@@ -1,0 +1,1682 @@
+[
+  {
+    "univId": "gachon",
+    "university": "가천대학교",
+    "region": "경기",
+    "pdf": "가천대학교[경기][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 30
+  },
+  {
+    "univId": "uA0000072",
+    "university": "가톨릭관동대학교",
+    "region": "강원",
+    "pdf": "가톨릭관동대학교[강원][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 22
+  },
+  {
+    "univId": "uA0000215",
+    "university": "가톨릭꽃동네대학교",
+    "region": "충북",
+    "pdf": "가톨릭꽃동네대학교[충북][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 17
+  },
+  {
+    "univId": "catholic",
+    "university": "가톨릭대학교",
+    "region": "경기",
+    "pdf": "가톨릭대학교[경기][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 37
+  },
+  {
+    "univId": "catholic",
+    "university": "가톨릭대학교",
+    "region": "경기",
+    "pdf": "가톨릭대학교[서울][제2캠퍼스]_2028_시행계획(1차수).pdf",
+    "match": "name",
+    "pages": 37
+  },
+  {
+    "univId": "catholic",
+    "university": "가톨릭대학교",
+    "region": "경기",
+    "pdf": "가톨릭대학교[서울][제3캠퍼스]_2028_시행계획(1차수).pdf",
+    "match": "name",
+    "pages": 37
+  },
+  {
+    "univId": "uA0000050",
+    "university": "감리교신학대학교",
+    "region": "서울",
+    "pdf": "감리교신학대학교[서울][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 5
+  },
+  {
+    "univId": "uA0000051",
+    "university": "강남대학교",
+    "region": "경기",
+    "pdf": "강남대학교[경기][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 21
+  },
+  {
+    "univId": "uA0000079",
+    "university": "강서대학교",
+    "region": "서울",
+    "pdf": "강서대학교[서울][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 24
+  },
+  {
+    "univId": "kangwon",
+    "university": "강원대학교",
+    "region": "강원",
+    "pdf": "강원대학교[강원][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 20
+  },
+  {
+    "univId": "kangwon",
+    "university": "강원대학교",
+    "region": "강원",
+    "pdf": "강원대학교[강원][제2캠퍼스]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 14
+  },
+  {
+    "univId": "kangwon",
+    "university": "강원대학교",
+    "region": "강원",
+    "pdf": "강원대학교[강원][제3캠퍼스]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 36
+  },
+  {
+    "univId": "kangwon",
+    "university": "강원대학교",
+    "region": "강원",
+    "pdf": "강원대학교[강원][제4캠퍼스]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 27
+  },
+  {
+    "univId": "uA0000053",
+    "university": "건국대학교(글로컬)",
+    "region": "충북",
+    "pdf": "건국대학교(글로컬)[충북][분교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 47
+  },
+  {
+    "univId": "konkuk",
+    "university": "건국대학교",
+    "region": "서울",
+    "pdf": "건국대학교[서울][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 57
+  },
+  {
+    "univId": "uA0000054",
+    "university": "건양대학교",
+    "region": "충남",
+    "pdf": "건양대학교[대전][제2캠퍼스]_2028_시행계획(1차수).pdf",
+    "match": "name",
+    "pages": 16
+  },
+  {
+    "univId": "uA0000054",
+    "university": "건양대학교",
+    "region": "충남",
+    "pdf": "건양대학교[충남][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 16
+  },
+  {
+    "univId": "kyonggi",
+    "university": "경기대학교",
+    "region": "경기",
+    "pdf": "경기대학교[경기][본교]_2028_시행계획(1차수)-복사_압축.pdf",
+    "match": "name+region",
+    "pages": 35
+  },
+  {
+    "univId": "kyonggi",
+    "university": "경기대학교",
+    "region": "경기",
+    "pdf": "경기대학교[서울][제2캠퍼스]_2028_시행계획(1차수)-복사_압축.pdf",
+    "match": "name",
+    "pages": 35
+  },
+  {
+    "univId": "uA0000059",
+    "university": "경남대학교",
+    "region": "경남",
+    "pdf": "경남대학교[경남][본교]_2028_시행계획(1차수)-복사_압축.pdf",
+    "match": "name+region",
+    "pages": 17
+  },
+  {
+    "univId": "uA0000060",
+    "university": "경동대학교",
+    "region": "강원",
+    "pdf": "경동대학교[강원][본교]_2028_시행계획(1차수)-복사_압축.pdf",
+    "match": "name+region",
+    "pages": 9
+  },
+  {
+    "univId": "uA0000060",
+    "university": "경동대학교",
+    "region": "강원",
+    "pdf": "경동대학교[강원][제3캠퍼스]_2028_시행계획(1차수)-복사_압축.pdf",
+    "match": "name+region",
+    "pages": 9
+  },
+  {
+    "univId": "uA0000060",
+    "university": "경동대학교",
+    "region": "강원",
+    "pdf": "경동대학교[경기][제4캠퍼스]_2028_시행계획(1차수)-복사_압축.pdf",
+    "match": "name",
+    "pages": 9
+  },
+  {
+    "univId": "knu",
+    "university": "경북대학교",
+    "region": "대구",
+    "pdf": "경북대학교[대구][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 50
+  },
+  {
+    "univId": "uA0000007",
+    "university": "경상국립대학교",
+    "region": "경남",
+    "pdf": "경상국립대학교[경남][본교]_2028_시행계획(1차수)_압축.pdf",
+    "match": "name+region",
+    "pages": 26
+  },
+  {
+    "univId": "uA0000062",
+    "university": "경성대학교",
+    "region": "부산",
+    "pdf": "경성대학교[부산][본교]_2028_시행계획(1차수)_압축.pdf",
+    "match": "name+region",
+    "pages": 27
+  },
+  {
+    "univId": "uA0000244",
+    "university": "경운대학교",
+    "region": "경북",
+    "pdf": "경운대학교[경북][본교]_2028_시행계획(1차수)-복사_압축.pdf",
+    "match": "name+region",
+    "pages": 9
+  },
+  {
+    "univId": "uA0000256",
+    "university": "경인교육대학교",
+    "region": "인천",
+    "pdf": "경인교육대학교[인천][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 8
+  },
+  {
+    "univId": "uA0000064",
+    "university": "경일대학교",
+    "region": "경북",
+    "pdf": "경일대학교[경북][본교]_2028_시행계획(1차수)-복사_압축.pdf",
+    "match": "name+region",
+    "pages": 38
+  },
+  {
+    "univId": "khu",
+    "university": "경희대학교",
+    "region": "서울",
+    "pdf": "경희대학교[서울][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 68
+  },
+  {
+    "univId": "uA0000068",
+    "university": "계명대학교",
+    "region": "대구",
+    "pdf": "계명대학교[대구][본교]_2028_시행계획(1차수)_압축.pdf",
+    "match": "name+region",
+    "pages": 37
+  },
+  {
+    "univId": "uA0000070",
+    "university": "고려대학교(세종)",
+    "region": "세종",
+    "pdf": "고려대학교(세종)[세종][분교]_2028_시행계획(1차수)-복사_압축.pdf",
+    "match": "name+region",
+    "pages": 31
+  },
+  {
+    "univId": "korea",
+    "university": "고려대학교",
+    "region": "서울",
+    "pdf": "고려대학교[서울][본교]_2028_시행계획(1차수)-복사_압축.pdf",
+    "match": "name+region",
+    "pages": 37
+  },
+  {
+    "univId": "uA0000071",
+    "university": "고신대학교",
+    "region": "부산",
+    "pdf": "고신대학교[부산][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 14
+  },
+  {
+    "univId": "uA0000251",
+    "university": "공주교육대학교",
+    "region": "충남",
+    "pdf": "공주교육대학교[충남][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 5
+  },
+  {
+    "univId": "uA0000073",
+    "university": "광신대학교",
+    "region": "광주",
+    "pdf": "광신대학교[광주][본교]_2028_시행계획(1차수)-복사_압축.pdf",
+    "match": "name+region",
+    "pages": 55
+  },
+  {
+    "univId": "kw",
+    "university": "광운대학교",
+    "region": "서울",
+    "pdf": "광운대학교[서울][본교]_2028_시행계획(1차수)-복사_압축.pdf",
+    "match": "name+region",
+    "pages": 20
+  },
+  {
+    "univId": "uA0000075",
+    "university": "광주가톨릭대학교",
+    "region": "전남",
+    "pdf": "광주가톨릭대학교[전남][본교]_2028_시행계획(1차수)_압축.pdf",
+    "match": "name+region",
+    "pages": 22
+  },
+  {
+    "univId": "uA0000252",
+    "university": "광주교육대학교",
+    "region": "광주",
+    "pdf": "광주교육대학교[광주][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 12
+  },
+  {
+    "univId": "uA0000231",
+    "university": "광주대학교",
+    "region": "광주",
+    "pdf": "광주대학교[광주][본교]_2028_시행계획(1차수)-복사_압축.pdf",
+    "match": "name+region",
+    "pages": 8
+  },
+  {
+    "univId": "uA0000076",
+    "university": "광주여자대학교",
+    "region": "광주",
+    "pdf": "광주여자대학교[광주][본교]_2028_시행계획(1차수)-복사_압축.pdf",
+    "match": "name+region",
+    "pages": 11
+  },
+  {
+    "univId": "uA0000021",
+    "university": "국립경국대학교",
+    "region": "경북",
+    "pdf": "국립경국대학교[경북][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 29
+  },
+  {
+    "univId": "uA0000008",
+    "university": "국립공주대학교",
+    "region": "충남",
+    "pdf": "국립공주대학교[충남][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 25
+  },
+  {
+    "univId": "uA0000009",
+    "university": "국립군산대학교",
+    "region": "전북",
+    "pdf": "국립군산대학교[전북][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 17
+  },
+  {
+    "univId": "uA0000010",
+    "university": "국립금오공과대학교",
+    "region": "경북",
+    "pdf": "국립금오공과대학교[경북][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 39
+  },
+  {
+    "univId": "uA0000011",
+    "university": "국립목포대학교",
+    "region": "전남",
+    "pdf": "국립목포대학교[전남][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 21
+  },
+  {
+    "univId": "uA0000012",
+    "university": "국립목포해양대학교",
+    "region": "전남",
+    "pdf": "국립목포해양대학교[전남][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 26
+  },
+  {
+    "univId": "uA0000013",
+    "university": "국립부경대학교",
+    "region": "부산",
+    "pdf": "국립부경대학교[부산][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 44
+  },
+  {
+    "univId": "uA0000020",
+    "university": "국립순천대학교",
+    "region": "전남",
+    "pdf": "국립순천대학교[전남][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 61
+  },
+  {
+    "univId": "uA0000028",
+    "university": "국립창원대학교",
+    "region": "경남",
+    "pdf": "국립창원대학교[경남][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 44
+  },
+  {
+    "univId": "uA0000028",
+    "university": "국립창원대학교",
+    "region": "경남",
+    "pdf": "국립창원대학교[경남][제2캠퍼스]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 18
+  },
+  {
+    "univId": "uA0000028",
+    "university": "국립창원대학교",
+    "region": "경남",
+    "pdf": "국립창원대학교[경남][제3캠퍼스]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 18
+  },
+  {
+    "univId": "uA0000034",
+    "university": "국립한국교통대학교",
+    "region": "충북",
+    "pdf": "국립한국교통대학교[충북][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 27
+  },
+  {
+    "univId": "uA0000033",
+    "university": "국립한국해양대학교",
+    "region": "부산",
+    "pdf": "국립한국해양대학교[부산][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 29
+  },
+  {
+    "univId": "uA0000039",
+    "university": "국립한밭대학교",
+    "region": "대전",
+    "pdf": "국립한밭대학교[대전][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 33
+  },
+  {
+    "univId": "kookmin",
+    "university": "국민대학교",
+    "region": "서울",
+    "pdf": "국민대학교[서울][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 59
+  },
+  {
+    "univId": "uA0000080",
+    "university": "극동대학교",
+    "region": "충북",
+    "pdf": "극동대학교[충북][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 22
+  },
+  {
+    "univId": "uA0000224",
+    "university": "금강대학교",
+    "region": "충남",
+    "pdf": "금강대학교[충남][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 18
+  },
+  {
+    "univId": "uA0000241",
+    "university": "김천대학교",
+    "region": "경북",
+    "pdf": "김천대학교[경북][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 13
+  },
+  {
+    "univId": "uA0000081",
+    "university": "나사렛대학교",
+    "region": "충남",
+    "pdf": "나사렛대학교[충남][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 15
+  },
+  {
+    "univId": "uA0000216",
+    "university": "남부대학교",
+    "region": "광주",
+    "pdf": "남부대학교[광주][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 11
+  },
+  {
+    "univId": "uA0000245",
+    "university": "남서울대학교",
+    "region": "충남",
+    "pdf": "남서울대학교[충남][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 34
+  },
+  {
+    "univId": "dankook",
+    "university": "단국대학교",
+    "region": "경기",
+    "pdf": "단국대학교[경기][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 39
+  },
+  {
+    "univId": "dankook",
+    "university": "단국대학교",
+    "region": "경기",
+    "pdf": "단국대학교[충남][제2캠퍼스]_2028_시행계획(1차수).pdf",
+    "match": "name",
+    "pages": 39
+  },
+  {
+    "univId": "uA0000088",
+    "university": "대구가톨릭대학교",
+    "region": "경북",
+    "pdf": "대구가톨릭대학교[경북][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 47
+  },
+  {
+    "univId": "uA0000253",
+    "university": "대구교육대학교",
+    "region": "대구",
+    "pdf": "대구교육대학교[대구][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 14
+  },
+  {
+    "univId": "uA0000084",
+    "university": "대구대학교",
+    "region": "경북",
+    "pdf": "대구대학교[경북][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 33
+  },
+  {
+    "univId": "uA0000087",
+    "university": "대구예술대학교",
+    "region": "경북",
+    "pdf": "대구예술대학교[경북][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 15
+  },
+  {
+    "univId": "uA0000061",
+    "university": "대구한의대학교",
+    "region": "경북",
+    "pdf": "대구한의대학교[경북][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 16
+  },
+  {
+    "univId": "uA0000093",
+    "university": "대신대학교",
+    "region": "경북",
+    "pdf": "대신대학교[경북][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 7
+  },
+  {
+    "univId": "uA0000094",
+    "university": "대전가톨릭대학교",
+    "region": "세종",
+    "pdf": "대전가톨릭대학교[세종][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 6
+  },
+  {
+    "univId": "uA0000095",
+    "university": "대전대학교",
+    "region": "대전",
+    "pdf": "대전대학교[대전][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 17
+  },
+  {
+    "univId": "uA0000238",
+    "university": "대전신학대학교",
+    "region": "대전",
+    "pdf": "대전신학대학교[대전][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 5
+  },
+  {
+    "univId": "uA0000097",
+    "university": "대진대학교",
+    "region": "경기",
+    "pdf": "대진대학교[경기][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 61
+  },
+  {
+    "univId": "uA0000099",
+    "university": "덕성여자대학교",
+    "region": "서울",
+    "pdf": "덕성여자대학교[서울][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 23
+  },
+  {
+    "univId": "uA0000101",
+    "university": "동국대학교(WISE)",
+    "region": "경북",
+    "pdf": "동국대학교(WISE)[경북][분교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 23
+  },
+  {
+    "univId": "dongguk",
+    "university": "동국대학교",
+    "region": "서울",
+    "pdf": "동국대학교[서울][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 46
+  },
+  {
+    "univId": "uA0000235",
+    "university": "동명대학교",
+    "region": "부산",
+    "pdf": "동명대학교[부산][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 14
+  },
+  {
+    "univId": "uA0000103",
+    "university": "동서대학교",
+    "region": "부산",
+    "pdf": "동서대학교[부산][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 22
+  },
+  {
+    "univId": "uA0000104",
+    "university": "동신대학교",
+    "region": "전남",
+    "pdf": "동신대학교[전남][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 13
+  },
+  {
+    "univId": "uA0000105",
+    "university": "동아대학교",
+    "region": "부산",
+    "pdf": "동아대학교[부산][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 27
+  },
+  {
+    "univId": "uA0000106",
+    "university": "동양대학교",
+    "region": "경북",
+    "pdf": "동양대학교[경북][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 12
+  },
+  {
+    "univId": "uA0000107",
+    "university": "동의대학교",
+    "region": "부산",
+    "pdf": "동의대학교[부산][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 53
+  },
+  {
+    "univId": "uA0000108",
+    "university": "루터대학교",
+    "region": "경기",
+    "pdf": "루터대학교[경기][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 7
+  },
+  {
+    "univId": "uA0000109",
+    "university": "명지대학교",
+    "region": "경기",
+    "pdf": "명지대학교[경기][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 43
+  },
+  {
+    "univId": "uA0000109",
+    "university": "명지대학교",
+    "region": "경기",
+    "pdf": "명지대학교[서울][제2캠퍼스]_2028_시행계획(1차수).pdf",
+    "match": "name",
+    "pages": 43
+  },
+  {
+    "univId": "uA0000112",
+    "university": "목원대학교",
+    "region": "대전",
+    "pdf": "목원대학교[대전][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 22
+  },
+  {
+    "univId": "uA0000221",
+    "university": "목포가톨릭대학교",
+    "region": "전남",
+    "pdf": "목포가톨릭대학교[전남][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 16
+  },
+  {
+    "univId": "uA0000113",
+    "university": "배재대학교",
+    "region": "대전",
+    "pdf": "배재대학교[대전][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 54
+  },
+  {
+    "univId": "uA0000178",
+    "university": "백석대학교",
+    "region": "충남",
+    "pdf": "백석대학교[충남][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 15
+  },
+  {
+    "univId": "uA0000114",
+    "university": "부산가톨릭대학교",
+    "region": "부산",
+    "pdf": "부산가톨릭대학교[부산][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 19
+  },
+  {
+    "univId": "uA0000254",
+    "university": "부산교육대학교",
+    "region": "부산",
+    "pdf": "부산교육대학교[부산][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 7
+  },
+  {
+    "univId": "pusan",
+    "university": "부산대학교",
+    "region": "부산",
+    "pdf": "부산대학교[부산][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 41
+  },
+  {
+    "univId": "uA0000115",
+    "university": "부산외국어대학교",
+    "region": "부산",
+    "pdf": "부산외국어대학교[부산][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 19
+  },
+  {
+    "univId": "uA0000222",
+    "university": "부산장신대학교",
+    "region": "경남",
+    "pdf": "부산장신대학교[경남][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 5
+  },
+  {
+    "univId": "uA0000116",
+    "university": "삼육대학교",
+    "region": "서울",
+    "pdf": "삼육대학교[서울][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 21
+  },
+  {
+    "univId": "smu",
+    "university": "상명대학교",
+    "region": "서울",
+    "pdf": "상명대학교[서울][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 38
+  },
+  {
+    "univId": "smu",
+    "university": "상명대학교",
+    "region": "서울",
+    "pdf": "상명대학교[충남][제2캠퍼스]_2028_시행계획(1차수).pdf",
+    "match": "name",
+    "pages": 34
+  },
+  {
+    "univId": "uA0000119",
+    "university": "상지대학교",
+    "region": "강원",
+    "pdf": "상지대학교[강원][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 19
+  },
+  {
+    "univId": "sogang",
+    "university": "서강대학교",
+    "region": "서울",
+    "pdf": "서강대학교[서울][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 44
+  },
+  {
+    "univId": "uA0000121",
+    "university": "서경대학교",
+    "region": "서울",
+    "pdf": "서경대학교[서울][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 24
+  },
+  {
+    "univId": "seoultech",
+    "university": "서울과학기술대학교",
+    "region": "서울",
+    "pdf": "서울과학기술대학교[서울][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 22
+  },
+  {
+    "univId": "uA0000255",
+    "university": "서울교육대학교",
+    "region": "서울",
+    "pdf": "서울교육대학교[서울][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 8
+  },
+  {
+    "univId": "uA0000098",
+    "university": "서울기독대학교",
+    "region": "서울",
+    "pdf": "서울기독대학교[서울][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 18
+  },
+  {
+    "univId": "snu",
+    "university": "서울대학교",
+    "region": "서울",
+    "pdf": "서울대학교[서울][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 42
+  },
+  {
+    "univId": "uos",
+    "university": "서울시립대학교",
+    "region": "서울",
+    "pdf": "서울시립대학교[서울][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 23
+  },
+  {
+    "univId": "uA0000125",
+    "university": "서울신학대학교",
+    "region": "경기",
+    "pdf": "서울신학대학교[경기][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 22
+  },
+  {
+    "univId": "swu",
+    "university": "서울여자대학교",
+    "region": "서울",
+    "pdf": "서울여자대학교[서울][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 34
+  },
+  {
+    "univId": "uA0000127",
+    "university": "서울장신대학교",
+    "region": "경기",
+    "pdf": "서울장신대학교[경기][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 11
+  },
+  {
+    "univId": "uA0000205",
+    "university": "서울한영대학교",
+    "region": "서울",
+    "pdf": "서울한영대학교[서울][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 6
+  },
+  {
+    "univId": "uA0000128",
+    "university": "서원대학교",
+    "region": "충북",
+    "pdf": "서원대학교[충북][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 16
+  },
+  {
+    "univId": "uA0000129",
+    "university": "선문대학교",
+    "region": "충남",
+    "pdf": "선문대학교[충남][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 33
+  },
+  {
+    "univId": "uA0000131",
+    "university": "성결대학교",
+    "region": "경기",
+    "pdf": "성결대학교[경기][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 10
+  },
+  {
+    "univId": "uA0000132",
+    "university": "성공회대학교",
+    "region": "서울",
+    "pdf": "성공회대학교[서울][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 13
+  },
+  {
+    "univId": "skku",
+    "university": "성균관대학교",
+    "region": "서울",
+    "pdf": "성균관대학교[서울][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 54
+  },
+  {
+    "univId": "uA0000136",
+    "university": "성신여자대학교",
+    "region": "서울",
+    "pdf": "성신여자대학교[서울][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 32
+  },
+  {
+    "univId": "uA0000137",
+    "university": "세명대학교",
+    "region": "충북",
+    "pdf": "세명대학교[충북][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 26
+  },
+  {
+    "univId": "sejong",
+    "university": "세종대학교",
+    "region": "서울",
+    "pdf": "세종대학교[서울][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 33
+  },
+  {
+    "univId": "uA0000092",
+    "university": "세한대학교",
+    "region": "전남",
+    "pdf": "세한대학교[전남][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 12
+  },
+  {
+    "univId": "uA0000243",
+    "university": "송원대학교",
+    "region": "광주",
+    "pdf": "송원대학교[광주][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 15
+  },
+  {
+    "univId": "uA0000139",
+    "university": "수원가톨릭대학교",
+    "region": "경기",
+    "pdf": "수원가톨릭대학교[경기][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 7
+  },
+  {
+    "univId": "uA0000140",
+    "university": "수원대학교",
+    "region": "경기",
+    "pdf": "수원대학교[경기][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 19
+  },
+  {
+    "univId": "sookmyung",
+    "university": "숙명여자대학교",
+    "region": "서울",
+    "pdf": "숙명여자대학교[서울][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 19
+  },
+  {
+    "univId": "uA0000142",
+    "university": "순천향대학교",
+    "region": "충남",
+    "pdf": "순천향대학교[충남][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 40
+  },
+  {
+    "univId": "soongsil",
+    "university": "숭실대학교",
+    "region": "서울",
+    "pdf": "숭실대학교[서울][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 44
+  },
+  {
+    "univId": "uA0000065",
+    "university": "신경주대학교",
+    "region": "경북",
+    "pdf": "신경주대학교[경북][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 10
+  },
+  {
+    "univId": "uA0000144",
+    "university": "신라대학교",
+    "region": "부산",
+    "pdf": "신라대학교[부산][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 17
+  },
+  {
+    "univId": "uA0002712",
+    "university": "신한대학교",
+    "region": "경기",
+    "pdf": "신한대학교[경기][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 24
+  },
+  {
+    "univId": "uA0002712",
+    "university": "신한대학교",
+    "region": "경기",
+    "pdf": "신한대학교[경기][제2캠퍼스]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 24
+  },
+  {
+    "univId": "uA0000145",
+    "university": "아신대학교",
+    "region": "경기",
+    "pdf": "아신대학교[경기][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 7
+  },
+  {
+    "univId": "ajou",
+    "university": "아주대학교",
+    "region": "경기",
+    "pdf": "아주대학교[경기][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 17
+  },
+  {
+    "univId": "uA0000147",
+    "university": "안양대학교",
+    "region": "경기",
+    "pdf": "안양대학교[경기][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 17
+  },
+  {
+    "univId": "uA0000147",
+    "university": "안양대학교",
+    "region": "경기",
+    "pdf": "안양대학교[인천][제2캠퍼스]_2028_시행계획(1차수).pdf",
+    "match": "name",
+    "pages": 17
+  },
+  {
+    "univId": "uA0000150",
+    "university": "연세대학교(미래)",
+    "region": "강원",
+    "pdf": "연세대학교(미래)[강원][분교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 40
+  },
+  {
+    "univId": "yonsei",
+    "university": "연세대학교",
+    "region": "서울",
+    "pdf": "연세대학교[서울][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 35
+  },
+  {
+    "univId": "uA0000151",
+    "university": "영남대학교",
+    "region": "경북",
+    "pdf": "영남대학교[경북][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 41
+  },
+  {
+    "univId": "uA0000153",
+    "university": "영남신학대학교",
+    "region": "경북",
+    "pdf": "영남신학대학교[경북][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 8
+  },
+  {
+    "univId": "uA0000155",
+    "university": "영산선학대학교",
+    "region": "전남",
+    "pdf": "영산선학대학교[전남][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 6
+  },
+  {
+    "univId": "uA0000228",
+    "university": "예수대학교",
+    "region": "전북",
+    "pdf": "예수대학교[전북][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 11
+  },
+  {
+    "univId": "uA0000218",
+    "university": "예원예술대학교",
+    "region": "전북",
+    "pdf": "예원예술대학교[경기][제2캠퍼스]_2028_시행계획(1차수).pdf",
+    "match": "name",
+    "pages": 8
+  },
+  {
+    "univId": "uA0000218",
+    "university": "예원예술대학교",
+    "region": "전북",
+    "pdf": "예원예술대학교[전북][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 8
+  },
+  {
+    "univId": "uA0000156",
+    "university": "용인대학교",
+    "region": "경기",
+    "pdf": "용인대학교[경기][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 22
+  },
+  {
+    "univId": "uA0000157",
+    "university": "우석대학교",
+    "region": "전북",
+    "pdf": "우석대학교[전북][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 17
+  },
+  {
+    "univId": "uA0000240",
+    "university": "우송대학교",
+    "region": "대전",
+    "pdf": "우송대학교[대전][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 17
+  },
+  {
+    "univId": "uA0000158",
+    "university": "울산대학교",
+    "region": "울산",
+    "pdf": "울산대학교[울산][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 39
+  },
+  {
+    "univId": "uA0000159",
+    "university": "원광대학교",
+    "region": "전북",
+    "pdf": "원광대학교[전북][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 32
+  },
+  {
+    "univId": "uA0000160",
+    "university": "위덕대학교",
+    "region": "경북",
+    "pdf": "위덕대학교[경북][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 31
+  },
+  {
+    "univId": "uA0000154",
+    "university": "유원대학교",
+    "region": "충북",
+    "pdf": "유원대학교[충북][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 10
+  },
+  {
+    "univId": "uA0000161",
+    "university": "을지대학교",
+    "region": "대전",
+    "pdf": "을지대학교[경기][제2캠퍼스]_2028_시행계획(1차수).pdf",
+    "match": "name",
+    "pages": 34
+  },
+  {
+    "univId": "uA0000161",
+    "university": "을지대학교",
+    "region": "대전",
+    "pdf": "을지대학교[경기][제3캠퍼스]_2028_시행계획(1차수).pdf",
+    "match": "name",
+    "pages": 34
+  },
+  {
+    "univId": "uA0000161",
+    "university": "을지대학교",
+    "region": "대전",
+    "pdf": "을지대학교[대전][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 34
+  },
+  {
+    "univId": "uA0000163",
+    "university": "이화여자대학교",
+    "region": "서울",
+    "pdf": "이화여자대학교[서울][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 24
+  },
+  {
+    "univId": "uA0000164",
+    "university": "인제대학교",
+    "region": "경남",
+    "pdf": "인제대학교[경남][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 26
+  },
+  {
+    "univId": "uA0000167",
+    "university": "인천가톨릭대학교",
+    "region": "인천",
+    "pdf": "인천가톨릭대학교[인천][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 14
+  },
+  {
+    "univId": "uA0000167",
+    "university": "인천가톨릭대학교",
+    "region": "인천",
+    "pdf": "인천가톨릭대학교[인천][제2캠퍼스]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 14
+  },
+  {
+    "univId": "uA0002660",
+    "university": "인천대학교",
+    "region": "인천",
+    "pdf": "인천대학교[인천][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 38
+  },
+  {
+    "univId": "inha",
+    "university": "인하대학교",
+    "region": "인천",
+    "pdf": "인하대학교[인천][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 52
+  },
+  {
+    "univId": "uA0000170",
+    "university": "장로회신학대학교",
+    "region": "서울",
+    "pdf": "장로회신학대학교[서울][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 15
+  },
+  {
+    "univId": "jnu",
+    "university": "전남대학교",
+    "region": "광주",
+    "pdf": "전남대학교[광주][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 37
+  },
+  {
+    "univId": "jnu",
+    "university": "전남대학교",
+    "region": "광주",
+    "pdf": "전남대학교[전남][제2캠퍼스]_2028_시행계획(1차수).pdf",
+    "match": "name",
+    "pages": 37
+  },
+  {
+    "univId": "jbnu",
+    "university": "전북대학교",
+    "region": "전북",
+    "pdf": "전북대학교[전북][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 60
+  },
+  {
+    "univId": "uA0000258",
+    "university": "전주교육대학교",
+    "region": "전북",
+    "pdf": "전주교육대학교[전북][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 6
+  },
+  {
+    "univId": "uA0000171",
+    "university": "전주대학교",
+    "region": "전북",
+    "pdf": "전주대학교[전북][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 23
+  },
+  {
+    "univId": "uA0000248",
+    "university": "제주국제대학교",
+    "region": "제주",
+    "pdf": "제주국제대학교[제주][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 28
+  },
+  {
+    "univId": "jejunu",
+    "university": "제주대학교",
+    "region": "제주",
+    "pdf": "제주대학교[제주][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 40
+  },
+  {
+    "univId": "uA0000172",
+    "university": "조선대학교",
+    "region": "광주",
+    "pdf": "조선대학교[광주][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 35
+  },
+  {
+    "univId": "uA0000173",
+    "university": "중부대학교",
+    "region": "충남",
+    "pdf": "중부대학교[충남][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 17
+  },
+  {
+    "univId": "cau",
+    "university": "중앙대학교",
+    "region": "서울",
+    "pdf": "중앙대학교[서울][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 49
+  },
+  {
+    "univId": "uA0000177",
+    "university": "중앙승가대학교",
+    "region": "경기",
+    "pdf": "중앙승가대학교[경기][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 3
+  },
+  {
+    "univId": "uA0000239",
+    "university": "중원대학교",
+    "region": "충북",
+    "pdf": "중원대학교[충북][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 39
+  },
+  {
+    "univId": "uA0000260",
+    "university": "진주교육대학교",
+    "region": "경남",
+    "pdf": "진주교육대학교[경남][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 14
+  },
+  {
+    "univId": "uA0000187",
+    "university": "차의과학대학교",
+    "region": "경기",
+    "pdf": "차의과학대학교[경기][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 25
+  },
+  {
+    "univId": "uA0000249",
+    "university": "창신대학교",
+    "region": "경남",
+    "pdf": "창신대학교[경남][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 16
+  },
+  {
+    "univId": "uA0000284",
+    "university": "청운대학교",
+    "region": "충남",
+    "pdf": "청운대학교[충남][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 12
+  },
+  {
+    "univId": "uA0000261",
+    "university": "청주교육대학교",
+    "region": "충북",
+    "pdf": "청주교육대학교[충북][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 8
+  },
+  {
+    "univId": "uA0000179",
+    "university": "청주대학교",
+    "region": "충북",
+    "pdf": "청주대학교[충북][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 23
+  },
+  {
+    "univId": "uA0000246",
+    "university": "초당대학교",
+    "region": "전남",
+    "pdf": "초당대학교[전남][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 33
+  },
+  {
+    "univId": "uA0000180",
+    "university": "총신대학교",
+    "region": "서울",
+    "pdf": "총신대학교[서울][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 12
+  },
+  {
+    "univId": "uA0000181",
+    "university": "추계예술대학교",
+    "region": "서울",
+    "pdf": "추계예술대학교[서울][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 20
+  },
+  {
+    "univId": "uA0000262",
+    "university": "춘천교육대학교",
+    "region": "강원",
+    "pdf": "춘천교육대학교[강원][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 14
+  },
+  {
+    "univId": "cnu",
+    "university": "충남대학교",
+    "region": "대전",
+    "pdf": "충남대학교[대전][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 56
+  },
+  {
+    "univId": "uA0000030",
+    "university": "충북대학교",
+    "region": "충북",
+    "pdf": "충북대학교[충북][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 29
+  },
+  {
+    "univId": "uA0000184",
+    "university": "칼빈대학교",
+    "region": "경기",
+    "pdf": "칼빈대학교[경기][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 11
+  },
+  {
+    "univId": "uA0000186",
+    "university": "평택대학교",
+    "region": "경기",
+    "pdf": "평택대학교[경기][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 40
+  },
+  {
+    "univId": "uA0000188",
+    "university": "포항공과대학교",
+    "region": "경북",
+    "pdf": "포항공과대학교[경북][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 11
+  },
+  {
+    "univId": "uA0000037",
+    "university": "한경국립대학교",
+    "region": "경기",
+    "pdf": "한경국립대학교[경기][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 12
+  },
+  {
+    "univId": "uA0000247",
+    "university": "한국공학대학교",
+    "region": "경기",
+    "pdf": "한국공학대학교[경기][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 18
+  },
+  {
+    "univId": "uA0000031",
+    "university": "한국교원대학교",
+    "region": "충북",
+    "pdf": "한국교원대학교[충북][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 24
+  },
+  {
+    "univId": "uA0000189",
+    "university": "한국기술교육대학교",
+    "region": "충남",
+    "pdf": "한국기술교육대학교[충남][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 16
+  },
+  {
+    "univId": "uA0000191",
+    "university": "한국성서대학교",
+    "region": "서울",
+    "pdf": "한국성서대학교[서울][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 14
+  },
+  {
+    "univId": "hufs",
+    "university": "한국외국어대학교",
+    "region": "서울",
+    "pdf": "한국외국어대학교[서울][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 25
+  },
+  {
+    "univId": "uA0000032",
+    "university": "한국체육대학교",
+    "region": "서울",
+    "pdf": "한국체육대학교[서울][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 25
+  },
+  {
+    "univId": "uA0000182",
+    "university": "한국침례신학대학교",
+    "region": "대전",
+    "pdf": "한국침례신학대학교[대전][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 12
+  },
+  {
+    "univId": "uA0000194",
+    "university": "한국항공대학교",
+    "region": "경기",
+    "pdf": "한국항공대학교[경기][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 27
+  },
+  {
+    "univId": "uA0000195",
+    "university": "한남대학교",
+    "region": "대전",
+    "pdf": "한남대학교[대전][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 24
+  },
+  {
+    "univId": "uA0000196",
+    "university": "한동대학교",
+    "region": "경북",
+    "pdf": "한동대학교[경북][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 40
+  },
+  {
+    "univId": "uA0000197",
+    "university": "한라대학교",
+    "region": "강원",
+    "pdf": "한라대학교[강원][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 11
+  },
+  {
+    "univId": "uA0000198",
+    "university": "한림대학교",
+    "region": "강원",
+    "pdf": "한림대학교[강원][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 24
+  },
+  {
+    "univId": "uA0000199",
+    "university": "한서대학교",
+    "region": "충남",
+    "pdf": "한서대학교[충남][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 21
+  },
+  {
+    "univId": "uA0000200",
+    "university": "한성대학교",
+    "region": "서울",
+    "pdf": "한성대학교[서울][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 16
+  },
+  {
+    "univId": "uA0000201",
+    "university": "한세대학교",
+    "region": "경기",
+    "pdf": "한세대학교[경기][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 21
+  },
+  {
+    "univId": "uA0000202",
+    "university": "한신대학교",
+    "region": "경기",
+    "pdf": "한신대학교[경기][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 16
+  },
+  {
+    "univId": "uA0000204",
+    "university": "한양대학교(ERICA)",
+    "region": "경기",
+    "pdf": "한양대학교(ERICA)[경기][분교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 41
+  },
+  {
+    "univId": "hanyang",
+    "university": "한양대학교",
+    "region": "서울",
+    "pdf": "한양대학교[서울][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 36
+  },
+  {
+    "univId": "uA0000206",
+    "university": "한일장신대학교",
+    "region": "전북",
+    "pdf": "한일장신대학교[전북][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 10
+  },
+  {
+    "univId": "uA0000207",
+    "university": "협성대학교",
+    "region": "경기",
+    "pdf": "협성대학교[경기][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 21
+  },
+  {
+    "univId": "uA0000208",
+    "university": "호남대학교",
+    "region": "광주",
+    "pdf": "호남대학교[광주][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 10
+  },
+  {
+    "univId": "uA0000209",
+    "university": "호남신학대학교",
+    "region": "광주",
+    "pdf": "호남신학대학교[광주][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 7
+  },
+  {
+    "univId": "uA0000211",
+    "university": "호서대학교",
+    "region": "충남",
+    "pdf": "호서대학교[충남][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 15
+  },
+  {
+    "univId": "uA0000233",
+    "university": "화성의과학대학교",
+    "region": "경기",
+    "pdf": "화성의과학대학교[경기][본교]_2028_시행계획(1차수).pdf",
+    "match": "name+region",
+    "pages": 10
+  }
+]

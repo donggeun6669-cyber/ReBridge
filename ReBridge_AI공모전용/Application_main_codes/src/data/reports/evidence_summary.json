@@ -1,0 +1,758 @@
+[
+  {
+    "univId": "ajou",
+    "evidencePages": 16
+  },
+  {
+    "univId": "catholic",
+    "evidencePages": 93
+  },
+  {
+    "univId": "cau",
+    "evidencePages": 42
+  },
+  {
+    "univId": "cnu",
+    "evidencePages": 49
+  },
+  {
+    "univId": "dankook",
+    "evidencePages": 76
+  },
+  {
+    "univId": "dongguk",
+    "evidencePages": 43
+  },
+  {
+    "univId": "gachon",
+    "evidencePages": 28
+  },
+  {
+    "univId": "hanyang",
+    "evidencePages": 33
+  },
+  {
+    "univId": "hufs",
+    "evidencePages": 24
+  },
+  {
+    "univId": "inha",
+    "evidencePages": 6
+  },
+  {
+    "univId": "jbnu",
+    "evidencePages": 59
+  },
+  {
+    "univId": "jejunu",
+    "evidencePages": 38
+  },
+  {
+    "univId": "jnu",
+    "evidencePages": 64
+  },
+  {
+    "univId": "kangwon",
+    "evidencePages": 95
+  },
+  {
+    "univId": "khu",
+    "evidencePages": 1
+  },
+  {
+    "univId": "knu",
+    "evidencePages": 49
+  },
+  {
+    "univId": "konkuk",
+    "evidencePages": 51
+  },
+  {
+    "univId": "kookmin",
+    "evidencePages": 55
+  },
+  {
+    "univId": "korea",
+    "evidencePages": 35
+  },
+  {
+    "univId": "kw",
+    "evidencePages": 19
+  },
+  {
+    "univId": "kyonggi",
+    "evidencePages": 64
+  },
+  {
+    "univId": "pusan",
+    "evidencePages": 33
+  },
+  {
+    "univId": "sejong",
+    "evidencePages": 31
+  },
+  {
+    "univId": "seoultech",
+    "evidencePages": 20
+  },
+  {
+    "univId": "skku",
+    "evidencePages": 44
+  },
+  {
+    "univId": "smu",
+    "evidencePages": 69
+  },
+  {
+    "univId": "snu",
+    "evidencePages": 36
+  },
+  {
+    "univId": "sogang",
+    "evidencePages": 32
+  },
+  {
+    "univId": "sookmyung",
+    "evidencePages": 17
+  },
+  {
+    "univId": "soongsil",
+    "evidencePages": 33
+  },
+  {
+    "univId": "swu",
+    "evidencePages": 33
+  },
+  {
+    "univId": "uA0000007",
+    "evidencePages": 24
+  },
+  {
+    "univId": "uA0000008",
+    "evidencePages": 23
+  },
+  {
+    "univId": "uA0000009",
+    "evidencePages": 15
+  },
+  {
+    "univId": "uA0000010",
+    "evidencePages": 34
+  },
+  {
+    "univId": "uA0000011",
+    "evidencePages": 19
+  },
+  {
+    "univId": "uA0000012",
+    "evidencePages": 22
+  },
+  {
+    "univId": "uA0000013",
+    "evidencePages": 41
+  },
+  {
+    "univId": "uA0000020",
+    "evidencePages": 3
+  },
+  {
+    "univId": "uA0000021",
+    "evidencePages": 28
+  },
+  {
+    "univId": "uA0000028",
+    "evidencePages": 67
+  },
+  {
+    "univId": "uA0000030",
+    "evidencePages": 22
+  },
+  {
+    "univId": "uA0000031",
+    "evidencePages": 18
+  },
+  {
+    "univId": "uA0000032",
+    "evidencePages": 16
+  },
+  {
+    "univId": "uA0000033",
+    "evidencePages": 26
+  },
+  {
+    "univId": "uA0000034",
+    "evidencePages": 24
+  },
+  {
+    "univId": "uA0000037",
+    "evidencePages": 10
+  },
+  {
+    "univId": "uA0000039",
+    "evidencePages": 25
+  },
+  {
+    "univId": "uA0000050",
+    "evidencePages": 5
+  },
+  {
+    "univId": "uA0000051",
+    "evidencePages": 19
+  },
+  {
+    "univId": "uA0000053",
+    "evidencePages": 44
+  },
+  {
+    "univId": "uA0000054",
+    "evidencePages": 30
+  },
+  {
+    "univId": "uA0000059",
+    "evidencePages": 15
+  },
+  {
+    "univId": "uA0000060",
+    "evidencePages": 27
+  },
+  {
+    "univId": "uA0000061",
+    "evidencePages": 15
+  },
+  {
+    "univId": "uA0000062",
+    "evidencePages": 25
+  },
+  {
+    "univId": "uA0000064",
+    "evidencePages": 37
+  },
+  {
+    "univId": "uA0000065",
+    "evidencePages": 9
+  },
+  {
+    "univId": "uA0000068",
+    "evidencePages": 35
+  },
+  {
+    "univId": "uA0000070",
+    "evidencePages": 29
+  },
+  {
+    "univId": "uA0000071",
+    "evidencePages": 13
+  },
+  {
+    "univId": "uA0000072",
+    "evidencePages": 21
+  },
+  {
+    "univId": "uA0000073",
+    "evidencePages": 47
+  },
+  {
+    "univId": "uA0000075",
+    "evidencePages": 21
+  },
+  {
+    "univId": "uA0000076",
+    "evidencePages": 10
+  },
+  {
+    "univId": "uA0000079",
+    "evidencePages": 15
+  },
+  {
+    "univId": "uA0000080",
+    "evidencePages": 19
+  },
+  {
+    "univId": "uA0000081",
+    "evidencePages": 13
+  },
+  {
+    "univId": "uA0000084",
+    "evidencePages": 31
+  },
+  {
+    "univId": "uA0000087",
+    "evidencePages": 15
+  },
+  {
+    "univId": "uA0000088",
+    "evidencePages": 43
+  },
+  {
+    "univId": "uA0000092",
+    "evidencePages": 11
+  },
+  {
+    "univId": "uA0000093",
+    "evidencePages": 6
+  },
+  {
+    "univId": "uA0000094",
+    "evidencePages": 5
+  },
+  {
+    "univId": "uA0000095",
+    "evidencePages": 16
+  },
+  {
+    "univId": "uA0000097",
+    "evidencePages": 54
+  },
+  {
+    "univId": "uA0000098",
+    "evidencePages": 14
+  },
+  {
+    "univId": "uA0000099",
+    "evidencePages": 19
+  },
+  {
+    "univId": "uA0000101",
+    "evidencePages": 22
+  },
+  {
+    "univId": "uA0000103",
+    "evidencePages": 20
+  },
+  {
+    "univId": "uA0000104",
+    "evidencePages": 12
+  },
+  {
+    "univId": "uA0000105",
+    "evidencePages": 27
+  },
+  {
+    "univId": "uA0000106",
+    "evidencePages": 10
+  },
+  {
+    "univId": "uA0000107",
+    "evidencePages": 48
+  },
+  {
+    "univId": "uA0000108",
+    "evidencePages": 6
+  },
+  {
+    "univId": "uA0000109",
+    "evidencePages": 78
+  },
+  {
+    "univId": "uA0000112",
+    "evidencePages": 21
+  },
+  {
+    "univId": "uA0000113",
+    "evidencePages": 50
+  },
+  {
+    "univId": "uA0000114",
+    "evidencePages": 19
+  },
+  {
+    "univId": "uA0000115",
+    "evidencePages": 18
+  },
+  {
+    "univId": "uA0000116",
+    "evidencePages": 19
+  },
+  {
+    "univId": "uA0000119",
+    "evidencePages": 15
+  },
+  {
+    "univId": "uA0000121",
+    "evidencePages": 20
+  },
+  {
+    "univId": "uA0000125",
+    "evidencePages": 18
+  },
+  {
+    "univId": "uA0000127",
+    "evidencePages": 10
+  },
+  {
+    "univId": "uA0000128",
+    "evidencePages": 13
+  },
+  {
+    "univId": "uA0000129",
+    "evidencePages": 27
+  },
+  {
+    "univId": "uA0000131",
+    "evidencePages": 8
+  },
+  {
+    "univId": "uA0000132",
+    "evidencePages": 12
+  },
+  {
+    "univId": "uA0000136",
+    "evidencePages": 30
+  },
+  {
+    "univId": "uA0000137",
+    "evidencePages": 22
+  },
+  {
+    "univId": "uA0000139",
+    "evidencePages": 6
+  },
+  {
+    "univId": "uA0000140",
+    "evidencePages": 14
+  },
+  {
+    "univId": "uA0000142",
+    "evidencePages": 38
+  },
+  {
+    "univId": "uA0000144",
+    "evidencePages": 16
+  },
+  {
+    "univId": "uA0000145",
+    "evidencePages": 7
+  },
+  {
+    "univId": "uA0000147",
+    "evidencePages": 28
+  },
+  {
+    "univId": "uA0000150",
+    "evidencePages": 39
+  },
+  {
+    "univId": "uA0000151",
+    "evidencePages": 40
+  },
+  {
+    "univId": "uA0000153",
+    "evidencePages": 7
+  },
+  {
+    "univId": "uA0000154",
+    "evidencePages": 10
+  },
+  {
+    "univId": "uA0000155",
+    "evidencePages": 5
+  },
+  {
+    "univId": "uA0000156",
+    "evidencePages": 21
+  },
+  {
+    "univId": "uA0000157",
+    "evidencePages": 15
+  },
+  {
+    "univId": "uA0000158",
+    "evidencePages": 36
+  },
+  {
+    "univId": "uA0000159",
+    "evidencePages": 28
+  },
+  {
+    "univId": "uA0000160",
+    "evidencePages": 30
+  },
+  {
+    "univId": "uA0000161",
+    "evidencePages": 81
+  },
+  {
+    "univId": "uA0000163",
+    "evidencePages": 1
+  },
+  {
+    "univId": "uA0000164",
+    "evidencePages": 22
+  },
+  {
+    "univId": "uA0000167",
+    "evidencePages": 26
+  },
+  {
+    "univId": "uA0000170",
+    "evidencePages": 13
+  },
+  {
+    "univId": "uA0000171",
+    "evidencePages": 20
+  },
+  {
+    "univId": "uA0000172",
+    "evidencePages": 34
+  },
+  {
+    "univId": "uA0000173",
+    "evidencePages": 15
+  },
+  {
+    "univId": "uA0000177",
+    "evidencePages": 3
+  },
+  {
+    "univId": "uA0000178",
+    "evidencePages": 11
+  },
+  {
+    "univId": "uA0000179",
+    "evidencePages": 21
+  },
+  {
+    "univId": "uA0000180",
+    "evidencePages": 12
+  },
+  {
+    "univId": "uA0000181",
+    "evidencePages": 18
+  },
+  {
+    "univId": "uA0000182",
+    "evidencePages": 9
+  },
+  {
+    "univId": "uA0000184",
+    "evidencePages": 8
+  },
+  {
+    "univId": "uA0000186",
+    "evidencePages": 28
+  },
+  {
+    "univId": "uA0000187",
+    "evidencePages": 22
+  },
+  {
+    "univId": "uA0000188",
+    "evidencePages": 10
+  },
+  {
+    "univId": "uA0000189",
+    "evidencePages": 14
+  },
+  {
+    "univId": "uA0000191",
+    "evidencePages": 13
+  },
+  {
+    "univId": "uA0000194",
+    "evidencePages": 24
+  },
+  {
+    "univId": "uA0000195",
+    "evidencePages": 23
+  },
+  {
+    "univId": "uA0000196",
+    "evidencePages": 33
+  },
+  {
+    "univId": "uA0000197",
+    "evidencePages": 9
+  },
+  {
+    "univId": "uA0000198",
+    "evidencePages": 22
+  },
+  {
+    "univId": "uA0000199",
+    "evidencePages": 19
+  },
+  {
+    "univId": "uA0000200",
+    "evidencePages": 15
+  },
+  {
+    "univId": "uA0000201",
+    "evidencePages": 20
+  },
+  {
+    "univId": "uA0000202",
+    "evidencePages": 15
+  },
+  {
+    "univId": "uA0000204",
+    "evidencePages": 35
+  },
+  {
+    "univId": "uA0000205",
+    "evidencePages": 4
+  },
+  {
+    "univId": "uA0000206",
+    "evidencePages": 9
+  },
+  {
+    "univId": "uA0000207",
+    "evidencePages": 21
+  },
+  {
+    "univId": "uA0000208",
+    "evidencePages": 9
+  },
+  {
+    "univId": "uA0000209",
+    "evidencePages": 6
+  },
+  {
+    "univId": "uA0000211",
+    "evidencePages": 13
+  },
+  {
+    "univId": "uA0000215",
+    "evidencePages": 13
+  },
+  {
+    "univId": "uA0000216",
+    "evidencePages": 10
+  },
+  {
+    "univId": "uA0000218",
+    "evidencePages": 14
+  },
+  {
+    "univId": "uA0000221",
+    "evidencePages": 14
+  },
+  {
+    "univId": "uA0000222",
+    "evidencePages": 4
+  },
+  {
+    "univId": "uA0000224",
+    "evidencePages": 15
+  },
+  {
+    "univId": "uA0000228",
+    "evidencePages": 10
+  },
+  {
+    "univId": "uA0000231",
+    "evidencePages": 7
+  },
+  {
+    "univId": "uA0000233",
+    "evidencePages": 0
+  },
+  {
+    "univId": "uA0000235",
+    "evidencePages": 12
+  },
+  {
+    "univId": "uA0000238",
+    "evidencePages": 5
+  },
+  {
+    "univId": "uA0000239",
+    "evidencePages": 32
+  },
+  {
+    "univId": "uA0000240",
+    "evidencePages": 13
+  },
+  {
+    "univId": "uA0000241",
+    "evidencePages": 11
+  },
+  {
+    "univId": "uA0000243",
+    "evidencePages": 12
+  },
+  {
+    "univId": "uA0000244",
+    "evidencePages": 8
+  },
+  {
+    "univId": "uA0000245",
+    "evidencePages": 27
+  },
+  {
+    "univId": "uA0000246",
+    "evidencePages": 29
+  },
+  {
+    "univId": "uA0000247",
+    "evidencePages": 17
+  },
+  {
+    "univId": "uA0000248",
+    "evidencePages": 24
+  },
+  {
+    "univId": "uA0000249",
+    "evidencePages": 14
+  },
+  {
+    "univId": "uA0000251",
+    "evidencePages": 5
+  },
+  {
+    "univId": "uA0000252",
+    "evidencePages": 11
+  },
+  {
+    "univId": "uA0000253",
+    "evidencePages": 9
+  },
+  {
+    "univId": "uA0000254",
+    "evidencePages": 7
+  },
+  {
+    "univId": "uA0000255",
+    "evidencePages": 7
+  },
+  {
+    "univId": "uA0000256",
+    "evidencePages": 7
+  },
+  {
+    "univId": "uA0000258",
+    "evidencePages": 5
+  },
+  {
+    "univId": "uA0000260",
+    "evidencePages": 10
+  },
+  {
+    "univId": "uA0000261",
+    "evidencePages": 7
+  },
+  {
+    "univId": "uA0000262",
+    "evidencePages": 13
+  },
+  {
+    "univId": "uA0000284",
+    "evidencePages": 10
+  },
+  {
+    "univId": "uA0002660",
+    "evidencePages": 36
+  },
+  {
+    "univId": "uA0002712",
+    "evidencePages": 46
+  },
+  {
+    "univId": "uos",
+    "evidencePages": 22
+  },
+  {
+    "univId": "yonsei",
+    "evidencePages": 31
+  }
+]

@@ -1,0 +1,11 @@
+.vercel
+.vercel-local
+.env
+.env.local
+.env.*.local
+node_modules
+dist
+__pycache__
+*.err
+src/data/pdf_sources/
+src/data/text/

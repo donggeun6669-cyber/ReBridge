@@ -1,0 +1,7 @@
+.env
+.npm-cache
+.vercel-local
+__pycache__
+node_modules
+dist
+*.xlsx
