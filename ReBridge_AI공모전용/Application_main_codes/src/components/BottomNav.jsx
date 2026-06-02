@@ -1,8 +1,9 @@
-import { Home, Search, User } from 'lucide-react';
+import { Home, Search, Route, User } from 'lucide-react';
 
 const TABS = [
   { id: 'home', label: '홈', icon: Home },
   { id: 'explore', label: '탐색', icon: Search },
+  { id: 'roadmap', label: '내 로드맵', icon: Route },
   { id: 'mypage', label: '프로필', icon: User },
 ];
 

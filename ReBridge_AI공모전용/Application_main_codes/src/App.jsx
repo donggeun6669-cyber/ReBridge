@@ -7,9 +7,10 @@ import MyPageScreen from './components/MyPageScreen.jsx';
 import GuideScreen from './components/GuideScreen.jsx';
 import ResultsScreen from './components/ResultsScreen.jsx';
 import DetailScreen from './components/DetailScreen.jsx';
+import RoadmapScreen from './components/RoadmapScreen.jsx';
 import BottomNav from './components/BottomNav.jsx';
 
-const TAB_ROOTS = ['home', 'explore', 'mypage'];
+const TAB_ROOTS = ['home', 'explore', 'roadmap', 'mypage'];
 
 export default function App() {
   const [screen, setScreen] = useState('home');
@@ -20,7 +21,7 @@ export default function App() {
     setScreen(next);
   }
 
-  const isMainScreen = ['home', 'explore', 'mypage', 'profile'].includes(screen);
+  const isMainScreen = ['home', 'explore', 'roadmap', 'mypage', 'profile'].includes(screen);
 
   return (
     <div className="app-shell">
@@ -28,6 +29,7 @@ export default function App() {
         {screen === 'home' && <HomeScreen goTo={goTo} />}
         {screen === 'explore' && <ExploreScreen goTo={goTo} />}
         {screen === 'mypage' && <MyPageScreen goTo={goTo} />}
+        {screen === 'roadmap' && <RoadmapScreen goTo={goTo} />}
         {screen === 'profile' && <ProfileScreen goTo={goTo} />}
         {screen === 'guide' && <GuideScreen topic={params.topic} goTo={goTo} />}
         {screen === 'results' && <ResultsScreen goTo={goTo} />}
