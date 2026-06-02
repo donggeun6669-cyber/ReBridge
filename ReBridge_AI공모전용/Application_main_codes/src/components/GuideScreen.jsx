@@ -324,6 +324,9 @@ const TOPIC_COLOR = {
   interview: 'green', grade: 'brand', guideline: 'green',
 };
 
+// 카드 아이콘이 전부 파란색으로 나오던 문제 → 카드마다 색을 번갈아 입힘
+const CARD_ICON_COLORS = ['green', 'gold', 'brand', 'red'];
+
 export default function GuideScreen({ topic = 'types', goTo = () => {} }) {
   const guide = GUIDES[topic] ?? GUIDES.types;
   const HeroIcon = guide.icon;
@@ -383,9 +386,9 @@ export default function GuideScreen({ topic = 'types', goTo = () => {} }) {
       </section>
 
       <div className="guide-card-list">
-        {guide.cards.map(({ icon: Icon, title, body }) => (
+        {guide.cards.map(({ icon: Icon, title, body }, i) => (
           <article className="guide-card" key={title}>
-            <span className="guide-card-icon">
+            <span className={`guide-card-icon ico-${CARD_ICON_COLORS[i % CARD_ICON_COLORS.length]}`}>
               <Icon size={20} />
             </span>
             <div>

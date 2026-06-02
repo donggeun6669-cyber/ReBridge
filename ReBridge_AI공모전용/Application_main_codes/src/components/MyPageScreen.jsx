@@ -100,6 +100,8 @@ export default function MyPageScreen({ goTo = () => {} }) {
         <br />
         로그인 없이 편하게 써요.
       </p>
+
+      <p className="build-stamp">build {__BUILD_TIME__}</p>
     </div>
   );
 }

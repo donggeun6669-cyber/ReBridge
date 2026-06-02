@@ -516,6 +516,16 @@ button {
   font-weight: 500;
 }
 
+/* 빌드 시각 표시 — 어떤 버전을 보고 있는지 확인용(아주 옅게) */
+.build-stamp {
+  margin-top: 18px;
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-sub);
+  opacity: 0.45;
+  font-variant-numeric: tabular-nums;
+}
+
 /* =====================================================================
    Profile form (토스식 한 페이지 폼)
    ===================================================================== */
@@ -1069,6 +1079,7 @@ button {
 .ico-brand { background: #eaf1ff; color: var(--brand-deep); }
 .ico-green { background: var(--green-soft); color: var(--green-dark); }
 .ico-gold  { background: var(--caution-soft); color: #a9791a; }
+.ico-red   { background: var(--danger-soft); color: #c0473b; }
 
 /* =====================================================================
    Featured FAQ cards (가로 스크롤)

@@ -29,9 +29,8 @@ const FILTERS = ['전체', '서울', '수도권', '지방거점', '기타', '전
 
 // 지원가능→조건부→불가, 같은 그룹 내 rank 오름차순
 const STATUS_ORDER = { ok: 0, cond: 1, no: 2 };
-const STATUS_LABEL = { ok: '지원 가능', cond: '조건부', no: '지원 어려움' };
-// 뱃지 대신 아이콘 색으로 상태 표현
-const STATUS_BADGE_COLOR = { ok: 'ok', cond: 'cond', no: 'no' };
+// "지원 가능"은 "합격"이 아니라 "검정고시로 지원 자격이 된다"는 뜻 → 오해 없게 문구 명확화
+const STATUS_LABEL = { ok: '검정고시 가능', cond: '조건 확인', no: '지원 어려움' };
 
 function matchFilter(s, filter) {
   if (filter === '전체')     return true;
@@ -107,9 +106,7 @@ export default function ExploreScreen({ goTo = () => {} }) {
               <span className="uni-name">{s.name}</span>
               <span className="uni-sub">{s.sub}</span>
             </span>
-            <span className={`badge ${STATUS_BADGE_COLOR[s.status]}`}>
-              {STATUS_LABEL[s.status]}
-            </span>
+            <span className={`badge ${s.status}`}>{STATUS_LABEL[s.status]}</span>
             <ChevronRight size={18} className="uni-arrow" />
           </button>
         ))}
@@ -121,9 +118,9 @@ export default function ExploreScreen({ goTo = () => {} }) {
       </div>
 
       <p className="note">
-        지금은 예시 대학 몇 곳만 보여드려요.
+        여기 나오는 곳은 검정고시로 <b>지원할 수 있는</b> 대학이에요.
         <br />
-        곧 전국 대학으로 넓혀갈 거예요.
+        실제 합격 가능성은 점수·경쟁률에 따라 달라요.
       </p>
     </div>
   );
