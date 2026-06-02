@@ -1,0 +1,159 @@
+/* 제출서류 체크리스트 전용 스타일 — doc-* 네임스페이스만 사용 (전역 styles.css 미수정) */
+
+.doc-card {
+  --doc-brand: #7c5cfc;
+  --doc-brand-deep: #5b3fd6;
+  --doc-brand-tint: #f1ecfe;
+  --doc-text: #1a1726;
+  --doc-text-sub: #7c7689;
+  --doc-green: #1e8c77;
+
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 6px 20px rgba(34, 24, 60, 0.06);
+  padding: 18px;
+  margin: 12px 0;
+  color: var(--doc-text);
+}
+
+.doc-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  color: var(--doc-brand-deep);
+}
+
+.doc-title {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.doc-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.doc-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #faf9ff;
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+  user-select: none;
+}
+
+.doc-item:hover {
+  background: var(--doc-brand-tint);
+}
+
+.doc-item:focus-visible {
+  outline: none;
+  border-color: var(--doc-brand);
+}
+
+.doc-item.is-checked {
+  background: var(--doc-brand-tint);
+  border-color: var(--doc-brand);
+}
+
+.doc-check {
+  display: flex;
+  align-items: center;
+  color: #c8c2da;
+  flex-shrink: 0;
+}
+
+.doc-item.is-checked .doc-check {
+  color: var(--doc-brand);
+}
+
+.doc-label {
+  font-size: 14px;
+  line-height: 1.45;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.doc-item.is-checked .doc-label {
+  color: var(--doc-text-sub);
+  text-decoration: line-through;
+  text-decoration-color: rgba(124, 92, 252, 0.4);
+}
+
+.doc-tag {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.doc-tag-req {
+  background: var(--doc-brand-tint);
+  color: var(--doc-brand-deep);
+}
+
+.doc-tag-opt {
+  background: #f0eef5;
+  color: var(--doc-text-sub);
+}
+
+.doc-notes {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.doc-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--doc-text-sub);
+}
+
+.doc-note svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--doc-brand);
+}
+
+.doc-note-warn {
+  color: var(--doc-text);
+}
+
+.doc-note-warn svg {
+  color: #e0843a;
+}
+
+.doc-badge {
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--doc-brand-tint);
+  color: var(--doc-brand-deep);
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.doc-badge svg {
+  flex-shrink: 0;
+}

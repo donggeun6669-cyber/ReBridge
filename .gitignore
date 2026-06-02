@@ -1,0 +1,27 @@
+# OS / editor junk
+.DS_Store
+**/.DS_Store
+
+# Local agent / editor state
+.claude/
+.obsidian/
+
+# Node / build
+node_modules/
+dist/
+**/node_modules/
+**/dist/
+
+# Vercel
+.vercel
+**/.vercel
+
+# Python
+__pycache__/
+**/__pycache__/
+*.pyc
+
+# Env
+.env
+.env.local
+.env.*.local

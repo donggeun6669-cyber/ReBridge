@@ -5,7 +5,7 @@
 
 ---
 
-## ✅ 최근 완료 (2026-06-02)
+## ✅ 최근 완료 (2026-06-02 — 2차)
 
 - [x] 탐색 탭 배지 `지원 가능` → `검정고시 가능` (지원 *자격* 의미로 명확화)
 - [x] 탐색 탭 하단 안내를 "실제 합격 가능성은 점수·경쟁률에 따라 달라요"로 (합격 단정 안 함)
@@ -14,18 +14,24 @@
 - [x] **배포 반영 안 되던 진짜 원인 해결** — Vercel 엣지/브라우저 캐시. `vercel.json`에 캐시 헤더(에셋 immutable, index.html no-cache) 추가
 - [x] 빌드 스탬프(프로필 하단 `build MM-DD HH:mm`) + `npm run deploy` / `npm run verify` 도구
 - [x] 팀 협업 셋업 — README, GitHub push
+- [x] **API 키 서버리스 인프라** — `api/gemini.js`, `api/careernet.js` 생성. `.env.example` VITE_ 접두어 제거. `vercel.json` /api/* 라우트 추가
+- [x] **부산대 confirmed_detail 반영** — 7개 전형 (교과우수·교과지역·탐구·서류·면접·사회배려자·수능우수), 모집인원·전형방법 포함
+- [x] **인하대 baseline → confirmed** + 교과추천형 gedEligible '가능'→'불가' 오류 수정
 
 ---
 
 ## 🔴 긴급 / 보안
 
-- [ ] **VITE_ API 키 노출 차단** — `VITE_GEMINI_API_KEY`·`VITE_CAREERNET_API_KEY`가 배포 번들에 그대로 박혀 누구나 추출 가능. 키 재발급 + Vercel 서버리스 함수(`/api/*`)로 옮겨 서버에만 보관. (과금 악용 위험)
+- [x] **VITE_ API 키 노출 차단** — `api/gemini.js` · `api/careernet.js` 서버리스 함수 생성. VITE_ 없는 서버 전용 키로 변경. (Vercel에서 GEMINI_API_KEY/CAREERNET_API_KEY 환경변수 설정 필요)
+- [ ] **키 재발급** — 과거 VITE_ 키 유출 가능성 있으면 Google AI Studio / CareerNet에서 재발급 후 Vercel 환경변수 교체
 
 ---
 
 ## A. 데이터 (최우선)
 
-- [ ] 핵심 대학 상세 8곳 추가 — **부산대(1순위)** → 국민·인하·한양·서울과기·경북·충남·전북
+- [x] **부산대 상세 반영** — confirmed_detail 7전형 완료
+- [x] **인하대 confirmed 승격** + 데이터 오류 수정
+- [ ] 핵심 대학 상세 6곳 추가 — **국민·한양·서울과기·경북·충남·전북** (PDF 원본 필요 — 로컬 pdf_sources/ 확인 후 반영)
 - [ ] OCR 실패 3곳(경희·이화·순천) 한글 재다운로드 → 반영
 - [ ] 학생부교과 '일괄 불가' 중 검정고시 교과전형 운영 대학 → '가능'으로 보정
 - [ ] 비교내신 환산식(comparativeGrade) 핵심 대학부터 입력 (학종·교과 지원자에 큰 도움)

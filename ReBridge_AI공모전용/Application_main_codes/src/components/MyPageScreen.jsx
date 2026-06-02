@@ -6,7 +6,10 @@ const STORAGE_KEY = 'rebridge_profile';
 function toChips(p) {
   if (!p) return [];
   const chips = [];
-  if (p.gedScore) {
+  if (p.gedAvg != null) {
+    chips.push(`검정고시 평균 ${p.gedAvg}점`);
+    if (p.gedGrade != null) chips.push(`추정 ${p.gedGrade}등급`);
+  } else if (p.gedScore) {
     chips.push(p.gedScore === '아직 몰라요' ? '검정고시 점수 미정' : `검정고시 ${p.gedScore}`);
   }
   if (p.csatPlan) {

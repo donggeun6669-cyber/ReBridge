@@ -319,8 +319,8 @@ const GUIDES = {
 
 // 홈 카드와 동일한 주제별 색
 const TOPIC_COLOR = {
-  types: 'brand', susi: 'green', compare: 'gold', csat: 'brand',
-  susiJeongsi: 'gold', count: 'brand', apply: 'gold',
+  types: 'brand', susi: 'green', compare: 'coral', csat: 'brand',
+  susiJeongsi: 'gold', count: 'brand', apply: 'coral',
   interview: 'green', grade: 'brand', guideline: 'green',
 };
 
@@ -334,7 +334,7 @@ export default function GuideScreen({ topic = 'types', goTo = () => {} }) {
 
   if (guide.pending) {
     return (
-      <div className="screen guide-screen">
+      <div className={`screen guide-screen guide-theme-${color}`}>
         <header className="topbar center">
           <button className="icon-btn" aria-label="뒤로" onClick={() => goTo('home')}>
             <ArrowLeft size={22} />
@@ -359,7 +359,7 @@ export default function GuideScreen({ topic = 'types', goTo = () => {} }) {
   }
 
   return (
-    <div className="screen guide-screen">
+    <div className={`screen guide-screen guide-theme-${color}`}>
       <header className="topbar center">
         <button className="icon-btn" aria-label="뒤로" onClick={() => goTo('home')}>
           <ArrowLeft size={22} />

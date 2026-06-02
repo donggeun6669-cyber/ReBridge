@@ -1,62 +1,88 @@
-import { useState } from 'react';
-import { Search, X, ChevronRight } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { Search, X, ChevronRight, SlidersHorizontal } from 'lucide-react';
+import { getExploreList } from '../lib/analysis.js';
+import { evaluateAdmission, admissionChance } from '../lib/scoreEngine.js';
+import ChanceGauge from './ChanceGauge.jsx';
+
+const STORAGE_KEY = 'rebridge_profile';
 
 const GEOJEOM = new Set([
   '부산대학교', '경북대학교', '전남대학교', '충남대학교', '전북대학교',
   '강원대학교', '제주대학교', '충북대학교', '경상국립대학교', '국립강릉원주대학교',
 ]);
 
-// rank: 낮을수록 상위 (1 = 가장 높은 랭킹)
-const SCHOOLS = [
-  { short: '서울', name: '서울대학교',         region: '서울', kind: '대학교',   sub: '학생부종합 · 면접 있음',            status: 'ok',   rank: 1  },
-  { short: '연세', name: '연세대학교',         region: '서울', kind: '대학교',   sub: '학생부종합 · 수능최저 있음',        status: 'ok',   rank: 2  },
-  { short: '고려', name: '고려대학교',         region: '서울', kind: '대학교',   sub: '학생부종합 · 수능최저 있음',        status: 'ok',   rank: 3  },
-  { short: '한양', name: '한양대학교',         region: '서울', kind: '대학교',   sub: '학생부종합 · 수능최저 없음',        status: 'ok',   rank: 4  },
-  { short: '시립', name: '서울시립대학교',     region: '서울', kind: '대학교',   sub: '학생부종합 · 면접 있음',            status: 'ok',   rank: 5  },
-  { short: '국민', name: '국민대학교',         region: '서울', kind: '대학교',   sub: '논술전형 · 검정고시 유리',          status: 'ok',   rank: 6  },
-  { short: '아주', name: '아주대학교',         region: '경기', kind: '대학교',   sub: '논술전형 · 수능최저 있음',          status: 'ok',   rank: 7  },
-  { short: '인하', name: '인하대학교',         region: '인천', kind: '대학교',   sub: '논술전형 · 교과 30% 반영',         status: 'ok',   rank: 8  },
-  { short: '부산', name: '부산대학교',         region: '부산', kind: '대학교',   sub: '학생부종합 · 거점국립대',           status: 'ok',   rank: 9  },
-  { short: '경북', name: '경북대학교',         region: '대구', kind: '대학교',   sub: '논술전형 · 교과 30% 반영',         status: 'ok',   rank: 10 },
-  { short: '인제', name: '인제대학교',         region: '경남', kind: '대학교',   sub: '학생부종합 · 수능최저 없음',        status: 'ok',   rank: 11 },
-  { short: '가천', name: '가천대학교',         region: '경기', kind: '대학교',   sub: '기회균형 · 검정고시 조건 확인',     status: 'cond', rank: 12 },
-  { short: '충남', name: '충남대학교',         region: '대전', kind: '대학교',   sub: '학생부교과 · 비교내신 환산 필요',   status: 'cond', rank: 13 },
-  { short: '인강', name: '인천재능대학교',     region: '인천', kind: '전문대학', sub: '수시 일반전형 · 면접 있음',         status: 'ok',   rank: 14 },
-  { short: '경과', name: '경기과학기술대학교', region: '경기', kind: '전문대학', sub: '수시 일반전형 · 면접 있음',         status: 'ok',   rank: 15 },
+const FILTERS = ['전체', '서울', '수도권', '지방거점', '전문대학'];
+const SORTS = [
+  { key: 'reco', label: '추천순' },
+  { key: 'name', label: '가나다순' },
 ];
 
-const FILTERS = ['전체', '서울', '수도권', '지방거점', '기타', '전문대학'];
+const STATUS_LABEL = { ok: '검정고시 가능', cond: '조건 확인' };
 
-// 지원가능→조건부→불가, 같은 그룹 내 rank 오름차순
-const STATUS_ORDER = { ok: 0, cond: 1, no: 2 };
-// "지원 가능"은 "합격"이 아니라 "검정고시로 지원 자격이 된다"는 뜻 → 오해 없게 문구 명확화
-const STATUS_LABEL = { ok: '검정고시 가능', cond: '조건 확인', no: '지원 어려움' };
+// 약칭(로고용 2글자)
+function shortName(name) {
+  const base = name.replace(/대학교$|대학$|학교$/, '');
+  return base.slice(0, 2) || name.slice(0, 2);
+}
 
 function matchFilter(s, filter) {
-  if (filter === '전체')     return true;
+  if (filter === '전체') return true;
   if (filter === '전문대학') return s.kind === '전문대학';
-  if (filter === '서울')     return s.region === '서울' && s.kind === '대학교';
-  if (filter === '수도권')   return ['경기', '인천'].includes(s.region) && s.kind === '대학교';
+  if (filter === '서울') return s.region === '서울' && s.kind === '대학교';
+  if (filter === '수도권') return ['경기', '인천'].includes(s.region) && s.kind === '대학교';
   if (filter === '지방거점') return GEOJEOM.has(s.name) && s.kind === '대학교';
-  if (filter === '기타')     return !['서울', '경기', '인천'].includes(s.region) && !GEOJEOM.has(s.name) && s.kind === '대학교';
   return true;
 }
 
+function loadProfile() {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || null;
+  } catch {
+    return null;
+  }
+}
+
 export default function ExploreScreen({ goTo = () => {} }) {
-  const [query, setQuery]   = useState('');
+  const [query, setQuery] = useState('');
   const [filter, setFilter] = useState('전체');
+  const [sort, setSort] = useState('reco');
+
+  const profile = useMemo(loadProfile, []);
+  const all = useMemo(getExploreList, []);
+  const hasScore = !!(profile && profile.gedScores && profile.gedAvg != null);
 
   const isSearching = query.trim() !== '';
 
-  const list = SCHOOLS
-    .filter((s) =>
-      isSearching ? s.name.includes(query.trim()) : matchFilter(s, filter)
-    )
-    .sort((a, b) => {
-      const statusDiff = (STATUS_ORDER[a.status] ?? 2) - (STATUS_ORDER[b.status] ?? 2);
-      if (statusDiff !== 0) return statusDiff;
-      return (a.rank ?? 99) - (b.rank ?? 99);
+  const list = useMemo(() => {
+    const q = query.trim();
+    let rows = all.filter((s) =>
+      isSearching ? s.name.includes(q) : matchFilter(s, filter)
+    );
+    rows = rows.map((s) => {
+      // 프로필 점수 있으면 best 전형에 대해 합격 판정 → 칸수 게이지
+      let chance = null;
+      if (hasScore && s.bestType) {
+        const ev = evaluateAdmission(profile, {
+          univId: s.univId,
+          admissionType: s.bestType,
+          admissionName: s.bestName,
+          gedEligible: s.bestGedEligible,
+        });
+        if (ev.applicable) chance = admissionChance(ev);
+      }
+      const status = s.bestGedEligible === '가능' ? 'ok' : 'cond';
+      return { ...s, chance, status };
     });
+    rows.sort((a, b) => {
+      if (sort === 'name') return a.name.localeCompare(b.name);
+      // 추천순: 데이터 충실도 → 가능 우선 → 가나다
+      const e = (b.status === 'ok') - (a.status === 'ok');
+      if (e) return e;
+      if (b.dataScore !== a.dataScore) return b.dataScore - a.dataScore;
+      return a.name.localeCompare(b.name);
+    });
+    return rows;
+  }, [all, query, filter, sort, isSearching, hasScore, profile]);
 
   return (
     <div className="screen">
@@ -64,26 +90,13 @@ export default function ExploreScreen({ goTo = () => {} }) {
         <span className="page-title">대학 탐색</span>
       </header>
 
-      {!isSearching && (
-        <div className="filter-row">
-          {FILTERS.map((f) => (
-            <button
-              key={f}
-              className={`fchip ${filter === f ? 'active' : ''}`}
-              onClick={() => setFilter(f)}
-            >
-              {f}
-            </button>
-          ))}
-        </div>
-      )}
-
-      <div className="search-bar" style={{ marginTop: isSearching ? 8 : 6 }}>
+      {/* 검색 (토스풍 큰 입력) */}
+      <div className="search-bar">
         <Search size={18} color="var(--text-sub)" />
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="대학 이름으로 검색해요"
+          placeholder="대학 이름으로 검색"
           aria-label="대학 검색"
         />
         {isSearching && (
@@ -98,15 +111,73 @@ export default function ExploreScreen({ goTo = () => {} }) {
         )}
       </div>
 
-      <div className="uni-list" style={{ marginTop: 10 }}>
-        {list.map((s) => (
-          <button key={s.name} className="uni-card" onClick={() => goTo('detail', { univ: s.name })}>
-            <span className={`uni-logo uni-logo-${s.status}`}>{s.short}</span>
-            <span className="uni-body">
-              <span className="uni-name">{s.name}</span>
-              <span className="uni-sub">{s.sub}</span>
+      {!isSearching && (
+        <>
+          <div className="filter-row">
+            {FILTERS.map((f) => (
+              <button
+                key={f}
+                className={`fchip ${filter === f ? 'active' : ''}`}
+                onClick={() => setFilter(f)}
+              >
+                {f}
+              </button>
+            ))}
+          </div>
+
+          <div className="explore-toolbar">
+            <span className="explore-count">
+              <b>{list.length}</b>개 대학
             </span>
-            <span className={`badge ${s.status}`}>{STATUS_LABEL[s.status]}</span>
+            <div className="sort-group">
+              <SlidersHorizontal size={14} />
+              {SORTS.map((s) => (
+                <button
+                  key={s.key}
+                  className={`sort-chip ${sort === s.key ? 'on' : ''}`}
+                  onClick={() => setSort(s.key)}
+                >
+                  {s.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
+
+      {!hasScore && !isSearching && (
+        <button className="explore-banner" onClick={() => goTo('profile')}>
+          <span className="explore-banner-body">
+            <b>내 검정고시 점수</b>를 넣으면<br />각 대학 합격 가능성까지 한눈에 보여요
+          </span>
+          <ChevronRight size={18} />
+        </button>
+      )}
+
+      <div className="uni-list" style={{ marginTop: 12 }}>
+        {list.map((s) => (
+          <button
+            key={s.univId}
+            className="uni-card"
+            onClick={() => goTo('detail', { univ: s.name, univId: s.univId })}
+          >
+            <span className={`uni-logo uni-logo-${s.status}`}>{shortName(s.name)}</span>
+            <span className="uni-body">
+              <span className="uni-name-row">
+                <span className="uni-name">{s.name}</span>
+                {s.chance ? (
+                  <ChanceGauge chance={s.chance} compact />
+                ) : (
+                  <span className={`badge ${s.status}`}>{STATUS_LABEL[s.status]}</span>
+                )}
+              </span>
+              <span className="uni-sub">
+                {s.region}
+                {s.establishment ? ` · ${s.establishment}` : ''}
+                {s.kind === '전문대학' ? ' · 전문대학' : ''}
+                {s.eligibleCount > 0 ? ` · 검정고시 ${s.eligibleCount}전형` : ''}
+              </span>
+            </span>
             <ChevronRight size={18} className="uni-arrow" />
           </button>
         ))}
@@ -118,9 +189,9 @@ export default function ExploreScreen({ goTo = () => {} }) {
       </div>
 
       <p className="note">
-        여기 나오는 곳은 검정고시로 <b>지원할 수 있는</b> 대학이에요.
+        검정고시로 <b>지원할 수 있는</b> 전형 기준이에요.
         <br />
-        실제 합격 가능성은 점수·경쟁률에 따라 달라요.
+        합격선·비교내신은 <b>작년 자료 참고용</b>이고, 실제는 모집요강을 확인해요.
       </p>
     </div>
   );

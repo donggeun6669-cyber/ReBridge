@@ -1,13 +1,8 @@
 import { useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
+import { GED_SUBJECTS, gedAverage, estimateGrade } from '../lib/scoreEngine';
 
 const QUESTIONS = [
-  {
-    key: 'gedScore',
-    title: '검정고시 평균 점수가 어느 정도예요?',
-    hint: '대략만 골라도 돼요. 아직 안 봤다면 "아직 몰라요"를 눌러요.',
-    options: ['60점대', '70점대', '80점대', '90점 이상', '아직 몰라요'],
-  },
   {
     key: 'csatPlan',
     title: '수능도 볼 생각이에요?',
@@ -39,19 +34,54 @@ export default function ProfileScreen({ goTo = () => {} }) {
     }
   });
 
+  // 과목별 점수: 기존 프로필에 gedScores 있으면 사용, 없으면 빈 객체
+  const [gedScores, setGedScores] = useState(() => {
+    const init = {};
+    const saved = answers.gedScores || {};
+    GED_SUBJECTS.forEach((s) => {
+      init[s] = saved[s] != null && saved[s] !== '' ? String(saved[s]) : '';
+    });
+    return init;
+  });
+
   function pick(key, value) {
     setAnswers((prev) => ({ ...prev, [key]: value }));
   }
 
-  const allAnswered = QUESTIONS.every((q) => answers[q.key]);
+  function setSubject(subject, raw) {
+    // 0~100 정수만 허용, 빈 값 허용
+    let v = raw.replace(/[^0-9]/g, '');
+    if (v !== '') {
+      let n = Math.min(100, parseInt(v, 10));
+      v = String(n);
+    }
+    setGedScores((prev) => ({ ...prev, [subject]: v }));
+  }
+
+  // 점수엔진이 기대하는 형태: 숫자 또는 미입력(빈문자)
+  const numericScores = Object.fromEntries(
+    GED_SUBJECTS.map((s) => [s, gedScores[s] === '' ? '' : Number(gedScores[s])])
+  );
+  const avg = gedAverage(numericScores);
+  const myGrade = estimateGrade(avg);
+  const filledCount = GED_SUBJECTS.filter((s) => gedScores[s] !== '').length;
+
+  const choicesAnswered = QUESTIONS.every((q) => answers[q.key]);
+  const canSubmit = choicesAnswered; // 점수는 선택(미입력 시 합격선 비교만 보류)
 
   function submit() {
+    const next = {
+      ...answers,
+      gedScores: numericScores,
+      gedAvg: avg,
+      gedGrade: myGrade,
+    };
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(answers));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
     } catch {
       /* localStorage 불가 시 무시 */
     }
-    goTo('results', { profile: answers });
+    goTo('results', { profile: next });
   }
 
   return (
@@ -65,9 +95,41 @@ export default function ProfileScreen({ goTo = () => {} }) {
 
       <div className="intro-line">몇 가지만 알려주세요</div>
       <div className="intro-sub">
-        그래야 나에게 맞는 대학과 전형을 찾아드릴 수 있어요.
+        검정고시 과목 점수를 넣으면 작년 합격선과 직접 비교해드려요.
         <br />
-        모르는 건 "아직 몰라요"를 눌러도 돼요.
+        아직 안 봤거나 모르는 과목은 비워둬도 괜찮아요.
+      </div>
+
+      {/* 과목별 점수 입력 (정밀) */}
+      <div className="field">
+        <h3>검정고시 과목 점수</h3>
+        <p className="hint">과목당 100점 만점. 본 과목만 입력해도 돼요.</p>
+        <div className="ged-grid">
+          {GED_SUBJECTS.map((s) => (
+            <label className="ged-cell" key={s}>
+              <span className="ged-label">{s}</span>
+              <input
+                className="ged-input"
+                type="number"
+                inputMode="numeric"
+                min="0"
+                max="100"
+                placeholder="–"
+                value={gedScores[s]}
+                onChange={(e) => setSubject(s, e.target.value)}
+              />
+            </label>
+          ))}
+        </div>
+        {avg != null ? (
+          <div className="ged-summary">
+            입력 {filledCount}과목 · 평균 <b>{avg}점</b>
+            <span className="ged-grade"> → 추정 {myGrade}등급</span>
+            <span className="ged-note"> (대학별 환산표는 달라요 · 참고용)</span>
+          </div>
+        ) : (
+          <div className="ged-summary muted">점수를 넣으면 평균과 추정 등급을 보여드려요.</div>
+        )}
       </div>
 
       {QUESTIONS.map((q) => (
@@ -89,8 +151,8 @@ export default function ProfileScreen({ goTo = () => {} }) {
       ))}
 
       <div className="form-foot">
-        <button className="cta" onClick={submit} disabled={!allAnswered}>
-          {allAnswered ? '나에게 맞는 길 보기' : '하나씩 골라주세요'}
+        <button className="cta" onClick={submit} disabled={!canSubmit}>
+          {canSubmit ? '나에게 맞는 길 보기' : '아래 질문을 골라주세요'}
         </button>
         <p className="reassure">입력한 정보는 이 기기에만 저장돼요. 로그인 필요 없어요.</p>
       </div>

@@ -2,6 +2,8 @@
 // 규칙 기반(AI 없음). baseline 데이터에서도 동작하고, 데이터가 채워질수록 정확해짐.
 import universities from '../data/universities.json';
 import admissions from '../data/admissions.json';
+import cutlines from '../data/cutlines_2025.json';
+import comparative from '../data/comparative_2028.json';
 
 const METRO = new Set(['서울', '경기', '인천']);
 
@@ -94,6 +96,60 @@ export function getUniversityDetailByName(name) {
     universities.find((x) => norm(x.name) === norm(name)) ||
     universities.find((x) => norm(x.name).includes(norm(name)));
   return u ? getUniversityDetail(u.univId) : null;
+}
+
+// 탐색(둘러보기)용 전체 대학 목록 — 유웨이식 입시정보 요약 카드.
+// 프로필 없이도 동작하며, 각 대학의 검정고시 관점 데이터 충실도를 함께 반환.
+export function getExploreList() {
+  const rowsById = new Map();
+  for (const r of admissions) {
+    if (!rowsById.has(r.univId)) rowsById.set(r.univId, []);
+    rowsById.get(r.univId).push(r);
+  }
+
+  const out = [];
+  for (const u of universities) {
+    const rows = rowsById.get(u.univId) || [];
+    const eligible = rows.filter((r) => r.gedEligible === '가능' || r.gedEligible === '조건부');
+    // 가장 유리한 전형 1개 (가능 우선 > 유형 우선)
+    const sorted = [...eligible].sort((a, b) => {
+      const e = (b.gedEligible === '가능') - (a.gedEligible === '가능');
+      if (e) return e;
+      return (TYPE_RANK[b.admissionType] || 0) - (TYPE_RANK[a.admissionType] || 0);
+    });
+    const best = sorted[0] || null;
+
+    const comp = comparative[u.univId] || null;
+    const comparativeType =
+      comp?.comparativeGradeType === 'numeric_table'
+        ? 'numeric'
+        : comp
+          ? 'prose'
+          : 'none';
+    const cut = cutlines[u.univId] || null;
+
+    out.push({
+      univId: u.univId,
+      name: u.name,
+      region: u.region,
+      kind: u.kind || '대학교',
+      establishment: u.establishment || '',
+      eligibleCount: eligible.length,
+      hasAny: rows.length > 0,
+      comparativeType,
+      hasCutline: !!cut,
+      // 데이터 충실도 점수(둘러보기 정렬용): 합격선·환산표·전형수
+      dataScore:
+        (cut ? 3 : 0) +
+        (comparativeType === 'numeric' ? 3 : comparativeType === 'prose' ? 1 : 0) +
+        Math.min(eligible.length, 5),
+      // 프로필 점수 비교용(best 전형)
+      bestType: best?.admissionType || null,
+      bestName: best?.admissionName || null,
+      bestGedEligible: best?.gedEligible || null,
+    });
+  }
+  return out;
 }
 
 export function analyzeProfile(profile = {}) {

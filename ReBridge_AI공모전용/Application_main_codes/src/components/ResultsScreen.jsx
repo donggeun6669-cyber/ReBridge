@@ -1,6 +1,8 @@
 import { useMemo } from 'react';
-import { ArrowLeft, MapPin, CheckCircle2, MessageCircle, Lightbulb } from 'lucide-react';
+import { ArrowLeft, MapPin, Lightbulb } from 'lucide-react';
 import { analyzeProfile } from '../lib/analysis.js';
+import { evaluateAdmission, admissionChance } from '../lib/scoreEngine.js';
+import ChanceGauge from './ChanceGauge.jsx';
 
 const STORAGE_KEY = 'rebridge_profile';
 const STATUS_LABEL = { ok: '검정고시 가능', cond: '조건부' };
@@ -16,7 +18,15 @@ function loadProfile() {
 function profileChips(p) {
   if (!p) return [];
   const chips = [];
-  if (p.gedScore) chips.push(p.gedScore === '아직 몰라요' ? '점수 미정' : `검정고시 ${p.gedScore}`);
+  if (p.gedAvg != null) {
+    chips.push(`검정고시 평균 ${p.gedAvg}점`);
+    if (p.gedGrade != null) chips.push(`추정 ${p.gedGrade}등급`);
+  } else if (p.gedScore) {
+    // 구버전 프로필 호환
+    chips.push(p.gedScore === '아직 몰라요' ? '점수 미정' : `검정고시 ${p.gedScore}`);
+  } else {
+    chips.push('점수 미정');
+  }
   if (p.csatPlan) {
     const m = { '볼 거예요': '수능 볼 예정', '안 볼 거예요': '수능 안 봄', '고민 중이에요': '수능 고민 중' };
     chips.push(m[p.csatPlan] || p.csatPlan);
@@ -86,7 +96,15 @@ export default function ResultsScreen({ goTo = () => {} }) {
       )}
 
       <div className="result-list">
-        {data.results.map((r) => (
+        {data.results.map((r) => {
+          const ev = evaluateAdmission(profile, {
+            univId: r.univId,
+            admissionType: r.bestType,
+            admissionName: r.bestName,
+            gedEligible: r.status === 'ok' ? '가능' : '조건부',
+          });
+          const chance = ev.applicable ? admissionChance(ev) : null;
+          return (
           <button
             key={r.univId}
             className="result-card"
@@ -100,26 +118,21 @@ export default function ResultsScreen({ goTo = () => {} }) {
                   {r.kind === '전문대학' ? ' · 전문대학' : ''}
                 </div>
               </div>
-              <span className={`badge ${r.status}`}>{STATUS_LABEL[r.status]}</span>
+              <div className="result-badges">
+                {chance ? (
+                  <ChanceGauge chance={chance} compact />
+                ) : (
+                  <span className={`badge ${r.status}`}>{STATUS_LABEL[r.status]}</span>
+                )}
+              </div>
             </div>
 
             <div className="result-tag">
               {r.bestType} · {r.bestName}
-              {r.csat ? ` · ${r.csat}` : ''}
-            </div>
-
-            {r.reflection && (
-              <div className="result-reflect">
-                <CheckCircle2 size={14} /> {r.reflection}
-              </div>
-            )}
-
-            <div className="result-next">
-              <span className="result-next-label">👉 지금 할 일</span>
-              {r.next}
             </div>
           </button>
-        ))}
+          );
+        })}
       </div>
 
       <p className="note">

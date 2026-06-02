@@ -8,6 +8,7 @@ import GuideScreen from './components/GuideScreen.jsx';
 import ResultsScreen from './components/ResultsScreen.jsx';
 import DetailScreen from './components/DetailScreen.jsx';
 import RoadmapScreen from './components/RoadmapScreen.jsx';
+import DocumentsScreen from './components/DocumentsScreen.jsx';
 import BottomNav from './components/BottomNav.jsx';
 
 const TAB_ROOTS = ['home', 'explore', 'roadmap', 'mypage'];
@@ -36,8 +37,16 @@ export default function App() {
         {screen === 'detail' && (
           <DetailScreen goTo={goTo} univId={params.univId} univName={params.univ} />
         )}
+        {screen === 'documents' && (
+          <DocumentsScreen
+            goTo={goTo}
+            univId={params.univId}
+            univName={params.univ}
+            admissionName={params.admissionName}
+          />
+        )}
 
-        {!isMainScreen && !['guide', 'results', 'detail'].includes(screen) && (
+        {!isMainScreen && !['guide', 'results', 'detail', 'documents'].includes(screen) && (
           <div className="screen">
             <header className="topbar center">
               <button className="icon-btn" aria-label="뒤로" onClick={() => goTo('home')}>

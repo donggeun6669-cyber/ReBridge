@@ -1,0 +1,2350 @@
+{
+"uA0000072": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 5.1,
+"cutScoreAvg": null,
+"cutScore70": 850.0,
+"n": 90,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 358.6,
+"n": 1,
+"confidence": "high"
+}
+},
+"kangwon": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 3.54,
+"cutScoreAvg": null,
+"cutScore70": 923.85,
+"n": 80,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 371.85,
+"n": 65,
+"confidence": "high"
+}
+},
+"uA0000060": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 4.77,
+"cutScoreAvg": null,
+"cutScore70": 982.0,
+"n": 70,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 676.0,
+"n": 52,
+"confidence": "mid"
+}
+},
+"uA0000001": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 4.85,
+"cutScoreAvg": null,
+"cutScore70": 854.0,
+"n": 41,
+"confidence": "high"
+},
+"학생부종합": {
+"cutGradeAvg": null,
+"cutGrade70": 5.66,
+"cutScoreAvg": null,
+"cutScore70": null,
+"n": 35,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 762.5,
+"n": 20,
+"confidence": "high"
+}
+},
+"uA0000119": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 4.79,
+"cutScoreAvg": null,
+"cutScore70": 807.5,
+"n": 61,
+"confidence": "high"
+},
+"학생부종합": {
+"cutGradeAvg": null,
+"cutGrade70": 4.65,
+"cutScoreAvg": null,
+"cutScore70": null,
+"n": 20,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 684.8,
+"n": 7,
+"confidence": "high"
+}
+},
+"uA0000150": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 3.7,
+"cutScoreAvg": null,
+"cutScore70": 93.08,
+"n": 69,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 644.34,
+"n": 13,
+"confidence": "mid"
+}
+},
+"gachon": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 3.98,
+"cutScoreAvg": null,
+"cutScore70": null,
+"n": 240,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 83.45,
+"n": 92,
+"confidence": "high"
+}
+},
+"catholic": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 2.74,
+"cutScoreAvg": null,
+"cutScore70": 982.48,
+"n": 78,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 842.5,
+"n": 22,
+"confidence": "mid"
+}
+},
+"uA0000051": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 4.74,
+"cutScoreAvg": null,
+"cutScore70": 851.15,
+"n": 59,
+"confidence": "high"
+},
+"학생부종합": {
+"cutGradeAvg": null,
+"cutGrade70": 4.63,
+"cutScoreAvg": null,
+"cutScore70": null,
+"n": 13,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 799.0,
+"n": 16,
+"confidence": "high"
+}
+},
+"kyonggi": {
+"학생부종합": {
+"cutGradeAvg": 3.76,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": null,
+"n": 6,
+"confidence": "high"
+}
+},
+"dankook": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 2.95,
+"cutScoreAvg": null,
+"cutScore70": 980.25,
+"n": 76,
+"confidence": "high"
+},
+"학생부종합": {
+"cutGradeAvg": null,
+"cutGrade70": 3.51,
+"cutScoreAvg": null,
+"cutScore70": null,
+"n": 143,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 840.5,
+"n": 67,
+"confidence": "high"
+}
+},
+"uA0000097": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 4.28,
+"cutScoreAvg": null,
+"cutScore70": 657.48,
+"n": 65,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": 25.0,
+"cutScore70": 801.0,
+"n": 30,
+"confidence": "high"
+}
+},
+"uA0000108": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 5.0,
+"cutScoreAvg": null,
+"cutScore70": 460.0,
+"n": 1,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 335.0,
+"n": 1,
+"confidence": "high"
+}
+},
+"uA0000109": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 2.56,
+"cutScoreAvg": null,
+"cutScore70": 669.62,
+"n": 83,
+"confidence": "high"
+},
+"학생부종합": {
+"cutGradeAvg": null,
+"cutGrade70": 3.48,
+"cutScoreAvg": null,
+"cutScore70": null,
+"n": 97,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 840.4,
+"n": 11,
+"confidence": "high"
+}
+},
+"uA0000125": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 4.71,
+"cutScoreAvg": null,
+"cutScore70": 511.74,
+"n": 90,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": 4.0,
+"cutScoreAvg": null,
+"cutScore70": 776.0,
+"n": 28,
+"confidence": "high"
+}
+},
+"uA0000127": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 5.67,
+"cutScoreAvg": null,
+"cutScore70": 590.66,
+"n": 6,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 600.0,
+"n": 4,
+"confidence": "high"
+}
+},
+"uA0000131": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 4.4,
+"cutScoreAvg": null,
+"cutScore70": 949.0,
+"n": 66,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 746.5,
+"n": 20,
+"confidence": "high"
+}
+},
+"uA0000140": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 3.67,
+"cutScoreAvg": null,
+"cutScore70": 989.0,
+"n": 98,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": 1.0,
+"cutScoreAvg": null,
+"cutScore70": 816.5,
+"n": 42,
+"confidence": "high"
+}
+},
+"uA0000145": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 6.3,
+"cutScoreAvg": null,
+"cutScore70": 253.0,
+"n": 4,
+"confidence": "high"
+}
+},
+"ajou": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 2.31,
+"cutScoreAvg": null,
+"cutScore70": 98.57,
+"n": 24,
+"confidence": "high"
+},
+"학생부종합": {
+"cutGradeAvg": null,
+"cutGrade70": 2.85,
+"cutScoreAvg": null,
+"cutScore70": null,
+"n": 46,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 900.24,
+"n": 33,
+"confidence": "high"
+}
+},
+"uA0000147": {
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": 3.0,
+"cutScoreAvg": null,
+"cutScore70": 79.58,
+"n": 76,
+"confidence": "mid"
+}
+},
+"uA0000059": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 4.4,
+"cutScoreAvg": null,
+"cutScore70": 934.66,
+"n": 59,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 892.25,
+"n": 22,
+"confidence": "high"
+}
+},
+"uA0000007": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 4.57,
+"cutScoreAvg": null,
+"cutScore70": 946.6,
+"n": 44,
+"confidence": "high"
+},
+"학생부종합": {
+"cutGradeAvg": null,
+"cutGrade70": 4.69,
+"cutScoreAvg": null,
+"cutScore70": null,
+"n": 52,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 822.09,
+"n": 47,
+"confidence": "high"
+}
+},
+"uA0000028": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 4.59,
+"cutScoreAvg": null,
+"cutScore70": 958.46,
+"n": 63,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 846.0,
+"n": 35,
+"confidence": "high"
+}
+},
+"uA0000222": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 5.5,
+"cutScoreAvg": null,
+"cutScore70": 612.23,
+"n": 4,
+"confidence": "high"
+}
+},
+"uA0000260": {
+"학생부종합": {
+"cutGradeAvg": null,
+"cutGrade70": 3.33,
+"cutScoreAvg": null,
+"cutScore70": null,
+"n": 1,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 615.8,
+"n": 1,
+"confidence": "high"
+}
+},
+"uA0000244": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 6.5,
+"cutScoreAvg": null,
+"cutScore70": null,
+"n": 37,
+"confidence": "high"
+}
+},
+"uA0000064": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 4.48,
+"cutScoreAvg": null,
+"cutScore70": 346.0,
+"n": 45,
+"confidence": "high"
+},
+"학생부종합": {
+"cutGradeAvg": null,
+"cutGrade70": 4.69,
+"cutScoreAvg": null,
+"cutScore70": null,
+"n": 8,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 224.18,
+"n": 21,
+"confidence": "high"
+}
+},
+"uA0000010": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 5.04,
+"cutScoreAvg": null,
+"cutScore70": 870.17,
+"n": 120,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 566.5,
+"n": 29,
+"confidence": "high"
+}
+},
+"uA0000241": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 4.89,
+"cutScoreAvg": null,
+"cutScore70": 900.7,
+"n": 24,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 504.0,
+"n": 3,
+"confidence": "high"
+}
+},
+"uA0000088": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 4.87,
+"cutScoreAvg": null,
+"cutScore70": 472.5,
+"n": 70,
+"confidence": "high"
+},
+"학생부종합": {
+"cutGradeAvg": null,
+"cutGrade70": 5.25,
+"cutScoreAvg": null,
+"cutScore70": null,
+"n": 35,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 305.97,
+"n": 14,
+"confidence": "mid"
+}
+},
+"uA0000084": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 4.8,
+"cutScoreAvg": null,
+"cutScore70": 899.62,
+"n": 68,
+"confidence": "high"
+},
+"학생부종합": {
+"cutGradeAvg": null,
+"cutGrade70": 6.4,
+"cutScoreAvg": null,
+"cutScore70": null,
+"n": 31,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 664.6,
+"n": 8,
+"confidence": "high"
+}
+},
+"uA0000061": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 5.5,
+"cutScoreAvg": null,
+"cutScore70": 982.94,
+"n": 90,
+"confidence": "high"
+},
+"학생부종합": {
+"cutGradeAvg": null,
+"cutGrade70": 4.62,
+"cutScoreAvg": null,
+"cutScore70": null,
+"n": 48,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 870.2,
+"n": 20,
+"confidence": "high"
+}
+},
+"uA0000093": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 6.0,
+"cutScoreAvg": null,
+"cutScore70": 263.08,
+"n": 8,
+"confidence": "high"
+}
+},
+"uA0000101": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 4.3,
+"cutScoreAvg": null,
+"cutScore70": null,
+"n": 164,
+"confidence": "mid"
+},
+"학생부종합": {
+"cutGradeAvg": null,
+"cutGrade70": 2.2,
+"cutScoreAvg": null,
+"cutScore70": null,
+"n": 6,
+"confidence": "mid"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 600.0,
+"n": 70,
+"confidence": "high"
+}
+},
+"uA0000106": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 4.9,
+"cutScoreAvg": null,
+"cutScore70": 640.0,
+"n": 159,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 683.5,
+"n": 54,
+"confidence": "high"
+}
+},
+"uA0000065": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 6.0,
+"cutScoreAvg": null,
+"cutScore70": 300.0,
+"n": 18,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 125.0,
+"n": 4,
+"confidence": "high"
+}
+},
+"uA0000073": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 6.5,
+"cutScoreAvg": null,
+"cutScore70": 225.0,
+"n": 2,
+"confidence": "high"
+}
+},
+"uA0000252": {
+"학생부종합": {
+"cutGradeAvg": null,
+"cutGrade70": 3.38,
+"cutScoreAvg": null,
+"cutScore70": null,
+"n": 6,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 800.25,
+"n": 1,
+"confidence": "high"
+}
+},
+"uA0000231": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 6.44,
+"cutScoreAvg": null,
+"cutScore70": 300.0,
+"n": 68,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 283.5,
+"n": 9,
+"confidence": "high"
+}
+},
+"uA0000076": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 6.57,
+"cutScoreAvg": null,
+"cutScore70": 295.0,
+"n": 27,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": 40.0,
+"cutScore70": 480.0,
+"n": 13,
+"confidence": "high"
+}
+},
+"uA0000216": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 6.82,
+"cutScoreAvg": null,
+"cutScore70": 600.0,
+"n": 13,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 537.75,
+"n": 2,
+"confidence": "high"
+}
+},
+"uA0000243": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 6.25,
+"cutScoreAvg": null,
+"cutScore70": 732.5,
+"n": 20,
+"confidence": "high"
+}
+},
+"knu": {
+"학생부종합": {
+"cutGradeAvg": 3.25,
+"cutGrade70": 3.38,
+"cutScoreAvg": null,
+"cutScore70": null,
+"n": 58,
+"confidence": "high"
+},
+"학생부교과": {
+"cutGradeAvg": 2.75,
+"cutGrade70": 2.88,
+"cutScoreAvg": 46.0,
+"cutScore70": null,
+"n": 114,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": 2.5,
+"cutGrade70": null,
+"cutScoreAvg": 291.52,
+"cutScore70": 650.73,
+"n": 366,
+"confidence": "high"
+}
+},
+"uA0000068": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 5.37,
+"cutScoreAvg": null,
+"cutScore70": 36.3,
+"n": 49,
+"confidence": "high"
+},
+"학생부종합": {
+"cutGradeAvg": null,
+"cutGrade70": 5.99,
+"cutScoreAvg": null,
+"cutScore70": null,
+"n": 18,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 65.91,
+"n": 38,
+"confidence": "high"
+}
+},
+"uA0000253": {
+"학생부종합": {
+"cutGradeAvg": null,
+"cutGrade70": 3.58,
+"cutScoreAvg": null,
+"cutScore70": null,
+"n": 6,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 846.45,
+"n": 4,
+"confidence": "high"
+}
+},
+"uA0000039": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 3.95,
+"cutScoreAvg": null,
+"cutScore70": 513.6,
+"n": 32,
+"confidence": "high"
+},
+"학생부종합": {
+"cutGradeAvg": null,
+"cutGrade70": 5.05,
+"cutScoreAvg": null,
+"cutScore70": null,
+"n": 31,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 402.0,
+"n": 25,
+"confidence": "high"
+}
+},
+"uA0000095": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 5.17,
+"cutScoreAvg": null,
+"cutScore70": 953.66,
+"n": 107,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 805.0,
+"n": 5,
+"confidence": "high"
+}
+},
+"uA0000238": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 7.0,
+"cutScoreAvg": null,
+"cutScore70": null,
+"n": 1,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": 8.0,
+"cutScoreAvg": null,
+"cutScore70": 904.5,
+"n": 1,
+"confidence": "high"
+}
+},
+"uA0000112": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 4.25,
+"cutScoreAvg": null,
+"cutScore70": 840.76,
+"n": 51,
+"confidence": "high"
+},
+"학생부종합": {
+"cutGradeAvg": null,
+"cutGrade70": 4.12,
+"cutScoreAvg": null,
+"cutScore70": null,
+"n": 6,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 760.0,
+"n": 28,
+"confidence": "high"
+}
+},
+"uA0000113": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 4.8,
+"cutScoreAvg": null,
+"cutScore70": 878.0,
+"n": 83,
+"confidence": "high"
+},
+"학생부종합": {
+"cutGradeAvg": null,
+"cutGrade70": 4.1,
+"cutScoreAvg": null,
+"cutScore70": null,
+"n": 2,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": 4.0,
+"cutScoreAvg": null,
+"cutScore70": 615.0,
+"n": 33,
+"confidence": "high"
+}
+},
+"uA0000062": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 4.3,
+"cutScoreAvg": null,
+"cutScore70": 940.0,
+"n": 212,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 508.5,
+"n": 28,
+"confidence": "high"
+}
+},
+"uA0000071": {
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 560.31,
+"n": 6,
+"confidence": "high"
+}
+},
+"uA0000013": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 3.51,
+"cutScoreAvg": null,
+"cutScore70": 985.5,
+"n": 51,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 658.68,
+"n": 29,
+"confidence": "mid"
+}
+},
+"uA0000033": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 3.85,
+"cutScoreAvg": null,
+"cutScore70": 928.0,
+"n": 43,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 557.19,
+"n": 26,
+"confidence": "high"
+}
+},
+"uA0000235": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 4.63,
+"cutScoreAvg": null,
+"cutScore70": 980.0,
+"n": 92,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 333.0,
+"n": 16,
+"confidence": "high"
+}
+},
+"uA0000103": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 3.85,
+"cutScoreAvg": null,
+"cutScore70": null,
+"n": 126,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 577.5,
+"n": 29,
+"confidence": "high"
+}
+},
+"uA0000105": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 4.5,
+"cutScoreAvg": null,
+"cutScore70": 965.0,
+"n": 95,
+"confidence": "high"
+},
+"학생부종합": {
+"cutGradeAvg": null,
+"cutGrade70": 1.86,
+"cutScoreAvg": null,
+"cutScore70": null,
+"n": 1,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 523.0,
+"n": 33,
+"confidence": "high"
+}
+},
+"uA0000107": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 4.58,
+"cutScoreAvg": null,
+"cutScore70": 890.5,
+"n": 130,
+"confidence": "high"
+},
+"학생부종합": {
+"cutGradeAvg": null,
+"cutGrade70": 6.79,
+"cutScoreAvg": null,
+"cutScore70": null,
+"n": 6,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 454.35,
+"n": 8,
+"confidence": "high"
+}
+},
+"uA0000114": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 3.5,
+"cutScoreAvg": null,
+"cutScore70": 970.0,
+"n": 21,
+"confidence": "high"
+},
+"학생부종합": {
+"cutGradeAvg": null,
+"cutGrade70": 5.3,
+"cutScoreAvg": null,
+"cutScore70": null,
+"n": 44,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 480.5,
+"n": 14,
+"confidence": "high"
+}
+},
+"uA0000254": {
+"학생부종합": {
+"cutGradeAvg": null,
+"cutGrade70": 2.8,
+"cutScoreAvg": null,
+"cutScore70": null,
+"n": 6,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 643.0,
+"n": 1,
+"confidence": "mid"
+}
+},
+"pusan": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 3.05,
+"cutScoreAvg": null,
+"cutScore70": 78.36,
+"n": 94,
+"confidence": "high"
+},
+"학생부종합": {
+"cutGradeAvg": null,
+"cutGrade70": 2.77,
+"cutScoreAvg": null,
+"cutScore70": null,
+"n": 72,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 682.75,
+"n": 88,
+"confidence": "high"
+}
+},
+"uA0000115": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 4.2,
+"cutScoreAvg": null,
+"cutScore70": 968.0,
+"n": 13,
+"confidence": "high"
+},
+"학생부종합": {
+"cutGradeAvg": null,
+"cutGrade70": 4.4,
+"cutScoreAvg": null,
+"cutScore70": null,
+"n": 3,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 412.5,
+"n": 2,
+"confidence": "high"
+}
+},
+"uA0000144": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 4.3,
+"cutScoreAvg": null,
+"cutScore70": 918.0,
+"n": 136,
+"confidence": "high"
+},
+"학생부종합": {
+"cutGradeAvg": null,
+"cutGrade70": 5.05,
+"cutScoreAvg": null,
+"cutScore70": null,
+"n": 32,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": 6.0,
+"cutScoreAvg": null,
+"cutScore70": 433.0,
+"n": 46,
+"confidence": "high"
+}
+},
+"uA0000050": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 5.97,
+"cutScoreAvg": null,
+"cutScore70": 616.5,
+"n": 3,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 350.4,
+"n": 1,
+"confidence": "high"
+}
+},
+"uA0000079": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 4.38,
+"cutScoreAvg": null,
+"cutScore70": 836.74,
+"n": 20,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 785.5,
+"n": 6,
+"confidence": "high"
+}
+},
+"konkuk": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 1.98,
+"cutScoreAvg": null,
+"cutScore70": 697.95,
+"n": 24,
+"confidence": "high"
+},
+"학생부종합": {
+"cutGradeAvg": null,
+"cutGrade70": 2.5,
+"cutScoreAvg": null,
+"cutScore70": null,
+"n": 28,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 664.78,
+"n": 35,
+"confidence": "high"
+}
+},
+"khu": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 1.92,
+"cutScoreAvg": null,
+"cutScore70": 678.34,
+"n": 52,
+"confidence": "high"
+},
+"학생부종합": {
+"cutGradeAvg": null,
+"cutGrade70": 3.51,
+"cutScoreAvg": null,
+"cutScore70": null,
+"n": 54,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 550.73,
+"n": 64,
+"confidence": "high"
+}
+},
+"korea": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 1.5,
+"cutScoreAvg": null,
+"cutScore70": 79.2,
+"n": 31,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 658.65,
+"n": 32,
+"confidence": "high"
+}
+},
+"kw": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 2.26,
+"cutScoreAvg": null,
+"cutScore70": 975.8,
+"n": 29,
+"confidence": "high"
+},
+"학생부종합": {
+"cutGradeAvg": null,
+"cutGrade70": 3.41,
+"cutScoreAvg": null,
+"cutScore70": null,
+"n": 33,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 682.44,
+"n": 35,
+"confidence": "high"
+}
+},
+"kookmin": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 2.64,
+"cutScoreAvg": null,
+"cutScore70": 986.82,
+"n": 153,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 499.88,
+"n": 24,
+"confidence": "high"
+}
+},
+"uA0000099": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 2.71,
+"cutScoreAvg": null,
+"cutScore70": 987.52,
+"n": 30,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 884.0,
+"n": 5,
+"confidence": "high"
+}
+},
+"dongguk": {
+"학생부교과": {
+"cutGradeAvg": 2.46,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": null,
+"n": 84,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 680.08,
+"n": 35,
+"confidence": "high"
+}
+},
+"uA0000102": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 3.0,
+"cutScoreAvg": null,
+"cutScore70": 945.86,
+"n": 24,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 765.0,
+"n": 61,
+"confidence": "high"
+}
+},
+"uA0000116": {
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 868.3,
+"n": 20,
+"confidence": "mid"
+}
+},
+"smu": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 3.73,
+"cutScoreAvg": null,
+"cutScore70": 962.16,
+"n": 78,
+"confidence": "high"
+},
+"학생부종합": {
+"cutGradeAvg": null,
+"cutGrade70": 3.12,
+"cutScoreAvg": null,
+"cutScore70": null,
+"n": 54,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 846.0,
+"n": 43,
+"confidence": "high"
+}
+},
+"sogang": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 1.57,
+"cutScoreAvg": null,
+"cutScore70": 842.98,
+"n": 19,
+"confidence": "high"
+},
+"학생부종합": {
+"cutGradeAvg": null,
+"cutGrade70": 3.5,
+"cutScoreAvg": null,
+"cutScore70": null,
+"n": 30,
+"confidence": "high"
+}
+},
+"uA0000121": {
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 69.0,
+"n": 9,
+"confidence": "mid"
+},
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 972.33,
+"n": 9,
+"confidence": "mid"
+}
+},
+"seoultech": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 2.13,
+"cutScoreAvg": null,
+"cutScore70": 990.52,
+"n": 28,
+"confidence": "mid"
+},
+"학생부종합": {
+"cutGradeAvg": null,
+"cutGrade70": 3.26,
+"cutScoreAvg": null,
+"cutScore70": null,
+"n": 104,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 914.94,
+"n": 33,
+"confidence": "high"
+}
+},
+"uA0000255": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 1.62,
+"cutScoreAvg": null,
+"cutScore70": 979.04,
+"n": 1,
+"confidence": "high"
+},
+"학생부종합": {
+"cutGradeAvg": null,
+"cutGrade70": 3.19,
+"cutScoreAvg": null,
+"cutScore70": null,
+"n": 5,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 563.4,
+"n": 3,
+"confidence": "high"
+}
+},
+"uA0000098": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 8.02,
+"cutScoreAvg": null,
+"cutScore70": 434.69,
+"n": 3,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 411.48,
+"n": 4,
+"confidence": "high"
+}
+},
+"snu": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 1.34,
+"cutScoreAvg": null,
+"cutScore70": null,
+"n": 45,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 394.2,
+"n": 27,
+"confidence": "high"
+}
+},
+"uos": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 2.09,
+"cutScoreAvg": null,
+"cutScore70": 980.06,
+"n": 49,
+"confidence": "high"
+},
+"학생부종합": {
+"cutGradeAvg": null,
+"cutGrade70": 2.36,
+"cutScoreAvg": null,
+"cutScore70": null,
+"n": 54,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 930.14,
+"n": 39,
+"confidence": "mid"
+}
+},
+"swu": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 3.28,
+"cutScoreAvg": null,
+"cutScore70": 97.72,
+"n": 28,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 268.0,
+"n": 37,
+"confidence": "mid"
+}
+},
+"uA0000205": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 6.04,
+"cutScoreAvg": null,
+"cutScore70": 801.52,
+"n": 8,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 395.4,
+"n": 5,
+"confidence": "high"
+}
+},
+"uA0000132": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 3.33,
+"cutScoreAvg": null,
+"cutScore70": 473.0,
+"n": 16,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 434.97,
+"n": 6,
+"confidence": "high"
+}
+},
+"skku": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 1.7,
+"cutScoreAvg": null,
+"cutScore70": 98.64,
+"n": 70,
+"confidence": "high"
+},
+"학생부종합": {
+"cutGradeAvg": null,
+"cutGrade70": 3.5,
+"cutScoreAvg": null,
+"cutScore70": null,
+"n": 102,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 653.94,
+"n": 64,
+"confidence": "high"
+}
+},
+"uA0000136": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 3.02,
+"cutScoreAvg": null,
+"cutScore70": 99.69,
+"n": 107,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 422.3,
+"n": 27,
+"confidence": "high"
+}
+},
+"sejong": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 2.23,
+"cutScoreAvg": null,
+"cutScore70": 986.43,
+"n": 32,
+"confidence": "high"
+}
+},
+"sookmyung": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 2.14,
+"cutScoreAvg": null,
+"cutScore70": 884.62,
+"n": 35,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 901.11,
+"n": 41,
+"confidence": "high"
+}
+},
+"soongsil": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 2.66,
+"cutScoreAvg": null,
+"cutScore70": 95.09,
+"n": 54,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 899.05,
+"n": 28,
+"confidence": "high"
+}
+},
+"yonsei": {
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 695.47,
+"n": 69,
+"confidence": "high"
+}
+},
+"uA0000070": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 3.79,
+"cutScoreAvg": null,
+"cutScore70": 939.56,
+"n": 25,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 815.4,
+"n": 23,
+"confidence": "high"
+}
+},
+"uA0000256": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 2.76,
+"cutScoreAvg": null,
+"cutScore70": 954.87,
+"n": 1,
+"confidence": "high"
+},
+"학생부종합": {
+"cutGradeAvg": null,
+"cutGrade70": 3.29,
+"cutScoreAvg": null,
+"cutScore70": null,
+"n": 6,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 871.75,
+"n": 1,
+"confidence": "high"
+}
+},
+"uA0000011": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 5.99,
+"cutScoreAvg": null,
+"cutScore70": 941.05,
+"n": 43,
+"confidence": "high"
+},
+"학생부종합": {
+"cutGradeAvg": null,
+"cutGrade70": 6.3,
+"cutScoreAvg": null,
+"cutScore70": null,
+"n": 21,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 655.0,
+"n": 23,
+"confidence": "high"
+}
+},
+"uA0000012": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 4.89,
+"cutScoreAvg": null,
+"cutScore70": 578.54,
+"n": 68,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 686.5,
+"n": 12,
+"confidence": "high"
+}
+},
+"uA0000104": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 6.62,
+"cutScoreAvg": null,
+"cutScore70": 513.64,
+"n": 45,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 698.19,
+"n": 2,
+"confidence": "high"
+}
+},
+"uA0000221": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 4.97,
+"cutScoreAvg": null,
+"cutScore70": 63.39,
+"n": 5,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 76.2,
+"n": 1,
+"confidence": "high"
+}
+},
+"uA0000092": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 5.0,
+"cutScoreAvg": null,
+"cutScore70": 941.0,
+"n": 28,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 639.5,
+"n": 12,
+"confidence": "high"
+}
+},
+"uA0000009": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 6.04,
+"cutScoreAvg": null,
+"cutScore70": 951.7,
+"n": 71,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 583.0,
+"n": 37,
+"confidence": "high"
+}
+},
+"uA0000054": {
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": 247.57,
+"cutScore70": 245.4,
+"n": 34,
+"confidence": "mid"
+},
+"학생부교과": {
+"cutGradeAvg": 1.3,
+"cutGrade70": 1.38,
+"cutScoreAvg": null,
+"cutScore70": null,
+"n": 2,
+"confidence": "mid"
+}
+},
+"uA0000251": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 2.81,
+"cutScoreAvg": null,
+"cutScore70": null,
+"n": 2,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 336.38,
+"n": 1,
+"confidence": "high"
+}
+},
+"uA0000224": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 5.45,
+"cutScoreAvg": null,
+"cutScore70": 862.04,
+"n": 1,
+"confidence": "high"
+}
+},
+"uA0000081": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 5.47,
+"cutScoreAvg": null,
+"cutScore70": 930.0,
+"n": 40,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 59.0,
+"n": 8,
+"confidence": "mid"
+}
+},
+"uA0000245": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 4.3,
+"cutScoreAvg": null,
+"cutScore70": 701.5,
+"n": 133,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 690.0,
+"n": 14,
+"confidence": "high"
+}
+},
+"uA0000178": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 4.92,
+"cutScoreAvg": null,
+"cutScore70": 780.06,
+"n": 28,
+"confidence": "high"
+},
+"학생부종합": {
+"cutGradeAvg": null,
+"cutGrade70": 5.11,
+"cutScoreAvg": null,
+"cutScore70": null,
+"n": 18,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": 7.5,
+"cutScoreAvg": 12.5,
+"cutScore70": 736.0,
+"n": 27,
+"confidence": "high"
+}
+},
+"uA0000129": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 3.95,
+"cutScoreAvg": null,
+"cutScore70": 785.3,
+"n": 72,
+"confidence": "high"
+},
+"학생부종합": {
+"cutGradeAvg": null,
+"cutGrade70": 6.21,
+"cutScoreAvg": null,
+"cutScore70": null,
+"n": 20,
+"confidence": "high"
+}
+},
+"uA0000142": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 3.95,
+"cutScoreAvg": null,
+"cutScore70": 943.55,
+"n": 95,
+"confidence": "high"
+},
+"학생부종합": {
+"cutGradeAvg": null,
+"cutGrade70": 4.77,
+"cutScoreAvg": null,
+"cutScore70": null,
+"n": 47,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": 9.0,
+"cutScoreAvg": null,
+"cutScore70": 953.2,
+"n": 40,
+"confidence": "high"
+}
+},
+"uA0000053": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 3.97,
+"cutScoreAvg": null,
+"cutScore70": 875.59,
+"n": 21,
+"confidence": "high"
+},
+"학생부종합": {
+"cutGradeAvg": null,
+"cutGrade70": 4.89,
+"cutScoreAvg": null,
+"cutScore70": null,
+"n": 24,
+"confidence": "high"
+}
+},
+"uA0000034": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 4.33,
+"cutScoreAvg": null,
+"cutScore70": 893.22,
+"n": 306,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 796.7,
+"n": 64,
+"confidence": "high"
+}
+},
+"uA0000080": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 5.13,
+"cutScoreAvg": null,
+"cutScore70": 456.0,
+"n": 29,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 10.0,
+"n": 34,
+"confidence": "high"
+}
+},
+"uA0000128": {
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 4.9,
+"cutScoreAvg": null,
+"cutScore70": 970.6,
+"n": 69,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": 6.5,
+"cutScoreAvg": null,
+"cutScore70": 24.4,
+"n": 5,
+"confidence": "mid"
+}
+},
+"uA0000137": {
+"학생부교과": {
+"cutGradeAvg": 5.6,
+"cutGrade70": null,
+"cutScoreAvg": 540.0,
+"cutScore70": null,
+"n": 50,
+"confidence": "high"
+},
+"학생부종합": {
+"cutGradeAvg": 4.17,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": null,
+"n": 4,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": 430.0,
+"cutScore70": null,
+"n": 15,
+"confidence": "high"
+}
+},
+"cau": {
+"학생부교과": {
+"cutGradeAvg": 2.2,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": null,
+"n": 55,
+"confidence": "high"
+},
+"학생부종합": {
+"cutGradeAvg": 3.3,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": null,
+"n": 95,
+"confidence": "high"
+},
+"논술": {
+"cutGradeAvg": 2.7,
+"cutGrade70": null,
+"cutScoreAvg": 86.0,
+"cutScore70": null,
+"n": 154,
+"confidence": "high"
+}
+},
+"inha": {
+"학생부종합": {
+"cutGradeAvg": 2.88,
+"cutGrade70": 2.95,
+"cutScoreAvg": null,
+"cutScore70": null,
+"n": 78,
+"confidence": "high"
+},
+"학생부교과": {
+"cutGradeAvg": 2.39,
+"cutGrade70": 2.4,
+"cutScoreAvg": null,
+"cutScore70": null,
+"n": 74,
+"confidence": "high"
+},
+"논술": {
+"cutGradeAvg": 3.97,
+"cutGrade70": 4.21,
+"cutScoreAvg": 69.7,
+"cutScore70": null,
+"n": 99,
+"confidence": "high"
+}
+},
+"hanyang": {
+"학생부교과": {
+"cutGradeAvg": 1.57,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": null,
+"n": 33,
+"confidence": "high"
+},
+"학생부종합": {
+"cutGradeAvg": 2.85,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": null,
+"n": 66,
+"confidence": "high"
+},
+"논술": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": 93.8,
+"cutScore70": null,
+"n": 25,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": 92.69,
+"cutScore70": null,
+"n": 54,
+"confidence": "high"
+}
+},
+"jbnu": {
+"학생부종합": {
+"cutGradeAvg": null,
+"cutGrade70": 4.09,
+"cutScoreAvg": null,
+"cutScore70": 955.0,
+"n": 48,
+"confidence": "high"
+},
+"학생부교과": {
+"cutGradeAvg": null,
+"cutGrade70": 4.03,
+"cutScoreAvg": null,
+"cutScore70": 990.36,
+"n": 86,
+"confidence": "high"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": null,
+"cutScore70": 71.25,
+"n": 29,
+"confidence": "high"
+}
+},
+"cnu": {
+"학생부교과": {
+"cutGradeAvg": 2.86,
+"cutGrade70": 2.9,
+"cutScoreAvg": 81.66,
+"cutScore70": null,
+"n": 259,
+"confidence": "mid"
+},
+"수능위주": {
+"cutGradeAvg": null,
+"cutGrade70": null,
+"cutScoreAvg": 172.86,
+"cutScore70": 173.55,
+"n": 89,
+"confidence": "mid"
+}
+}
+}
