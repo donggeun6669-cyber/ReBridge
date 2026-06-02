@@ -5,3 +5,11 @@ __pycache__
 node_modules
 dist
 *.xlsx
+src/data/pdf_sources
+src/data/text
+src/data/evidence
+src/data/reports
+src/data/patches
+*.pdf
+*.hwp
+*.hwpx
