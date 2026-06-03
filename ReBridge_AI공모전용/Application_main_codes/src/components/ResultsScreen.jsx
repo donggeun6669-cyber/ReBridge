@@ -1,11 +1,10 @@
 import { useMemo } from 'react';
-import { ArrowLeft, MapPin, Lightbulb } from 'lucide-react';
+import { ArrowLeft, MapPin, Lightbulb, Sparkles } from 'lucide-react';
 import { analyzeProfile } from '../lib/analysis.js';
-import { evaluateAdmission, admissionChance } from '../lib/scoreEngine.js';
+import { gedFit } from '../lib/scoreEngine.js';
 import ChanceGauge from './ChanceGauge.jsx';
 
 const STORAGE_KEY = 'rebridge_profile';
-const STATUS_LABEL = { ok: '검정고시 가능', cond: '조건부' };
 
 function loadProfile() {
   try {
@@ -97,13 +96,12 @@ export default function ResultsScreen({ goTo = () => {}, goBack = () => {} }) {
 
       <div className="result-list">
         {data.results.map((r) => {
-          const ev = evaluateAdmission(profile, {
-            univId: r.univId,
-            admissionType: r.bestType,
-            admissionName: r.bestName,
-            gedEligible: r.status === 'ok' ? '가능' : '조건부',
-          });
-          const chance = ev.applicable ? admissionChance(ev) : null;
+          const fit = r.chance
+            ? null
+            : gedFit(
+                { admissionType: r.bestType, gedEligible: r.bestGedEligible || (r.status === 'ok' ? '가능' : '조건부') },
+                r.comparativeType
+              );
           return (
           <button
             key={r.univId}
@@ -119,10 +117,12 @@ export default function ResultsScreen({ goTo = () => {}, goBack = () => {} }) {
                 </div>
               </div>
               <div className="result-badges">
-                {chance ? (
-                  <ChanceGauge chance={chance} compact />
+                {r.chance ? (
+                  <ChanceGauge chance={r.chance} compact />
                 ) : (
-                  <span className={`badge ${r.status}`}>{STATUS_LABEL[r.status]}</span>
+                  <span className={`fit-tag fit-${fit?.level || 'ok'}`}>
+                    <Sparkles size={11} /> {fit?.label || '지원 가능'}
+                  </span>
                 )}
               </div>
             </div>

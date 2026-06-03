@@ -333,6 +333,35 @@ button {
 }
 .map-legend .dot-ged { background: #5B3FD6; margin-left: 4px; }
 .map-legend .dot-none { background: #A7A2B6; margin-left: 14px; }
+.map-legend-hint { margin-left: 10px; color: var(--text-sub); }
+
+/* 지도 마커 — 점 + (확대 시) 학교 이름 라벨 */
+.map-pin { position: relative; }
+.map-pin-dot {
+  display: block;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: 1.5px solid #fff;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.12);
+}
+.map-pin-dot.ged { background: #5B3FD6; }
+.map-pin-dot.none { background: #A7A2B6; }
+.map-pin-label {
+  display: none;
+  position: absolute;
+  left: 15px;
+  top: -3px;
+  white-space: nowrap;
+  font-size: 11px;
+  font-weight: 700;
+  color: #2b2b3a;
+  background: rgba(255, 255, 255, 0.88);
+  padding: 1px 5px;
+  border-radius: 6px;
+  pointer-events: none;
+}
+.map-canvas.show-labels .map-pin-label { display: inline-block; }
 
 /* 상단바 텍스트 버튼(예: 탐색 → 지도 진입) */
 .topbar-textbtn {

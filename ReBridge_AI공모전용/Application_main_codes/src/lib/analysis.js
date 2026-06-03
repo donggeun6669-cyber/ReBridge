@@ -4,6 +4,7 @@ import universities from '../data/universities.json';
 import admissions from '../data/admissions.json';
 import cutlines from '../data/cutlines_2025.json';
 import comparative from '../data/comparative_2028.json';
+import { evaluateAdmission, admissionChance } from './scoreEngine.js';
 
 const METRO = new Set(['서울', '경기', '인천']);
 
@@ -186,6 +187,17 @@ export function analyzeProfile(profile = {}) {
     });
     const best = rows[0];
 
+    // 합격 가능성(칸수) — 점수가 있고 합격선 자료가 있을 때만.
+    const ev = evaluateAdmission(profile, {
+      univId: u.univId,
+      admissionType: best.admissionType,
+      admissionName: best.admissionName,
+      gedEligible: best.gedEligible,
+    });
+    const chance = ev.applicable ? admissionChance(ev) : null;
+    const comp = comparative[u.univId] || null;
+    const comparativeType = comp?.comparativeGradeType === 'numeric_table' ? 'numeric' : comp ? 'prose' : 'none';
+
     results.push({
       univId: u.univId,
       name: u.name,
@@ -194,12 +206,15 @@ export function analyzeProfile(profile = {}) {
       status: best.gedEligible === '가능' ? 'ok' : 'cond',
       bestType: best.admissionType,
       bestName: best.admissionName,
+      bestGedEligible: best.gedEligible,
+      comparativeType,
       reflection: best.gedReflection || '',
       csat: csatHint(best.csatMinimum),
       interview: !!best.interview,
       next: nextAction(best.admissionType, best.interview),
       eligibleCount: rows.length,
       confirmed: isConfirmedStatus(best.status),
+      chance,
       _score:
         (TYPE_RANK[best.admissionType] || 0) * 10 +
         rows.length +
@@ -208,8 +223,13 @@ export function analyzeProfile(profile = {}) {
     });
   }
 
-  // 점수순 정렬 후 상위 30
-  results.sort((a, b) => b._score - a._score || a.name.localeCompare(b.name));
+  // 가능성순(칸수) 정렬 — 칸수가 있는 곳을 위로(높은 순), 자료 없는 곳은 _score로.
+  results.sort((a, b) => {
+    const la = a.chance ? a.chance.level : 0;
+    const lb = b.chance ? b.chance.level : 0;
+    if (lb !== la) return lb - la;
+    return b._score - a._score || a.name.localeCompare(b.name);
+  });
   const top = results.slice(0, 30);
 
   return {

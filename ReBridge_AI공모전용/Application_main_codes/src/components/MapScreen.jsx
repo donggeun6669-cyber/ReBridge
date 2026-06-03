@@ -75,18 +75,32 @@ export default function MapScreen({ goTo = () => {}, goBack = () => {} }) {
           attribution: '© OpenStreetMap',
         }).addTo(map);
 
+        const esc = (s) => String(s).replace(/[&<>"]/g, (c) => (
+          { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]
+        ));
         points.forEach((p) => {
           const hasGed = p.eligibleCount > 0;
-          const m = L.circleMarker([p.lat, p.lng], {
-            radius: 5,
-            weight: 1.5,
-            color: '#ffffff',
-            fillColor: hasGed ? '#5B3FD6' : '#A7A2B6',
-            fillOpacity: 0.92,
+          const icon = L.divIcon({
+            className: 'map-pin',
+            html:
+              `<i class="map-pin-dot ${hasGed ? 'ged' : 'none'}"></i>` +
+              `<span class="map-pin-label">${esc(p.name)}</span>`,
+            iconSize: [12, 12],
+            iconAnchor: [6, 6],
           });
+          const m = L.marker([p.lat, p.lng], { icon, keyboard: false });
           m.on('click', () => setSelected(p));
           m.addTo(map);
         });
+
+        // 확대하면 학교 이름 라벨 표시(전국 줌에선 점만 — 겹침 방지)
+        const updateLabels = () => {
+          if (containerRef.current) {
+            containerRef.current.classList.toggle('show-labels', map.getZoom() >= 8);
+          }
+        };
+        map.on('zoomend', updateLabels);
+        updateLabels();
 
         // flex 레이아웃에서 컨테이너 크기 측정 보정
         setTimeout(() => map.invalidateSize(), 0);
@@ -158,6 +172,7 @@ export default function MapScreen({ goTo = () => {}, goBack = () => {} }) {
         <p className="map-legend">
           <span className="dot dot-ged" /> 검정고시 지원 전형 있음
           <span className="dot dot-none" /> 정보 준비 중
+          <span className="map-legend-hint">· 확대하면 학교 이름이 보여요</span>
         </p>
       )}
     </div>
