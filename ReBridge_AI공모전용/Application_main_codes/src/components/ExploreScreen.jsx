@@ -81,7 +81,15 @@ export default function ExploreScreen({ goTo = () => {} }) {
     });
     rows.sort((a, b) => {
       if (sort === 'name') return a.name.localeCompare(b.name);
-      // 추천순: 데이터 충실도 → 가능 우선 → 가나다
+      // 추천순:
+      //  - 점수가 있으면 '합격 가능성(칸수)' 높은 순을 최우선 → 위에서부터 유리한 대학.
+      //    칸수를 낼 자료가 없는 대학(level 0)은 아래로 내려, "더 유리한 순"이 명확해지게.
+      //  - 그 다음은 지원 가능 우선 → 데이터 충실도 → 가나다.
+      if (hasScore) {
+        const al = a.chance ? a.chance.level : 0;
+        const bl = b.chance ? b.chance.level : 0;
+        if (al !== bl) return bl - al;
+      }
       const e = (b.status === 'ok') - (a.status === 'ok');
       if (e) return e;
       if (b.dataScore !== a.dataScore) return b.dataScore - a.dataScore;
@@ -146,7 +154,7 @@ export default function ExploreScreen({ goTo = () => {} }) {
                   className={`sort-chip ${sort === s.key ? 'on' : ''}`}
                   onClick={() => setSort(s.key)}
                 >
-                  {s.label}
+                  {s.key === 'reco' && hasScore ? '가능성순' : s.label}
                 </button>
               ))}
             </div>
