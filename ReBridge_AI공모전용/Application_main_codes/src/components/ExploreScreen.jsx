@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Search, X, ChevronRight, SlidersHorizontal } from 'lucide-react';
+import { Search, X, ChevronRight, SlidersHorizontal, KeyRound } from 'lucide-react';
 import { getExploreList } from '../lib/analysis.js';
 import { evaluateAdmission, admissionChance } from '../lib/scoreEngine.js';
 import ChanceGauge from './ChanceGauge.jsx';
@@ -17,7 +17,10 @@ const SORTS = [
   { key: 'name', label: '가나다순' },
 ];
 
-const STATUS_LABEL = { ok: '검정고시 가능', cond: '조건 확인' };
+// 자격(eligibility) 라벨 — '합격 가능성(칸수)'이 아니라 '지원할 수 있는지'를 뜻함.
+const STATUS_LABEL = { ok: '지원 가능', cond: '조건 확인' };
+// 점수는 있는데 칸수가 안 뜨는 이유(왜 어떤 카드는 칸수, 어떤 카드는 자격만 뜨는지 설명).
+const NO_CHANCE_REASON = { csat: '수능 기준', cutline: '합격선 자료 없음' };
 
 // 약칭(로고용 2글자)
 function shortName(name) {
@@ -59,8 +62,10 @@ export default function ExploreScreen({ goTo = () => {} }) {
       isSearching ? s.name.includes(q) : matchFilter(s, filter)
     );
     rows = rows.map((s) => {
-      // 프로필 점수 있으면 best 전형에 대해 합격 판정 → 칸수 게이지
+      // 프로필 점수 있으면 best 전형에 대해 합격 판정 → 칸수 게이지.
+      // 칸수가 안 나오면(수능 기준/합격선 없음) 그 '이유'를 같이 담아 자격만 뜨는 카드를 설명.
       let chance = null;
+      let noChanceReason = null;
       if (hasScore && s.bestType) {
         const ev = evaluateAdmission(profile, {
           univId: s.univId,
@@ -69,9 +74,10 @@ export default function ExploreScreen({ goTo = () => {} }) {
           gedEligible: s.bestGedEligible,
         });
         if (ev.applicable) chance = admissionChance(ev);
+        if (!chance) noChanceReason = NO_CHANCE_REASON[ev.dataGap] || null;
       }
       const status = s.bestGedEligible === '가능' ? 'ok' : 'cond';
-      return { ...s, chance, status };
+      return { ...s, chance, noChanceReason, status };
     });
     rows.sort((a, b) => {
       if (sort === 'name') return a.name.localeCompare(b.name);
@@ -168,7 +174,9 @@ export default function ExploreScreen({ goTo = () => {} }) {
                 {s.chance ? (
                   <ChanceGauge chance={s.chance} compact />
                 ) : (
-                  <span className={`badge ${s.status}`}>{STATUS_LABEL[s.status]}</span>
+                  <span className={`elig-tag elig-${s.status}`}>
+                    <KeyRound size={11} /> {STATUS_LABEL[s.status]}
+                  </span>
                 )}
               </span>
               <span className="uni-sub">
@@ -176,6 +184,7 @@ export default function ExploreScreen({ goTo = () => {} }) {
                 {s.establishment ? ` · ${s.establishment}` : ''}
                 {s.kind === '전문대학' ? ' · 전문대학' : ''}
                 {s.eligibleCount > 0 ? ` · 검정고시 ${s.eligibleCount}전형` : ''}
+                {hasScore && !s.chance && s.noChanceReason ? ` · ${s.noChanceReason}` : ''}
               </span>
             </span>
             <ChevronRight size={18} className="uni-arrow" />
@@ -189,8 +198,10 @@ export default function ExploreScreen({ goTo = () => {} }) {
       </div>
 
       <p className="note">
-        검정고시로 <b>지원할 수 있는</b> 전형 기준이에요.
+        <b>지원 가능</b>은 검정고시로 <b>넣을 수 있는지</b>(자격)를,
+        <b> 칸수 게이지</b>는 내 점수로 본 <b>합격 가능성</b>을 뜻해요. 둘은 서로 달라요.
         <br />
+        내 점수를 넣으면 합격선이 있는 전형은 칸수로, 자료가 없으면 그대로 <b>지원 가능</b>만 보여드려요.
         합격선·비교내신은 <b>작년 자료 참고용</b>이고, 실제는 모집요강을 확인해요.
       </p>
     </div>

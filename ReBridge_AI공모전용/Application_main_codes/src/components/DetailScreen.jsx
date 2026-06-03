@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import {
   ArrowLeft, MapPin, ExternalLink, Target, Users, MessageSquare,
-  ChevronDown, Table2, Info, Lock, FileCheck2,
+  ChevronDown, Table2, Info, Lock, FileCheck2, KeyRound,
 } from 'lucide-react';
 import { getUniversityDetail, getUniversityDetailByName } from '../lib/analysis.js';
 import {
@@ -28,7 +28,7 @@ function cleanCsat(raw) {
   return raw;
 }
 
-export default function DetailScreen({ goTo = () => {}, univId, univName }) {
+export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univId, univName }) {
   const profile = useMemo(loadProfile, []);
   const [openRows, setOpenRows] = useState(() => new Set());
 
@@ -42,7 +42,7 @@ export default function DetailScreen({ goTo = () => {}, univId, univName }) {
     return (
       <div className="screen">
         <header className="topbar center">
-          <button className="icon-btn" aria-label="뒤로" onClick={() => goTo('home')}>
+          <button className="icon-btn" aria-label="뒤로" onClick={goBack}>
             <ArrowLeft size={22} />
           </button>
           <span className="page-title">대학 정보</span>
@@ -160,7 +160,10 @@ export default function DetailScreen({ goTo = () => {}, univId, univName }) {
                       {chance ? (
                         <ChanceGauge chance={chance} />
                       ) : (
-                        <span className={`badge ${ELIG[r.gedEligible]}`}>{r.gedEligible}</span>
+                        <span className={`elig-tag elig-${ELIG[r.gedEligible]}`}>
+                          <KeyRound size={11} />
+                          {r.gedEligible === '조건부' ? '조건부 지원' : '지원 가능'}
+                        </span>
                       )}
                     </div>
                     <div className="adm-summary-meta">

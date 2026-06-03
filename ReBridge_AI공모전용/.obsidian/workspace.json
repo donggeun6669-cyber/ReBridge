@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Application_main_codes/src/data/추출방법_확정.md",
+                "file": "Data/클로드_2번창_제출서류기능_프롬프트.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "추출방법_확정"
+              "title": "클로드_2번창_제출서류기능_프롬프트"
             }
           }
         ]
@@ -183,8 +183,20 @@
       "bases:새 베이스 생성하기": false
     }
   },
-  "active": "41a109c626d76751",
+  "active": "93cff8df5c9de150",
   "lastOpenFiles": [
+    "Application_main_codes/dist/assets/index-WSbaS8hV.css",
+    "Application_main_codes/dist/assets/index-B6cIFCHG.js",
+    "Application_main_codes/src/components/GuideScreen.jsx.tmp.30600.74cc865a3ed2",
+    "Data/코덱스_비교내신_추가보강_프롬프트.md",
+    "Data/클로드_충남대_상세전형_프롬프트.md",
+    "Application_main_codes/src/data/_inspect_out.txt",
+    "Application_main_codes/src/data/_inspect_tmp.py",
+    "Application_main_codes/src/data/_inspect_tmp.py.tmp.30600.7c6df6af56d0",
+    "Data/CODEX_다음작업_인계.md",
+    "logo.png",
+    "Application_main_codes/src/data/admissions_2028_patch_B_report.md",
+    "Application_main_codes/src/data/추출방법_확정.md",
     "Application_main_codes/dist/assets/index-Cda9X13E.css",
     "Application_main_codes/dist/assets/index-G1CSExnZ.js",
     "Data/2028_부산대학교_상세반영후보.md",
@@ -195,14 +207,7 @@
     "Application_main_codes/src/data/reports/manual_more_snippets.md",
     "Data/2028_핵심5개대학_상세전형_반영결과.md",
     "Application_main_codes/src/data/__pycache__/promote_manual_core_details.cpython-312.pyc",
-    "Application_main_codes/src/data/reports/manual_core_promotion_report.json",
-    "Application_main_codes/src/data/promote_manual_core_details.py",
     "Data/2028_가천대학교_상세전형_반영결과.md",
-    "Application_main_codes/src/data/__pycache__/promote_gachon_detail.cpython-312.pyc",
-    "Application_main_codes/dist/assets/index-BV_6Cyow.css",
-    "Application_main_codes/dist/assets/index-B5nImXsW.js",
-    "Application_main_codes/src/styles.css.tmp.42396.94aee30b07e9",
-    "Data/CODEX_다음작업_인계.md",
     "Data/2028_핵심대학_전형별요약표_안전추출결과.md",
     "Application_main_codes/src/data/reports/core_summary_table_rows.md",
     "Application_main_codes/src/data/reports/tier1_summary_uos.md",
@@ -216,10 +221,6 @@
     "Application_main_codes/src/data/reports/tier1_summary_text_candidates.md",
     "Application_main_codes/src/data/reports/tier1_summary_extracted.md",
     "Data/2028_Tier1_상세필드후보.md",
-    "Application_main_codes/src/data/reports/tier1_field_candidates.md",
-    "Data/2028_Tier1_상세추출후보.md",
-    "Application_main_codes/src/data/reports/tier1_detail_candidates.md",
-    "Data/2028_입시데이터_1차추출결과.md",
-    "Application_main_codes/src/data/CODEX_데이터추출_지시.md"
+    "Application_main_codes/src/data/reports/tier1_field_candidates.md"
   ]
 }

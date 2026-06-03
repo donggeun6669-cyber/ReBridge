@@ -8,6 +8,7 @@ import DocumentsChecklist from './DocumentsChecklist.jsx';
 // 라우팅은 메인이 붙임. 여기서는 export만 잘 해두면 됨.
 export default function DocumentsScreen({
   goTo = () => {},
+  goBack = () => {},
   univId,
   univName,
   admissionName,
@@ -31,7 +32,7 @@ export default function DocumentsScreen({
   return (
     <div className="screen">
       <header className="topbar center">
-        <button className="icon-btn" aria-label="뒤로" onClick={() => goTo('home')}>
+        <button className="icon-btn" aria-label="뒤로" onClick={goBack}>
           <ArrowLeft size={22} />
         </button>
         <span className="page-title">제출서류</span>

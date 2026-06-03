@@ -35,7 +35,7 @@ function profileChips(p) {
   return chips;
 }
 
-export default function ResultsScreen({ goTo = () => {} }) {
+export default function ResultsScreen({ goTo = () => {}, goBack = () => {} }) {
   const profile = useMemo(loadProfile, []);
   const data = useMemo(() => (profile ? analyzeProfile(profile) : null), [profile]);
 
@@ -43,7 +43,7 @@ export default function ResultsScreen({ goTo = () => {} }) {
     return (
       <div className="screen">
         <header className="topbar center">
-          <button className="icon-btn" aria-label="홈으로" onClick={() => goTo('home')}>
+          <button className="icon-btn" aria-label="뒤로" onClick={goBack}>
             <ArrowLeft size={22} />
           </button>
           <span className="page-title">나와 맞는 대학</span>
@@ -64,7 +64,7 @@ export default function ResultsScreen({ goTo = () => {} }) {
   return (
     <div className="screen">
       <header className="topbar center">
-        <button className="icon-btn" aria-label="홈으로" onClick={() => goTo('home')}>
+        <button className="icon-btn" aria-label="뒤로" onClick={goBack}>
           <ArrowLeft size={22} />
         </button>
         <span className="page-title">나와 맞는 대학</span>

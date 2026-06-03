@@ -327,7 +327,7 @@ const TOPIC_COLOR = {
 // 카드 아이콘이 전부 파란색으로 나오던 문제 → 카드마다 색을 번갈아 입힘
 const CARD_ICON_COLORS = ['green', 'gold', 'brand', 'red'];
 
-export default function GuideScreen({ topic = 'types', goTo = () => {} }) {
+export default function GuideScreen({ topic = 'types', goTo = () => {}, goBack = () => {} }) {
   const guide = GUIDES[topic] ?? GUIDES.types;
   const HeroIcon = guide.icon;
   const color = TOPIC_COLOR[topic] || 'brand';
@@ -336,7 +336,7 @@ export default function GuideScreen({ topic = 'types', goTo = () => {} }) {
     return (
       <div className={`screen guide-screen guide-theme-${color}`}>
         <header className="topbar center">
-          <button className="icon-btn" aria-label="뒤로" onClick={() => goTo('home')}>
+          <button className="icon-btn" aria-label="뒤로" onClick={goBack}>
             <ArrowLeft size={22} />
           </button>
           <span className="page-title">자주 하는 질문</span>
@@ -361,7 +361,7 @@ export default function GuideScreen({ topic = 'types', goTo = () => {} }) {
   return (
     <div className={`screen guide-screen guide-theme-${color}`}>
       <header className="topbar center">
-        <button className="icon-btn" aria-label="뒤로" onClick={() => goTo('home')}>
+        <button className="icon-btn" aria-label="뒤로" onClick={goBack}>
           <ArrowLeft size={22} />
         </button>
         <span className="page-title">자주 하는 질문</span>

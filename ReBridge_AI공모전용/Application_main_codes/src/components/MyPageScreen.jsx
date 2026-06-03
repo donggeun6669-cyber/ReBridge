@@ -25,7 +25,7 @@ function toChips(p) {
   return chips;
 }
 
-export default function MyPageScreen({ goTo = () => {} }) {
+export default function MyPageScreen({ goTo = () => {}, goBack = () => {} }) {
   let profile = null;
   try {
     profile = JSON.parse(localStorage.getItem(STORAGE_KEY));
@@ -38,7 +38,7 @@ export default function MyPageScreen({ goTo = () => {} }) {
   return (
     <div className="screen">
       <header className="topbar center">
-        <button className="icon-btn" aria-label="홈으로" onClick={() => goTo('home')}>
+        <button className="icon-btn" aria-label="뒤로" onClick={goBack}>
           <ArrowLeft size={22} />
         </button>
         <span className="page-title">프로필</span>

@@ -25,7 +25,7 @@ const QUESTIONS = [
 
 const STORAGE_KEY = 'rebridge_profile';
 
-export default function ProfileScreen({ goTo = () => {} }) {
+export default function ProfileScreen({ goTo = () => {}, goBack = () => {} }) {
   const [answers, setAnswers] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
@@ -87,7 +87,7 @@ export default function ProfileScreen({ goTo = () => {} }) {
   return (
     <div className="screen">
       <header className="topbar center">
-        <button className="icon-btn" aria-label="뒤로" onClick={() => goTo('home')}>
+        <button className="icon-btn" aria-label="뒤로" onClick={goBack}>
           <ArrowLeft size={22} />
         </button>
         <span className="page-title">내 정보</span>

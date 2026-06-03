@@ -664,6 +664,24 @@ button {
   color: #c0473b;
 }
 
+/* 지원 자격 태그 — '합격 가능성(칸수 게이지)'과 다른 축임을 시각적으로 분리.
+   초록 verdict(안정)처럼 보이지 않도록 브랜드 계열 + 외곽선의 중립 칩으로 처리. */
+.elig-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: var(--r-pill);
+  font-size: 11.5px;
+  font-weight: 700;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+.elig-tag svg { opacity: 0.85; }
+.elig-ok   { background: var(--brand-tint); color: var(--brand-deep); border-color: #DDD2F7; }
+.elig-cond { background: var(--caution-soft); color: #a9791a; border-color: #F2E2BE; }
+.elig-no   { background: var(--danger-soft); color: #c0473b; border-color: #F6D4C9; }
+
 /* =====================================================================
    Note
    ===================================================================== */
