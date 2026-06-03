@@ -1,9 +1,10 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import {
   ArrowLeft, MapPin, ExternalLink, Target, Users, MessageSquare,
-  ChevronDown, Table2, Info, Lock, FileCheck2, KeyRound,
+  ChevronDown, Table2, Info, Lock, FileCheck2, KeyRound, Bookmark,
 } from 'lucide-react';
 import { getUniversityDetail, getUniversityDetailByName } from '../lib/analysis.js';
+import { isBookmarked, toggleBookmark } from '../lib/bookmarks.js';
 import {
   evaluateAdmission, coachLine, gedAffinity, admissionChance,
   getComparative, comparativeAvailability,
@@ -37,6 +38,14 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
     if (univName) return getUniversityDetailByName(univName);
     return null;
   }, [univId, univName]);
+
+  // 관심 대학(북마크) — bmId가 바뀌면(다른 대학으로 이동) 상태 재동기화
+  const bmId = detail?.univ?.univId || univId || null;
+  const [marked, setMarked] = useState(false);
+  useEffect(() => {
+    setMarked(isBookmarked(bmId));
+  }, [bmId]);
+  const handleBookmark = () => setMarked(toggleBookmark(bmId));
 
   if (!detail) {
     return (
@@ -102,10 +111,18 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
   return (
     <div className="screen">
       <header className="topbar center">
-        <button className="icon-btn" aria-label="뒤로" onClick={() => goTo('home')}>
+        <button className="icon-btn" aria-label="뒤로" onClick={goBack}>
           <ArrowLeft size={22} />
         </button>
         <span className="page-title">대학 정보</span>
+        <button
+          className={`icon-btn topbar-right ${marked ? 'on' : ''}`}
+          aria-label={marked ? '관심 대학에서 빼기' : '관심 대학에 담기'}
+          aria-pressed={marked}
+          onClick={handleBookmark}
+        >
+          <Bookmark size={20} fill={marked ? 'currentColor' : 'none'} />
+        </button>
       </header>
 
       <div className="detail-header">

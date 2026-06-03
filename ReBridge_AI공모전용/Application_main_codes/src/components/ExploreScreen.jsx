@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Search, X, ChevronRight, SlidersHorizontal, KeyRound } from 'lucide-react';
+import { Search, X, ChevronRight, SlidersHorizontal, KeyRound, Map as MapIcon } from 'lucide-react';
 import { getExploreList } from '../lib/analysis.js';
 import { evaluateAdmission, admissionChance } from '../lib/scoreEngine.js';
 import ChanceGauge from './ChanceGauge.jsx';
@@ -94,6 +94,9 @@ export default function ExploreScreen({ goTo = () => {} }) {
     <div className="screen">
       <header className="topbar">
         <span className="page-title">대학 탐색</span>
+        <button className="topbar-textbtn" onClick={() => goTo('map')}>
+          <MapIcon size={16} /> 지도
+        </button>
       </header>
 
       {/* 검색 (토스풍 큰 입력) */}

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import HomeScreen from './components/HomeScreen.jsx';
 import ExploreScreen from './components/ExploreScreen.jsx';
@@ -9,6 +9,8 @@ import ResultsScreen from './components/ResultsScreen.jsx';
 import DetailScreen from './components/DetailScreen.jsx';
 import RoadmapScreen from './components/RoadmapScreen.jsx';
 import DocumentsScreen from './components/DocumentsScreen.jsx';
+import SavedScreen from './components/SavedScreen.jsx';
+import MapScreen from './components/MapScreen.jsx';
 import BottomNav from './components/BottomNav.jsx';
 
 // 하단 탭의 루트 화면들 — 탭 이동은 히스토리를 쌓지 않고 스택을 새로 시작한다.
@@ -22,6 +24,7 @@ export default function App() {
   const params = current.params;
 
   // 화면 전환: 탭 루트면 스택을 새로 시작, 하위 화면이면 push.
+  // 매 전환마다 브라우저 히스토리에 한 칸 쌓아 휴대폰 뒤로가기를 받는다.
   const goTo = useCallback((next, options = {}) => {
     setStack((s) => {
       if (TAB_ROOTS.includes(next)) return [{ screen: next, params: options }];
@@ -33,27 +36,12 @@ export default function App() {
     window.scrollTo(0, 0);
   }, []);
 
-  // 바로 전 화면으로. 더 갈 곳 없으면 홈으로.
+  // 뒤로가기: 스택을 한 칸만 pop(루트면 그대로). 브라우저 히스토리에 의존하지 않아
+  // 더블팝/홈점프가 구조적으로 불가능하다.
   const goBack = useCallback(() => {
-    setStack((s) => {
-      if (s.length > 1) return s.slice(0, -1);
-      if (s[0].screen !== 'home') return [{ screen: 'home', params: {} }];
-      return s;
-    });
+    setStack((s) => (s.length > 1 ? s.slice(0, -1) : s));
     window.scrollTo(0, 0);
   }, []);
-
-  // 휴대폰/브라우저 뒤로가기 버튼을 앱 내부 뒤로가기로 흡수(앱이 통째로 닫히지 않게).
-  useEffect(() => {
-    window.history.pushState({ rebridge: true }, '');
-    const onPop = () => {
-      // 가드 엔트리를 다시 채워 다음 뒤로가기도 흡수
-      window.history.pushState({ rebridge: true }, '');
-      goBack();
-    };
-    window.addEventListener('popstate', onPop);
-    return () => window.removeEventListener('popstate', onPop);
-  }, [goBack]);
 
   const isMainScreen = ['home', 'explore', 'roadmap', 'mypage', 'profile'].includes(screen);
 
@@ -79,8 +67,10 @@ export default function App() {
             admissionName={params.admissionName}
           />
         )}
+        {screen === 'saved' && <SavedScreen goTo={goTo} goBack={goBack} />}
+        {screen === 'map' && <MapScreen goTo={goTo} goBack={goBack} />}
 
-        {!isMainScreen && !['guide', 'results', 'detail', 'documents'].includes(screen) && (
+        {!isMainScreen && !['guide', 'results', 'detail', 'documents', 'saved', 'map'].includes(screen) && (
           <div className="screen">
             <header className="topbar center">
               <button className="icon-btn" aria-label="뒤로" onClick={goBack}>
