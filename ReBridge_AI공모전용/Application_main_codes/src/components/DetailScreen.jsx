@@ -1,18 +1,17 @@
 import { useMemo, useState, useEffect } from 'react';
 import {
   ArrowLeft, MapPin, ExternalLink, Target, Users, MessageSquare,
-  ChevronDown, Table2, Info, Lock, FileCheck2, KeyRound, Bookmark,
+  ChevronDown, Table2, Info, Lock, FileCheck2, Bookmark, Sparkles,
 } from 'lucide-react';
 import { getUniversityDetail, getUniversityDetailByName } from '../lib/analysis.js';
 import { isBookmarked, toggleBookmark } from '../lib/bookmarks.js';
 import {
   evaluateAdmission, coachLine, gedAffinity, admissionChance,
-  getComparative, comparativeAvailability,
+  getComparative, comparativeAvailability, gedFit,
 } from '../lib/scoreEngine.js';
 import DocumentsChecklist from './DocumentsChecklist.jsx';
 import ChanceGauge from './ChanceGauge.jsx';
 
-const ELIG = { 가능: 'ok', 조건부: 'cond', 불가: 'no' };
 const STORAGE_KEY = 'rebridge_profile';
 
 function loadProfile() {
@@ -72,13 +71,14 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
   const realUnivId = univ.univId;
   const comp = getComparative(realUnivId);
   const compAvail = comparativeAvailability(comp);
+  const compType = comp?.comparativeGradeType === 'numeric_table' ? 'numeric' : comp ? 'prose' : 'none';
 
   // 각 가능 전형 평가
   const evals = okRows.map((r) => {
     const ev = hasScore
       ? evaluateAdmission(profile, { ...r, univId: realUnivId })
       : null;
-    return { r, ev, chance: ev ? admissionChance(ev) : null };
+    return { r, ev, chance: ev ? admissionChance(ev) : null, fit: gedFit(r, compType) };
   });
 
   // 담임 한마디 — 점수 있으면 칸수 분포로, 없으면 전형 안내
@@ -164,7 +164,7 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
             지원할 수 있는 전형 <span className="count-pill">{okRows.length}</span>
           </div>
           <div className="result-list">
-            {evals.map(({ r, ev, chance }, i) => {
+            {evals.map(({ r, ev, chance, fit }, i) => {
               const aff = gedAffinity(r);
               const open = openRows.has(i);
               const rowComp = r.comparativeGrade || (comp ? comp.comparativeGrade : null);
@@ -177,9 +177,8 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
                       {chance ? (
                         <ChanceGauge chance={chance} />
                       ) : (
-                        <span className={`elig-tag elig-${ELIG[r.gedEligible]}`}>
-                          <KeyRound size={11} />
-                          {r.gedEligible === '조건부' ? '조건부 지원' : '지원 가능'}
+                        <span className={`fit-tag fit-${fit.level}`}>
+                          <Sparkles size={11} /> {fit.label}
                         </span>
                       )}
                     </div>
@@ -202,6 +201,24 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
                   {/* 상세(펼침) */}
                   {open && (
                     <div className="adm-detail">
+                      {/* 검정고시 적합도 — 합격 가능성이 아니라 '지원하기 좋은 정도'(비확률적) */}
+                      <div className="adm-block fit-block">
+                        <div className="adm-block-title">
+                          <Sparkles size={13} /> 검정고시 적합도
+                          <span className={`fit-tag fit-${fit.level}`} style={{ marginLeft: 'auto' }}>
+                            {fit.label}
+                          </span>
+                        </div>
+                        <ul className="fit-reasons">
+                          {fit.reasons.map((rs, ri) => (
+                            <li key={ri}>{rs}</li>
+                          ))}
+                        </ul>
+                        <p className="fit-disclaim">
+                          ※ 합격 확률이 아니라, 검정고시생이 <b>지원하기 좋은 정도</b>예요.
+                        </p>
+                      </div>
+
                       {/* 합격선 블록 */}
                       {ev && ev.applicable && ev.cutGrade != null ? (
                         <div className="adm-block">
@@ -212,7 +229,9 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
                               {' '}({ev.cutType}{ev.cutN ? ` · 표본 ${ev.cutN}명` : ''})
                             </span>
                           </div>
-                          <div className="adm-disclaimer">2025학년도 9등급제 입결 기준 · 참고용 예상이에요</div>
+                          <div className="adm-disclaimer">
+                            작년(2025) 9등급제 입결로 추정한 <b>참고용 예상</b>이에요. 2028학년도는 5등급제로 바뀌어 제도가 달라, 실제와 차이가 있을 수 있어요.
+                          </div>
                         </div>
                       ) : (
                         <div className="adm-block adm-block-empty">

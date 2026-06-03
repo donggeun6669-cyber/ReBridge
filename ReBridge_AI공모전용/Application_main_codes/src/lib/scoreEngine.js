@@ -88,6 +88,77 @@ export function gedAffinity(row) {
   return { grade: 'C', label: '지원 가능', tone: 'ok' };
 }
 
+// 검정고시 '적합도' — 합격 가능성(칸수)이 아니라, 검정고시생이 "지원하기 좋은 정도".
+// 합격선 자료가 없어 칸수를 못 낼 때도 항상 줄 수 있는 비확률적 힌트(규칙 기반, 추측 없음).
+// 근거: ① 전형 성격(학종/논술/교과/수능) ② 비교내신 환산표 공개 여부 ③ 수능최저 유무.
+// comparativeType: 'numeric' | 'prose' | 'none'  (없으면 row의 comparativeGradeType로 판단)
+export function gedFit(adm, comparativeType) {
+  const type = adm?.admissionType;
+  const reasons = [];
+
+  // 조건부 자격: 대상 제한이 있으니 '확인'으로.
+  if (adm?.gedEligible === '조건부') {
+    reasons.push(
+      adm?.gedIneligibleReason ||
+        '지원 자격에 조건이 있어요(지역·소득·재직 등). 내가 대상인지 모집요강에서 꼭 확인하세요.'
+    );
+    return { level: 'check', label: '조건 확인', tone: 'warn', reasons };
+  }
+  if (adm?.gedEligible === '불가') {
+    return { level: 'no', label: '지원 불가', tone: 'hard', reasons: ['검정고시로는 지원할 수 없는 전형이에요.'] };
+  }
+
+  // 비교내신 환산표 유무
+  const ctype = comparativeType || (adm?.comparativeGradeType === 'numeric_table' ? 'numeric' : 'none');
+  const hasTable = ctype === 'numeric';
+
+  // 수능최저 해석
+  const csat = adm?.csatMinimum || '';
+  const noCsat = /없음|미적용|적용하지\s*않|해당\s*없/.test(csat);
+  const csatUnknown = !csat || /확인|모집요강/.test(csat);
+
+  let level = 'ok';
+  if (type === '학생부종합') {
+    level = 'good';
+    reasons.push('학생부종합이에요. 내신 등급 대신 검정고시 성적·서류·면접으로 평가해서, 학교를 안 다닌 점이 불리하게 작용하지 않아요.');
+  } else if (type === '논술') {
+    level = 'ok';
+    reasons.push('논술 위주 전형이라 내신 비중이 작아요. 논술 실력으로 승부해볼 수 있어요.');
+  } else if (type === '학생부교과') {
+    reasons.push('학생부교과는 검정고시 점수를 내신 등급으로 "환산"해서 반영해요.');
+    level = hasTable ? 'good' : 'ok';
+  } else if (type === '수능위주') {
+    level = 'check';
+    reasons.push('수능 성적이 핵심인 전형이에요. 수능을 준비할 계획일 때 적합해요.');
+  } else if (type === '실기/실적') {
+    level = 'ok';
+    reasons.push('실기·실적이 핵심인 전형이에요. 실기 준비가 가장 중요해요.');
+  } else {
+    reasons.push('검정고시로 지원할 수 있는 전형이에요.');
+  }
+
+  // 비교내신 환산표 안내(검정고시생에게 가장 중요한 정보)
+  if (hasTable) {
+    reasons.push('이 대학은 검정고시 점수 → 내신 환산표를 공개했어요. 내 점수가 어떻게 반영되는지 미리 확인할 수 있어요.');
+  } else if (type === '학생부교과' || type === '학생부종합') {
+    reasons.push('검정고시 환산 기준은 아직 공개 전이에요 — 모집요강이 나오면 확인해요.');
+  }
+
+  // 수능최저(수능위주 제외)
+  if (type !== '수능위주') {
+    if (noCsat) {
+      reasons.push('수능최저가 없어, 수능을 안 봐도 지원할 수 있어요.');
+      if (level === 'ok') level = 'good';
+    } else if (!csatUnknown) {
+      reasons.push('수능최저가 있어요 — 수능 일부 과목은 준비가 필요해요.');
+    }
+  }
+
+  const label = level === 'good' ? '지원 수월' : '지원 가능';
+  const tone = level === 'good' ? 'good' : 'ok';
+  return { level, label, tone, reasons };
+}
+
 /**
  * 검정고시 점수로 특정 전형을 평가.
  * @param {object} profile - { gedScores: {국어:..}, ... }
