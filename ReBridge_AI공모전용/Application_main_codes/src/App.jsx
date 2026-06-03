@@ -11,6 +11,7 @@ import RoadmapScreen from './components/RoadmapScreen.jsx';
 import DocumentsScreen from './components/DocumentsScreen.jsx';
 import SavedScreen from './components/SavedScreen.jsx';
 import MapScreen from './components/MapScreen.jsx';
+import HelpScreen from './components/HelpScreen.jsx';
 import BottomNav from './components/BottomNav.jsx';
 
 // 하단 탭의 루트 화면들 — 탭 이동은 히스토리를 쌓지 않고 스택을 새로 시작한다.
@@ -69,8 +70,9 @@ export default function App() {
         )}
         {screen === 'saved' && <SavedScreen goTo={goTo} goBack={goBack} />}
         {screen === 'map' && <MapScreen goTo={goTo} goBack={goBack} />}
+        {screen === 'help' && <HelpScreen goTo={goTo} goBack={goBack} />}
 
-        {!isMainScreen && !['guide', 'results', 'detail', 'documents', 'saved', 'map'].includes(screen) && (
+        {!isMainScreen && !['guide', 'results', 'detail', 'documents', 'saved', 'map', 'help'].includes(screen) && (
           <div className="screen">
             <header className="topbar center">
               <button className="icon-btn" aria-label="뒤로" onClick={goBack}>

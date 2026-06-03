@@ -69,6 +69,15 @@ export default function HomeScreen({ goTo = () => {} }) {
         <ChevronRight size={20} className="discover-arrow" />
       </button>
 
+      <button className="discover-card discover-card-ask" onClick={() => goTo('help')}>
+        <span className="discover-ico"><MessageCircle size={22} /></span>
+        <span className="discover-body">
+          <span className="discover-kicker">막히면 물어보세요</span>
+          <span className="discover-title">담임에게 물어보기</span>
+        </span>
+        <ChevronRight size={20} className="discover-arrow" />
+      </button>
+
       <div className="section-head section-head-stack">
         <h2>궁금한 거, 하나씩 풀어봐요</h2>
         <p className="section-sub">학교에서 안 알려준 입시 이야기예요.</p>

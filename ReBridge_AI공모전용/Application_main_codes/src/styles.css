@@ -379,6 +379,105 @@ button {
 }
 
 /* =====================================================================
+   도움 창구 (담임에게 물어보기)
+   ===================================================================== */
+/* 홈 진입 카드 변형 */
+.discover-card-ask .discover-ico { background: var(--green-soft); color: var(--green-dark); }
+
+/* ③ 능동 안내 */
+.help-nudge {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin: 14px 0 4px;
+  padding: 14px 16px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border);
+  background: var(--grad-soft);
+  cursor: pointer;
+  text-align: left;
+}
+.help-nudge-ico {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  background: #fff;
+  color: var(--brand-deep);
+}
+.help-nudge-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.help-nudge-kicker { font-size: 11.5px; font-weight: 800; color: var(--brand-deep); }
+.help-nudge-title { font-size: 15px; font-weight: 800; color: var(--text); }
+.help-nudge-todo { font-size: 12.5px; color: var(--text-sub); line-height: 1.45; }
+
+/* ① 검색 결과 FAQ */
+.help-results { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+.help-faq-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 13px 15px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: #fff;
+  cursor: pointer;
+  text-align: left;
+}
+.help-faq-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.help-faq-title { font-size: 14.5px; font-weight: 700; color: var(--text); }
+.help-faq-desc { font-size: 12.5px; color: var(--text-sub); }
+.help-faq-card .help-arrow { color: var(--text-sub); flex: 0 0 auto; }
+
+/* ② 멘토 Q&A */
+.mentor-card {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 16px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--brand-tint);
+  background: var(--brand-tint);
+}
+.mentor-ico {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: #fff;
+  color: var(--brand-deep);
+}
+.mentor-body { display: flex; flex-direction: column; min-width: 0; }
+.mentor-title { font-size: 15.5px; font-weight: 800; color: var(--text); }
+.mentor-desc { margin: 5px 0 0; font-size: 13px; line-height: 1.55; color: var(--text); }
+.mentor-cta {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: var(--r-pill);
+  background: var(--brand);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.mentor-note {
+  margin: 10px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--brand-deep);
+}
+
+/* =====================================================================
    Hero
    ===================================================================== */
 .hero {
