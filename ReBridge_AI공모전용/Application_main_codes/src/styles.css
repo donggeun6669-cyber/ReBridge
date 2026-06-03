@@ -1635,6 +1635,82 @@ button {
   color: var(--brand-deep);
 }
 
+/* 단계 용어 풀이(청소년 눈높이) */
+.rm-stage-term {
+  display: flex;
+  align-items: flex-start;
+  gap: 5px;
+  margin: 7px 0 0;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: var(--bg-soft, #F4F1FA);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-sub);
+}
+.rm-stage-term svg { flex: 0 0 auto; margin-top: 2px; }
+/* 단계별 개인 맞춤 액션 버튼 */
+.rm-stage-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 9px;
+  margin-right: 8px;
+  padding: 7px 12px;
+  border: 1px solid var(--brand-tint);
+  border-radius: var(--r-pill);
+  background: var(--brand-tint);
+  color: var(--brand-deep);
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* 내 상황 카드 — 개인 맞춤 요약 */
+.rm-mystatus {
+  margin: 14px 0 6px;
+  padding: 14px 16px;
+  border-radius: var(--r-md);
+  background: #fff;
+  border: 1px solid var(--border);
+}
+.rm-mystatus-line {
+  margin: 6px 0 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--text);
+}
+.rm-mystatus-line .tone-good { color: var(--green-dark); }
+.rm-mystatus-line .tone-ok { color: var(--brand-deep); }
+.rm-mystatus-line .tone-warn { color: #a9791a; }
+.rm-mystatus-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+.rm-chip-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 13px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-pill);
+  background: var(--bg-soft, #F4F1FA);
+  color: var(--brand-deep);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.rm-mystatus-note {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 10px 0 0;
+  font-size: 11.5px;
+  color: var(--text-sub);
+}
+
 /* 단계 상태 */
 .rm-done { opacity: 0.62; }
 .rm-done .rm-dot {

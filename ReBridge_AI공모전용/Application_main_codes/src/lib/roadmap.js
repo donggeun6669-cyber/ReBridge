@@ -96,6 +96,7 @@ export function buildRoadmap(profile, today = new Date()) {
     title: '비교내신 확인 & 목표 대학 좁히기',
     when: targetDate,
     todo: '내 점수가 대학마다 몇 등급으로 환산되는지 보고 목표를 정해요.',
+    term: '비교내신: 검정고시 점수를 대학이 "내신 등급"으로 바꿔 계산하는 방식이에요.',
     guideTopic: 'compare',
   });
 
@@ -106,6 +107,7 @@ export function buildRoadmap(profile, today = new Date()) {
     title: '수시 원서 접수',
     when: md(aYear, ADMISSION.susiApply),
     todo: '수시는 최대 6장. 유웨이·진학사나 대학 입학처에서 접수해요.',
+    term: '수시 6장: 수시는 최대 6개 대학까지 원서를 낼 수 있어요. 안정·적정·소신을 섞어 배분하면 좋아요.',
     guideTopic: 'apply',
   });
 
@@ -117,6 +119,7 @@ export function buildRoadmap(profile, today = new Date()) {
       title: '수능 응시',
       when: md(aYear, ADMISSION.csat),
       todo: '수능 최저가 있는 전형이면 꼭 챙겨요. 정시 길도 같이 열려요.',
+      term: '수능최저: 합격하려면 수능에서 정해진 등급 이상을 받아야 하는 조건이에요. 없는 전형도 많아요.',
       guideTopic: 'csat',
     });
   }
@@ -138,6 +141,7 @@ export function buildRoadmap(profile, today = new Date()) {
     title: '합격 발표 & 등록',
     when: md(aYear, ADMISSION.susiResult),
     todo: '합격하면 등록 기간을 지켜요. 수시에 붙으면 정시는 못 써요.',
+    term: '수시에 최종 합격하면(=수시 납치) 그 해 정시 지원은 못 해요. 그래서 6장 배분이 중요해요.',
     guideTopic: 'count',
   });
 
@@ -149,6 +153,7 @@ export function buildRoadmap(profile, today = new Date()) {
       title: '정시 지원 (수시 모두 불합격 시)',
       when: md(aYear, ADMISSION.jeongsiApply),
       todo: '수시에서 다 떨어졌다면 정시 가·나·다 군에 3번 기회가 있어요.',
+      term: '가·나·다군: 정시는 군별로 한 곳씩, 최대 세 곳까지 지원할 수 있어요.',
       guideTopic: 'susiJeongsi',
       optional: true,
     });
