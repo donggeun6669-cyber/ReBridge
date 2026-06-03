@@ -1,11 +1,11 @@
 import { useMemo } from 'react';
 import {
   ChevronRight, ClipboardList, FileText, Scale,
-  CalendarDays, Target, MessageCircle, CheckCircle2, Compass,
-  Info, Search, Bookmark,
+  CalendarDays, Target, MessageCircle, CheckCircle2,
+  Info, Search, Bookmark, Flag,
 } from 'lucide-react';
 import { buildRoadmap } from '../lib/roadmap.js';
-import { getExploreList } from '../lib/analysis.js';
+import { getExploreList, getUniversityDetail } from '../lib/analysis.js';
 import { evaluateAdmission, admissionChance, estimateGrade } from '../lib/scoreEngine.js';
 import { getBookmarks } from '../lib/bookmarks.js';
 
@@ -93,6 +93,35 @@ export default function RoadmapScreen({ goTo = () => {} }) {
     return null;
   }
 
+  // 목표 대학(=관심 대학)까지 몇 점 더 필요한지 — 점수가 있을 때.
+  const targets = useMemo(() => {
+    if (!hasScore) return [];
+    return getBookmarks()
+      .slice()
+      .reverse()
+      .map((id) => {
+        const d = getUniversityDetail(id);
+        if (!d) return null;
+        const best = d.rows.find((r) => r.gedEligible === '가능' || r.gedEligible === '조건부');
+        if (!best) return null;
+        const ev = evaluateAdmission(profile, { ...best, univId: id });
+        const chance = ev.applicable ? admissionChance(ev) : null;
+        return { id, name: d.univ.name, best, ev, chance };
+      })
+      .filter(Boolean);
+  }, [profile, hasScore]);
+
+  function gapText(t) {
+    if (t.chance && t.ev.shortPoints > 0) {
+      return { tone: 'warn', text: `평균 ${t.ev.shortPoints}점 더 · 과목당 약 ${t.ev.perSubjectQuestions}문제` };
+    }
+    if (t.chance) {
+      return { tone: 'good', text: `지금 점수로 ${t.chance.label}권이에요` };
+    }
+    if (t.ev?.dataGap === 'csat') return { tone: 'mute', text: '수능 기준 전형 — 점수 비교 어려움' };
+    return { tone: 'mute', text: '작년 합격선 자료 없음' };
+  }
+
   return (
     <div className="screen">
       <header className="topbar center">
@@ -142,6 +171,42 @@ export default function RoadmapScreen({ goTo = () => {} }) {
               <Info size={11} /> 안정·적정·소신은 작년 합격선 자료가 있는 전형 기준이에요(참고용).
             </p>
           )}
+        </div>
+      )}
+
+      {/* 목표 대학까지 — 관심 대학을 등록하면 합격선까지 몇 점 더 필요한지 */}
+      {hasScore && (
+        <div className="rm-targets">
+          <span className="mini-label"><Flag size={12} /> 목표 대학까지</span>
+          {targets.length === 0 ? (
+            <div className="rm-targets-empty">
+              <p>가고 싶은 대학을 <b>관심 대학</b>으로 담으면, 합격선까지 <b>몇 점이 더 필요한지</b> 여기서 챙겨드려요.</p>
+              <button className="rm-chip-btn" onClick={() => goTo('explore')}>
+                <Search size={14} /> 대학 담으러 가기
+              </button>
+            </div>
+          ) : (
+            <ul className="rm-target-list">
+              {targets.map((t) => {
+                const g = gapText(t);
+                return (
+                  <li key={t.id}>
+                    <button
+                      className="rm-target-row"
+                      onClick={() => goTo('detail', { univ: t.name, univId: t.id })}
+                    >
+                      <span className="rm-target-name">{t.name}</span>
+                      <span className={`rm-target-gap tone-${g.tone}`}>{g.text}</span>
+                      <ChevronRight size={16} className="rm-target-arrow" />
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+          <p className="rm-targets-note">
+            <Info size={11} /> 부족 점수는 작년(2025) 합격선 기준 추정이에요 · 참고용.
+          </p>
         </div>
       )}
 
@@ -202,20 +267,6 @@ export default function RoadmapScreen({ goTo = () => {} }) {
           );
         })}
       </div>
-
-      {/* 비입시 경로 분기 — 대학 말고 다른 길도 있다는 걸 보여줘요 */}
-      <button className="rm-branch" onClick={() => goTo('explore')}>
-        <span className="rm-branch-ico">
-          <Compass size={20} />
-        </span>
-        <span className="rm-branch-body">
-          <span className="rm-branch-title">대학 말고 다른 길도 있어요</span>
-          <span className="rm-branch-desc">
-            취업·직업훈련·자격증… 검정고시 뒤에 갈 수 있는 길은 하나가 아니에요.
-          </span>
-        </span>
-        <ChevronRight size={18} />
-      </button>
 
       <p className="note">
         일정은 예년 패턴 기준이에요. 정확한 날짜는 시도교육청·대학 입학처 공고로 꼭 확인해요.

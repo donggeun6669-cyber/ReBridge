@@ -1,5 +1,5 @@
 import {
-  User, ArrowRight, HelpCircle, Sparkles, Scale, Target,
+  ArrowRight, HelpCircle, Sparkles, Scale, Target,
   ChevronRight, ArrowLeftRight, Layers, CalendarDays,
   MessageCircle, BarChart3, FileText,
 } from 'lucide-react';
@@ -35,16 +35,13 @@ export default function HomeScreen({ goTo = () => {} }) {
           <span className="wordmark">Re:Bridge</span>
           <LogoMark size={24} />
         </span>
-        <button className="avatar-btn" aria-label="내 프로필" onClick={() => goTo('mypage')}>
-          <User size={20} />
-        </button>
       </header>
 
       <section className="hero">
         <h1>
-          내 점수로 갈 수 있는
+          우리, 대학
           <br />
-          대학, <span className="accent">같이 찾아봐요.</span>
+          한번 <span className="accent">가 볼까요?</span>
         </h1>
         <p>
           검정고시 점수만 알면 돼요.

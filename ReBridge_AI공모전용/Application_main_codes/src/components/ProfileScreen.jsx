@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { ArrowLeft } from 'lucide-react';
 import { GED_SUBJECTS, gedAverage, estimateGrade } from '../lib/scoreEngine';
 
 const QUESTIONS = [
@@ -25,7 +24,7 @@ const QUESTIONS = [
 
 const STORAGE_KEY = 'rebridge_profile';
 
-export default function ProfileScreen({ goTo = () => {}, goBack = () => {} }) {
+export default function ProfileScreen({ goTo = () => {} }) {
   const [answers, setAnswers] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
@@ -66,8 +65,8 @@ export default function ProfileScreen({ goTo = () => {}, goBack = () => {} }) {
   const myGrade = estimateGrade(avg);
   const filledCount = GED_SUBJECTS.filter((s) => gedScores[s] !== '').length;
 
-  const choicesAnswered = QUESTIONS.every((q) => answers[q.key]);
-  const canSubmit = choicesAnswered; // 점수는 선택(미입력 시 합격선 비교만 보류)
+  // 뒤로가기를 없앴으므로 제출(=화면 나가기)은 항상 가능. 미선택 항목은 기본값으로 처리.
+  const canSubmit = true;
 
   function submit() {
     const next = {
@@ -87,9 +86,6 @@ export default function ProfileScreen({ goTo = () => {}, goBack = () => {} }) {
   return (
     <div className="screen">
       <header className="topbar center">
-        <button className="icon-btn" aria-label="뒤로" onClick={goBack}>
-          <ArrowLeft size={22} />
-        </button>
         <span className="page-title">내 정보</span>
       </header>
 

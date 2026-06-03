@@ -1740,6 +1740,44 @@ button {
   color: var(--text-sub);
 }
 
+/* 목표 대학까지 — 관심 대학별 부족 점수 */
+.rm-targets {
+  margin: 12px 0 6px;
+  padding: 14px 16px;
+  border-radius: var(--r-md);
+  background: #fff;
+  border: 1px solid var(--border);
+}
+.rm-targets .mini-label { display: inline-flex; align-items: center; gap: 4px; }
+.rm-targets-empty p { margin: 8px 0 10px; font-size: 13.5px; line-height: 1.55; color: var(--text); }
+.rm-target-list { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.rm-target-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg-soft, #F7F5FB);
+  cursor: pointer;
+  text-align: left;
+}
+.rm-target-name { font-size: 14px; font-weight: 700; color: var(--text); flex: 0 1 auto; }
+.rm-target-gap { margin-left: auto; font-size: 12.5px; font-weight: 700; white-space: nowrap; }
+.rm-target-gap.tone-good { color: var(--green-dark); }
+.rm-target-gap.tone-warn { color: #a9791a; }
+.rm-target-gap.tone-mute { color: var(--text-sub); font-weight: 600; }
+.rm-target-arrow { flex: 0 0 auto; color: var(--text-sub); }
+.rm-targets-note {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 10px 0 0;
+  font-size: 11px;
+  color: var(--text-sub);
+}
+
 /* 단계 상태 */
 .rm-done { opacity: 0.62; }
 .rm-done .rm-dot {
