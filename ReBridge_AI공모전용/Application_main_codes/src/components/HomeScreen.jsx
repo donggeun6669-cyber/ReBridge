@@ -44,7 +44,7 @@ export default function HomeScreen({ goTo = () => {} }) {
       <section className="home-hero">
         <p className="home-kicker">검정고시 맞춤 입시</p>
         <h1 className="home-title">
-          우리도 갈 수 있는<br />
+          우리가 갈 수 있는<br />
           <span className="accent">대학, 찾아드려요</span>
         </h1>
       </section>

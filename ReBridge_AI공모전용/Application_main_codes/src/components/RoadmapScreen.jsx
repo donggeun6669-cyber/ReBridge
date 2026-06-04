@@ -102,16 +102,22 @@ export default function RoadmapScreen({ goTo = () => {} }) {
         <span className="page-title">내 로드맵</span>
       </header>
 
-      <div className="intro-line">지금 너는 여기 있어요</div>
+      <div className="intro-line">지금 나는 여기 있어요</div>
       <div className="intro-sub">
         검정고시부터 대학 등록까지, 다음에 뭘 언제 해야 하는지 같이 챙길게요.
       </div>
 
       {/* 목표 대학까지 — 관심 대학을 등록하면 합격선까지 몇 점 더 필요한지 */}
-      {hasScore && (
-        <div className="rm-targets">
+      <div className="rm-targets">
           <span className="mini-label"><Flag size={12} /> 목표 대학까지</span>
-          {targets.length === 0 ? (
+          {!hasScore ? (
+            <div className="rm-targets-empty">
+              <p><b>내 점수</b>를 넣고 관심 대학을 담으면, 합격선까지 <b>몇 점이 더 필요한지</b> 챙겨드려요.</p>
+              <button className="rm-chip-btn" onClick={() => goTo('profile')}>
+                내 점수 입력
+              </button>
+            </div>
+          ) : targets.length === 0 ? (
             <div className="rm-targets-empty">
               <p>가고 싶은 대학을 <b>관심 대학</b>으로 담으면, 합격선까지 <b>몇 점이 더 필요한지</b> 여기서 챙겨드려요.</p>
               <button className="rm-chip-btn" onClick={() => goTo('explore')}>
@@ -154,11 +160,12 @@ export default function RoadmapScreen({ goTo = () => {} }) {
               })}
             </ul>
           )}
-          <p className="rm-targets-note">
-            <Info size={11} /> 부족 점수는 작년(2025) 합격선 기준 추정이에요 · 참고용.
-          </p>
+          {hasScore && targets.length > 0 && (
+            <p className="rm-targets-note">
+              <Info size={11} /> 부족 점수는 작년(2025) 합격선 기준 추정이에요 · 참고용.
+            </p>
+          )}
         </div>
-      )}
 
       {nextStage && (
         <div className="rm-next">
