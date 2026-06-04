@@ -189,14 +189,31 @@ export default function RoadmapScreen({ goTo = () => {} }) {
             <ul className="rm-target-list">
               {targets.map((t) => {
                 const g = gapText(t);
+                const showQuestions = t.ev?.shortPoints > 0 && t.ev?.perSubjectQuestions > 0;
                 return (
                   <li key={t.id}>
                     <button
                       className="rm-target-row"
                       onClick={() => goTo('detail', { univ: t.name, univId: t.id })}
                     >
-                      <span className="rm-target-name">{t.name}</span>
-                      <span className={`rm-target-gap tone-${g.tone}`}>{g.text}</span>
+                      <div className="rm-target-info">
+                        <span className="rm-target-name">{t.name}</span>
+                        <span className={`rm-target-gap tone-${g.tone}`}>{g.text}</span>
+                        {showQuestions && (
+                          <div className="rm-inverse-msg">
+                            <span className="rm-inverse-ico">🎯</span>
+                            <span>
+                              <b>과목당 {t.ev.perSubjectQuestions}문제</b>씩
+                              더 맞히면 돼요
+                              {t.ev.totalQuestions > 0 && (
+                                <span className="rm-total-q">
+                                  (전체 약 {t.ev.totalQuestions}문제)
+                                </span>
+                              )}
+                            </span>
+                          </div>
+                        )}
+                      </div>
                       <ChevronRight size={16} className="rm-target-arrow" />
                     </button>
                   </li>

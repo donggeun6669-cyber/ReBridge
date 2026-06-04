@@ -1,4 +1,4 @@
-import { ArrowLeft, User, Pencil, Bookmark, BookOpen, ChevronRight, MapPin, GraduationCap, ClipboardCheck } from 'lucide-react';
+import { ArrowLeft, User, Pencil, Bookmark, BookOpen, ChevronRight, MapPin, GraduationCap, ClipboardCheck, Heart } from 'lucide-react';
 
 const STORAGE_KEY = 'rebridge_profile';
 
@@ -104,6 +104,15 @@ export default function MyPageScreen({ goTo = () => {}, goBack = () => {} }) {
           <span className="mp-menu-text">
             <span className="mp-menu-title">대학 지도</span>
             <span className="mp-menu-sub">내 주변 검정고시 지원 대학</span>
+          </span>
+          <ChevronRight size={16} className="mp-menu-arrow" />
+        </button>
+        <div className="mp-row-divider" />
+        <button className="mp-menu-row" onClick={() => goTo('dreamdrive')}>
+          <span className="mp-menu-ico ico-coral"><Heart size={18} /></span>
+          <span className="mp-menu-text">
+            <span className="mp-menu-title">꿈드림센터 찾기</span>
+            <span className="mp-menu-sub">검정고시·자립 무료 지원 기관</span>
           </span>
           <ChevronRight size={16} className="mp-menu-arrow" />
         </button>

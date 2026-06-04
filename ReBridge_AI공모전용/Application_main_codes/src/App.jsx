@@ -14,6 +14,7 @@ import MapScreen from './components/MapScreen.jsx';
 import HelpScreen from './components/HelpScreen.jsx';
 import ChecklistScreen from './components/ChecklistScreen.jsx';
 import FormsGuideScreen from './components/FormsGuideScreen.jsx';
+import DreamdriveScreen from './components/DreamdriveScreen.jsx';
 import BottomNav from './components/BottomNav.jsx';
 import SplashScreen from './components/SplashScreen.jsx';
 
@@ -22,7 +23,7 @@ const TAB_ROOTS = ['home', 'explore', 'roadmap', 'mypage'];
 
 const KNOWN_SCREENS = [
   'guide', 'results', 'detail', 'documents', 'saved', 'map', 'help',
-  'checklist', 'forms-guide',
+  'checklist', 'forms-guide', 'dreamdrive',
 ];
 
 function hasProfile() {
@@ -100,6 +101,7 @@ export default function App() {
         {!splash && screen === 'help'        && <HelpScreen goTo={goTo} goBack={goBack} />}
         {!splash && screen === 'checklist'   && <ChecklistScreen goTo={goTo} goBack={goBack} />}
         {!splash && screen === 'forms-guide' && <FormsGuideScreen goTo={goTo} goBack={goBack} />}
+        {!splash && screen === 'dreamdrive'  && <DreamdriveScreen goTo={goTo} goBack={goBack} />}
 
         {/* 미구현 화면 fallback */}
         {!splash && !isMainScreen && !KNOWN_SCREENS.includes(screen) && (

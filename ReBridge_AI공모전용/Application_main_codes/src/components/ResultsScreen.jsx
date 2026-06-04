@@ -3,7 +3,7 @@ import {
   ArrowLeft, MapPin, Sparkles, Info,
   ChevronRight, ChevronLeft, SlidersHorizontal, X,
 } from 'lucide-react';
-import { analyzeProfile } from '../lib/analysis.js';
+import { analyzeProfile, getEssayList } from '../lib/analysis.js';
 import { gedFit } from '../lib/scoreEngine.js';
 import ChanceGauge from './ChanceGauge.jsx';
 
@@ -284,14 +284,88 @@ function ResultSection({ state, goTo, badgeFn, showChance = true }) {
   );
 }
 
+// ── 논술 전형 카드 ──────────────────────────────────────────────────────
+const STAR_COLORS = { green: '#16a34a', brand: 'var(--brand)', gold: '#d97706' };
+
+function EssayCard({ item, goTo }) {
+  const filled   = '★'.repeat(item.star);
+  const empty    = '☆'.repeat(3 - item.star);
+
+  const csatBadge =
+    item.csatStatus === 'ok'      ? <span className="essay-csat-badge ok">수능 최저 충족</span>
+    : item.csatStatus === 'fail'  ? <span className="essay-csat-badge fail">수능 최저 미달</span>
+    : item.csatStatus === 'unknown' ? <span className="essay-csat-badge unknown">최저 불확실</span>
+    : null;
+
+  return (
+    <button className="essay-card" onClick={() => goTo('detail', { univ: item.name, univId: item.univId })}>
+      <div className={`essay-cat-bar essay-cat-${item.color}`}>
+        <span className="essay-cat-label">{item.label}</span>
+        <span className="essay-stars" style={{ color: STAR_COLORS[item.color] || 'var(--brand)' }}>
+          {filled}<span style={{ opacity: 0.3 }}>{empty}</span>
+        </span>
+      </div>
+      <div className="essay-card-body">
+        <div className="essay-card-name">{item.name}</div>
+        <div className="essay-card-sub">
+          <MapPin size={11} /> {item.region}
+          {item.admissionName && <span className="essay-adm-name">{item.admissionName}</span>}
+        </div>
+        {item.desc && <div className="essay-card-desc">{item.desc}</div>}
+        <div className="essay-card-foot">
+          {item.csatMinimum && !item.csatMinimum.includes('없음') && (
+            <span className="essay-csat-text">{item.csatMinimum}</span>
+          )}
+          {csatBadge}
+          {item.gedEligible === '조건부' && (
+            <span className="essay-cond-badge">조건부</span>
+          )}
+        </div>
+      </div>
+      <ChevronRight size={14} className="result-row-arrow" />
+    </button>
+  );
+}
+
+// ── 논술 탭 필터 ──────────────────────────────────────────────────────────
+function useEssayFiltered(items) {
+  const [catF,    setCatF]    = useState('전체');
+  const [csatF,   setCsatF]   = useState('전체');
+  const [regionF, setRegionF] = useState('전체');
+  const [sortF,   setSortF]   = useState('추천순');
+
+  const filtered = useMemo(() => {
+    let out = [...items];
+    if (catF === '논술 100%')   out = out.filter((r) => r.cat === 'essay100');
+    else if (catF === '역산')   out = out.filter((r) => r.cat === 'inverse');
+    else if (catF === '논술 90%+') out = out.filter((r) => r.cat === 'essay90');
+    else if (catF === '혼합')   out = out.filter((r) => ['essay80','essay70','mixed'].includes(r.cat));
+
+    if (csatF === '충족 예상') out = out.filter((r) => r.csatStatus === 'ok');
+    else if (csatF === '최저 없음') out = out.filter((r) => r.csatStatus === null);
+    else if (csatF === '확인 필요') out = out.filter((r) => ['unknown','fail'].includes(r.csatStatus));
+
+    if (regionF === '서울')   out = out.filter((r) => r.region === '서울');
+    else if (regionF === '수도권') out = out.filter((r) => METRO.has(r.region));
+    else if (regionF === '지방') out = out.filter((r) => !METRO.has(r.region));
+
+    if (sortF === '가나다') out = [...out].sort((a, b) => a.name.localeCompare(b.name));
+    return out;
+  }, [items, catF, csatF, regionF, sortF]);
+
+  return { filtered, catF, setCatF, csatF, setCsatF, regionF, setRegionF, sortF, setSortF };
+}
+
 // ── 메인 컴포넌트 ──────────────────────────────────────────────────────
 export default function ResultsScreen({ goTo = () => {}, goBack = () => {} }) {
   const profile = useMemo(loadProfile, []);
   const data = useMemo(() => (profile ? analyzeProfile(profile) : null), [profile]);
+  const essayData = useMemo(() => (profile ? getEssayList(profile) : []), [profile]);
   const [tab, setTab] = useState('수시');
 
-  const susiState = useFilteredPaged(data?.susi?.results ?? []);
+  const susiState    = useFilteredPaged(data?.susi?.results ?? []);
   const jeongsiState = useFilteredPaged(data?.jeongsi?.results ?? []);
+  const essayState   = useEssayFiltered(essayData);
 
   if (!profile) {
     return (
@@ -325,10 +399,13 @@ export default function ResultsScreen({ goTo = () => {}, goBack = () => {} }) {
         <button className="result-profile-edit" onClick={() => goTo('profile')}>수정</button>
       </div>
 
-      {/* 수시 / 정시 탭 */}
+      {/* 수시 / 논술 / 정시 탭 */}
       <div className="result-tabs">
         <button className={`result-tab${tab === '수시' ? ' active' : ''}`} onClick={() => setTab('수시')}>
           수시 <span className="result-tab-count">{susi.total}</span>
+        </button>
+        <button className={`result-tab${tab === '논술' ? ' active' : ''}`} onClick={() => setTab('논술')}>
+          논술 <span className="result-tab-count">{essayData.length}</span>
         </button>
         <button
           className={`result-tab${tab === '정시' ? ' active' : ''}`}
@@ -353,6 +430,84 @@ export default function ResultsScreen({ goTo = () => {}, goBack = () => {} }) {
           <p className="note" style={{ marginTop: 16 }}>
             합격 가능성 예측은 일반학생 입결 기반 참고값이에요.
             <br />실제 검정고시 비교내신 입결 데이터 반영 예정.
+          </p>
+        </>
+      )}
+
+      {/* ── 논술 탭 ── */}
+      {tab === '논술' && (
+        <>
+          <div className="result-count">
+            논술 전형 지원 가능 <b>{essayData.length}곳</b>
+            <span className="result-exclude-hint">· 검정고시 지원 가능·조건부 한정</span>
+          </div>
+
+          {/* 논술 카테고리 안내 */}
+          <div className="essay-legend">
+            {[
+              { label: '★★★ 논술 100%·역산', color: 'green', desc: '내신 영향 거의 없음' },
+              { label: '★★ 논술 80~90%',      color: 'brand', desc: '내신 소폭 반영' },
+              { label: '★ 혼합형',             color: 'gold',  desc: '모집요강 확인 필요' },
+            ].map(({ label, color, desc }) => (
+              <div key={color} className={`essay-legend-item legend-${color}`}>
+                <span>{label}</span>
+                <span className="essay-legend-sub">{desc}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* 논술 필터 바 */}
+          <div className="essay-filter-bar">
+            <div className="essay-filter-row">
+              <span className="essay-filter-label">유형</span>
+              {['전체', '논술 100%', '역산', '논술 90%+', '혼합'].map((v) => (
+                <button key={v}
+                  className={`fchip${essayState.catF === v ? ' active' : ''}`}
+                  onClick={() => essayState.setCatF(v)}>{v}</button>
+              ))}
+            </div>
+            <div className="essay-filter-row">
+              <span className="essay-filter-label">수능 최저</span>
+              {['전체', '충족 예상', '최저 없음', '확인 필요'].map((v) => (
+                <button key={v}
+                  className={`fchip${essayState.csatF === v ? ' active' : ''}`}
+                  onClick={() => essayState.setCsatF(v)}>{v}</button>
+              ))}
+            </div>
+            <div className="essay-filter-row">
+              <span className="essay-filter-label">지역</span>
+              {['전체', '서울', '수도권', '지방'].map((v) => (
+                <button key={v}
+                  className={`fchip${essayState.regionF === v ? ' active' : ''}`}
+                  onClick={() => essayState.setRegionF(v)}>{v}</button>
+              ))}
+            </div>
+            <div style={{ display: 'flex', gap: 6, marginTop: 4 }}>
+              <span className="essay-filter-label">정렬</span>
+              {['추천순', '가나다'].map((v) => (
+                <button key={v}
+                  className={`fchip${essayState.sortF === v ? ' active' : ''}`}
+                  onClick={() => essayState.setSortF(v)}>{v}</button>
+              ))}
+            </div>
+          </div>
+
+          <p className="result-filtered-count">
+            {essayState.filtered.length}개
+            {essayState.filtered.length === 0 && <span style={{ color: 'var(--brand)' }}> — 조건을 바꿔보세요</span>}
+          </p>
+
+          {essayState.filtered.length > 0 && (
+            <div className="essay-list">
+              {essayState.filtered.map((item) => (
+                <EssayCard key={`${item.univId}-${item.admissionName}`} item={item} goTo={goTo} />
+              ))}
+            </div>
+          )}
+
+          <p className="note" style={{ marginTop: 16 }}>
+            ★★★ 논술 100% 전형은 검정고시생에게 가장 유리해요.
+            <br />수능 최저 충족 여부는 프로필의 모의고사 등급 기준이에요.
           </p>
         </>
       )}

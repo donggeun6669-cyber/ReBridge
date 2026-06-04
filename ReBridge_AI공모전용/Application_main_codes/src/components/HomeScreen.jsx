@@ -1,7 +1,7 @@
 import {
   ArrowRight, HelpCircle, Sparkles, Scale, Target,
   ChevronRight, ArrowLeftRight, Layers, CalendarDays,
-  MessageCircle, BarChart3, FileText, ClipboardCheck, BookOpen,
+  MessageCircle, BarChart3, FileText, ClipboardCheck, BookOpen, Heart,
 } from 'lucide-react';
 import LogoMark from './LogoMark.jsx';
 
@@ -100,6 +100,17 @@ export default function HomeScreen({ goTo = () => {} }) {
             <span className="home-quick-text">
               <span className="home-quick-title">담임에게 물어보기</span>
               <span className="home-quick-sub">막히면 여기서 바로 질문해요</span>
+            </span>
+            <ChevronRight size={16} className="home-quick-arrow" />
+          </button>
+          <div className="home-divider" />
+          <button className="home-quick-row" onClick={() => goTo('dreamdrive')}>
+            <span className="home-quick-ico ico-coral">
+              <Heart size={18} />
+            </span>
+            <span className="home-quick-text">
+              <span className="home-quick-title">꿈드림센터 찾기</span>
+              <span className="home-quick-sub">검정고시·자립 무료 지원 기관 전국 안내</span>
             </span>
             <ChevronRight size={16} className="home-quick-arrow" />
           </button>

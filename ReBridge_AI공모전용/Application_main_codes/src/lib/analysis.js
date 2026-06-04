@@ -304,3 +304,96 @@ export function analyzeProfile(profile = {}) {
     },
   };
 }
+
+// ─── 논술 전형 목록 생성 ────────────────────────────────────────────────────
+// evalMethod 텍스트에서 논술 비중 파싱
+function parseEssayWeight(evalMethod) {
+  if (!evalMethod) return null;
+  const m = evalMethod.match(/논술\s*(\d+)/);
+  return m ? parseInt(m[1], 10) : null;
+}
+
+// 논술 전형 유형 분류
+function essayCategory(adm) {
+  const w = parseEssayWeight(adm.evalMethod);
+  if (w === 100 || adm.evalMethod?.includes('100%') || adm.evalMethod?.trim() === '논술 100') {
+    return { cat: 'essay100', label: '논술 100%', star: 3, desc: '내신 반영 없음 — 검정고시생 최우선 추천', color: 'green' };
+  }
+  if (adm.gedReflection?.includes('역산') || adm.note?.includes('역산')) {
+    return { cat: 'inverse', label: '논술 성적으로 내신 역산', star: 3, desc: '논술 점수로 비교내신 자동 부여', color: 'green' };
+  }
+  if (w != null && w >= 90) {
+    return { cat: 'essay90', label: `논술 ${w}%`, star: 2, desc: '내신 비중 매우 낮음 — 검정고시 유리', color: 'brand' };
+  }
+  if (w != null && w >= 80) {
+    return { cat: 'essay80', label: `논술 ${w}%`, star: 2, desc: '내신 소폭 반영 — 조건부 추천', color: 'brand' };
+  }
+  if (w != null && w >= 70) {
+    return { cat: 'essay70', label: `논술 ${w}%`, star: 1, desc: '내신 30% 반영 — 비교내신 격차 확인 필요', color: 'gold' };
+  }
+  return { cat: 'mixed', label: '논술+내신 혼합', star: 1, desc: '모집요강에서 실질 내신 반영 비율 확인 필요', color: 'gold' };
+}
+
+// 수능 최저 충족 여부 판단 (간단 파싱)
+function checkCsatMinimum(csatMinimum, csatGrades) {
+  if (!csatMinimum || csatMinimum.includes('없음') || csatMinimum.includes('미확인')) return null;
+  if (!csatGrades) return 'unknown';
+
+  // "등급합 N 이내" 패턴 파싱
+  const sumMatch = csatMinimum.match(/(\d+)개?\s*영역\s*(?:등급)?합\s*(\d+)\s*이내/);
+  if (sumMatch) {
+    const cnt = parseInt(sumMatch[1], 10);
+    const limit = parseInt(sumMatch[2], 10);
+    // 국수영탐1탐2 중 낮은 순으로 cnt개 선택해서 합산
+    const grades = ['국어', '수학', '영어', '탐구1', '탐구2']
+      .map((s) => csatGrades[s])
+      .filter((v) => v != null && v > 0)
+      .sort((a, b) => a - b)
+      .slice(0, cnt);
+    if (grades.length < cnt) return 'unknown';
+    const sum = grades.reduce((a, b) => a + b, 0);
+    return sum <= limit ? 'ok' : 'fail';
+  }
+  return 'unknown';
+}
+
+export function getEssayList(profile = {}) {
+  const { region, csatGrades } = profile;
+  const rowsById = new Map();
+  for (const r of admissions) {
+    if (!rowsById.has(r.univId)) rowsById.set(r.univId, []);
+    rowsById.get(r.univId).push(r);
+  }
+
+  const results = [];
+  for (const u of universities) {
+    if (!regionMatches(u.region, region)) continue;
+    const rows = (rowsById.get(u.univId) || []).filter(
+      (r) => r.admissionType === '논술' && (r.gedEligible === '가능' || r.gedEligible === '조건부')
+    );
+    if (rows.length === 0) continue;
+
+    for (const adm of rows) {
+      const cat = essayCategory(adm);
+      const csatStatus = checkCsatMinimum(adm.csatMinimum, csatGrades);
+      results.push({
+        univId: u.univId,
+        name: u.name,
+        region: u.region,
+        kind: u.kind || '대학교',
+        admissionName: adm.admissionName,
+        evalMethod: adm.evalMethod || '',
+        csatMinimum: adm.csatMinimum || '',
+        csatStatus, // 'ok' | 'fail' | 'unknown' | null
+        gedEligible: adm.gedEligible,
+        note: adm.note || '',
+        ...cat,
+        // 정렬용
+        _sortScore: (cat.star * 10) + (adm.gedEligible === '가능' ? 5 : 0) + (csatStatus === 'ok' ? 3 : 0),
+      });
+    }
+  }
+
+  results.sort((a, b) => b._sortScore - a._sortScore || a.name.localeCompare(b.name));
+  return results;
+}

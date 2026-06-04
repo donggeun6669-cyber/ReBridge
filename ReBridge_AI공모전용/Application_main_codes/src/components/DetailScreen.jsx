@@ -8,6 +8,7 @@ import { isBookmarked, toggleBookmark } from '../lib/bookmarks.js';
 import {
   evaluateAdmission, coachLine, gedAffinity, admissionChance,
   getComparative, comparativeAvailability, gedFit,
+  applyComparativeConversion, gedAverage,
 } from '../lib/scoreEngine.js';
 import DocumentsChecklist from './DocumentsChecklist.jsx';
 import ChanceGauge from './ChanceGauge.jsx';
@@ -28,9 +29,72 @@ function cleanCsat(raw) {
   return raw;
 }
 
+// 비교내신 환산 계산 근거 텍스트 생성
+function conversionBasis(profile, comp) {
+  if (!profile?.gedScores) return null;
+  const avg = gedAverage(profile.gedScores);
+  if (avg == null) return null;
+
+  const result = applyComparativeConversion(avg, profile.gedScores, comp);
+  const { grade, score, method } = result;
+  const conv = comp?.conversion;
+
+  const lines = [];
+  lines.push(`내 검정고시 평균: ${avg}점`);
+
+  switch (method) {
+    case 'grade_table': {
+      const row = conv?.gradeTable?.find((r) => avg >= (r.minAvg ?? -Infinity) && avg <= (r.maxAvg ?? Infinity));
+      if (row) {
+        lines.push(`대학 공개 환산표 적용: ${row.minAvg ?? 0}~${row.maxAvg ?? 100}점 → ${grade}등급`);
+        if (score != null) lines.push(`환산 점수: ${score}점`);
+        lines.push('이 수치는 대학이 공식 발표한 비교내신 환산표 기반이에요.');
+      }
+      break;
+    }
+    case 'score_table': {
+      lines.push(`대학 공개 점수표 적용 → 환산점수 ${score}점 → 추정 ${grade}등급`);
+      lines.push('점수표에서 등급을 역산한 결과예요.');
+      break;
+    }
+    case 'score_formula': {
+      const f = conv?.scoreFormula;
+      lines.push(`점수 산출식 적용: 기준 점수 ${f?.maxScore} - (등급-1)×${f?.gradeCoeff}`);
+      if (score != null) lines.push(`산출된 교과 점수: ${score}점`);
+      lines.push(`추정 등급: ${grade}등급 (표준 추정표 기반)`);
+      break;
+    }
+    case 'formula_complex': {
+      const p = conv?.formulaParams;
+      lines.push(`복합 산출식: 최고 ${p?.maxScore}점, 기준 ${p?.baseScore}점 적용`);
+      if (score != null) lines.push(`산출된 교과 점수: ${score}점`);
+      lines.push(`추정 등급: ${grade}등급`);
+      break;
+    }
+    case 'subject_weighted': {
+      lines.push('과목별 환산점수 + 가중치 방식 적용');
+      const weights = conv?.subjectWeights || {};
+      for (const [subj, w] of Object.entries(weights)) {
+        const s = profile.gedScores[subj];
+        if (s != null) lines.push(`  ${subj}: ${s}점 (가중치 ${w})`);
+      }
+      if (score != null) lines.push(`가중 합산 점수: ${score}점`);
+      break;
+    }
+    default: {
+      lines.push(`비교내신 환산표 없음 → 표준 추정표 적용`);
+      lines.push(`검정고시 평균 ${avg}점 → 추정 ${grade}등급`);
+      lines.push('※ 이 수치는 일반적인 내신 환산 추정값이에요. 실제 대학별 환산식과 다를 수 있어요.');
+    }
+  }
+
+  return { lines, grade, score, method };
+}
+
 export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univId, univName }) {
   const profile = useMemo(loadProfile, []);
   const [openRows, setOpenRows] = useState(() => new Set());
+  const [showCalcBasis, setShowCalcBasis] = useState(false);
 
   const detail = useMemo(() => {
     if (univId) return getUniversityDetail(univId);
@@ -72,6 +136,7 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
   const comp = getComparative(realUnivId);
   const compAvail = comparativeAvailability(comp);
   const compType = comp?.comparativeGradeType === 'numeric_table' ? 'numeric' : comp ? 'prose' : 'none';
+  const calcBasis = hasScore ? conversionBasis(profile, comp) : null;
 
   // 각 가능 전형 평가
   const evals = okRows.map((r) => {
@@ -254,7 +319,7 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
                         )}
                       </div>
 
-                      {/* 비교내신 가용성 */}
+                      {/* 비교내신 가용성 + 계산 근거 */}
                       <div className="adm-block">
                         <div className="adm-block-title">
                           <Table2 size={13} /> 비교내신
@@ -263,8 +328,37 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
                           </span>
                         </div>
                         <p className="adm-block-desc">{compAvail.desc}</p>
+
+                        {/* 계산 근거 보기 — 내 점수 있을 때만 */}
+                        {calcBasis && (
+                          <>
+                            <div className="calc-basis-summary">
+                              <span>내 비교내신 추정:&nbsp;
+                                <b>{calcBasis.grade != null ? `${calcBasis.grade}등급` : '–'}</b>
+                                {calcBasis.score != null && ` (${calcBasis.score}점)`}
+                              </span>
+                              <button
+                                className="calc-basis-toggle"
+                                onClick={() => setShowCalcBasis((v) => !v)}
+                              >
+                                {showCalcBasis ? '▲ 닫기' : '계산 근거 보기 ▼'}
+                              </button>
+                            </div>
+                            {showCalcBasis && (
+                              <div className="calc-basis-box">
+                                {calcBasis.lines.map((line, idx) => (
+                                  <p key={idx} className="calc-basis-line">{line}</p>
+                                ))}
+                                <p className="calc-basis-note">
+                                  * 대학별 실제 환산식은 모집요강에서 최종 확인하세요.
+                                </p>
+                              </div>
+                            )}
+                          </>
+                        )}
+
                         {rowComp && (
-                          <details className="adm-raw">
+                          <details className="adm-raw" style={{ marginTop: 8 }}>
                             <summary>공개된 환산 원문 보기</summary>
                             <pre>{rowComp}</pre>
                           </details>

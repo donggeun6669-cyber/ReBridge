@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { AlertTriangle, ExternalLink } from 'lucide-react';
 import { GED_SUBJECTS, gedAverage, estimateGrade } from '../lib/scoreEngine';
 
+const CSAT_SUBJECTS = ['국어', '수학', '영어', '탐구1', '탐구2'];
+
 const CURRENT_YEAR = 2026;
 const EXAM_YEARS = ['2026', '2025', '2024', '2023', '2022 이전'];
 
@@ -61,6 +63,19 @@ export default function ProfileScreen({ goTo = () => {}, goBack = () => {}, onCo
   const [examYear,  setExamYear]  = useState(answers.examYear  || '');
   const [examRound, setExamRound] = useState(answers.examRound || '');
 
+  const [csatGrades, setCsatGrades] = useState(() => {
+    const saved = answers.csatGrades || {};
+    const init = {};
+    CSAT_SUBJECTS.forEach((s) => { init[s] = saved[s] != null ? String(saved[s]) : ''; });
+    return init;
+  });
+
+  function setCsatSubject(subj, raw) {
+    let v = raw.replace(/[^0-9]/g, '');
+    if (v !== '') v = String(Math.min(9, Math.max(1, parseInt(v, 10))));
+    setCsatGrades((prev) => ({ ...prev, [subj]: v }));
+  }
+
   const is2ndRound    = examRound === '2회차';
   const isCritical2nd = is2ndRound && examYear === String(CURRENT_YEAR);
 
@@ -82,6 +97,9 @@ export default function ProfileScreen({ goTo = () => {}, goBack = () => {}, onCo
   const filledCount = GED_SUBJECTS.filter((s) => gedScores[s] !== '').length;
 
   function submit() {
+    const numericCsat = Object.fromEntries(
+      CSAT_SUBJECTS.map((s) => [s, csatGrades[s] === '' ? null : Number(csatGrades[s])])
+    );
     const next = {
       ...answers,
       gedScores: numericScores,
@@ -89,6 +107,7 @@ export default function ProfileScreen({ goTo = () => {}, goBack = () => {}, onCo
       gedGrade: myGrade,
       examYear,
       examRound,
+      csatGrades: numericCsat,
     };
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(next)); } catch { /* 무시 */ }
     if (onComplete) onComplete();
@@ -221,6 +240,36 @@ export default function ProfileScreen({ goTo = () => {}, goBack = () => {}, onCo
           </div>
         </div>
       ))}
+
+      {/* ── 4. 수능 모의 등급 (수능 볼 예정일 때) ── */}
+      {answers.csatPlan === '볼 거예요' && (
+        <div className="field">
+          <h3>수능 모의 등급 <span style={{ fontWeight: 500, fontSize: 13, color: 'var(--text-sub)' }}>(선택)</span></h3>
+          <p className="hint">최근 모의고사 등급을 넣으면 논술 전형 수능 최저 충족 여부를 알려드려요. 1~9등급.</p>
+          <div className="csat-grid">
+            {CSAT_SUBJECTS.map((s) => (
+              <label className="ged-cell" key={s}>
+                <span className="ged-label">{s}</span>
+                <input
+                  className="ged-input"
+                  type="number"
+                  inputMode="numeric"
+                  min="1"
+                  max="9"
+                  placeholder="–"
+                  value={csatGrades[s]}
+                  onChange={(e) => setCsatSubject(s, e.target.value)}
+                />
+              </label>
+            ))}
+          </div>
+          {Object.values(csatGrades).some((v) => v !== '') && (
+            <div className="ged-summary">
+              입력한 등급으로 논술 전형 수능 최저 충족 여부를 결과 화면에서 확인할 수 있어요.
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="form-foot">
         <button className="cta" onClick={submit}>나에게 맞는 길 보기</button>
