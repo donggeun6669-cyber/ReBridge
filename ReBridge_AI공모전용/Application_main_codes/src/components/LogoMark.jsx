@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 // 검고담임(Gumgo Mentor) 로고
-// 1순위: public/logo-gumgo.png (실제 캐릭터 이미지) — 파일이 있으면 이걸 사용
+// 1순위: public/GumgomentorLOGO.png (실제 캐릭터 이미지)
 // 폴백: 이미지가 없거나 로드 실패 시 말풍선+체크 SVG (브랜드 초록/파랑)
 export default function LogoMark({ size = 24 }) {
   const [imgFailed, setImgFailed] = useState(false);
@@ -9,7 +9,7 @@ export default function LogoMark({ size = 24 }) {
   if (!imgFailed) {
     return (
       <img
-        src="/logo-gumgo.png"
+        src="/GumgomentorLOGO.png"
         width={size}
         height={size}
         alt="검고담임 로고"

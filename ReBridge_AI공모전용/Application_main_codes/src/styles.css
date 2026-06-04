@@ -19,6 +19,7 @@
 
   /* cool neutrals */
   --bg: #F1F5F9;          /* 푸른빛 그레이 — 카드가 떠오르는 배경 */
+  --bg-soft: #EEF3F8;     /* 옅은 블루그레이 — 보조 박스/태그 배경 */
   --card: #ffffff;
   --text: #1F2733;
   --text-sub: #6B7686;
@@ -2019,7 +2020,7 @@ button {
   margin: 7px 0 0;
   padding: 8px 10px;
   border-radius: 10px;
-  background: var(--bg-soft, #F4F1FA);
+  background: #EEF3F8;
   font-size: 12px;
   line-height: 1.5;
   color: var(--text-sub);

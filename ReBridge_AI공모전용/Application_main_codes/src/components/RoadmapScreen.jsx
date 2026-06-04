@@ -5,35 +5,11 @@ import {
   Info, Search, Bookmark, Flag,
 } from 'lucide-react';
 import { buildRoadmap } from '../lib/roadmap.js';
-import { getExploreList, getUniversityDetail } from '../lib/analysis.js';
-import { evaluateAdmission, admissionChance, estimateGrade } from '../lib/scoreEngine.js';
+import { getUniversityDetail } from '../lib/analysis.js';
+import { evaluateAdmission, admissionChance } from '../lib/scoreEngine.js';
 import { getBookmarks } from '../lib/bookmarks.js';
 
 const STORAGE_KEY = 'rebridge_profile';
-
-// 프로필 점수로 전체 대학을 훑어 칸수 분포(안정/적정/소신)를 센다 — 로드맵 개인화용.
-function computeFit(profile) {
-  const list = getExploreList();
-  let safe = 0;
-  let fit = 0;
-  let reach = 0;
-  for (const s of list) {
-    if (!s.bestType) continue;
-    const ev = evaluateAdmission(profile, {
-      univId: s.univId,
-      admissionType: s.bestType,
-      admissionName: s.bestName,
-      gedEligible: s.bestGedEligible,
-    });
-    if (!ev.applicable) continue;
-    const c = admissionChance(ev);
-    if (!c) continue;
-    if (c.level >= 5) safe += 1;
-    else if (c.level === 4) fit += 1;
-    else if (c.level === 3) reach += 1;
-  }
-  return { safe, fit, reach };
-}
 
 const ICONS = {
   ClipboardList, FileText, Scale, CalendarDays, Target, MessageCircle, CheckCircle2,
@@ -74,8 +50,6 @@ export default function RoadmapScreen({ goTo = () => {} }) {
 
   // 개인 맞춤 — 점수가 있으면 칸수 분포, 관심 대학 수.
   const hasScore = !!(profile.gedScores && profile.gedAvg != null);
-  const myGrade = hasScore ? estimateGrade(profile.gedAvg) : null;
-  const fit = useMemo(() => (hasScore ? computeFit(profile) : null), [profile, hasScore]);
   const bookmarkCount = useMemo(() => getBookmarks().length, []);
 
   // 단계별 개인 맞춤 액션(버튼) — id로 매칭.
@@ -132,47 +106,6 @@ export default function RoadmapScreen({ goTo = () => {} }) {
       <div className="intro-sub">
         검정고시부터 대학 등록까지, 다음에 뭘 언제 해야 하는지 같이 챙길게요.
       </div>
-
-      {/* 내 상황 — 점수/관심대학과 연동한 개인 맞춤 요약 */}
-      {(hasScore || bookmarkCount > 0) && (
-        <div className="rm-mystatus">
-          <span className="mini-label">내 상황</span>
-          {hasScore && (
-            <p className="rm-mystatus-line">
-              평균 <b>{profile.gedAvg}점</b>
-              {myGrade != null ? ` · 추정 ${myGrade}등급` : ''} 기준,
-              지금 점수로 <b className="tone-good">안정 {fit.safe}</b> ·{' '}
-              <b className="tone-ok">적정 {fit.fit}</b> · <b className="tone-warn">소신 {fit.reach}</b>곳이 있어요.
-            </p>
-          )}
-          {!hasScore && (
-            <p className="rm-mystatus-line">
-              점수를 넣으면 지금 어디가 안정·적정인지 로드맵에 맞춰 알려드려요.
-            </p>
-          )}
-          <div className="rm-mystatus-actions">
-            <button className="rm-chip-btn" onClick={() => goTo('explore')}>
-              <Search size={14} /> {hasScore ? '가능성순으로 보기' : '대학 둘러보기'}
-            </button>
-            {bookmarkCount > 0 ? (
-              <button className="rm-chip-btn" onClick={() => goTo('saved')}>
-                <Bookmark size={14} /> 관심 대학 {bookmarkCount}곳
-              </button>
-            ) : (
-              !hasScore && (
-                <button className="rm-chip-btn" onClick={() => goTo('profile')}>
-                  내 점수 입력
-                </button>
-              )
-            )}
-          </div>
-          {hasScore && (
-            <p className="rm-mystatus-note">
-              <Info size={11} /> 안정·적정·소신은 작년 합격선 자료가 있는 전형 기준이에요(참고용).
-            </p>
-          )}
-        </div>
-      )}
 
       {/* 목표 대학까지 — 관심 대학을 등록하면 합격선까지 몇 점 더 필요한지 */}
       {hasScore && (
