@@ -17,7 +17,9 @@ export default function BottomNav({ active, goTo = () => {} }) {
           onClick={() => goTo(id)}
           aria-current={active === id ? 'page' : undefined}
         >
-          <Icon size={22} />
+          <span className="tab-ico-wrap">
+            <Icon size={22} />
+          </span>
           {label}
         </button>
       ))}

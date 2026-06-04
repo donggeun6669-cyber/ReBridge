@@ -153,89 +153,154 @@ export function getExploreList() {
   return out;
 }
 
+// ─── 수시에서 제외할 상위권 대학 ─────────────────────────────────────────
+// 이 대학들은 일반학생 합격선 기준 입결만 있어 검정고시 비교내신으로는
+// 정확한 합격 예측이 불가하고, 실제 합격 사례도 매우 드물어 추천 목록에서 제외.
+// 정시 탭에서는 여전히 지원 자격 확인 가능.
+const SUSI_HARD_EXCLUDE = new Set([
+  'snu',        // 서울대
+  'yonsei',     // 연세대
+  'korea',      // 고려대
+  'skku',       // 성균관대
+  'sogang',     // 서강대
+  'hanyang',    // 한양대
+  'uA0000163',  // 이화여자대학교
+  'cau',        // 중앙대
+  'khu',        // 경희대
+  'uos',        // 서울시립대
+  'hufs',       // 한국외국어대
+]);
+
+// 공통: 카드 항목 생성
+function makeResultItem(u, best, rows, profile, comp) {
+  const ev = evaluateAdmission(profile, {
+    univId: u.univId,
+    admissionType: best.admissionType,
+    admissionName: best.admissionName,
+    gedEligible: best.gedEligible,
+  });
+  const chance = ev.applicable ? admissionChance(ev) : null;
+  const dataGap = !ev.applicable ? (ev.dataGap || null) : null;
+  const comparativeType = comp?.comparativeGradeType === 'numeric_table' ? 'numeric' : comp ? 'prose' : 'none';
+
+  return {
+    univId: u.univId,
+    name: u.name,
+    region: u.region,
+    kind: u.kind || '대학교',
+    status: best.gedEligible === '가능' ? 'ok' : 'cond',
+    bestType: best.admissionType,
+    bestName: best.admissionName,
+    bestGedEligible: best.gedEligible,
+    comparativeType,
+    reflection: best.gedReflection || '',
+    csat: csatHint(best.csatMinimum),
+    interview: !!best.interview,
+    next: nextAction(best.admissionType, best.interview),
+    eligibleCount: rows.length,
+    confirmed: isConfirmedStatus(best.status),
+    chance,
+    dataGap,
+    _score:
+      (TYPE_RANK[best.admissionType] || 0) * 10 +
+      rows.length +
+      (isConfirmedStatus(best.status) ? 2 : 0) +
+      (best.gedEligible === '가능' ? 5 : 0),
+  };
+}
+
 export function analyzeProfile(profile = {}) {
   const { region, csatPlan } = profile;
 
-  // univId → 대학 정보
-  const byId = new Map(universities.map((u) => [u.univId, u]));
-  // univId → 전형 행들
   const rowsById = new Map();
   for (const r of admissions) {
     if (!rowsById.has(r.univId)) rowsById.set(r.univId, []);
     rowsById.get(r.univId).push(r);
   }
 
-  const results = [];
+  const susiResults = [];
+  const jeongsiResults = [];
 
   for (const u of universities) {
     if (!regionMatches(u.region, region)) continue;
 
-    let rows = rowsById.get(u.univId) || [];
-    // 검정고시 지원 가능/조건부만
-    rows = rows.filter((r) => r.gedEligible === '가능' || r.gedEligible === '조건부');
-    // 수능 안 볼 거면 정시(수능위주) 제외
-    if (csatPlan === '안 볼 거예요') {
-      rows = rows.filter((r) => r.phase !== '정시' && r.admissionType !== '수능위주');
-    }
-    if (rows.length === 0) continue;
+    const allRows = (rowsById.get(u.univId) || []).filter(
+      (r) => r.gedEligible === '가능' || r.gedEligible === '조건부'
+    );
+    if (allRows.length === 0) continue;
 
-    // 가장 유리한 전형 1개 선택 (가능 우선 > 유형 우선)
-    rows.sort((a, b) => {
-      const elig = (b.gedEligible === '가능') - (a.gedEligible === '가능');
-      if (elig) return elig;
-      return (TYPE_RANK[b.admissionType] || 0) - (TYPE_RANK[a.admissionType] || 0);
-    });
-    const best = rows[0];
-
-    // 합격 가능성(칸수) — 점수가 있고 합격선 자료가 있을 때만.
-    const ev = evaluateAdmission(profile, {
-      univId: u.univId,
-      admissionType: best.admissionType,
-      admissionName: best.admissionName,
-      gedEligible: best.gedEligible,
-    });
-    const chance = ev.applicable ? admissionChance(ev) : null;
     const comp = comparative[u.univId] || null;
-    const comparativeType = comp?.comparativeGradeType === 'numeric_table' ? 'numeric' : comp ? 'prose' : 'none';
 
-    results.push({
-      univId: u.univId,
-      name: u.name,
-      region: u.region,
-      kind: u.kind || '대학교',
-      status: best.gedEligible === '가능' ? 'ok' : 'cond',
-      bestType: best.admissionType,
-      bestName: best.admissionName,
-      bestGedEligible: best.gedEligible,
-      comparativeType,
-      reflection: best.gedReflection || '',
-      csat: csatHint(best.csatMinimum),
-      interview: !!best.interview,
-      next: nextAction(best.admissionType, best.interview),
-      eligibleCount: rows.length,
-      confirmed: isConfirmedStatus(best.status),
-      chance,
-      _score:
-        (TYPE_RANK[best.admissionType] || 0) * 10 +
-        rows.length +
-        (isConfirmedStatus(best.status) ? 2 : 0) +
-        (best.gedEligible === '가능' ? 5 : 0),
-    });
+    // ── 수시 ──────────────────────────────────────────────────────────────
+    if (!SUSI_HARD_EXCLUDE.has(u.univId)) {
+      const susiRows = allRows.filter(
+        (r) => r.phase !== '정시' && r.admissionType !== '수능위주'
+      );
+      if (susiRows.length > 0) {
+        susiRows.sort((a, b) => {
+          const elig = (b.gedEligible === '가능') - (a.gedEligible === '가능');
+          if (elig) return elig;
+          return (TYPE_RANK[b.admissionType] || 0) - (TYPE_RANK[a.admissionType] || 0);
+        });
+        susiResults.push(makeResultItem(u, susiRows[0], susiRows, profile, comp));
+      }
+    }
+
+    // ── 정시 ──────────────────────────────────────────────────────────────
+    // 수능 안 볼 예정이면 정시 탭 자체를 안 쓰므로 건너뜀
+    if (csatPlan !== '안 볼 거예요') {
+      const jeongsiRows = allRows.filter(
+        (r) => r.phase === '정시' || r.admissionType === '수능위주'
+      );
+      if (jeongsiRows.length > 0) {
+        jeongsiRows.sort((a, b) =>
+          (TYPE_RANK[b.admissionType] || 0) - (TYPE_RANK[a.admissionType] || 0)
+        );
+        const best = jeongsiRows[0];
+        jeongsiResults.push({
+          univId: u.univId,
+          name: u.name,
+          region: u.region,
+          kind: u.kind || '대학교',
+          status: best.gedEligible === '가능' ? 'ok' : 'cond',
+          bestType: best.admissionType,
+          bestName: best.admissionName,
+          bestGedEligible: best.gedEligible,
+          csat: csatHint(best.csatMinimum),
+          eligibleCount: jeongsiRows.length,
+          // 정시는 합격 예측 없이 지원 자격만 표시
+          chance: null,
+          dataGap: 'csat',
+        });
+      }
+    }
   }
 
-  // 가능성순(칸수) 정렬 — 칸수가 있는 곳을 위로(높은 순), 자료 없는 곳은 _score로.
-  results.sort((a, b) => {
+  // 수시: 가능성 순 정렬
+  susiResults.sort((a, b) => {
     const la = a.chance ? a.chance.level : 0;
     const lb = b.chance ? b.chance.level : 0;
     if (lb !== la) return lb - la;
     return b._score - a._score || a.name.localeCompare(b.name);
   });
-  const top = results.slice(0, 30);
 
+  // 정시: 이름 순
+  jeongsiResults.sort((a, b) => a.name.localeCompare(b.name));
+
+  // 페이지네이션이 ResultsScreen에서 처리되므로 전체 결과 반환
   return {
-    total: results.length,
-    shown: top.length,
     note: guideNote(csatPlan),
-    results: top,
+    susi: {
+      total: susiResults.length,
+      shown: susiResults.length,
+      excludedCount: SUSI_HARD_EXCLUDE.size,
+      results: susiResults,
+    },
+    jeongsi: {
+      total: jeongsiResults.length,
+      shown: jeongsiResults.length,
+      available: csatPlan !== '안 볼 거예요',
+      results: jeongsiResults,
+    },
   };
 }

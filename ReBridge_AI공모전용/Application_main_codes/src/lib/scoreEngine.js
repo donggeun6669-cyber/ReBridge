@@ -1,5 +1,5 @@
-// 검정고시 점수 → 비교내신 추정등급 → 2025 합격선 비교 → 부족점수/문항수 → 합격가능성
-// 규칙 기반(AI 없음). 모든 등급 환산은 "표준 추정"이며, 대학별 실제 비교내신표는 상이함을 항상 안내한다.
+// 검정고시 점수 → 비교내신 환산(대학별 5케이스) → 합격선 비교(점수 우선, 등급 폴백)
+// 규칙 기반(AI 없음). 대학별 conversion 데이터가 없으면 표준 추정표로 폴백.
 // 입결(results)은 2025학년도(9등급제) 기준, 입시제도는 2028(5등급제)이므로 직접비교는 '참고용'.
 import cutlines from '../data/cutlines_2025.json';
 import comparative from '../data/comparative_2028.json';
@@ -66,12 +66,179 @@ export function getComparative(univId) {
   return comparative[univId] || null;
 }
 
-// 합격 가능성 라벨 (등급 격차 기반; gap<0 = 내가 더 우수)
+// ============================================================
+// 대학별 비교내신 환산 — 5케이스 (gumjung.co.kr 방식)
+//
+// comparative_2028.json에 대학별 "conversion" 객체를 추가하면
+// 대학 공식/표대로 정확한 비교내신을 계산함.
+// 데이터 없는 대학은 표준 추정표(GRADE_MIN_AVG)로 자동 폴백.
+//
+// conversion 객체 스키마 (comparative_2028.json에 추가):
+// {
+//   "conversion": {
+//     "type": "grade_table" | "score_table" | "score_formula" | "formula_complex" | "subject_weighted",
+//     "maxScore": 900,        // 대학 환산점수 만점 (정규화용)
+//     "minScore": 0,          // 대학 환산점수 최저 (정규화용)
+//
+//     // type=grade_table (Case 1,2: 등급표 직접 공개)
+//     "gradeTable": [
+//       { "minAvg": 99, "maxAvg": 100, "grade": 1, "score": 900 },
+//       { "minAvg": 96, "maxAvg": 98.99, "grade": 2, "score": null }
+//     ],
+//
+//     // type=score_table (Case 3: 환산점수표만 공개)
+//     "scoreTable": [
+//       { "minAvg": 99.01, "maxAvg": 100, "score": 900 }
+//     ],
+//     "gradeFromScore": { "maxScore": 900, "baseScore": 0 }, // 역산용 (선택)
+//
+//     // type=score_formula (Case 3: 산출식)
+//     // score = maxScore - (grade-1)*gradeCoeff - offset + bonus
+//     "scoreFormula": { "maxScore": 900, "gradeCoeff": 20, "offset": 60, "bonus": 0 },
+//
+//     // type=formula_complex (Case 4: 복잡 산출식)
+//     // grade = Min(1 + ((max-score)/(max-base))×8, 9)  역산
+//     "formulaParams": { "maxScore": 1000, "baseScore": 0 },
+//
+//     // type=subject_weighted (Case 5: 과목별 가중치)
+//     "subjectWeights": { "국어": 2, "영어": 3, "수학": 3, "사회": 1, "과학": 1 },
+//     "subjectScoreTable": [
+//       { "minScore": 95, "maxScore": 100, "convertedScore": 4.0 }
+//     ],
+//     "subjectFormula": { "type": "linear_offset", "rate": 1, "coeff": 4, "offset": 63 }
+//   }
+// }
+// ============================================================
+
+export const CONV_TYPES = {
+  GRADE_TABLE:      'grade_table',
+  SCORE_TABLE:      'score_table',
+  SCORE_FORMULA:    'score_formula',
+  FORMULA_COMPLEX:  'formula_complex',
+  SUBJECT_WEIGHTED: 'subject_weighted',
+};
+
+/**
+ * 검정고시 점수 → 대학별 비교내신 등급 & 환산점수
+ * @param {number|null} avg 전과목 평균
+ * @param {object} gedScores 과목별 점수 { 국어, 수학, ... }
+ * @param {object|null} comp comparative_2028.json 대학 항목
+ * @returns {{ grade: number|null, score: number|null, method: string }}
+ */
+export function applyComparativeConversion(avg, gedScores, comp) {
+  if (avg == null) return { grade: null, score: null, method: 'no_score' };
+
+  const conv = comp?.conversion;
+  if (!conv?.type) {
+    // 데이터 없음 → 표준 추정표
+    return { grade: estimateGrade(avg), score: null, method: 'standard' };
+  }
+
+  switch (conv.type) {
+
+    // Case 1, 2: 대학 발표 등급표 (등급 ± 환산점수)
+    case CONV_TYPES.GRADE_TABLE: {
+      if (!Array.isArray(conv.gradeTable)) break;
+      const row = conv.gradeTable.find(
+        (r) => avg >= (r.minAvg ?? -Infinity) && avg <= (r.maxAvg ?? Infinity)
+      );
+      if (row) return { grade: row.grade ?? null, score: row.score ?? null, method: 'grade_table' };
+      break;
+    }
+
+    // Case 3a: 환산점수표만 공개 → 점수 조회 후 등급 역산
+    case CONV_TYPES.SCORE_TABLE: {
+      if (!Array.isArray(conv.scoreTable)) break;
+      const row = conv.scoreTable.find(
+        (r) => avg >= (r.minAvg ?? -Infinity) && avg <= (r.maxAvg ?? Infinity)
+      );
+      if (row) {
+        const grade = conv.gradeFromScore
+          ? _gradeFromInverseFormula(row.score, conv.gradeFromScore)
+          : estimateGrade(avg);
+        return { grade, score: row.score, method: 'score_table' };
+      }
+      break;
+    }
+
+    // Case 3b: 점수 산출식 — score = maxScore - (grade-1)*coeff - offset + bonus
+    case CONV_TYPES.SCORE_FORMULA: {
+      if (!conv.scoreFormula) break;
+      const grade = estimateGrade(avg);
+      const f = conv.scoreFormula;
+      const score = f.maxScore
+        - (grade - 1) * (f.gradeCoeff ?? 0)
+        - (f.offset ?? 0)
+        + (f.bonus ?? 0);
+      return { grade, score: Math.round(score * 10) / 10, method: 'score_formula' };
+    }
+
+    // Case 4: 복잡 산출식 — grade = Min(1+((max-score)/(max-base))×8, 9) 역산
+    case CONV_TYPES.FORMULA_COMPLEX: {
+      if (!conv.formulaParams) break;
+      const { maxScore, baseScore } = conv.formulaParams;
+      if (maxScore != null && baseScore != null) {
+        const grade = estimateGrade(avg);
+        // 역산: score = max - (grade-1)/8*(max-base)
+        const score = maxScore - ((grade - 1) / 8) * (maxScore - baseScore);
+        return { grade, score: Math.round(score * 10) / 10, method: 'formula_complex' };
+      }
+      break;
+    }
+
+    // Case 5: 과목별 환산점수 + 가중치
+    case CONV_TYPES.SUBJECT_WEIGHTED: {
+      if (!conv.subjectWeights || !conv.subjectScoreTable || !gedScores) break;
+      let wSum = 0, wTotal = 0;
+      for (const [subj, w] of Object.entries(conv.subjectWeights)) {
+        const s = Number(gedScores[subj]);
+        if (isNaN(s)) continue;
+        const entry = conv.subjectScoreTable.find(
+          (r) => s >= (r.minScore ?? -Infinity) && s <= (r.maxScore ?? Infinity)
+        );
+        if (entry) { wSum += entry.convertedScore * w; wTotal += w; }
+      }
+      if (wTotal > 0) {
+        let score;
+        const sf = conv.subjectFormula;
+        if (sf?.type === 'linear_offset') {
+          // 교과성적 = rate × [(wSum / 10) × coeff + offset] × 10
+          score = (sf.rate ?? 1) * ((wSum / 10) * (sf.coeff ?? 4) + (sf.offset ?? 63)) * 10;
+        } else {
+          score = wSum / wTotal;
+        }
+        return {
+          grade: estimateGrade(avg),
+          score: Math.round(score * 10) / 10,
+          method: 'subject_weighted',
+        };
+      }
+      break;
+    }
+
+    default: break;
+  }
+
+  // 모든 케이스 실패 → 표준 추정
+  return { grade: estimateGrade(avg), score: null, method: 'standard' };
+}
+
+// 점수 → 등급 역산 (score_table 케이스용)
+// formula: { maxScore, baseScore }  → grade = 1 + ((max-score)/(max-base))×8
+function _gradeFromInverseFormula(score, params) {
+  const { maxScore, baseScore } = params;
+  const raw = 1 + ((maxScore - score) / (maxScore - baseScore)) * 8;
+  return Math.min(Math.max(Math.round(raw * 100) / 100, 1.0), 9.0);
+}
+
+// 합격 가능성 라벨 (gap<0 = 내가 더 우수)
+// grade 기반: gap 단위 = 등급 (1등급 차이)
+// score 기반: gap은 정규화된 등급-환산값 (아래 evaluateAdmission 참조)
 function verdictFromGap(gap) {
-  if (gap <= -1.0) return { key: 'safe', label: '안정', tone: 'good' };
-  if (gap <= 0.3) return { key: 'fit', label: '적정', tone: 'ok' };
-  if (gap <= 1.0) return { key: 'reach', label: '소신', tone: 'warn' };
-  return { key: 'hard', label: '도전', tone: 'hard' };
+  if (gap <= -1.0) return { key: 'safe',  label: '안정', tone: 'good' };
+  if (gap <=  0.3) return { key: 'fit',   label: '적정', tone: 'ok'   };
+  if (gap <=  1.0) return { key: 'reach', label: '소신', tone: 'warn' };
+  return             { key: 'hard',  label: '도전', tone: 'hard'  };
 }
 
 // 검정고시 친화도 (전형 성격 기준): A(매우 유리) ~ E / X(불가)
@@ -161,7 +328,9 @@ export function gedFit(adm, comparativeType) {
 
 /**
  * 검정고시 점수로 특정 전형을 평가.
- * @param {object} profile - { gedScores: {국어:..}, ... }
+ * 비교 우선순위: ① 환산점수(대학별 공식) vs 점수 합격선 → ② 등급 vs 등급 합격선
+ *
+ * @param {object} profile - { gedScores: {국어:..., 수학:...}, gedAvg?, ... }
  * @param {object} adm - admissions 행 (univId, admissionType, admissionName, gedEligible ...)
  * @returns {object} 평가 결과
  */
@@ -169,18 +338,26 @@ export function evaluateAdmission(profile, adm) {
   const gedScores = profile?.gedScores;
   const avg = gedAverage(gedScores);
   const nSub = gedSubjectCount(gedScores);
-  const myGrade = estimateGrade(avg);
   const affinity = gedAffinity(adm);
-  const comparative = getComparative(adm.univId);
+  const comp = getComparative(adm.univId);
+
+  // ── 비교내신 환산 (대학별 공식 적용, 없으면 표준 추정) ──
+  const conversion = applyComparativeConversion(avg, gedScores, comp);
+  const myGrade = conversion.grade;   // 등급 (1~9, 소수점 가능)
+  const myScore = conversion.score;   // 환산점수 (대학별 공식 있을 때만)
+  const conversionMethod = conversion.method; // 'grade_table'|'score_table'|...|'standard'
+
   const base = {
     avg,
     myGrade,
+    myScore,
+    conversionMethod,
     affinity,
-    comparative,
+    comparative: comp,
     hasScore: avg != null,
   };
 
-  // 정시 수능위주: 검정고시 평균과 수능환산점수는 척도가 달라 직접비교 불가
+  // 정시 수능위주
   if (adm.admissionType === '수능위주' || adm.phase === '정시') {
     return {
       ...base,
@@ -191,8 +368,12 @@ export function evaluateAdmission(profile, adm) {
   }
 
   const cut = getCutline(adm.univId, adm.admissionType);
-  // 합격선 데이터 없음 — 공개 자료 자체가 없는 경우가 대부분(검정고시 입결 미공개)
-  if (!cut || (cut.cutGradeAvg == null && cut.cutGrade70 == null)) {
+  const hasAnyCutline =
+    cut && (
+      cut.cutGradeAvg != null || cut.cutGrade70 != null ||
+      cut.cutScoreAvg != null || cut.cutScore70 != null
+    );
+  if (!hasAnyCutline) {
     return {
       ...base,
       applicable: false,
@@ -201,43 +382,78 @@ export function evaluateAdmission(profile, adm) {
     };
   }
 
-  // 평균컷 우선, 없으면 70%컷
-  const cutGrade = cut.cutGradeAvg != null ? cut.cutGradeAvg : cut.cutGrade70;
-  const cutType = cut.cutGradeAvg != null ? '평균' : '70%컷';
+  // 합격선 — 점수 우선, 없으면 등급
+  const cutScore = cut.cutScoreAvg ?? cut.cutScore70 ?? null;
+  const cutGrade = cut.cutGradeAvg ?? cut.cutGrade70 ?? null;
+  const cutScoreType = cut.cutScoreAvg != null ? '평균' : (cut.cutScore70 != null ? '70%컷' : null);
+  const cutGradeType = cut.cutGradeAvg != null ? '평균' : (cut.cutGrade70 != null ? '70%컷' : null);
 
   if (avg == null) {
     return {
       ...base,
       applicable: true,
-      cutGrade,
-      cutType,
+      cutGrade, cutScore, cutGradeType, cutScoreType,
       cutN: cut.n,
       cutConfidence: cut.confidence,
       reason: '검정고시 과목 점수를 입력하면 작년 합격선과 비교해드릴게요.',
     };
   }
 
-  const gap = Math.round((myGrade - cutGrade) * 100) / 100; // +면 부족
+  // ── 비교 기준 선택 ──
+  // 점수 비교: myScore(환산)와 cutScore(입결) 둘 다 있을 때 우선 사용.
+  // 정규화: 환산점수 격차를 등급-등가 gap으로 변환해 verdictFromGap에 통일 입력.
+  // 정규화 공식: gap = -(myScore - cutScore) / pointsPerGrade
+  //   pointsPerGrade = (conv.maxScore - conv.minScore) / 8   (없으면 fallback=20)
+  let gap, comparisonBasis, cutScoreUsed, cutGradeUsed;
+
+  if (myScore != null && cutScore != null) {
+    const maxS  = comp?.conversion?.maxScore ?? null;
+    const minS  = comp?.conversion?.minScore ?? 0;
+    const range = maxS != null ? (maxS - minS) : null;
+    const ptsPerGrade = range ? range / 8 : 20; // 1등급당 점수차 추정
+    gap = Math.round((-(myScore - cutScore) / ptsPerGrade) * 100) / 100;
+    comparisonBasis = 'score';
+    cutScoreUsed = cutScore;
+    cutGradeUsed = cutGrade;
+  } else if (myGrade != null && cutGrade != null) {
+    gap = Math.round((myGrade - cutGrade) * 100) / 100;
+    comparisonBasis = 'grade';
+    cutScoreUsed = null;
+    cutGradeUsed = cutGrade;
+  } else {
+    return {
+      ...base,
+      applicable: false,
+      dataGap: 'cutline',
+      reason: '합격선 자료와 내 점수를 비교할 수 없어요.',
+    };
+  }
+
   const verdict = verdictFromGap(gap);
 
-  // 부족 점수/문항수: 합격선 등급을 받기 위한 최소 평균 - 내 평균
-  const neededAvg = gradeToMinAvg(cutGrade);
+  // 부족 점수/문항수 (등급 기반, 참고용)
+  const neededAvg = gradeToMinAvg(cutGradeUsed ?? cutGrade);
   const shortPoints =
-    neededAvg != null && avg < neededAvg ? Math.round((neededAvg - avg) * 100) / 100 : 0;
+    neededAvg != null && avg < neededAvg
+      ? Math.round((neededAvg - avg) * 100) / 100
+      : 0;
   const perSubjectQuestions = shortPoints > 0 ? Math.ceil(shortPoints / POINTS_PER_QUESTION) : 0;
   const totalQuestions =
-    shortPoints > 0 && nSub > 0 ? Math.ceil((shortPoints * nSub) / POINTS_PER_QUESTION) : 0;
+    shortPoints > 0 && nSub > 0
+      ? Math.ceil((shortPoints * nSub) / POINTS_PER_QUESTION)
+      : 0;
 
   return {
     ...base,
     applicable: true,
-    cutGrade,
-    cutType,
+    cutGrade, cutScore,
+    cutGradeType, cutScoreType,
     cutN: cut.n,
     cutConfidence: cut.confidence,
-    neededAvg,
     gap,
+    comparisonBasis,         // 'score' | 'grade' — 어떤 기준으로 비교했는지
     verdict,
+    neededAvg,
     shortPoints,
     perSubjectQuestions,
     totalQuestions,
@@ -245,11 +461,22 @@ export function evaluateAdmission(profile, adm) {
   };
 }
 
-// 짧은 안내 문구(담임 톤)
+// 짧은 안내 문구(담임 톤) — 환산점수 기반/등급 기반 구분 표시
 export function coachLine(ev) {
   if (!ev) return '';
   if (!ev.applicable) return ev.reason || '';
   if (ev.avg == null) return ev.reason || '';
+
+  // 환산점수 기반 비교인 경우
+  if (ev.comparisonBasis === 'score' && ev.myScore != null && ev.cutScore != null) {
+    const diff = Math.round((ev.myScore - ev.cutScore) * 10) / 10;
+    if (diff >= 0) {
+      return `내 환산점수(${ev.myScore}점)가 작년 합격선(${ev.cutScore}점)보다 ${diff}점 높아요. ${ev.verdict.label} 지원!`;
+    }
+    return `작년 합격선(${ev.cutScore}점)까지 환산점수 ${Math.abs(diff)}점 부족해요. 과목당 약 ${ev.perSubjectQuestions}문제 더 맞히면 닿아요.`;
+  }
+
+  // 등급 기반 비교
   if (ev.shortPoints <= 0) {
     return `지금 평균이면 작년 합격선(약 ${ev.cutGrade}등급) 안쪽이에요. ${ev.verdict.label} 지원!`;
   }
