@@ -1,17 +1,22 @@
 import {
   ArrowRight, HelpCircle, Sparkles, Scale, Target,
   ChevronRight, ArrowLeftRight, Layers, CalendarDays,
-  MessageCircle,
+  MessageCircle, BarChart3, FileText, ClipboardCheck, BookOpen, Heart,
 } from 'lucide-react';
 import LogoMark from './LogoMark.jsx';
 
 const HELP = [
-  { icon: HelpCircle,    color: 'brand', title: '전형이 뭐예요?',           topic: 'types'       },
-  { icon: Sparkles,      color: 'green', title: '검정고시도 수시 돼요?',     topic: 'susi'        },
-  { icon: Scale,         color: 'coral', title: '비교내신이 뭐예요?',        topic: 'compare'     },
-  { icon: Target,        color: 'brand', title: '수능 최저가 뭐예요?',       topic: 'csat'        },
-  { icon: ArrowLeftRight,color: 'gold',  title: '수시 vs 정시, 차이는?',     topic: 'susiJeongsi' },
-  { icon: Layers,        color: 'brand', title: '수시 몇 개까지 써요?',      topic: 'count'       },
+  { icon: HelpCircle,    color: 'brand', title: '전형이 뭐예요?',                topic: 'types'       },
+  { icon: Sparkles,      color: 'green', title: '검정고시도 수시 돼요?',          topic: 'susi'        },
+  { icon: Scale,         color: 'coral', title: '비교내신이 뭐예요?',             topic: 'compare'     },
+  { icon: Target,        color: 'brand', title: '수능 최저가 뭐예요?',            topic: 'csat'        },
+  { icon: Target,        color: 'brand', title: '100점이면 교과 전형 돼요?',      topic: 'gedLimit'    },
+  { icon: FileText,      color: 'coral', title: '합격증명서 vs 성적증명서?',      topic: 'docs'        },
+  { icon: ArrowLeftRight,color: 'gold',  title: '수시 vs 정시, 차이는?',          topic: 'susiJeongsi' },
+  { icon: Layers,        color: 'brand', title: '수시 몇 개까지 써요?',           topic: 'count'       },
+  { icon: CalendarDays,  color: 'coral', title: '원서 언제, 어떻게 내요?',        topic: 'apply'       },
+  { icon: BarChart3,     color: 'brand', title: '나이스 온라인 신청이 뭐예요?',   topic: 'naice'       },
+  { icon: MessageCircle, color: 'green', title: '논술 전형이 왜 유리해요?',       topic: 'essay'       },
 ];
 
 export default function HomeScreen({ goTo = () => {} }) {
@@ -67,6 +72,28 @@ export default function HomeScreen({ goTo = () => {} }) {
             <ChevronRight size={16} className="home-quick-arrow" />
           </button>
           <div className="home-divider" />
+          <button className="home-quick-row" onClick={() => goTo('checklist')}>
+            <span className="home-quick-ico ico-coral">
+              <ClipboardCheck size={18} />
+            </span>
+            <span className="home-quick-text">
+              <span className="home-quick-title">내 서류 체크리스트</span>
+              <span className="home-quick-sub">합격증명서·성적증명서 등 빠짐없이</span>
+            </span>
+            <ChevronRight size={16} className="home-quick-arrow" />
+          </button>
+          <div className="home-divider" />
+          <button className="home-quick-row" onClick={() => goTo('forms-guide')}>
+            <span className="home-quick-ico ico-gold">
+              <BookOpen size={18} />
+            </span>
+            <span className="home-quick-text">
+              <span className="home-quick-title">학생부 대체서식 안내</span>
+              <span className="home-quick-sub">학종 지원할 때 내는 서류</span>
+            </span>
+            <ChevronRight size={16} className="home-quick-arrow" />
+          </button>
+          <div className="home-divider" />
           <button className="home-quick-row" onClick={() => goTo('help')}>
             <span className="home-quick-ico ico-green">
               <MessageCircle size={18} />
@@ -74,6 +101,17 @@ export default function HomeScreen({ goTo = () => {} }) {
             <span className="home-quick-text">
               <span className="home-quick-title">담임에게 물어보기</span>
               <span className="home-quick-sub">막히면 여기서 바로 질문해요</span>
+            </span>
+            <ChevronRight size={16} className="home-quick-arrow" />
+          </button>
+          <div className="home-divider" />
+          <button className="home-quick-row" onClick={() => goTo('dreamdrive')}>
+            <span className="home-quick-ico ico-coral">
+              <Heart size={18} />
+            </span>
+            <span className="home-quick-text">
+              <span className="home-quick-title">꿈드림센터 찾기</span>
+              <span className="home-quick-sub">검정고시·자립 무료 지원 기관 전국 안내</span>
             </span>
             <ChevronRight size={16} className="home-quick-arrow" />
           </button>
