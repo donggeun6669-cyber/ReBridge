@@ -1,17 +1,23 @@
 import {
   ArrowRight, HelpCircle, Sparkles, Scale, Target,
   ChevronRight, ArrowLeftRight, Layers, CalendarDays,
-  MessageCircle,
+  MessageCircle, BarChart3, FileText, Users,
 } from 'lucide-react';
 import LogoMark from './LogoMark.jsx';
 
 const HELP = [
-  { icon: HelpCircle,    color: 'brand', title: '전형이 뭐예요?',           topic: 'types'       },
-  { icon: Sparkles,      color: 'green', title: '검정고시도 수시 돼요?',     topic: 'susi'        },
-  { icon: Scale,         color: 'coral', title: '비교내신이 뭐예요?',        topic: 'compare'     },
-  { icon: Target,        color: 'brand', title: '수능 최저가 뭐예요?',       topic: 'csat'        },
-  { icon: ArrowLeftRight,color: 'gold',  title: '수시 vs 정시, 차이는?',     topic: 'susiJeongsi' },
-  { icon: Layers,        color: 'brand', title: '수시 몇 개까지 써요?',      topic: 'count'       },
+  { icon: HelpCircle,    color: 'brand', title: '전형이 뭐예요?',                topic: 'types'       },
+  { icon: Sparkles,      color: 'green', title: '검정고시도 수시 돼요?',          topic: 'susi'        },
+  { icon: Scale,         color: 'coral', title: '비교내신이 뭐예요?',             topic: 'compare'     },
+  { icon: Target,        color: 'brand', title: '수능 최저가 뭐예요?',            topic: 'csat'        },
+  { icon: ArrowLeftRight,color: 'gold',  title: '수시 vs 정시, 차이는?',          topic: 'susiJeongsi' },
+  { icon: Layers,        color: 'brand', title: '수시 몇 개까지 써요?',           topic: 'count'       },
+  { icon: CalendarDays,  color: 'coral', title: '원서 언제, 어떻게 내요?',        topic: 'apply'       },
+  { icon: Users,         color: 'green', title: '면접에서 뭘 물어봐요?',          topic: 'interview'   },
+  { icon: FileText,      color: 'coral', title: '합격증명서 vs 성적증명서?',      topic: 'docs'        },
+  { icon: BarChart3,     color: 'brand', title: '나이스 온라인 신청이 뭐예요?',   topic: 'naice'       },
+  { icon: Target,        color: 'gold',  title: '100점이면 교과 전형 돼요?',      topic: 'gedLimit'    },
+  { icon: MessageCircle, color: 'green', title: '논술 전형이 왜 유리해요?',       topic: 'essay'       },
 ];
 
 export default function HomeScreen({ goTo = () => {} }) {
@@ -30,7 +36,7 @@ export default function HomeScreen({ goTo = () => {} }) {
       <header className="topbar">
         <span className="brand-lockup">
           <LogoMark size={24} />
-          <span className="wordmark">Re:Bridge</span>
+          <span className="wordmark">검고담임</span>
         </span>
       </header>
 

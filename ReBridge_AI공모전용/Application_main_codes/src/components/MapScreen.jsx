@@ -32,7 +32,7 @@ function loadKakao() {
 
 /* ── 색상 원형 SVG 마커 이미지 생성 ── */
 function makeMarkerImage(maps, hasGed) {
-  const fill = hasGed ? '#7C5CFC' : '#C4BFCF';
+  const fill = hasGed ? '#2E8BD0' : '#C4BFCF';
   const stroke = hasGed ? '#fff' : '#E5E0EF';
   const svg = encodeURIComponent(
     `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14">` +
@@ -49,14 +49,14 @@ function makeMarkerImage(maps, hasGed) {
 /* ── 클러스터 스타일 (네이비 원형 뱃지) ── */
 const CLUSTER_STYLES = [{
   width: '40px', height: '40px',
-  background: 'rgba(124,92,252,0.88)',
+  background: 'rgba(46,139,208,0.88)',
   borderRadius: '50%',
   color: '#fff',
   textAlign: 'center',
   lineHeight: '40px',
   fontSize: '13px',
   fontWeight: '700',
-  boxShadow: '0 2px 8px rgba(124,92,252,0.35)',
+  boxShadow: '0 2px 8px rgba(46,139,208,0.35)',
 }];
 
 const FILTERS = ['전체', '검정고시 전형', '4년제', '전문대'];
