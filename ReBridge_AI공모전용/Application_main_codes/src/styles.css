@@ -3757,69 +3757,90 @@ button {
    꿈드림센터 — DreamdriveScreen
    ===================================================================== */
 
-/* 히어로 배너 */
-.kdream-hero {
+/* 화면 자체 — bottom nav 공간 확보 */
+.kdream-screen { padding-bottom: 100px; }
+
+/* 상단 검색 + 위치 버튼 행 */
+.kdream-top-bar {
+  display: flex;
+  gap: 8px;
+  padding: 10px 20px 0;
+}
+
+/* 검색 */
+.kdream-search-wrap {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin: 12px 20px 0;
-  padding: 16px;
-  background: var(--grad-soft);
-  border-radius: var(--r-lg);
-  border: 1.5px solid var(--border);
-}
-.kdream-hero-emoji {
-  font-size: 36px;
-  flex-shrink: 0;
-}
-.kdream-hero-title {
-  font-size: 15px;
-  font-weight: 800;
-  color: var(--brand-deep);
-  margin-bottom: 4px;
-}
-.kdream-hero-sub {
-  font-size: 12.5px;
-  color: var(--text-sub);
-  line-height: 1.5;
-}
-
-/* 섹션 */
-.kdream-section {
-  padding: 16px 20px 0;
-}
-.kdream-section-title {
-  font-size: 14px;
-  font-weight: 800;
-  color: var(--text);
-  margin-bottom: 10px;
-}
-
-/* 프로그램 현황 그리드 */
-.kdream-stats-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
   gap: 8px;
-  margin-bottom: 4px;
+  flex: 1;
+  padding: 9px 12px;
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-md);
 }
-.kdream-stat-card {
+.kdream-search-ico { color: var(--text-sub); flex-shrink: 0; }
+.kdream-search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 14px;
+  background: transparent;
+  color: var(--text);
+}
+.kdream-search-input::placeholder { color: var(--text-sub); }
+.kdream-clear-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-sub);
+  padding: 0;
   display: flex;
-  flex-direction: column;
+  align-items: center;
+}
+
+/* 내 위치 버튼 */
+.kdream-loc-btn {
+  display: flex;
   align-items: center;
   gap: 4px;
-  padding: 10px 6px;
+  padding: 9px 11px;
+  background: var(--card);
+  border: 1.5px solid var(--border);
   border-radius: var(--r-md);
-  text-align: center;
-}
-.kdream-stat-label {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
-  line-height: 1.3;
+  color: var(--text-sub);
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
-.kdream-stat-count {
-  font-size: 10.5px;
-  font-weight: 600;
-  opacity: 0.75;
+.kdream-loc-btn.active {
+  background: var(--brand-tint);
+  border-color: var(--brand);
+  color: var(--brand-deep);
+}
+.kdream-loc-label { font-size: 11px; }
+
+/* 목록/지도 토글 (topbar 오른쪽) */
+.kdream-view-toggle {
+  display: flex;
+  gap: 2px;
+}
+.kdream-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--r-sm);
+  background: none;
+  border: none;
+  color: var(--text-sub);
+  cursor: pointer;
+}
+.kdream-toggle-btn.active {
+  background: var(--brand-tint);
+  color: var(--brand);
 }
 
 /* 지역 필터 스크롤 */
@@ -3827,41 +3848,118 @@ button {
   display: flex;
   overflow-x: auto;
   gap: 6px;
-  padding: 14px 20px 0;
+  padding: 10px 20px 0;
   scrollbar-width: none;
 }
 .kdream-region-scroll::-webkit-scrollbar { display: none; }
 .kdream-region-chip { white-space: nowrap; }
+.kdream-chip-cnt { font-size: 10px; opacity: 0.65; }
 
-/* 센터 목록 */
-.kdream-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-top: 4px;
+/* 결과 수 */
+.kdream-result-count {
+  padding: 8px 20px 0;
+  font-size: 12.5px;
+  color: var(--text-sub);
+}
+.kdream-near-badge {
+  font-weight: 700;
+  color: var(--brand);
 }
 
-/* 센터 카드 */
-.kdream-card {
+/* ── 지도 뷰 ── */
+.kdream-map-wrap {
+  position: relative;
+  margin: 10px 20px 0;
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  height: 420px;
+  border: 1.5px solid var(--border);
+}
+.kdream-map {
+  width: 100%;
+  height: 100%;
+}
+
+/* 커스텀 마커 */
+.kdream-marker {
+  width: 14px;
+  height: 14px;
+  background: var(--brand);
+  border: 2.5px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+.kdream-marker.selected {
+  width: 18px;
+  height: 18px;
+  background: var(--coral);
+  border-color: #fff;
+}
+.kdream-marker.me {
+  width: 16px;
+  height: 16px;
+  background: #2563eb;
+  border-color: #fff;
+  box-shadow: 0 0 0 4px rgba(37,99,235,0.25);
+}
+
+/* 지도 하단 팝업 패널 */
+.kdream-map-panel {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--card);
+  padding: 14px 16px 18px;
+  border-top: 1.5px solid var(--border);
+  z-index: 1000;
+}
+.kdream-map-panel-close {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  background: var(--bg);
+  border: none;
+  border-radius: 50%;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-sub);
+}
+
+/* ── 목록 뷰 ── */
+.kdream-list-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 20px 0;
+}
+.kdream-list-card {
   background: var(--card);
   border: 1.5px solid var(--border);
   border-radius: var(--r-md);
   overflow: hidden;
+  cursor: pointer;
   transition: border-color 0.18s;
 }
-.kdream-card.open { border-color: var(--brand); }
-
-.kdream-card-header {
+.kdream-list-card.selected { border-color: var(--brand); }
+.kdream-list-card-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 16px;
-  width: 100%;
-  text-align: left;
-  cursor: pointer;
+  padding: 12px 14px;
 }
+.kdream-list-card-body {
+  padding: 0 14px 12px;
+  border-top: 1px solid var(--border);
+}
+
+/* 공통 카드 요소 */
 .kdream-card-name {
-  font-size: 14.5px;
+  font-size: 14px;
   font-weight: 800;
   color: var(--text);
   margin-bottom: 3px;
@@ -3872,54 +3970,30 @@ button {
   gap: 4px;
   font-size: 11.5px;
   color: var(--text-sub);
-}
-.kdream-chevron {
-  color: var(--text-sub);
-  transition: transform 0.2s;
-  flex-shrink: 0;
-}
-.kdream-chevron.open { transform: rotate(90deg); }
-
-/* 카드 상세 */
-.kdream-card-body {
-  padding: 0 16px 14px;
-  border-top: 1px solid var(--border);
+  flex-wrap: wrap;
 }
 .kdream-card-address {
   font-size: 12.5px;
   color: var(--text-sub);
-  margin: 10px 0 4px;
+  margin: 8px 0 4px;
   line-height: 1.4;
 }
-.kdream-card-hours {
-  font-size: 12px;
-  color: var(--text-sub);
-  margin: 0 0 4px;
+
+/* 거리 칩 */
+.kdream-dist-chip {
+  margin-left: 4px;
+  padding: 1px 6px;
+  background: var(--brand-tint);
+  border-radius: var(--r-pill);
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--brand-deep);
 }
-.kdream-card-note {
+.kdream-near-dist {
   font-size: 12px;
   color: var(--brand);
   font-weight: 600;
-  margin: 0 0 8px;
-}
-
-/* 프로그램 칩 */
-.kdream-prog-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-  margin: 8px 0 12px;
-}
-.kdream-prog-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 9px;
-  background: var(--bg);
-  border-radius: var(--r-pill);
-  font-size: 11.5px;
-  font-weight: 600;
-  color: var(--text-sub);
+  margin: 4px 0 8px;
 }
 
 /* 연락처 버튼 */
@@ -3927,6 +4001,7 @@ button {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+  margin-top: 8px;
 }
 .kdream-action-btn {
   display: inline-flex;
@@ -3937,21 +4012,17 @@ button {
   font-size: 13px;
   font-weight: 700;
   text-decoration: none;
+  cursor: pointer;
+  border: none;
   transition: opacity 0.15s;
 }
 .kdream-action-btn:hover { opacity: 0.8; }
-.kdream-action-btn.call {
-  background: var(--brand-tint);
-  color: var(--brand-deep);
-}
-.kdream-action-btn.web {
-  background: var(--bg);
-  color: var(--text);
-}
+.kdream-action-btn.call { background: var(--brand-tint); color: var(--brand-deep); }
+.kdream-action-btn.web  { background: var(--bg); color: var(--text); }
 
-/* Footer 안내 */
+/* Footer */
 .kdream-footer-note {
-  margin: 20px 20px 100px;
+  margin: 20px 20px 0;
   padding: 14px 16px;
   background: var(--card);
   border-radius: var(--r-md);
@@ -3967,4 +4038,5 @@ button {
   line-height: 1.5;
 }
 .kdream-footer-note b { color: var(--text); }
+.kdream-source { font-size: 11px !important; margin-top: 4px !important; }
 
