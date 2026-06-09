@@ -18,38 +18,33 @@ import DreamdriveScreen from './components/DreamdriveScreen.jsx';
 import GedGuideScreen from './components/GedGuideScreen.jsx';
 import CareerHubScreen from './components/CareerHubScreen.jsx';
 import PathGuideScreen from './components/PathGuideScreen.jsx';
+import OnboardingScreen from './components/OnboardingScreen.jsx';
 import BottomNav from './components/BottomNav.jsx';
 import SplashScreen from './components/SplashScreen.jsx';
+import { getPersona, getNav, activeTabId } from './lib/persona.js';
 
-// 하단 탭의 루트 화면들
-const TAB_ROOTS = ['home', 'explore', 'roadmap', 'mypage'];
+// 하단 탭의 루트 화면들(여기로 가면 스택 리셋). persona별로 탭이 달라도 모두 포함.
+const TAB_ROOTS = ['home', 'ged-guide', 'explore', 'univ-explore', 'roadmap', 'mypage'];
 
 const KNOWN_SCREENS = [
   'guide', 'results', 'detail', 'documents', 'saved', 'map', 'help',
   'checklist', 'forms-guide', 'dreamdrive', 'ged-guide', 'univ-explore', 'path',
+  'onboarding',
 ];
-
-// 검정고시 "결과"가 있는지 — 점수를 하나라도 넣었거나, 합격 회차를 골랐으면 결과 있음으로 본다.
-// (아직 안 본 사람·점수 미입력자는 결과 없음 → 검정고시 도우미로 안내)
-function hasGedResult() {
-  try {
-    const p = JSON.parse(localStorage.getItem('rebridge_profile'));
-    if (!p) return false;
-    const hasScores = p.gedScores && Object.values(p.gedScores).some((v) => v !== '' && v != null);
-    const tookExam = p.examRound && p.examRound !== '아직 안 봤어요';
-    return Boolean(hasScores || tookExam);
-  } catch {
-    return false;
-  }
-}
 
 export default function App() {
   const [splash, setSplash] = useState(true);
+  const [stack, setStack] = useState([{ screen: 'home', params: {} }]);
 
   function handleSplashDone() {
     setSplash(false);
-    // 검정고시 결과 있으면 기존 홈으로, 없으면 검정고시 도우미 안내로.
-    if (!hasGedResult()) setStack([{ screen: 'ged-guide', params: {} }]);
+    const persona = getPersona();
+    if (!persona) {
+      setStack([{ screen: 'onboarding', params: {} }]);
+    } else {
+      const { landing } = getNav(persona);
+      setStack([{ screen: landing, params: {} }]);
+    }
   }
 
   function handleProfileComplete() {
@@ -59,7 +54,6 @@ export default function App() {
     ]);
   }
 
-  const [stack, setStack] = useState([{ screen: 'home', params: {} }]);
   const current = stack[stack.length - 1];
   const screen  = current.screen;
   const params  = current.params;
@@ -79,15 +73,22 @@ export default function App() {
     window.scrollTo(0, 0);
   }, []);
 
-  const isMainScreen = ['home', 'explore', 'roadmap', 'mypage', 'profile'].includes(screen);
+  const isMainScreen = [...TAB_ROOTS, 'profile', 'onboarding'].includes(screen);
+
+  // persona 기반 하단 탭 (없으면 BottomNav 기본 폴백)
+  const persona = getPersona();
+  const nav = getNav(persona);
+  const showNav = !splash && persona && !['onboarding', 'profile'].includes(screen);
 
   return (
     <div className="app-shell">
       <div className="app-frame">
         {splash && <SplashScreen onDone={handleSplashDone} />}
 
+        {!splash && screen === 'onboarding'  && <OnboardingScreen goTo={goTo} />}
+
         {!splash && screen === 'home'        && <HomeScreen goTo={goTo} />}
-        {!splash && screen === 'explore'     && <CareerHubScreen goTo={goTo} />}
+        {!splash && screen === 'explore'     && <CareerHubScreen goTo={goTo} persona={persona} />}
         {!splash && screen === 'univ-explore' && <ExploreScreen goTo={goTo} goBack={goBack} />}
         {!splash && screen === 'path'        && (
           <PathGuideScreen pathKey={params.key} goBack={goBack} />
@@ -141,13 +142,8 @@ export default function App() {
           </div>
         )}
 
-        {!splash && (TAB_ROOTS.includes(screen) || screen === 'results' || screen === 'ged-guide' || screen === 'univ-explore') && (
-          <BottomNav
-            active={
-              TAB_ROOTS.includes(screen) ? screen : screen === 'univ-explore' ? 'explore' : 'home'
-            }
-            goTo={goTo}
-          />
+        {showNav && (
+          <BottomNav tabs={nav.tabs} active={activeTabId(screen)} goTo={goTo} />
         )}
       </div>
     </div>

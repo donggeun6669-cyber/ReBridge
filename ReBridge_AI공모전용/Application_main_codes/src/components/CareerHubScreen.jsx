@@ -1,10 +1,13 @@
-import { GraduationCap, Wrench, BadgeCheck, ChevronRight, Compass, Phone } from 'lucide-react';
+import { GraduationCap, Wrench, BadgeCheck, Compass, Phone } from 'lucide-react';
 import { CAREER_PATHS, WORK_SAFETY } from '../data/careerPaths.js';
+import { careerCardsFor } from '../lib/persona.js';
 import '../styles.career.css';
 
 const ICONS = { Wrench, BadgeCheck };
 
-export default function CareerHubScreen({ goTo = () => {} }) {
+export default function CareerHubScreen({ goTo = () => {}, persona = null }) {
+  const cards = careerCardsFor(persona); // ['university','training','cert'] 중 일부
+  const showUniv = cards.includes('university');
   return (
     <div className="screen">
       <header className="topbar">
@@ -21,14 +24,16 @@ export default function CareerHubScreen({ goTo = () => {} }) {
 
       <div className="career-cards">
         {/* 대학 진학 — 우리 강점(실데이터 매칭) */}
-        <button className="career-card cc-brand" onClick={() => goTo('univ-explore')}>
-          <span className="career-card-emoji">🎓</span>
-          <span className="career-card-body">
-            <span className="career-card-title">대학 진학</span>
-            <span className="career-card-tag">내 점수로 갈 대학을 찾고 싶어요</span>
-          </span>
-          <span className="career-card-arrow"><GraduationCap size={20} /></span>
-        </button>
+        {showUniv && (
+          <button className="career-card cc-brand" onClick={() => goTo('univ-explore')}>
+            <span className="career-card-emoji">🎓</span>
+            <span className="career-card-body">
+              <span className="career-card-title">대학 진학</span>
+              <span className="career-card-tag">내 점수로 갈 대학을 찾고 싶어요</span>
+            </span>
+            <span className="career-card-arrow"><GraduationCap size={20} /></span>
+          </button>
+        )}
 
         {/* 직업훈련 / 자격증·취업 — 안내 + 공식 연결 */}
         {Object.values(CAREER_PATHS).map((p) => {

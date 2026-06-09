@@ -5,7 +5,6 @@ import {
   Globe2, FlaskConical, Landmark, Info,
 } from 'lucide-react';
 import LogoMark from './LogoMark.jsx';
-import ModeSwitch from './ModeSwitch.jsx';
 import {
   GED_LINKS, PASS_RULE, GED_SUBJECT_GUIDE, GED_ELECTIVE_NOTE,
   getNextSession, daysUntil, formatKDate,
@@ -185,9 +184,6 @@ export default function GedGuideScreen({ goTo = () => {} }) {
           ))}
         </div>
       </div>
-
-      {/* ── 모드 전환: 대학 탐색으로 ── */}
-      <ModeSwitch current="study" goTo={goTo} />
 
       <p className="note" style={{ marginTop: 22 }}>
         검정고시로 대학을 준비하는<br />
