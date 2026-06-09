@@ -15,6 +15,7 @@ import HelpScreen from './components/HelpScreen.jsx';
 import ChecklistScreen from './components/ChecklistScreen.jsx';
 import FormsGuideScreen from './components/FormsGuideScreen.jsx';
 import DreamdriveScreen from './components/DreamdriveScreen.jsx';
+import GedGuideScreen from './components/GedGuideScreen.jsx';
 import BottomNav from './components/BottomNav.jsx';
 import SplashScreen from './components/SplashScreen.jsx';
 
@@ -23,12 +24,21 @@ const TAB_ROOTS = ['home', 'explore', 'roadmap', 'mypage'];
 
 const KNOWN_SCREENS = [
   'guide', 'results', 'detail', 'documents', 'saved', 'map', 'help',
-  'checklist', 'forms-guide', 'dreamdrive',
+  'checklist', 'forms-guide', 'dreamdrive', 'ged-guide',
 ];
 
-function hasProfile() {
-  try { return Boolean(JSON.parse(localStorage.getItem('rebridge_profile'))); }
-  catch { return false; }
+// 검정고시 "결과"가 있는지 — 점수를 하나라도 넣었거나, 합격 회차를 골랐으면 결과 있음으로 본다.
+// (아직 안 본 사람·점수 미입력자는 결과 없음 → 검정고시 도우미로 안내)
+function hasGedResult() {
+  try {
+    const p = JSON.parse(localStorage.getItem('rebridge_profile'));
+    if (!p) return false;
+    const hasScores = p.gedScores && Object.values(p.gedScores).some((v) => v !== '' && v != null);
+    const tookExam = p.examRound && p.examRound !== '아직 안 봤어요';
+    return Boolean(hasScores || tookExam);
+  } catch {
+    return false;
+  }
 }
 
 export default function App() {
@@ -36,7 +46,8 @@ export default function App() {
 
   function handleSplashDone() {
     setSplash(false);
-    if (!hasProfile()) setStack([{ screen: 'profile', params: {} }]);
+    // 검정고시 결과 있으면 기존 홈으로, 없으면 검정고시 도우미 안내로.
+    if (!hasGedResult()) setStack([{ screen: 'ged-guide', params: {} }]);
   }
 
   function handleProfileComplete() {
@@ -102,6 +113,7 @@ export default function App() {
         {!splash && screen === 'checklist'   && <ChecklistScreen goTo={goTo} goBack={goBack} />}
         {!splash && screen === 'forms-guide' && <FormsGuideScreen goTo={goTo} goBack={goBack} />}
         {!splash && screen === 'dreamdrive'  && <DreamdriveScreen goTo={goTo} goBack={goBack} />}
+        {!splash && screen === 'ged-guide'   && <GedGuideScreen goTo={goTo} goBack={goBack} />}
 
         {/* 미구현 화면 fallback */}
         {!splash && !isMainScreen && !KNOWN_SCREENS.includes(screen) && (
@@ -123,7 +135,7 @@ export default function App() {
           </div>
         )}
 
-        {!splash && (TAB_ROOTS.includes(screen) || screen === 'results') && (
+        {!splash && (TAB_ROOTS.includes(screen) || screen === 'results' || screen === 'ged-guide') && (
           <BottomNav active={TAB_ROOTS.includes(screen) ? screen : 'home'} goTo={goTo} />
         )}
       </div>

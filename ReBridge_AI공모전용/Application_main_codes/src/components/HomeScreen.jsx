@@ -1,7 +1,7 @@
 import {
   ArrowRight, HelpCircle, Sparkles, Scale, Target,
   ChevronRight, ArrowLeftRight, Layers, CalendarDays,
-  MessageCircle, BarChart3, FileText, Users,
+  MessageCircle, BarChart3, FileText, Users, GraduationCap,
 } from 'lucide-react';
 import LogoMark from './LogoMark.jsx';
 
@@ -69,6 +69,17 @@ export default function HomeScreen({ goTo = () => {} }) {
             <span className="home-quick-text">
               <span className="home-quick-title">지금 내가 뭘 해야 할 때일까요?</span>
               <span className="home-quick-sub">지금 시기에 맞는 할 일 확인</span>
+            </span>
+            <ChevronRight size={16} className="home-quick-arrow" />
+          </button>
+          <div className="home-divider" />
+          <button className="home-quick-row" onClick={() => goTo('ged-guide')}>
+            <span className="home-quick-ico ico-gold">
+              <GraduationCap size={18} />
+            </span>
+            <span className="home-quick-text">
+              <span className="home-quick-title">검정고시 준비 도우미</span>
+              <span className="home-quick-sub">시험 D-day · 과목별 공부 가이드 · 기출</span>
             </span>
             <ChevronRight size={16} className="home-quick-arrow" />
           </button>
