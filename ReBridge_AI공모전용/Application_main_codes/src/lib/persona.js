@@ -56,11 +56,16 @@ export function getNav(persona) {
     };
   }
 
-  // 취업·자격증 — 진로 허브 중심. 입시 로드맵은 안 맞으므로 노출하지 않는다.
+  // 취업·자격증 — 대학 트랙급 4탭 (홈/정보탐색/준비 로드맵/프로필).
   if (goal === 'job') {
     return {
-      tabs: [TAB.careerJob, TAB.mypage],
-      landing: 'explore',
+      tabs: [
+        { id: 'home', label: '홈', icon: 'Home', screen: 'job-home' },
+        { id: 'explore', label: '정보탐색', icon: 'Search', screen: 'job-explore' },
+        { id: 'roadmap', label: '준비', icon: 'Route', screen: 'job-roadmap' },
+        { id: 'mypage', label: '프로필', icon: 'User', screen: 'mypage' },
+      ],
+      landing: 'job-home',
     };
   }
   if (goal === 'undecided') {
@@ -80,10 +85,10 @@ export function getNav(persona) {
 export function activeTabId(screen, persona = null) {
   // 공부 중(대학) 유저는 '탐색' 탭이 '플래너'다. 대학 관련 화면은 프로필 경유라 프로필 탭으로.
   const studying = persona?.stage === 'studying' && persona?.goal === 'university';
-  if (['home', 'ged-guide'].includes(screen)) return 'home';
+  if (['home', 'ged-guide', 'job-home', 'job-questions'].includes(screen)) return 'home';
   if (['mypage', 'saved', 'help', 'profile'].includes(screen)) return 'mypage';
-  if (['roadmap', 'study-roadmap', 'checklist', 'forms-guide', 'dreamdrive'].includes(screen)) return 'roadmap';
-  if (['explore', 'study-planner', 'path'].includes(screen)) return 'explore';
+  if (['roadmap', 'study-roadmap', 'job-roadmap', 'checklist', 'forms-guide', 'dreamdrive'].includes(screen)) return 'roadmap';
+  if (['explore', 'study-planner', 'path', 'job-explore'].includes(screen)) return 'explore';
   // 대학 관련 서브화면
   if (['univ-explore', 'detail', 'documents', 'map', 'results'].includes(screen)) {
     return studying ? 'mypage' : 'explore';
