@@ -1,0 +1,69 @@
+/* =====================================================================
+   MyPage — persona 인식 카드
+   ===================================================================== */
+
+.mp-persona-card {
+  margin-top: 6px;
+  padding: 14px 16px 12px;
+  border-radius: var(--r-lg);
+  background: var(--card);
+  box-shadow: var(--shadow-sm);
+}
+
+.mp-persona-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.mp-persona-label {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--text-sub);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.mp-persona-reset {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  border-radius: var(--r-pill);
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--text-sub);
+  border: 1px solid var(--border);
+  background: var(--bg-soft);
+  transition: background 0.13s, color 0.13s;
+}
+.mp-persona-reset:active {
+  background: var(--brand-tint);
+  color: var(--brand);
+}
+
+.mp-persona-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.mp-persona-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 11px;
+  border-radius: var(--r-pill);
+  font-size: 12.5px;
+  font-weight: 700;
+  line-height: 1;
+}
+.mp-persona-chip--stage {
+  background: var(--brand-tint);
+  color: var(--brand-deep);
+}
+.mp-persona-chip--goal {
+  background: var(--coral-tint);
+  color: var(--coral-deep);
+}
