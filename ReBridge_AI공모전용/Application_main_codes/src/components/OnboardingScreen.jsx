@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { GraduationCap, BookOpen, Briefcase, Compass, ArrowRight, ChevronLeft } from 'lucide-react';
+import { GraduationCap, BookOpen, Briefcase, ArrowRight, ChevronLeft } from 'lucide-react';
 import LogoMark from './LogoMark.jsx';
 import { savePersona, getNav } from '../lib/persona.js';
 import '../styles.onboarding.css';
@@ -20,13 +20,6 @@ const TRACK_OPTS = [
     title: '바로 취업·자격증',
     desc: '직업훈련·자격증으로 일을 시작할래요',
     color: 'green',
-  },
-  {
-    key: 'undecided',
-    icon: Compass,
-    title: '아직 고민 중이에요',
-    desc: '어떤 길이 있는지 둘러보고 싶어요',
-    color: 'gold',
   },
 ];
 
