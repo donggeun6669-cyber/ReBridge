@@ -56,13 +56,13 @@ export default function RoadmapScreen({ goTo = () => {} }) {
   function stageAction(id) {
     if (id === 'target') {
       return hasScore
-        ? { label: '내 점수로 가능성순 보기', icon: Search, onClick: () => goTo('explore') }
-        : { label: '대학 둘러보기', icon: Search, onClick: () => goTo('explore') };
+        ? { label: '내 점수로 가능성순 보기', icon: Search, onClick: () => goTo('univ-explore') }
+        : { label: '대학 둘러보기', icon: Search, onClick: () => goTo('univ-explore') };
     }
     if (id === 'susi') {
       return bookmarkCount > 0
         ? { label: `관심 대학 ${bookmarkCount}곳 보기`, icon: Bookmark, onClick: () => goTo('saved') }
-        : { label: '관심 대학 담으러 가기', icon: Bookmark, onClick: () => goTo('explore') };
+        : { label: '관심 대학 담으러 가기', icon: Bookmark, onClick: () => goTo('univ-explore') };
     }
     return null;
   }
@@ -120,7 +120,7 @@ export default function RoadmapScreen({ goTo = () => {} }) {
           ) : targets.length === 0 ? (
             <div className="rm-targets-empty">
               <p>가고 싶은 대학을 <b>관심 대학</b>으로 담으면, 합격선까지 <b>몇 점이 더 필요한지</b> 여기서 챙겨드려요.</p>
-              <button className="rm-chip-btn" onClick={() => goTo('explore')}>
+              <button className="rm-chip-btn" onClick={() => goTo('univ-explore')}>
                 <Search size={14} /> 대학 담으러 가기
               </button>
             </div>

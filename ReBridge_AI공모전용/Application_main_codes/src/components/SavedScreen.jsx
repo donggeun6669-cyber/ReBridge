@@ -41,7 +41,7 @@ export default function SavedScreen({ goTo = () => {}, goBack = () => {} }) {
           </span>
           <h2>아직 담은 대학이 없어요</h2>
           <p>대학 상세 화면의 북마크 버튼을 누르면 여기에 모여요.</p>
-          <button className="btn-outline" onClick={() => goTo('explore')}>
+          <button className="btn-outline" onClick={() => goTo('univ-explore')}>
             <Search size={14} style={{ marginRight: 6, verticalAlign: '-2px' }} />
             대학 둘러보기
           </button>

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Search, X, ChevronRight, SlidersHorizontal, Sparkles, Map as MapIcon } from 'lucide-react';
+import { Search, X, ChevronRight, SlidersHorizontal, Sparkles, Map as MapIcon, ArrowLeft } from 'lucide-react';
 import { getExploreList } from '../lib/analysis.js';
 import { evaluateAdmission, admissionChance, gedFit } from '../lib/scoreEngine.js';
 import ChanceGauge from './ChanceGauge.jsx';
@@ -43,7 +43,7 @@ function loadProfile() {
   }
 }
 
-export default function ExploreScreen({ goTo = () => {} }) {
+export default function ExploreScreen({ goTo = () => {}, goBack = () => {} }) {
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState('전체');
   const [sort, setSort] = useState('reco');
@@ -109,7 +109,12 @@ export default function ExploreScreen({ goTo = () => {} }) {
   return (
     <div className="screen">
       <header className="topbar">
-        <span className="page-title">대학 탐색</span>
+        <span className="topbar-left">
+          <button className="icon-btn" aria-label="뒤로" onClick={goBack}>
+            <ArrowLeft size={22} />
+          </button>
+          <span className="page-title">대학 탐색</span>
+        </span>
         <button className="topbar-textbtn" onClick={() => goTo('map')}>
           <MapIcon size={16} /> 지도
         </button>

@@ -16,6 +16,8 @@ import ChecklistScreen from './components/ChecklistScreen.jsx';
 import FormsGuideScreen from './components/FormsGuideScreen.jsx';
 import DreamdriveScreen from './components/DreamdriveScreen.jsx';
 import GedGuideScreen from './components/GedGuideScreen.jsx';
+import CareerHubScreen from './components/CareerHubScreen.jsx';
+import PathGuideScreen from './components/PathGuideScreen.jsx';
 import BottomNav from './components/BottomNav.jsx';
 import SplashScreen from './components/SplashScreen.jsx';
 
@@ -24,7 +26,7 @@ const TAB_ROOTS = ['home', 'explore', 'roadmap', 'mypage'];
 
 const KNOWN_SCREENS = [
   'guide', 'results', 'detail', 'documents', 'saved', 'map', 'help',
-  'checklist', 'forms-guide', 'dreamdrive', 'ged-guide',
+  'checklist', 'forms-guide', 'dreamdrive', 'ged-guide', 'univ-explore', 'path',
 ];
 
 // 검정고시 "결과"가 있는지 — 점수를 하나라도 넣었거나, 합격 회차를 골랐으면 결과 있음으로 본다.
@@ -85,7 +87,11 @@ export default function App() {
         {splash && <SplashScreen onDone={handleSplashDone} />}
 
         {!splash && screen === 'home'        && <HomeScreen goTo={goTo} />}
-        {!splash && screen === 'explore'     && <ExploreScreen goTo={goTo} />}
+        {!splash && screen === 'explore'     && <CareerHubScreen goTo={goTo} />}
+        {!splash && screen === 'univ-explore' && <ExploreScreen goTo={goTo} goBack={goBack} />}
+        {!splash && screen === 'path'        && (
+          <PathGuideScreen pathKey={params.key} goBack={goBack} />
+        )}
         {!splash && screen === 'mypage'      && <MyPageScreen goTo={goTo} goBack={goBack} />}
         {!splash && screen === 'roadmap'     && <RoadmapScreen goTo={goTo} />}
         {!splash && screen === 'profile'     && (
@@ -135,8 +141,13 @@ export default function App() {
           </div>
         )}
 
-        {!splash && (TAB_ROOTS.includes(screen) || screen === 'results' || screen === 'ged-guide') && (
-          <BottomNav active={TAB_ROOTS.includes(screen) ? screen : 'home'} goTo={goTo} />
+        {!splash && (TAB_ROOTS.includes(screen) || screen === 'results' || screen === 'ged-guide' || screen === 'univ-explore') && (
+          <BottomNav
+            active={
+              TAB_ROOTS.includes(screen) ? screen : screen === 'univ-explore' ? 'explore' : 'home'
+            }
+            goTo={goTo}
+          />
         )}
       </div>
     </div>

@@ -182,6 +182,11 @@ button {
   justify-content: center;
   position: relative;
 }
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
 .brand-lockup {
   display: flex;
   align-items: center;
