@@ -87,7 +87,7 @@ export default function App() {
       <div className="app-frame">
         {splash && <SplashScreen onDone={handleSplashDone} />}
 
-        {!splash && screen === 'onboarding'  && <OnboardingScreen goTo={goTo} />}
+        {!splash && screen === 'onboarding'  && <OnboardingScreen goTo={goTo} presetTrack={params.presetTrack} />}
 
         {!splash && screen === 'home'        && <HomeScreen goTo={goTo} />}
         {!splash && screen === 'explore'     && <CareerHubScreen goTo={goTo} persona={persona} />}

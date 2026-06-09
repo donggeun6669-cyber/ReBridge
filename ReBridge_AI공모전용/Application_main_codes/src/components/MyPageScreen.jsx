@@ -1,8 +1,17 @@
 import {
   User, Pencil, Bookmark, BookOpen, ChevronRight,
   MapPin, GraduationCap, ClipboardCheck, Heart,
-  RefreshCw, Target, Briefcase, HelpCircle,
+  RefreshCw, Target, Briefcase, HelpCircle, RotateCcw,
 } from 'lucide-react';
+
+// 테스트/초기화용 — 저장된 모든 정보 지우고 첫 화면(스플래시→온보딩)부터 다시
+function resetEverything() {
+  try {
+    localStorage.removeItem('rebridge_profile');
+    localStorage.removeItem('rebridge_study_progress');
+  } catch { /* 무시 */ }
+  window.location.reload();
+}
 import { getPersona, loadProfile } from '../lib/persona';
 import '../styles.mypage.css';
 
@@ -217,6 +226,13 @@ export default function MyPageScreen({ goTo = () => {}, goBack = () => {} }) {
         <br />
         로그인 없이 편하게 써요.
       </p>
+
+      {/* 처음부터 다시 시작 (로그아웃처럼) — 저장된 정보 모두 삭제 */}
+      <button className="mp-reset-btn" onClick={resetEverything}>
+        <RotateCcw size={15} />
+        처음부터 다시 시작
+      </button>
+      <p className="mp-reset-hint">입력한 모든 정보를 지우고 첫 화면으로 돌아가요.</p>
 
       <p className="build-stamp">build {__BUILD_TIME__}</p>
     </div>

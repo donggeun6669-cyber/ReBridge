@@ -55,8 +55,9 @@ function hasScores() {
   } catch { return false; }
 }
 
-export default function OnboardingScreen({ goTo = () => {} }) {
-  const [step, setStep] = useState(0);
+export default function OnboardingScreen({ goTo = () => {}, presetTrack = null }) {
+  // 진로 허브에서 '대학 진학'으로 진입하면 검정고시 단계 질문부터 시작
+  const [step, setStep] = useState(presetTrack === 'university' ? 1 : 0);
 
   function finish(goal, stage) {
     savePersona({ goal, stage });

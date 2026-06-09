@@ -23,13 +23,20 @@ export default function CareerHubScreen({ goTo = () => {}, persona = null }) {
       </div>
 
       <div className="career-cards">
-        {/* 대학 진학 — 우리 강점(실데이터 매칭) */}
+        {/* 대학 진학 — 누르면 대학 트랙으로 전환(검정고시 단계부터) */}
         {showUniv && (
-          <button className="career-card cc-brand" onClick={() => goTo('univ-explore')}>
+          <button
+            className="career-card cc-brand"
+            onClick={() =>
+              persona?.goal === 'university'
+                ? goTo('univ-explore')
+                : goTo('onboarding', { presetTrack: 'university' })
+            }
+          >
             <span className="career-card-emoji">🎓</span>
             <span className="career-card-body">
               <span className="career-card-title">대학 진학</span>
-              <span className="career-card-tag">내 점수로 갈 대학을 찾고 싶어요</span>
+              <span className="career-card-tag">검정고시로 대학에 가고 싶어요</span>
             </span>
             <span className="career-card-arrow"><GraduationCap size={20} /></span>
           </button>

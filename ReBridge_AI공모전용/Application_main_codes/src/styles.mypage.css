@@ -2,6 +2,30 @@
    MyPage — persona 인식 카드
    ===================================================================== */
 
+/* 처음부터 다시 시작 (로그아웃형) */
+.mp-reset-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: 100%;
+  margin-top: 18px;
+  padding: 13px;
+  border-radius: var(--r-md);
+  background: var(--card);
+  border: 1px solid var(--border);
+  color: var(--danger);
+  font-size: 14px;
+  font-weight: 700;
+}
+.mp-reset-btn:active { background: var(--danger-soft); }
+.mp-reset-hint {
+  text-align: center;
+  font-size: 11.5px;
+  color: var(--text-sub);
+  margin-top: 8px;
+}
+
 .mp-persona-card {
   margin-top: 6px;
   padding: 14px 16px 12px;
