@@ -43,7 +43,7 @@ function loadProfile() {
   }
 }
 
-export default function ExploreScreen({ goTo = () => {}, goBack = () => {} }) {
+export default function ExploreScreen({ goTo = () => {}, goBack = () => {}, canGoBack = false }) {
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState('전체');
   const [sort, setSort] = useState('reco');
@@ -111,9 +111,11 @@ export default function ExploreScreen({ goTo = () => {}, goBack = () => {} }) {
     <div className="screen">
       <header className="topbar">
         <span className="topbar-left">
-          <button className="icon-btn" aria-label="뒤로" onClick={goBack}>
-            <ArrowLeft size={22} />
-          </button>
+          {canGoBack && (
+            <button className="icon-btn" aria-label="뒤로" onClick={goBack}>
+              <ArrowLeft size={22} />
+            </button>
+          )}
           <span className="page-title">대학 탐색</span>
         </span>
         <button className="topbar-textbtn" onClick={() => goTo('map')}>

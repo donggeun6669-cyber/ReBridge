@@ -97,7 +97,7 @@ export default function MyPageScreen({ goTo = () => {}, goBack = () => {} }) {
       )}
 
       {/* 프로필 카드 */}
-      <div className="mp-card" style={{ marginTop: persona ? 10 : 6 }}>
+      <div className="mp-card" style={{ marginTop: persona ? 18 : 6 }}>
         <div className="mp-card-header">
           <span className="mp-avatar">
             <User size={30} color="#fff" />

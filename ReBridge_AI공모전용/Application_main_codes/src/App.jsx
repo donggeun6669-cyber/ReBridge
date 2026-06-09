@@ -26,7 +26,8 @@ import SplashScreen from './components/SplashScreen.jsx';
 import { getPersona, getNav, activeTabId } from './lib/persona.js';
 
 // 하단 탭의 루트 화면들(여기로 가면 스택 리셋). persona별로 탭이 달라도 모두 포함.
-const TAB_ROOTS = ['home', 'ged-guide', 'explore', 'univ-explore', 'roadmap', 'study-roadmap', 'study-planner', 'mypage'];
+// univ-explore는 제외: tested는 탭(BottomNav가 리셋), studying은 프로필 경유 서브화면(push해야 뒤로가기 됨).
+const TAB_ROOTS = ['home', 'ged-guide', 'explore', 'roadmap', 'study-roadmap', 'study-planner', 'mypage'];
 
 const KNOWN_SCREENS = [
   'guide', 'results', 'detail', 'documents', 'saved', 'map', 'help',
@@ -81,6 +82,12 @@ export default function App() {
     window.scrollTo(0, 0);
   }, []);
 
+  // 하단 탭 전용 — 항상 스택을 해당 화면으로 리셋(콘텐츠 이동인 goTo와 분리)
+  const goToTab = useCallback((screen) => {
+    setStack([{ screen, params: {} }]);
+    window.scrollTo(0, 0);
+  }, []);
+
   const isMainScreen = [...TAB_ROOTS, 'profile', 'onboarding'].includes(screen);
 
   // persona 기반 하단 탭 (없으면 BottomNav 기본 폴백)
@@ -97,7 +104,7 @@ export default function App() {
 
         {!splash && screen === 'home'        && <HomeScreen goTo={goTo} />}
         {!splash && screen === 'explore'     && <CareerHubScreen goTo={goTo} persona={persona} />}
-        {!splash && screen === 'univ-explore' && <ExploreScreen goTo={goTo} goBack={goBack} />}
+        {!splash && screen === 'univ-explore' && <ExploreScreen goTo={goTo} goBack={goBack} canGoBack={stack.length > 1} />}
         {!splash && screen === 'path'        && (
           <PathGuideScreen pathKey={params.key} goBack={goBack} />
         )}
@@ -153,7 +160,7 @@ export default function App() {
         )}
 
         {showNav && (
-          <BottomNav tabs={nav.tabs} active={activeTabId(screen, persona)} goTo={goTo} />
+          <BottomNav tabs={nav.tabs} active={activeTabId(screen, persona)} goTo={goToTab} />
         )}
       </div>
     </div>
