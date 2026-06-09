@@ -182,32 +182,66 @@
 .gedh-link-host { font-size: 12px; color: var(--text-sub); margin-top: 2px; }
 .gedh-link-ext { color: var(--brand); flex: 0 0 auto; }
 
-/* ── 이미 합격 → 점수 입력 CTA ── */
-.gedh-cta {
+/* ── 원서접수 임박/진행 배너 ── */
+.gedh-applybanner {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 13px 15px;
+  margin: 0 0 16px;
+  border-radius: var(--r-md);
+  background: var(--caution-soft);
+  border: 1px solid #F4D08A;
+  text-decoration: none;
+  color: inherit;
+  box-shadow: var(--shadow-sm);
+}
+.gedh-applybanner:active { filter: brightness(0.97); }
+.gedh-applybanner-ico {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: #F6B84B;
+  color: #fff;
+}
+.gedh-applybanner-body { flex: 1; display: flex; flex-direction: column; }
+.gedh-applybanner-title { font-size: 14.5px; font-weight: 800; color: #9A6300; }
+.gedh-applybanner-sub { font-size: 12px; color: #B07A1E; margin-top: 2px; }
+
+/* ── 모드 전환 버튼 (학습 홈 ↔ 대학 탐색) ── */
+.mode-switch {
   width: 100%;
   margin-top: 22px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 18px 20px;
+  gap: 13px;
+  padding: 17px 18px;
   border-radius: var(--r-lg);
   background: var(--card);
-  border: 1.5px solid var(--brand);
+  border: 1.5px solid var(--border);
   box-shadow: var(--shadow-md);
   text-align: left;
 }
-.gedh-cta:active { transform: scale(0.98); }
-.gedh-cta-inner { display: flex; flex-direction: column; }
-.gedh-cta-label { font-size: 12.5px; color: var(--text-sub); }
-.gedh-cta-title { font-size: 17px; font-weight: 800; color: var(--brand-deep); margin-top: 2px; }
-.gedh-cta-arrow {
-  width: 40px;
-  height: 40px;
-  flex: 0 0 40px;
+.mode-switch:active { transform: scale(0.985); }
+.mode-switch-ico {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
   display: grid;
   place-items: center;
-  border-radius: 50%;
-  background: var(--grad-brand);
+  border-radius: 13px;
   color: #fff;
 }
+.ms-study .mode-switch-ico { background: var(--grad-warm); }     /* 학습 홈 = 초록 */
+.ms-explore .mode-switch-ico { background: var(--grad-brand); }  /* 대학 탐색 = 파랑 */
+.ms-study { border-color: var(--green); }
+.ms-explore { border-color: var(--brand); }
+.mode-switch-body { flex: 1; display: flex; flex-direction: column; }
+.mode-switch-title { font-size: 16px; font-weight: 800; color: var(--text); }
+.ms-study .mode-switch-title { color: var(--green-dark); }
+.ms-explore .mode-switch-title { color: var(--brand-deep); }
+.mode-switch-sub { font-size: 12.5px; color: var(--text-sub); margin-top: 2px; }
+.mode-switch-arrow { color: var(--text-sub); flex: 0 0 auto; }

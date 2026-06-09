@@ -4,6 +4,7 @@ import {
   MessageCircle, BarChart3, FileText, Users, GraduationCap,
 } from 'lucide-react';
 import LogoMark from './LogoMark.jsx';
+import ModeSwitch from './ModeSwitch.jsx';
 
 const HELP = [
   { icon: HelpCircle,    color: 'brand', title: '전형이 뭐예요?',                topic: 'types'       },
@@ -114,6 +115,11 @@ export default function HomeScreen({ goTo = () => {} }) {
             </button>
           ))}
         </div>
+      </div>
+
+      {/* 모드 전환: 학습 홈으로 */}
+      <div className="home-section">
+        <ModeSwitch current="explore" goTo={goTo} />
       </div>
 
       <p className="note" style={{ marginTop: 28 }}>

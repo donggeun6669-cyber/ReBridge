@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react';
 import {
-  ArrowRight, ChevronDown, ExternalLink, CalendarClock, FileText,
+  ChevronDown, ExternalLink, CalendarClock, FileText,
   ClipboardList, Award, CheckCircle2, BookOpen, Calculator, Languages,
   Globe2, FlaskConical, Landmark, Info,
 } from 'lucide-react';
 import LogoMark from './LogoMark.jsx';
+import ModeSwitch from './ModeSwitch.jsx';
 import {
   GED_LINKS, PASS_RULE, GED_SUBJECT_GUIDE, GED_ELECTIVE_NOTE,
   getNextSession, daysUntil, formatKDate,
@@ -20,6 +21,9 @@ export default function GedGuideScreen({ goTo = () => {} }) {
 
   const session = useMemo(() => getNextSession(), []);
   const dday = session ? daysUntil(session.examDate) : null;
+  const applyDday = session ? daysUntil(session.applyDate) : null;
+  // 원서접수 임박/진행 중(D-14 ~ 접수일+5일)일 때 적극 안내
+  const applyOpen = applyDday != null && applyDday <= 14 && applyDday >= -5;
 
   // 다음 회차의 3단계 (원서접수 → 시험 → 합격발표)
   const milestones = session
@@ -64,6 +68,29 @@ export default function GedGuideScreen({ goTo = () => {} }) {
             {session.year}년 {session.label} · 시험 {formatKDate(session.examDate)}
           </div>
         </div>
+      )}
+
+      {/* ── 원서접수 임박/진행 배너 ── */}
+      {applyOpen && (
+        <a
+          className="gedh-applybanner"
+          href={GED_LINKS.apply.url}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <span className="gedh-applybanner-ico"><ClipboardList size={18} /></span>
+          <span className="gedh-applybanner-body">
+            <span className="gedh-applybanner-title">
+              {applyDday > 0
+                ? `원서접수 ${applyDday}일 남았어요`
+                : '지금 원서접수 기간이에요'}
+            </span>
+            <span className="gedh-applybanner-sub">
+              놓치면 이번 회차는 응시할 수 없어요 · 접수 바로가기
+            </span>
+          </span>
+          <ExternalLink size={15} />
+        </a>
       )}
 
       {/* ── 일정 타임라인 ── */}
@@ -159,14 +186,8 @@ export default function GedGuideScreen({ goTo = () => {} }) {
         </div>
       </div>
 
-      {/* ── 이미 합격한 사람 → 점수 입력 ── */}
-      <button className="gedh-cta" onClick={() => goTo('profile')}>
-        <span className="gedh-cta-inner">
-          <span className="gedh-cta-label">이미 검정고시에 합격했어요</span>
-          <span className="gedh-cta-title">점수 넣고 대학 찾기</span>
-        </span>
-        <span className="gedh-cta-arrow"><ArrowRight size={22} /></span>
-      </button>
+      {/* ── 모드 전환: 대학 탐색으로 ── */}
+      <ModeSwitch current="study" goTo={goTo} />
 
       <p className="note" style={{ marginTop: 22 }}>
         검정고시로 대학을 준비하는<br />
