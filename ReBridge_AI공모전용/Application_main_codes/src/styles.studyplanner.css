@@ -1,213 +1,150 @@
 /* =====================================================================
-   StudyPlannerScreen — 공부 플래너 (검정고시 공부 중)
+   StudyPlannerScreen — 데일리 플래너 + 학습시간 + 달력 (모트모트형)
    ===================================================================== */
 .planner-dday {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 12.5px;
-  font-weight: 700;
-  color: var(--brand-deep);
-  background: var(--brand-tint);
-  padding: 5px 11px;
-  border-radius: var(--r-pill);
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 12.5px; font-weight: 700; color: var(--brand-deep);
+  background: var(--brand-tint); padding: 5px 11px; border-radius: var(--r-pill);
 }
 
-/* 동기부여 메시지 */
+/* 동기부여 */
 .planner-motiv {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 13px 15px;
-  margin: 4px 0 12px;
-  border-radius: var(--r-md);
-  background: var(--grad-warm);
-  color: #fff;
-  box-shadow: var(--shadow-warm);
+  display: flex; align-items: center; gap: 10px;
+  padding: 13px 15px; margin: 4px 0 12px;
+  border-radius: var(--r-md); background: var(--grad-warm);
+  color: #fff; box-shadow: var(--shadow-warm);
 }
 .planner-motiv-ico { flex: 0 0 auto; display: grid; place-items: center; }
 .planner-motiv-text { font-size: 13.5px; font-weight: 700; line-height: 1.45; }
 
 /* 목표 점수 카드 */
 .planner-target {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 16px;
-  margin-bottom: 14px;
-  border-radius: var(--r-md);
-  background: var(--card);
-  border: 1px solid var(--brand-tint);
-  box-shadow: var(--shadow-sm);
-  text-align: left;
+  width: 100%; display: flex; align-items: center; gap: 12px;
+  padding: 14px 16px; margin-bottom: 14px; border-radius: var(--r-md);
+  background: var(--card); border: 1px solid var(--brand-tint);
+  box-shadow: var(--shadow-sm); text-align: left;
 }
 .planner-target:active { background: var(--brand-tint); }
 .planner-target-ico {
-  width: 38px; height: 38px; flex: 0 0 38px;
-  display: grid; place-items: center;
+  width: 38px; height: 38px; flex: 0 0 38px; display: grid; place-items: center;
   border-radius: 11px; background: var(--brand-tint); color: var(--brand-deep);
 }
 .planner-target-body { flex: 1; display: flex; flex-direction: column; }
 .planner-target-label { font-size: 11.5px; color: var(--text-sub); }
 .planner-target-val { font-size: 15.5px; font-weight: 800; color: var(--brand-deep); margin-top: 1px; }
 
-/* 오늘의 할 일 체크리스트 */
-.planner-tasks { display: flex; flex-direction: column; gap: 7px; margin-bottom: 4px; }
+/* 공부 시간 기록 */
+.planner-time {
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--r-lg);
+  box-shadow: var(--shadow-sm); padding: 16px; margin-bottom: 16px;
+}
+.planner-time-head { display: flex; justify-content: space-between; align-items: center; }
+.planner-time-when { font-size: 13px; font-weight: 700; color: var(--text-sub); }
+.planner-time-reset { font-size: 12px; color: var(--text-sub); padding: 4px 8px; border-radius: var(--r-pill); background: var(--bg-soft); }
+.planner-time-total {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 26px; font-weight: 800; color: var(--brand-deep); margin: 6px 0 12px;
+}
+.planner-subj-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 11px; }
+.planner-subj-chip {
+  font-size: 12px; font-weight: 700; color: var(--text-sub);
+  background: var(--bg-soft); border: 1px solid var(--border);
+  padding: 6px 11px; border-radius: var(--r-pill);
+}
+.planner-subj-chip.on { color: #fff; background: var(--brand); border-color: var(--brand); }
+.planner-time-add { display: flex; gap: 8px; }
+.planner-add-btn {
+  flex: 1; padding: 11px 0; border-radius: var(--r-md);
+  background: var(--brand-tint); color: var(--brand-deep);
+  font-size: 14px; font-weight: 800;
+}
+.planner-add-btn:active { filter: brightness(0.96); }
+
+/* 데일리 플래너 */
+.planner-daily-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.planner-list-label2 { font-size: 14px; font-weight: 800; color: var(--text); }
+.planner-rec-btn {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 12.5px; font-weight: 700; color: var(--green-dark);
+  background: var(--green-soft); padding: 6px 12px; border-radius: var(--r-pill);
+}
+.planner-task-input { display: flex; gap: 8px; margin-bottom: 10px; }
+.planner-task-input input {
+  flex: 1; border: 1.5px solid var(--border); border-radius: var(--r-md);
+  padding: 12px 14px; font-size: 14px; font-family: inherit; background: var(--card); color: var(--text);
+}
+.planner-task-input input:focus { outline: none; border-color: var(--brand); }
+.planner-task-add {
+  flex: 0 0 46px; width: 46px; border-radius: var(--r-md);
+  background: var(--brand); color: #fff; display: grid; place-items: center;
+}
+.planner-task-add:active { filter: brightness(0.95); }
+
+.planner-tasks { display: flex; flex-direction: column; gap: 7px; }
+.planner-empty { font-size: 13px; color: var(--text-sub); padding: 14px; text-align: center; background: var(--bg-soft); border-radius: var(--r-md); }
 .planner-task {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 14px;
-  border-radius: var(--r-md);
-  background: var(--card);
-  border: 1.5px solid var(--border);
-  box-shadow: var(--shadow-sm);
-  text-align: left;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text);
+  display: flex; align-items: center; gap: 6px;
+  padding: 4px 8px 4px 4px; border-radius: var(--r-md);
+  background: var(--card); border: 1.5px solid var(--border); box-shadow: var(--shadow-sm);
 }
-.planner-task svg { flex: 0 0 auto; color: var(--text-sub); }
-.planner-task:active { transform: scale(0.99); }
-.planner-task.on {
-  border-color: var(--green);
-  background: var(--green-soft);
-  color: var(--green-dark);
+.planner-task-check {
+  flex: 1; display: flex; align-items: center; gap: 10px;
+  padding: 10px; text-align: left; font-size: 14px; font-weight: 600; color: var(--text);
 }
-.planner-task.on svg { color: var(--green); }
-.planner-task.on span { text-decoration: line-through; opacity: 0.8; }
+.planner-task-check svg { flex: 0 0 auto; color: var(--text-sub); }
+.planner-task.on { border-color: var(--green); background: var(--green-soft); }
+.planner-task.on .planner-task-check { color: var(--green-dark); }
+.planner-task.on .planner-task-check svg { color: var(--green); }
+.planner-task.on .planner-task-check span { text-decoration: line-through; opacity: 0.75; }
+.planner-task-del { flex: 0 0 auto; width: 28px; height: 28px; display: grid; place-items: center; border-radius: 8px; color: var(--text-sub); }
+.planner-task-del:active { background: var(--bg-soft); }
 
-/* 과목별 공부법 링크 */
-.planner-guide-link {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  margin-top: 14px;
-  padding: 13px;
-  border-radius: var(--r-md);
-  background: var(--brand-tint);
-  color: var(--brand-deep);
-  font-size: 14px;
-  font-weight: 700;
+/* 학습 달력 */
+.planner-cal {
+  margin: 22px 0 6px; padding: 14px; border-radius: var(--r-lg);
+  background: var(--card); border: 1px solid var(--border); box-shadow: var(--shadow-sm);
 }
-.planner-guide-link:active { filter: brightness(0.97); }
+.planner-cal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.planner-cal-title { font-size: 14px; font-weight: 800; color: var(--text); }
+.planner-cal-nav { width: 32px; height: 32px; display: grid; place-items: center; border-radius: 8px; color: var(--text-sub); background: var(--bg-soft); }
+.planner-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.planner-cal-dow { text-align: center; font-size: 11px; font-weight: 700; color: var(--text-sub); padding-bottom: 4px; }
+.planner-cal-cell {
+  aspect-ratio: 1; display: grid; place-items: center; border-radius: 9px;
+  font-size: 12.5px; font-weight: 700; color: var(--text);
+  background: var(--bg-soft); border: 1.5px solid transparent;
+}
+.planner-cal-cell.empty { background: transparent; }
+.planner-cal-cell.lvl0 { background: var(--bg-soft); color: var(--text-sub); }
+.planner-cal-cell.lvl1 { background: #DCEFE2; color: var(--green-dark); }
+.planner-cal-cell.lvl2 { background: #AEDFBE; color: var(--green-dark); }
+.planner-cal-cell.lvl3 { background: #6FCB8C; color: #0B5C2A; }
+.planner-cal-cell.lvl4 { background: var(--green); color: #fff; }
+.planner-cal-cell.today { border-color: var(--brand); }
+.planner-cal-cell.sel { box-shadow: 0 0 0 2px var(--brand); }
+.planner-cal-legend { font-size: 11px; color: var(--text-sub); margin-top: 10px; line-height: 1.4; }
 
-/* 진행률 */
+/* 전체 과목 진행 */
 .planner-progress {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--r-md);
-  box-shadow: var(--shadow-sm);
-  padding: 16px;
-  margin: 6px 0 16px;
-  position: relative;
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--r-md);
+  box-shadow: var(--shadow-sm); padding: 16px; margin: 22px 0 12px; position: relative;
 }
 .planner-progress-top { display: flex; justify-content: space-between; align-items: baseline; }
 .planner-progress-label { font-size: 13px; font-weight: 700; color: var(--text-sub); }
 .planner-progress-num { font-size: 13px; font-weight: 700; color: var(--text); }
-.planner-bar {
-  margin-top: 10px;
-  height: 12px;
-  border-radius: var(--r-pill);
-  background: var(--bg-soft);
-  overflow: hidden;
-}
-.planner-bar-fill {
-  display: block;
-  height: 100%;
-  border-radius: var(--r-pill);
-  background: var(--grad-warm);
-  transition: width 0.35s ease;
-}
-.planner-progress-pct {
-  position: absolute;
-  right: 16px;
-  bottom: 14px;
-  font-size: 11px;
-  font-weight: 800;
-  color: var(--green-dark);
-}
+.planner-bar { margin-top: 10px; height: 12px; border-radius: var(--r-pill); background: var(--bg-soft); overflow: hidden; }
+.planner-bar-fill { display: block; height: 100%; border-radius: var(--r-pill); background: var(--grad-warm); transition: width 0.35s ease; }
+.planner-progress-pct { position: absolute; right: 16px; bottom: 14px; font-size: 11px; font-weight: 800; color: var(--green-dark); }
 
-/* 다음 추천 */
-.planner-next {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 15px 16px;
-  border-radius: var(--r-lg);
-  background: var(--grad-soft);
-  border: 1px solid var(--brand-tint);
-  text-align: left;
-  margin-bottom: 20px;
-}
-.planner-next:active { filter: brightness(0.98); }
-.planner-next-ico {
-  width: 40px;
-  height: 40px;
-  flex: 0 0 40px;
-  display: grid;
-  place-items: center;
-  border-radius: 12px;
-  background: var(--brand);
-  color: #fff;
-}
-.planner-next-body { flex: 1; display: flex; flex-direction: column; }
-.planner-next-kicker { font-size: 11.5px; font-weight: 700; color: var(--brand-deep); }
-.planner-next-title { font-size: 16px; font-weight: 800; color: var(--text); margin-top: 1px; }
-.planner-next-sub { font-size: 12px; color: var(--text-sub); margin-top: 2px; line-height: 1.4; }
-
-.planner-done-all {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--green-dark);
-  background: var(--green-soft);
-  border-radius: var(--r-md);
-  padding: 15px 16px;
-  margin-bottom: 20px;
-}
-
-/* 과목 리스트 */
-.planner-list-label {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--text-sub);
-  margin-bottom: 10px;
-}
-.planner-list-label span { font-weight: 500; color: var(--text-sub); font-size: 12px; }
-.planner-subjects {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 9px;
-}
+.planner-subjects { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
 .planner-subj {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 8px;
-  padding: 14px 15px;
-  border-radius: var(--r-md);
-  background: var(--card);
-  border: 1.5px solid var(--border);
-  box-shadow: var(--shadow-sm);
-  text-align: left;
-  transition: border-color 0.15s, background 0.15s;
+  display: flex; flex-direction: column; align-items: flex-start; gap: 8px;
+  padding: 14px 15px; border-radius: var(--r-md);
+  background: var(--card); border: 1.5px solid var(--border); box-shadow: var(--shadow-sm); text-align: left;
 }
 .planner-subj:active { transform: scale(0.97); }
 .planner-subj-name { font-size: 15.5px; font-weight: 800; color: var(--text); }
-.planner-subj-state {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 12.5px;
-  font-weight: 700;
-}
+.planner-subj-state { display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; font-weight: 700; }
 .st-todo  { border-color: var(--border); }
 .st-todo  .planner-subj-state { color: var(--text-sub); }
 .st-doing { border-color: var(--caution); background: var(--caution-soft); }
