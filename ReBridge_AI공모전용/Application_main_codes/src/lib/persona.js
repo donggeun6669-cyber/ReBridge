@@ -44,17 +44,19 @@ export function getNav(persona) {
     careerJob: { id: 'explore', label: '진로', icon: 'Compass', screen: 'explore' },
     careerHub: { id: 'explore', label: '진로 탐색', icon: 'Compass', screen: 'explore' },
     roadmap: { id: 'roadmap', label: '로드맵', icon: 'Route', screen: 'roadmap' },
+    studyRoadmap: { id: 'roadmap', label: '로드맵', icon: 'Route', screen: 'study-roadmap' },
     mypage: { id: 'mypage', label: '프로필', icon: 'User', screen: 'mypage' },
   };
 
   if (stage === 'studying') {
     // 공부 중 — 학습 홈이 중심. 점수가 없으니 합격 게이지는 안 씀(탐색은 '목표 잡기' 용도).
+    // 로드맵도 입시용이 아니라 '검정고시 준비 로드맵'으로.
     let mid;
     if (goal === 'university') mid = TAB.targetUniv;
     else if (goal === 'job') mid = TAB.careerJob;
     else mid = TAB.careerHub;
     return {
-      tabs: [TAB.studyHome, mid, TAB.roadmap, TAB.mypage],
+      tabs: [TAB.studyHome, mid, TAB.studyRoadmap, TAB.mypage],
       landing: 'ged-guide',
     };
   }
@@ -85,7 +87,7 @@ export function activeTabId(screen) {
   if (['explore', 'univ-explore', 'path', 'detail', 'documents', 'map', 'results'].includes(screen)) {
     return 'explore';
   }
-  if (['roadmap', 'checklist', 'forms-guide', 'dreamdrive'].includes(screen)) return 'roadmap';
+  if (['roadmap', 'study-roadmap', 'checklist', 'forms-guide', 'dreamdrive'].includes(screen)) return 'roadmap';
   if (['mypage', 'saved', 'help'].includes(screen)) return 'mypage';
   return 'home';
 }
