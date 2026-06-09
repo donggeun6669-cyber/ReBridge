@@ -17,6 +17,7 @@ import FormsGuideScreen from './components/FormsGuideScreen.jsx';
 import DreamdriveScreen from './components/DreamdriveScreen.jsx';
 import GedGuideScreen from './components/GedGuideScreen.jsx';
 import StudyRoadmapScreen from './components/StudyRoadmapScreen.jsx';
+import StudyPlannerScreen from './components/StudyPlannerScreen.jsx';
 import CareerHubScreen from './components/CareerHubScreen.jsx';
 import PathGuideScreen from './components/PathGuideScreen.jsx';
 import OnboardingScreen from './components/OnboardingScreen.jsx';
@@ -25,12 +26,12 @@ import SplashScreen from './components/SplashScreen.jsx';
 import { getPersona, getNav, activeTabId } from './lib/persona.js';
 
 // 하단 탭의 루트 화면들(여기로 가면 스택 리셋). persona별로 탭이 달라도 모두 포함.
-const TAB_ROOTS = ['home', 'ged-guide', 'explore', 'univ-explore', 'roadmap', 'study-roadmap', 'mypage'];
+const TAB_ROOTS = ['home', 'ged-guide', 'explore', 'univ-explore', 'roadmap', 'study-roadmap', 'study-planner', 'mypage'];
 
 const KNOWN_SCREENS = [
   'guide', 'results', 'detail', 'documents', 'saved', 'map', 'help',
   'checklist', 'forms-guide', 'dreamdrive', 'ged-guide', 'univ-explore', 'path',
-  'onboarding', 'study-roadmap',
+  'onboarding', 'study-roadmap', 'study-planner',
 ];
 
 export default function App() {
@@ -123,6 +124,7 @@ export default function App() {
         {!splash && screen === 'dreamdrive'  && <DreamdriveScreen goTo={goTo} goBack={goBack} />}
         {!splash && screen === 'ged-guide'   && <GedGuideScreen goTo={goTo} goBack={goBack} />}
         {!splash && screen === 'study-roadmap' && <StudyRoadmapScreen goTo={goTo} />}
+        {!splash && screen === 'study-planner' && <StudyPlannerScreen goTo={goTo} />}
 
         {/* 미구현 화면 fallback */}
         {!splash && !isMainScreen && !KNOWN_SCREENS.includes(screen) && (

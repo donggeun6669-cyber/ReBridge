@@ -39,7 +39,7 @@ export function getNav(persona) {
   const TAB = {
     studyHome: { id: 'home', label: '학습 홈', icon: 'GraduationCap', screen: 'ged-guide' },
     exploreHome: { id: 'home', label: '홈', icon: 'Home', screen: 'home' },
-    targetUniv: { id: 'explore', label: '목표 대학', icon: 'Search', screen: 'univ-explore' },
+    planner: { id: 'explore', label: '플래너', icon: 'ListChecks', screen: 'study-planner' },
     univExplore: { id: 'explore', label: '대학 탐색', icon: 'Search', screen: 'univ-explore' },
     careerJob: { id: 'explore', label: '진로', icon: 'Compass', screen: 'explore' },
     careerHub: { id: 'explore', label: '진로 탐색', icon: 'Compass', screen: 'explore' },
@@ -48,29 +48,24 @@ export function getNav(persona) {
     mypage: { id: 'mypage', label: '프로필', icon: 'User', screen: 'mypage' },
   };
 
-  if (stage === 'studying') {
-    // 공부 중 — 학습 홈이 중심. 점수가 없으니 합격 게이지는 안 씀(탐색은 '목표 잡기' 용도).
-    // 로드맵도 입시용이 아니라 '검정고시 준비 로드맵'으로.
-    let mid;
-    if (goal === 'university') mid = TAB.targetUniv;
-    else if (goal === 'job') mid = TAB.careerJob;
-    else mid = TAB.careerHub;
+  // 검정고시 공부 중 — 학습 홈 중심. 진로 탐색 없음. 로드맵은 '공부 로드맵'.
+  if (goal === 'university' && stage === 'studying') {
     return {
-      tabs: [TAB.studyHome, mid, TAB.studyRoadmap, TAB.mypage],
+      tabs: [TAB.studyHome, TAB.planner, TAB.studyRoadmap, TAB.mypage],
       landing: 'ged-guide',
     };
   }
 
-  // tested — 이미 응시(점수 있음). 완성된 입시 기능 풀 사용.
+  // 취업·자격증 — 진로 허브 중심. 입시 로드맵은 안 맞으므로 노출하지 않는다.
   if (goal === 'job') {
     return {
-      tabs: [TAB.careerJob, TAB.roadmap, TAB.mypage],
+      tabs: [TAB.careerJob, TAB.mypage],
       landing: 'explore',
     };
   }
   if (goal === 'undecided') {
     return {
-      tabs: [TAB.careerHub, TAB.roadmap, TAB.mypage],
+      tabs: [TAB.careerHub, TAB.mypage],
       landing: 'explore',
     };
   }
@@ -84,7 +79,7 @@ export function getNav(persona) {
 // 현재 화면이 어느 탭에 속하는지 (서브화면 포함) → 활성 탭 id
 export function activeTabId(screen) {
   if (['home', 'ged-guide'].includes(screen)) return 'home';
-  if (['explore', 'univ-explore', 'path', 'detail', 'documents', 'map', 'results'].includes(screen)) {
+  if (['explore', 'univ-explore', 'study-planner', 'path', 'detail', 'documents', 'map', 'results'].includes(screen)) {
     return 'explore';
   }
   if (['roadmap', 'study-roadmap', 'checklist', 'forms-guide', 'dreamdrive'].includes(screen)) return 'roadmap';

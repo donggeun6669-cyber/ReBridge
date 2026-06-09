@@ -1,0 +1,134 @@
+/* =====================================================================
+   StudyPlannerScreen — 공부 플래너 (검정고시 공부 중)
+   ===================================================================== */
+.planner-dday {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--brand-deep);
+  background: var(--brand-tint);
+  padding: 5px 11px;
+  border-radius: var(--r-pill);
+}
+
+/* 진행률 */
+.planner-progress {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-sm);
+  padding: 16px;
+  margin: 6px 0 16px;
+  position: relative;
+}
+.planner-progress-top { display: flex; justify-content: space-between; align-items: baseline; }
+.planner-progress-label { font-size: 13px; font-weight: 700; color: var(--text-sub); }
+.planner-progress-num { font-size: 13px; font-weight: 700; color: var(--text); }
+.planner-bar {
+  margin-top: 10px;
+  height: 12px;
+  border-radius: var(--r-pill);
+  background: var(--bg-soft);
+  overflow: hidden;
+}
+.planner-bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: var(--r-pill);
+  background: var(--grad-warm);
+  transition: width 0.35s ease;
+}
+.planner-progress-pct {
+  position: absolute;
+  right: 16px;
+  bottom: 14px;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--green-dark);
+}
+
+/* 다음 추천 */
+.planner-next {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 15px 16px;
+  border-radius: var(--r-lg);
+  background: var(--grad-soft);
+  border: 1px solid var(--brand-tint);
+  text-align: left;
+  margin-bottom: 20px;
+}
+.planner-next:active { filter: brightness(0.98); }
+.planner-next-ico {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--brand);
+  color: #fff;
+}
+.planner-next-body { flex: 1; display: flex; flex-direction: column; }
+.planner-next-kicker { font-size: 11.5px; font-weight: 700; color: var(--brand-deep); }
+.planner-next-title { font-size: 16px; font-weight: 800; color: var(--text); margin-top: 1px; }
+.planner-next-sub { font-size: 12px; color: var(--text-sub); margin-top: 2px; line-height: 1.4; }
+
+.planner-done-all {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--green-dark);
+  background: var(--green-soft);
+  border-radius: var(--r-md);
+  padding: 15px 16px;
+  margin-bottom: 20px;
+}
+
+/* 과목 리스트 */
+.planner-list-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-sub);
+  margin-bottom: 10px;
+}
+.planner-list-label span { font-weight: 500; color: var(--text-sub); font-size: 12px; }
+.planner-subjects {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+}
+.planner-subj {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 14px 15px;
+  border-radius: var(--r-md);
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  text-align: left;
+  transition: border-color 0.15s, background 0.15s;
+}
+.planner-subj:active { transform: scale(0.97); }
+.planner-subj-name { font-size: 15.5px; font-weight: 800; color: var(--text); }
+.planner-subj-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12.5px;
+  font-weight: 700;
+}
+.st-todo  { border-color: var(--border); }
+.st-todo  .planner-subj-state { color: var(--text-sub); }
+.st-doing { border-color: var(--caution); background: var(--caution-soft); }
+.st-doing .planner-subj-state { color: #9A6300; }
+.st-done  { border-color: var(--green); background: var(--green-soft); }
+.st-done  .planner-subj-state { color: var(--green-dark); }
