@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Search, X, ChevronRight, SlidersHorizontal, Sparkles, Map as MapIcon, ArrowLeft } from 'lucide-react';
+import { Search, X, ChevronRight, SlidersHorizontal, Sparkles, Map as MapIcon, ArrowLeft, Target } from 'lucide-react';
 import { getExploreList } from '../lib/analysis.js';
 import { evaluateAdmission, admissionChance, gedFit } from '../lib/scoreEngine.js';
 import ChanceGauge from './ChanceGauge.jsx';
@@ -51,6 +51,7 @@ export default function ExploreScreen({ goTo = () => {}, goBack = () => {} }) {
   const profile = useMemo(loadProfile, []);
   const all = useMemo(getExploreList, []);
   const hasScore = !!(profile && profile.gedScores && profile.gedAvg != null);
+  const isTarget = hasScore && profile.scoreMode === 'target'; // 공부 중 = 목표 점수 기준
 
   const isSearching = query.trim() !== '';
 
@@ -173,6 +174,13 @@ export default function ExploreScreen({ goTo = () => {}, goBack = () => {} }) {
             </div>
           </div>
         </>
+      )}
+
+      {isTarget && !isSearching && (
+        <div className="explore-target-note">
+          <Target size={14} />
+          <span><b>목표 점수 기준</b> 합격 가능성이에요. 실제 점수가 나오면 다시 확인해요.</span>
+        </div>
       )}
 
       {!hasScore && !isSearching && (

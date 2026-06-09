@@ -50,6 +50,12 @@ export default function App() {
   }
 
   function handleProfileComplete() {
+    const persona = getPersona();
+    // 공부 중(대학) — '목표 점수'를 넣은 것이므로 목표 대학 탐색으로.
+    if (persona?.stage === 'studying' && persona?.goal === 'university') {
+      setStack([{ screen: 'univ-explore', params: {} }]);
+      return;
+    }
     setStack([
       { screen: 'home',    params: {} },
       { screen: 'results', params: {} },
@@ -147,7 +153,7 @@ export default function App() {
         )}
 
         {showNav && (
-          <BottomNav tabs={nav.tabs} active={activeTabId(screen)} goTo={goTo} />
+          <BottomNav tabs={nav.tabs} active={activeTabId(screen, persona)} goTo={goTo} />
         )}
       </div>
     </div>

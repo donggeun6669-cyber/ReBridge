@@ -77,13 +77,17 @@ export function getNav(persona) {
 }
 
 // 현재 화면이 어느 탭에 속하는지 (서브화면 포함) → 활성 탭 id
-export function activeTabId(screen) {
+export function activeTabId(screen, persona = null) {
+  // 공부 중(대학) 유저는 '탐색' 탭이 '플래너'다. 대학 관련 화면은 프로필 경유라 프로필 탭으로.
+  const studying = persona?.stage === 'studying' && persona?.goal === 'university';
   if (['home', 'ged-guide'].includes(screen)) return 'home';
-  if (['explore', 'univ-explore', 'study-planner', 'path', 'detail', 'documents', 'map', 'results'].includes(screen)) {
-    return 'explore';
-  }
+  if (['mypage', 'saved', 'help', 'profile'].includes(screen)) return 'mypage';
   if (['roadmap', 'study-roadmap', 'checklist', 'forms-guide', 'dreamdrive'].includes(screen)) return 'roadmap';
-  if (['mypage', 'saved', 'help'].includes(screen)) return 'mypage';
+  if (['explore', 'study-planner', 'path'].includes(screen)) return 'explore';
+  // 대학 관련 서브화면
+  if (['univ-explore', 'detail', 'documents', 'map', 'results'].includes(screen)) {
+    return studying ? 'mypage' : 'explore';
+  }
   return 'home';
 }
 

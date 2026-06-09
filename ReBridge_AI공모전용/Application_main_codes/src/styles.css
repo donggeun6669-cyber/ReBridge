@@ -187,6 +187,20 @@ button {
   align-items: center;
   gap: 2px;
 }
+.explore-target-note {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 4px 0 10px;
+  padding: 10px 13px;
+  border-radius: var(--r-sm);
+  background: var(--coral-tint);
+  border: 1px solid #BDE7C8;
+  color: var(--green-dark);
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+.explore-target-note svg { flex: 0 0 auto; }
 .brand-lockup {
   display: flex;
   align-items: center;

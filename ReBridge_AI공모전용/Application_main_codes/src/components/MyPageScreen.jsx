@@ -20,7 +20,7 @@ function toChips(p) {
   if (!p) return [];
   const chips = [];
   if (p.gedAvg != null) {
-    chips.push(`검정고시 평균 ${p.gedAvg}점`);
+    chips.push(`${p.scoreMode === 'target' ? '목표 평균' : '검정고시 평균'} ${p.gedAvg}점`);
     if (p.gedGrade != null) chips.push(`추정 ${p.gedGrade}등급`);
   } else if (p.gedScore) {
     chips.push(p.gedScore === '아직 몰라요' ? '검정고시 점수 미정' : `검정고시 ${p.gedScore}`);
@@ -108,17 +108,19 @@ export default function MyPageScreen({ goTo = () => {}, goBack = () => {} }) {
               {stage === 'tested'
                 ? '검정고시 맞춤 입시 분석 중'
                 : stage === 'studying'
-                ? '점수 생기면 바로 대학 찾아드려요'
+                ? (profile?.gedAvg != null ? '목표 점수로 갈 대학 분석 중' : '목표 점수를 정해볼까요?')
                 : chips.length > 0
                 ? '검정고시 맞춤 입시 분석 중'
                 : '정보를 입력하면 대학을 찾아드려요'}
             </span>
           </div>
-          {/* tested: 점수 수정 버튼 / 기존 프로필 있고 persona 없음: 수정 버튼 */}
-          {(stage === 'tested' || (!persona && chips.length > 0)) && (
+          {/* 점수/목표 수정 버튼 */}
+          {(stage === 'tested'
+            || (stage === 'studying' && profile?.gedAvg != null)
+            || (!persona && chips.length > 0)) && (
             <button className="mp-edit-btn" onClick={() => goTo('profile')}>
               <Pencil size={14} />
-              {stage === 'tested' ? '점수 수정' : '수정'}
+              {stage === 'studying' ? '목표 수정' : stage === 'tested' ? '점수 수정' : '수정'}
             </button>
           )}
         </div>
@@ -132,13 +134,29 @@ export default function MyPageScreen({ goTo = () => {}, goBack = () => {} }) {
           </div>
         )}
 
-        {/* studying — 점수 없는 사용자: 나중에 입력 CTA */}
-        {stage === 'studying' && (
+        {/* studying — 목표 점수 미설정: 목표 점수 정하기 CTA */}
+        {stage === 'studying' && profile?.gedAvg == null && (
           <button className="mp-setup-cta" onClick={() => goTo('profile')}>
-            <GraduationCap size={16} />
-            검정고시 점수가 생기면 입력하기
+            <Target size={16} />
+            목표 점수 정하고 대학 찾기
             <ChevronRight size={15} />
           </button>
+        )}
+
+        {/* studying — 목표 점수 설정됨: 칩 + 목표 대학 찾기 */}
+        {stage === 'studying' && profile?.gedAvg != null && (
+          <>
+            <div className="mp-chips">
+              {chips.map((c) => (
+                <span className="pchip" key={c}>{c}</span>
+              ))}
+            </div>
+            <button className="mp-setup-cta" onClick={() => goTo('univ-explore')}>
+              <Target size={16} />
+              목표로 갈 수 있는 대학 보기
+              <ChevronRight size={15} />
+            </button>
+          </>
         )}
 
         {/* persona 없음 + 프로필 없음: 처음 입력 CTA */}
