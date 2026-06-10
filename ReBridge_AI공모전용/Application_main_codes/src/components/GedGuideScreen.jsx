@@ -2,21 +2,47 @@ import { useMemo, useState } from 'react';
 import {
   ChevronDown, ExternalLink, CalendarClock, FileText,
   ClipboardList, Award, CheckCircle2, BookOpen, Calculator, Languages,
-  Globe2, FlaskConical, Landmark, Info,
+  Globe2, FlaskConical, Landmark, Info, Target,
 } from 'lucide-react';
 import LogoMark from './LogoMark.jsx';
 import {
   GED_LINKS, PASS_RULE, GED_SUBJECT_GUIDE, GED_ELECTIVE_NOTE,
   getNextSession, daysUntil, formatKDate,
 } from '../data/gedGuide.js';
+import { loadProfile } from '../lib/persona.js';
 import '../styles.gedguide.css';
 
 const ICONS = {
   BookOpen, Calculator, Languages, Globe2, FlaskConical, Landmark,
 };
 
+const MOCK_KEY = 'rebridge_mock_scores';
+function loadScores() {
+  try { return JSON.parse(localStorage.getItem(MOCK_KEY)) || {}; }
+  catch { return {}; }
+}
+
 export default function GedGuideScreen({ goTo = () => {} }) {
   const [openSubject, setOpenSubject] = useState(null);
+
+  const profile = useMemo(loadProfile, []);
+  const targetAvg = profile?.scoreMode === 'target' ? profile.gedAvg : null;
+
+  // ── 내 모의점수 (과목별) → 합격선 60점과 비교 ──
+  const [scores, setScores] = useState(loadScores);
+  function setScore(subjKey, raw) {
+    const digits = raw.replace(/[^0-9]/g, '').slice(0, 3);
+    const next = { ...scores };
+    if (digits === '') delete next[subjKey];
+    else next[subjKey] = Math.min(100, parseInt(digits, 10));
+    setScores(next);
+    try { localStorage.setItem(MOCK_KEY, JSON.stringify(next)); } catch { /* 무시 */ }
+  }
+  const entered = GED_SUBJECT_GUIDE
+    .map((s) => scores[s.key])
+    .filter((v) => v != null && v !== '');
+  const avg = entered.length ? Math.round(entered.reduce((a, b) => a + b, 0) / entered.length) : null;
+  const passLine = PASS_RULE.passAverage;
 
   const session = useMemo(() => getNextSession(), []);
   const dday = session ? daysUntil(session.examDate) : null;
@@ -124,6 +150,61 @@ export default function GedGuideScreen({ goTo = () => {} }) {
           평균 <b>{PASS_RULE.passAverage}점</b>이면 합격
         </div>
         <p className="gedh-pass-sub">{PASS_RULE.note}</p>
+      </div>
+
+      {/* ── 내 점수 체크 (모의/기출 점수 → 합격선 비교) ── */}
+      <div className="home-section">
+        <p className="home-section-label">
+          <Target size={15} style={{ verticalAlign: '-2px', marginRight: 5 }} />
+          내 점수 체크
+        </p>
+        <div className="gedh-mock">
+          <div className="gedh-mock-grid">
+            {GED_SUBJECT_GUIDE.map((s) => (
+              <label key={s.key} className={`gedh-mock-item ${scores[s.key] != null ? 'on' : ''}`}>
+                <span className="gedh-mock-subj">{s.key}</span>
+                <input
+                  className="gedh-mock-input"
+                  inputMode="numeric"
+                  value={scores[s.key] ?? ''}
+                  onChange={(e) => setScore(s.key, e.target.value)}
+                  placeholder="-"
+                  aria-label={`${s.key} 점수`}
+                />
+                <span className="gedh-mock-unit">점</span>
+              </label>
+            ))}
+          </div>
+
+          {avg == null ? (
+            <p className="gedh-mock-hint">
+              풀어본 기출·모의고사 점수를 적으면 합격선({passLine}점)까지 얼마나 남았는지 알려드려요.
+            </p>
+          ) : (
+            <div className="gedh-mock-result">
+              <div className="gedh-mock-avgrow">
+                <span className="gedh-mock-avg">평균 {avg}점</span>
+                <span className="gedh-mock-cnt">{entered.length}과목 기준</span>
+              </div>
+              <div className="gedh-mock-bar">
+                <span className={`gedh-mock-bar-fill ${avg >= passLine ? 'ok' : ''}`} style={{ width: `${avg}%` }} />
+                <span className="gedh-mock-bar-mark pass" style={{ left: `${passLine}%` }} />
+                {targetAvg != null && <span className="gedh-mock-bar-mark target" style={{ left: `${targetAvg}%` }} />}
+              </div>
+              <p className="gedh-mock-legend">
+                ▏합격선 {passLine}점{targetAvg != null ? ` · 내 목표 ${targetAvg}점` : ''}
+              </p>
+              <p className={`gedh-mock-status ${avg >= passLine ? 'ok' : 'under'}`}>
+                {avg >= passLine
+                  ? (targetAvg != null && avg < targetAvg
+                      ? `합격선 통과! 목표 평균까지 ${targetAvg - avg}점 남았어요.`
+                      : '합격선에 도달했어요. 이대로 꾸준히 가요! 👏')
+                  : `합격선까지 평균 ${passLine - avg}점만 더 올리면 돼요.`}
+              </p>
+            </div>
+          )}
+          <p className="gedh-mock-note">점수는 이 기기에만 저장돼요. 선택 과목은 빼고 필수 6과목으로만 가늠해요.</p>
+        </div>
       </div>
 
       {/* ── 과목별 공부 가이드 ── */}
