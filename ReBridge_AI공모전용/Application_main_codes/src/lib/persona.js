@@ -88,7 +88,7 @@ export function activeTabId(screen, persona = null) {
   if (['home', 'ged-guide', 'job-home', 'job-questions'].includes(screen)) return 'home';
   if (['mypage', 'saved', 'help', 'profile'].includes(screen)) return 'mypage';
   if (['roadmap', 'study-roadmap', 'job-roadmap', 'checklist', 'forms-guide', 'dreamdrive'].includes(screen)) return 'roadmap';
-  if (['explore', 'study-planner', 'path', 'job-explore'].includes(screen)) return 'explore';
+  if (['explore', 'study-planner', 'path', 'job-explore', 'job-detail', 'job-info'].includes(screen)) return 'explore';
   // 대학 관련 서브화면
   if (['univ-explore', 'detail', 'documents', 'map', 'results'].includes(screen)) {
     return studying ? 'mypage' : 'explore';

@@ -1,15 +1,39 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   Briefcase, Search, GraduationCap, BadgeCheck, Coins, HeartHandshake,
-  ChevronDown, ExternalLink, Phone, ArrowUpRight,
+  ChevronDown, ChevronRight, ExternalLink, Phone, Sparkles,
 } from 'lucide-react';
-import { JOB_CATEGORIES, JOB_PROGRAMS } from '../data/jobData.js';
+import { JOB_CATEGORIES, matchPrograms, matchReason } from '../data/jobData.js';
+import { loadProfile } from '../lib/persona.js';
 import '../styles.job.css';
 
 const ICONS = { Briefcase, Search, GraduationCap, BadgeCheck, Coins, HeartHandshake };
 
-export default function JobExploreScreen() {
+export default function JobExploreScreen({ goTo = () => {} }) {
+  const jp = useMemo(() => loadProfile()?.jobProfile || null, []);
+  const { recommended, rest } = useMemo(() => matchPrograms(jp), [jp]);
+  const reason = matchReason(jp);
   const [open, setOpen] = useState(null);
+
+  function ProgCard(p) {
+    return (
+      <button
+        key={p.id}
+        className="job-prog"
+        onClick={() => goTo('job-detail', { id: p.id })}
+      >
+        <div className="job-prog-top">
+          <div className="job-prog-tags">
+            {p.badge && <span className="job-tag badge">{p.badge}</span>}
+            {p.tags.map((t) => <span key={t} className="job-tag">{t}</span>)}
+          </div>
+          <ChevronRight size={16} className="job-prog-go" />
+        </div>
+        <span className="job-prog-title">{p.title}</span>
+        <span className="job-prog-desc">{p.desc}</span>
+      </button>
+    );
+  }
 
   return (
     <div className="screen">
@@ -17,8 +41,30 @@ export default function JobExploreScreen() {
         <span className="page-title">취업 정보</span>
       </header>
 
-      {/* 고용정책 카테고리 */}
-      <p className="job-sec-label">고용정책 한눈에</p>
+      {/* 맞춤 추천 — 앱 안에서 설명, 신청만 외부 */}
+      <p className="job-sec-label">
+        <Sparkles size={13} style={{ verticalAlign: '-2px', marginRight: 4 }} />
+        {jp ? '나에게 맞는 것부터' : '이런 지원이 있어요'}
+      </p>
+      {reason && <p className="job-reason">{reason}</p>}
+      <div className="job-prog-list">
+        {recommended.map(ProgCard)}
+      </div>
+
+      {/* 나머지 프로그램 */}
+      {rest.length > 0 && (
+        <>
+          <p className="job-sec-label" style={{ marginTop: 24 }}>
+            다른 지원도 둘러보기 <span className="job-sec-count">{rest.length}</span>
+          </p>
+          <div className="job-prog-list">
+            {rest.map(ProgCard)}
+          </div>
+        </>
+      )}
+
+      {/* 공식 포털 빠른 연결 (검색·접수형 포털) */}
+      <p className="job-sec-label" style={{ marginTop: 24 }}>공식 포털 바로가기</p>
       <div className="job-cat-grid">
         {JOB_CATEGORIES.map((c) => {
           const Icon = ICONS[c.icon] || Briefcase;
@@ -61,28 +107,9 @@ export default function JobExploreScreen() {
         })}
       </div>
 
-      {/* 청년 지원 프로그램 */}
-      <p className="job-sec-label" style={{ marginTop: 24 }}>
-        청년 지원 프로그램 <span className="job-sec-count">{JOB_PROGRAMS.length}</span>
-      </p>
-      <div className="job-prog-list">
-        {JOB_PROGRAMS.map((p) => (
-          <a key={p.title} className="job-prog" href={p.url} target="_blank" rel="noopener noreferrer">
-            <div className="job-prog-top">
-              <div className="job-prog-tags">
-                {p.badge && <span className="job-tag badge">{p.badge}</span>}
-                {p.tags.map((t) => <span key={t} className="job-tag">{t}</span>)}
-              </div>
-              <ArrowUpRight size={16} className="job-prog-go" />
-            </div>
-            <span className="job-prog-title">{p.title}</span>
-            <span className="job-prog-desc">{p.desc}</span>
-          </a>
-        ))}
-      </div>
-
       <p className="note" style={{ marginTop: 20 }}>
-        프로그램·자격 정보는 <b>공식 기관으로 바로 연결</b>해요. 정확한 자격·일정·금액은 해당 기관에서 확인해요.
+        프로그램 설명은 <b>앱 안에서</b> 안내하고, 실제 신청·접수만 공식 기관으로 연결해요.
+        정확한 자격·일정·금액은 신청 화면에서 확인해요.
       </p>
     </div>
   );

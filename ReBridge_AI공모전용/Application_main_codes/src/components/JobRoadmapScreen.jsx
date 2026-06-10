@@ -40,7 +40,7 @@ export default function JobRoadmapScreen({ goTo = () => {} }) {
                 </div>
                 <p className="srm-todo">{s.todo}</p>
                 {s.cta && (
-                  <button className="srm-cta" onClick={() => goTo(s.cta.screen)}>
+                  <button className="srm-cta" onClick={() => goTo(s.cta.screen, s.cta.params || {})}>
                     {s.cta.label} <ChevronRight size={15} />
                   </button>
                 )}

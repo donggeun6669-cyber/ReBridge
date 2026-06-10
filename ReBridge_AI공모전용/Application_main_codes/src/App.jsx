@@ -24,10 +24,12 @@ import JobHomeScreen from './components/JobHomeScreen.jsx';
 import JobExploreScreen from './components/JobExploreScreen.jsx';
 import JobRoadmapScreen from './components/JobRoadmapScreen.jsx';
 import JobQuestionsScreen from './components/JobQuestionsScreen.jsx';
+import JobDetailScreen from './components/JobDetailScreen.jsx';
+import JobInfoScreen from './components/JobInfoScreen.jsx';
 import OnboardingScreen from './components/OnboardingScreen.jsx';
 import BottomNav from './components/BottomNav.jsx';
 import SplashScreen from './components/SplashScreen.jsx';
-import { getPersona, getNav, activeTabId } from './lib/persona.js';
+import { getPersona, getNav, activeTabId, loadProfile } from './lib/persona.js';
 
 // 하단 탭의 루트 화면들(여기로 가면 스택 리셋). persona별로 탭이 달라도 모두 포함.
 // univ-explore는 제외: tested는 탭(BottomNav가 리셋), studying은 프로필 경유 서브화면(push해야 뒤로가기 됨).
@@ -38,8 +40,15 @@ const KNOWN_SCREENS = [
   'guide', 'results', 'detail', 'documents', 'saved', 'map', 'help',
   'checklist', 'forms-guide', 'dreamdrive', 'ged-guide', 'univ-explore', 'path',
   'onboarding', 'study-roadmap', 'study-planner',
-  'job-home', 'job-explore', 'job-roadmap', 'job-questions',
+  'job-home', 'job-explore', 'job-roadmap', 'job-questions', 'job-detail', 'job-info',
 ];
+
+// 직업 트랙은 답변(jobProfile)이 있어야 맞춤 안내가 되므로, 없으면 질문부터.
+function jobLandingFor(landing) {
+  if (landing !== 'job-home') return landing;
+  const p = loadProfile();
+  return p?.jobProfile ? 'job-home' : 'job-questions';
+}
 
 export default function App() {
   const [splash, setSplash] = useState(true);
@@ -52,7 +61,7 @@ export default function App() {
       setStack([{ screen: 'onboarding', params: {} }]);
     } else {
       const { landing } = getNav(persona);
-      setStack([{ screen: landing, params: {} }]);
+      setStack([{ screen: jobLandingFor(landing), params: {} }]);
     }
   }
 
@@ -145,9 +154,11 @@ export default function App() {
         {!splash && screen === 'study-roadmap' && <StudyRoadmapScreen goTo={goTo} />}
         {!splash && screen === 'study-planner' && <StudyPlannerScreen goTo={goTo} />}
         {!splash && screen === 'job-home'      && <JobHomeScreen goTo={goTo} />}
-        {!splash && screen === 'job-explore'   && <JobExploreScreen />}
+        {!splash && screen === 'job-explore'   && <JobExploreScreen goTo={goTo} />}
         {!splash && screen === 'job-roadmap'   && <JobRoadmapScreen goTo={goTo} />}
-        {!splash && screen === 'job-questions' && <JobQuestionsScreen goTo={goTo} goBack={goBack} />}
+        {!splash && screen === 'job-questions' && <JobQuestionsScreen goTo={goTo} goBack={goBack} canGoBack={stack.length > 1} />}
+        {!splash && screen === 'job-detail'    && <JobDetailScreen id={params.id} goBack={goBack} />}
+        {!splash && screen === 'job-info'      && <JobInfoScreen goBack={goBack} goTo={goTo} />}
 
         {/* 미구현 화면 fallback */}
         {!splash && !isMainScreen && !KNOWN_SCREENS.includes(screen) && (

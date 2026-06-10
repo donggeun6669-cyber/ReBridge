@@ -5,7 +5,7 @@ import { loadProfile } from '../lib/persona.js';
 
 const STORAGE_KEY = 'rebridge_profile';
 
-export default function JobQuestionsScreen({ goTo = () => {}, goBack = () => {} }) {
+export default function JobQuestionsScreen({ goTo = () => {}, goBack = () => {}, canGoBack = true }) {
   const [answers, setAnswers] = useState(() => {
     const p = loadProfile();
     return p?.jobProfile || {};
@@ -27,9 +27,11 @@ export default function JobQuestionsScreen({ goTo = () => {}, goBack = () => {} 
   return (
     <div className="screen">
       <header className="topbar center">
-        <button className="icon-btn" aria-label="뒤로" onClick={goBack}>
-          <ArrowLeft size={22} />
-        </button>
+        {canGoBack && (
+          <button className="icon-btn" aria-label="뒤로" onClick={goBack}>
+            <ArrowLeft size={22} />
+          </button>
+        )}
         <span className="page-title">내 취업 유형</span>
       </header>
 

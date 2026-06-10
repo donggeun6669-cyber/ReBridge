@@ -56,6 +56,8 @@ export default function OnboardingScreen({ goTo = () => {}, presetTrack = null }
     savePersona({ goal, stage });
     if (goal === 'university' && stage === 'tested' && !hasScores()) {
       goTo('profile'); // 점수 입력부터
+    } else if (goal === 'job') {
+      goTo('job-questions'); // 취업 트랙은 '내 취업 유형'부터 묻고 맞춤 안내
     } else {
       goTo(getNav({ goal, stage }).landing);
     }
