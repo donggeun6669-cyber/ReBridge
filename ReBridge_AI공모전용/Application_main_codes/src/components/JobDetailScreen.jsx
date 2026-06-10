@@ -40,6 +40,7 @@ export default function JobDetailScreen({ id, goBack = () => {} }) {
           {p.tags.map((t) => <span key={t} className="job-tag">{t}</span>)}
         </div>
         <h1 className="jd-title">{p.title}</h1>
+        {p.plain && <p className="jd-plain">{p.plain}</p>}
         <p className="jd-summary">{p.summary}</p>
       </div>
 

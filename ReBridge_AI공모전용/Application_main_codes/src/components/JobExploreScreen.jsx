@@ -31,6 +31,7 @@ export default function JobExploreScreen({ goTo = () => {} }) {
         </div>
         <span className="job-prog-title">{p.title}</span>
         <span className="job-prog-desc">{p.desc}</span>
+        {p.plain && <span className="job-prog-plain">{p.plain}</span>}
       </button>
     );
   }

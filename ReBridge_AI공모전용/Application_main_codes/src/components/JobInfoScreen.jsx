@@ -7,6 +7,16 @@ import { enrichJob } from '../lib/careernet.js';
 import { CATALOG_FIELDS, catalogFor } from '../data/careerData.js';
 import '../styles.job.css';
 
+// 연결 경로에서 한눈 칩 도출 — 학교 밖 청소년이 가장 궁금한 '학력/돈/방법'
+function metaChips(item) {
+  const chips = ['학력 무관'];
+  const pid = item.connect?.programId;
+  if (pid === 'tomorrow-card') chips.push('국비 무료 훈련');
+  else if (pid === 'technician-cert') chips.push('국가기능사 자격');
+  else if (pid === 'national-employment') chips.push('단기 교육 → 취업');
+  return chips;
+}
+
 export default function JobInfoScreen({ goBack = () => {}, goTo = () => {} }) {
   const jp = useMemo(() => loadProfile()?.jobProfile || null, []);
   const initialField = jp?.interest && CATALOG_FIELDS.includes(jp.interest)
@@ -88,6 +98,11 @@ export default function JobInfoScreen({ goBack = () => {}, goTo = () => {} }) {
               <button className="ji-item-head" onClick={() => toggle(idx, item)}>
                 <span className="ji-item-text">
                   <span className="ji-item-name">{item.name}</span>
+                  <span className="ji-meta">
+                    {metaChips(item).map((c) => (
+                      <span key={c} className="ji-meta-chip">{c}</span>
+                    ))}
+                  </span>
                   <span className="ji-item-sum">{item.why}</span>
                 </span>
                 <ChevronDown size={18} className="ji-item-chev" />
