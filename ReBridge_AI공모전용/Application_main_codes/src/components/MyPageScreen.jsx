@@ -1,7 +1,7 @@
 import {
   User, Pencil, Bookmark, BookOpen, ChevronRight,
   MapPin, GraduationCap, ClipboardCheck, Heart,
-  RefreshCw, Target, Briefcase, HelpCircle, RotateCcw,
+  RefreshCw, Target, Briefcase, HelpCircle, RotateCcw, Route,
 } from 'lucide-react';
 
 // 테스트/초기화용 — 저장된 모든 정보 지우고 첫 화면(스플래시→온보딩)부터 다시
@@ -38,6 +38,17 @@ function toChips(p) {
   return chips;
 }
 
+// 취업 프로필(jobProfile)을 칩 문구로 변환
+function toJobChips(jp) {
+  if (!jp) return [];
+  const chips = [];
+  if (jp.interest && jp.interest !== '아직 몰라요') chips.push(jp.interest);
+  if (jp.startWith && jp.startWith !== '고민 중이에요') chips.push(jp.startWith);
+  if (jp.hasCert) chips.push(jp.hasCert === '있어요' ? '자격증 있음' : '자격증 준비 전');
+  if (jp.workType && jp.workType !== '상관없어요') chips.push(jp.workType);
+  return chips;
+}
+
 const STAGE_LABEL = {
   studying: '지금 공부 중',
   tested: '검정고시 응시 완료',
@@ -61,6 +72,9 @@ export default function MyPageScreen({ goTo = () => {}, goBack = () => {} }) {
 
   const stage = persona?.stage;
   const goal = persona?.goal;
+  const isJob = goal === 'job';
+  const jp = profile?.jobProfile || null;
+  const jobChips = toJobChips(jp);
 
   // 대학 관련 메뉴는 university/undecided 목표일 때만 노출
   const showUnivMenus = !persona || goal === 'university' || goal === 'undecided';
@@ -103,9 +117,11 @@ export default function MyPageScreen({ goTo = () => {}, goBack = () => {} }) {
             <User size={30} color="#fff" />
           </span>
           <div className="mp-card-header-text">
-            <span className="mp-card-name">나의 입시 프로필</span>
+            <span className="mp-card-name">{isJob ? '나의 취업 프로필' : '나의 입시 프로필'}</span>
             <span className="mp-card-sub">
-              {stage === 'tested'
+              {isJob
+                ? (jp ? '답변에 맞춰 길을 안내하고 있어요' : '몇 가지 질문에 답하면 맞춤 안내해드려요')
+                : stage === 'tested'
                 ? '검정고시 맞춤 입시 분석 중'
                 : stage === 'studying'
                 ? (profile?.gedAvg != null ? '목표 점수로 갈 대학 분석 중' : '목표 점수를 정해볼까요?')
@@ -114,8 +130,15 @@ export default function MyPageScreen({ goTo = () => {}, goBack = () => {} }) {
                 : '정보를 입력하면 대학을 찾아드려요'}
             </span>
           </div>
-          {/* 점수/목표 수정 버튼 */}
-          {(stage === 'tested'
+          {/* 점수/목표/답변 수정 버튼 */}
+          {isJob ? (
+            jp && (
+              <button className="mp-edit-btn" onClick={() => goTo('job-questions')}>
+                <Pencil size={14} />
+                답변 수정
+              </button>
+            )
+          ) : (stage === 'tested'
             || (stage === 'studying' && profile?.gedAvg != null)
             || (!persona && chips.length > 0)) && (
             <button className="mp-edit-btn" onClick={() => goTo('profile')}>
@@ -125,8 +148,24 @@ export default function MyPageScreen({ goTo = () => {}, goBack = () => {} }) {
           )}
         </div>
 
+        {/* 취업 — 답변 칩 + 직업 사전 CTA */}
+        {isJob && jobChips.length > 0 && (
+          <div className="mp-chips">
+            {jobChips.map((c) => (
+              <span className="pchip" key={c}>{c}</span>
+            ))}
+          </div>
+        )}
+        {isJob && !jp && (
+          <button className="mp-setup-cta" onClick={() => goTo('job-questions')}>
+            <Briefcase size={16} />
+            내 취업 유형 알아보기
+            <ChevronRight size={15} />
+          </button>
+        )}
+
         {/* tested — 기존 점수 칩 표시 */}
-        {stage === 'tested' && chips.length > 0 && (
+        {!isJob && stage === 'tested' && chips.length > 0 && (
           <div className="mp-chips">
             {chips.map((c) => (
               <span className="pchip" key={c}>{c}</span>
@@ -135,7 +174,7 @@ export default function MyPageScreen({ goTo = () => {}, goBack = () => {} }) {
         )}
 
         {/* studying — 목표 점수 미설정: 목표 점수 정하기 CTA */}
-        {stage === 'studying' && profile?.gedAvg == null && (
+        {!isJob && stage === 'studying' && profile?.gedAvg == null && (
           <button className="mp-setup-cta" onClick={() => goTo('profile')}>
             <Target size={16} />
             목표 점수 정하고 대학 찾기
@@ -144,7 +183,7 @@ export default function MyPageScreen({ goTo = () => {}, goBack = () => {} }) {
         )}
 
         {/* studying — 목표 점수 설정됨: 칩 + 목표 대학 찾기 */}
-        {stage === 'studying' && profile?.gedAvg != null && (
+        {!isJob && stage === 'studying' && profile?.gedAvg != null && (
           <>
             <div className="mp-chips">
               {chips.map((c) => (
@@ -179,8 +218,32 @@ export default function MyPageScreen({ goTo = () => {}, goBack = () => {} }) {
       </div>
 
       {/* 메뉴 그룹 */}
-      <p className="mp-section-label">학습 도구</p>
+      <p className="mp-section-label">{isJob ? '취업 도구' : '학습 도구'}</p>
       <div className="mp-menu-group">
+        {/* 취업 목표 — 직업 사전 / 준비 로드맵 */}
+        {isJob && (
+          <>
+            <button className="mp-menu-row" onClick={() => goTo('job-info')}>
+              <span className="mp-menu-ico ico-brand"><Briefcase size={18} /></span>
+              <span className="mp-menu-text">
+                <span className="mp-menu-title">직업 사전</span>
+                <span className="mp-menu-sub">지금 닿을 수 있는 직업·진로검사</span>
+              </span>
+              <ChevronRight size={16} className="mp-menu-arrow" />
+            </button>
+            <div className="mp-row-divider" />
+            <button className="mp-menu-row" onClick={() => goTo('job-roadmap')}>
+              <span className="mp-menu-ico ico-green"><Route size={18} /></span>
+              <span className="mp-menu-text">
+                <span className="mp-menu-title">취업 준비 로드맵</span>
+                <span className="mp-menu-sub">관심 파악 → 역량 → 일자리</span>
+              </span>
+              <ChevronRight size={16} className="mp-menu-arrow" />
+            </button>
+            <div className="mp-row-divider" />
+          </>
+        )}
+
         {showUnivMenus && (
           <>
             <button className="mp-menu-row" onClick={() => goTo('saved')}>
@@ -195,14 +258,16 @@ export default function MyPageScreen({ goTo = () => {}, goBack = () => {} }) {
           </>
         )}
 
-        <button className="mp-menu-row" onClick={() => goTo('checklist')}>
-          <span className="mp-menu-ico ico-coral"><ClipboardCheck size={18} /></span>
-          <span className="mp-menu-text">
-            <span className="mp-menu-title">서류 체크리스트</span>
-            <span className="mp-menu-sub">제출 서류 빠짐없이 확인</span>
-          </span>
-          <ChevronRight size={16} className="mp-menu-arrow" />
-        </button>
+        {!isJob && (
+          <button className="mp-menu-row" onClick={() => goTo('checklist')}>
+            <span className="mp-menu-ico ico-coral"><ClipboardCheck size={18} /></span>
+            <span className="mp-menu-text">
+              <span className="mp-menu-title">서류 체크리스트</span>
+              <span className="mp-menu-sub">제출 서류 빠짐없이 확인</span>
+            </span>
+            <ChevronRight size={16} className="mp-menu-arrow" />
+          </button>
+        )}
 
         {showUnivMenus && (
           <>
@@ -218,7 +283,7 @@ export default function MyPageScreen({ goTo = () => {}, goBack = () => {} }) {
           </>
         )}
 
-        <div className="mp-row-divider" />
+        {!isJob && <div className="mp-row-divider" />}
         <button className="mp-menu-row" onClick={() => goTo('dreamdrive')}>
           <span className="mp-menu-ico ico-coral"><Heart size={18} /></span>
           <span className="mp-menu-text">
@@ -228,15 +293,19 @@ export default function MyPageScreen({ goTo = () => {}, goBack = () => {} }) {
           <ChevronRight size={16} className="mp-menu-arrow" />
         </button>
 
-        <div className="mp-row-divider" />
-        <button className="mp-menu-row" onClick={() => goTo('guide', { topic: 'types' })}>
-          <span className="mp-menu-ico ico-gold"><BookOpen size={18} /></span>
-          <span className="mp-menu-text">
-            <span className="mp-menu-title">입시 용어 가이드</span>
-            <span className="mp-menu-sub">전형 종류부터 서류까지 한 번에</span>
-          </span>
-          <ChevronRight size={16} className="mp-menu-arrow" />
-        </button>
+        {!isJob && (
+          <>
+            <div className="mp-row-divider" />
+            <button className="mp-menu-row" onClick={() => goTo('guide', { topic: 'types' })}>
+              <span className="mp-menu-ico ico-gold"><BookOpen size={18} /></span>
+              <span className="mp-menu-text">
+                <span className="mp-menu-title">입시 용어 가이드</span>
+                <span className="mp-menu-sub">전형 종류부터 서류까지 한 번에</span>
+              </span>
+              <ChevronRight size={16} className="mp-menu-arrow" />
+            </button>
+          </>
+        )}
       </div>
 
       <p className="note" style={{ marginTop: 28 }}>

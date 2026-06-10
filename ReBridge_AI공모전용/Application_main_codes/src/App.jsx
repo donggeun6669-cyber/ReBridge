@@ -26,6 +26,7 @@ import JobRoadmapScreen from './components/JobRoadmapScreen.jsx';
 import JobQuestionsScreen from './components/JobQuestionsScreen.jsx';
 import JobDetailScreen from './components/JobDetailScreen.jsx';
 import JobInfoScreen from './components/JobInfoScreen.jsx';
+import JobPsychScreen from './components/JobPsychScreen.jsx';
 import OnboardingScreen from './components/OnboardingScreen.jsx';
 import BottomNav from './components/BottomNav.jsx';
 import SplashScreen from './components/SplashScreen.jsx';
@@ -40,7 +41,7 @@ const KNOWN_SCREENS = [
   'guide', 'results', 'detail', 'documents', 'saved', 'map', 'help',
   'checklist', 'forms-guide', 'dreamdrive', 'ged-guide', 'univ-explore', 'path',
   'onboarding', 'study-roadmap', 'study-planner',
-  'job-home', 'job-explore', 'job-roadmap', 'job-questions', 'job-detail', 'job-info',
+  'job-home', 'job-explore', 'job-roadmap', 'job-questions', 'job-detail', 'job-info', 'job-psych',
 ];
 
 // 직업 트랙은 답변(jobProfile)이 있어야 맞춤 안내가 되므로, 없으면 질문부터.
@@ -159,6 +160,7 @@ export default function App() {
         {!splash && screen === 'job-questions' && <JobQuestionsScreen goTo={goTo} goBack={goBack} canGoBack={stack.length > 1} />}
         {!splash && screen === 'job-detail'    && <JobDetailScreen id={params.id} goBack={goBack} />}
         {!splash && screen === 'job-info'      && <JobInfoScreen goBack={goBack} goTo={goTo} />}
+        {!splash && screen === 'job-psych'     && <JobPsychScreen goBack={goBack} />}
 
         {/* 미구현 화면 fallback */}
         {!splash && !isMainScreen && !KNOWN_SCREENS.includes(screen) && (

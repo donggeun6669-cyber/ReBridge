@@ -1,15 +1,16 @@
 import { useMemo } from 'react';
 import {
-  ArrowRight, ChevronRight, Compass, Route, Sparkles, Briefcase,
+  ArrowRight, ChevronRight, Sparkles, Briefcase, Target,
 } from 'lucide-react';
 import LogoMark from './LogoMark.jsx';
-import { loadProfile } from '../lib/persona.js';
+import { loadProfile, loadJobTarget } from '../lib/persona.js';
 import { matchPrograms, matchReason } from '../data/jobData.js';
 import '../styles.job.css';
 
 export default function JobHomeScreen({ goTo = () => {} }) {
   const profile = useMemo(loadProfile, []);
   const jp = profile?.jobProfile || null;
+  const target = loadJobTarget();
 
   // 맞춤 인사 — 질문에 답했으면 관심분야 반영
   const greeting = jp?.interest && jp.interest !== '아직 몰라요'
@@ -46,37 +47,33 @@ export default function JobHomeScreen({ goTo = () => {} }) {
         <span className="home-cta-arrow"><ArrowRight size={24} /></span>
       </button>
 
-      {/* 빠른 접근 */}
+      {/* 내 목표 직업 — 정했으면 로드맵으로, 아니면 직업 사전으로 */}
       <div className="home-section">
-        <p className="home-section-label">바로가기</p>
-        <div className="home-quick-list">
-          <button className="home-quick-row" onClick={() => goTo('job-explore')}>
-            <span className="home-quick-ico ico-brand"><Compass size={18} /></span>
+        <p className="home-section-label">
+          <Target size={13} style={{ verticalAlign: '-2px', marginRight: 4 }} />
+          내 목표 직업
+        </p>
+        {target ? (
+          <button className="home-quick-row" onClick={() => goTo('job-roadmap')}>
+            <span className="home-quick-ico ico-green"><Target size={18} /></span>
             <span className="home-quick-text">
-              <span className="home-quick-title">고용정책·프로그램 둘러보기</span>
-              <span className="home-quick-sub">훈련·자격증·지원금 정보 모음</span>
+              <span className="home-quick-title">{target.name}</span>
+              <span className="home-quick-sub">준비 로드맵 이어보기</span>
             </span>
             <ChevronRight size={16} className="home-quick-arrow" />
           </button>
-          <div className="home-divider" />
+        ) : (
           <button className="home-quick-row" onClick={() => goTo('job-info')}>
             <span className="home-quick-ico ico-gold"><Briefcase size={18} /></span>
             <span className="home-quick-text">
-              <span className="home-quick-title">관심 분야 직업 살펴보기</span>
-              <span className="home-quick-sub">{jp?.interest && jp.interest !== '아직 몰라요' ? `${jp.interest} 관련 직업` : '커리어넷 직업 사전'}</span>
+              <span className="home-quick-title">목표 직업 정하기</span>
+              <span className="home-quick-sub">
+                {jp?.interest && jp.interest !== '아직 몰라요' ? `${jp.interest} 관련 직업부터` : '직업 사전에서 골라보기'}
+              </span>
             </span>
             <ChevronRight size={16} className="home-quick-arrow" />
           </button>
-          <div className="home-divider" />
-          <button className="home-quick-row" onClick={() => goTo('job-roadmap')}>
-            <span className="home-quick-ico ico-green"><Route size={18} /></span>
-            <span className="home-quick-text">
-              <span className="home-quick-title">취업 준비 로드맵</span>
-              <span className="home-quick-sub">관심 파악 → 역량 → 일자리까지</span>
-            </span>
-            <ChevronRight size={16} className="home-quick-arrow" />
-          </button>
-        </div>
+        )}
       </div>
 
       {/* 맞춤 추천 프로그램 — 클릭 시 앱 안에서 상세 설명 */}

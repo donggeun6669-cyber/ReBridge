@@ -30,6 +30,19 @@ export function savePersona({ stage, goal }) {
   return next;
 }
 
+// 취업 트랙 — '내 목표 직업' 저장/조회. target = { name, field, programId, programLabel } | null
+export function setJobTarget(target) {
+  const prev = loadProfile() || {};
+  const jobProfile = { ...(prev.jobProfile || {}), target: target || undefined };
+  const next = { ...prev, jobProfile };
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(next)); } catch { /* 무시 */ }
+  return next;
+}
+
+export function loadJobTarget() {
+  return loadProfile()?.jobProfile?.target || null;
+}
+
 // persona → 하단 탭 구성 + 첫 진입 화면
 // 각 탭: { id, label, icon(이름), screen }
 export function getNav(persona) {
@@ -88,7 +101,7 @@ export function activeTabId(screen, persona = null) {
   if (['home', 'ged-guide', 'job-home', 'job-questions'].includes(screen)) return 'home';
   if (['mypage', 'saved', 'help', 'profile'].includes(screen)) return 'mypage';
   if (['roadmap', 'study-roadmap', 'job-roadmap', 'checklist', 'forms-guide', 'dreamdrive'].includes(screen)) return 'roadmap';
-  if (['explore', 'study-planner', 'path', 'job-explore', 'job-detail', 'job-info'].includes(screen)) return 'explore';
+  if (['explore', 'study-planner', 'path', 'job-explore', 'job-detail', 'job-info', 'job-psych'].includes(screen)) return 'explore';
   // 대학 관련 서브화면
   if (['univ-explore', 'detail', 'documents', 'map', 'results'].includes(screen)) {
     return studying ? 'mypage' : 'explore';

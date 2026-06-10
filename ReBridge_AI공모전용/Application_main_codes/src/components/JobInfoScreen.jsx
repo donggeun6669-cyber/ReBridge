@@ -1,11 +1,10 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
-  ArrowLeft, ChevronDown, Loader2, ArrowRight, ExternalLink, Sparkles,
+  ArrowLeft, ChevronDown, Loader2, ArrowRight, ExternalLink, Sparkles, Check, Compass,
 } from 'lucide-react';
-import { loadProfile } from '../lib/persona.js';
+import { loadProfile, setJobTarget, loadJobTarget } from '../lib/persona.js';
 import { enrichJob } from '../lib/careernet.js';
-import { CATALOG_FIELDS, catalogFor, PSYCH_TESTS } from '../data/careerData.js';
-import { getProgram } from '../data/jobData.js';
+import { CATALOG_FIELDS, catalogFor } from '../data/careerData.js';
 import '../styles.job.css';
 
 export default function JobInfoScreen({ goBack = () => {}, goTo = () => {} }) {
@@ -16,10 +15,23 @@ export default function JobInfoScreen({ goBack = () => {}, goTo = () => {} }) {
   const [field, setField] = useState(initialField);
   const [openIdx, setOpenIdx] = useState(null);
   const [enrich, setEnrich] = useState({}); // "field::idx" -> { loading, data }
+  const [target, setTarget] = useState(() => loadJobTarget());
 
   const items = catalogFor(field);
 
   useEffect(() => { setOpenIdx(null); }, [field]);
+
+  const saveTarget = useCallback((item) => {
+    const next = {
+      name: item.name,
+      field,
+      programId: item.connect?.programId,
+      programLabel: item.connect?.label,
+    };
+    setJobTarget(next);
+    setTarget(next);
+    goTo('job-roadmap');
+  }, [field, goTo]);
 
   const toggle = useCallback(async (idx, item) => {
     if (openIdx === idx) { setOpenIdx(null); return; }
@@ -70,7 +82,7 @@ export default function JobInfoScreen({ goBack = () => {}, goTo = () => {} }) {
           const isOpen = openIdx === idx;
           const key = `${field}::${idx}`;
           const e = enrich[key];
-          const prog = item.connect ? getProgram(item.connect.programId) : null;
+          const isTarget = target?.name === item.name && target?.field === field;
           return (
             <div key={item.name} className={`ji-item ${isOpen ? 'open' : ''}`}>
               <button className="ji-item-head" onClick={() => toggle(idx, item)}>
@@ -97,14 +109,27 @@ export default function JobInfoScreen({ goBack = () => {}, goTo = () => {} }) {
                     </p>
                   )}
 
-                  {item.connect && prog && (
+                  {isTarget ? (
                     <button
-                      className="ji-connect"
-                      onClick={() => goTo('job-detail', { id: item.connect.programId })}
+                      className="ji-connect is-target"
+                      onClick={() => goTo('job-roadmap')}
                     >
                       <span className="ji-connect-text">
-                        <span className="ji-connect-label">{item.connect.label}</span>
-                        <span className="ji-connect-sub">{prog.title}</span>
+                        <span className="ji-connect-label">내 목표 직업이에요</span>
+                        <span className="ji-connect-sub">준비 로드맵 보기</span>
+                      </span>
+                      <Check size={17} />
+                    </button>
+                  ) : (
+                    <button
+                      className="ji-connect"
+                      onClick={() => saveTarget(item)}
+                    >
+                      <span className="ji-connect-text">
+                        <span className="ji-connect-label">이 직업으로 준비 시작</span>
+                        <span className="ji-connect-sub">
+                          {item.connect ? item.connect.label : '목표로 정하고 로드맵 보기'}
+                        </span>
                       </span>
                       <ArrowRight size={17} />
                     </button>
@@ -127,49 +152,19 @@ export default function JobInfoScreen({ goBack = () => {}, goTo = () => {} }) {
         })}
       </div>
 
-      {/* 진로심리검사 — 뭐가 맞을지 모를 때 나부터 알아보기 */}
-      <div className="ji-test-sec">
-        <p className="ji-test-head">아직 뭐가 맞을지 모르겠다면</p>
-        <p className="ji-test-sub">
-          커리어넷 진로심리검사로 나를 먼저 알아봐요. 모두 <b>무료</b>예요.
-        </p>
-        <PsychGroup tests={PSYCH_TESTS.filter((t) => t.target === '청소년')} />
-        {PSYCH_TESTS.some((t) => t.target === '성인') && (
-          <>
-            <p className="ji-test-glabel">만 18세 이상이라면, 성인용 검사도 있어요</p>
-            <PsychGroup tests={PSYCH_TESTS.filter((t) => t.target === '성인')} />
-          </>
-        )}
-      </div>
+      {/* 뭐가 맞을지 모를 때 — 진로심리검사로 분리 */}
+      <button className="ji-connect" onClick={() => goTo('job-psych')} style={{ marginTop: 16 }}>
+        <span className="ji-connect-text">
+          <span className="ji-connect-label">아직 뭐가 맞을지 모르겠다면</span>
+          <span className="ji-connect-sub">진로심리검사로 나부터 알아보기</span>
+        </span>
+        <Compass size={17} />
+      </button>
 
       <p className="note" style={{ marginTop: 18 }}>
         직업 설명은 <b>커리어넷(한국직업능력연구원)</b> 자료예요. 더 많은 직업은
         커리어넷에서 볼 수 있지만, 여기선 <b>지금 닿을 수 있는 길</b>부터 보여드려요.
       </p>
-    </div>
-  );
-}
-
-function PsychGroup({ tests }) {
-  return (
-    <div className="ji-test-list">
-      {tests.map((t) => (
-        <a
-          key={t.id}
-          className="ji-test"
-          href={t.url}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <span className="ji-test-text">
-            <span className="ji-test-name">
-              {t.name}<span className="ji-test-min">{t.minutes}</span>
-            </span>
-            <span className="ji-test-desc">{t.desc}</span>
-          </span>
-          <ExternalLink size={15} />
-        </a>
-      ))}
     </div>
   );
 }
