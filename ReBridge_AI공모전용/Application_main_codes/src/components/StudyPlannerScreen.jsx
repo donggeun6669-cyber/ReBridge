@@ -1,14 +1,17 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   CalendarClock, ChevronRight, ChevronLeft, Target, Flame, CalendarDays,
   Plus, X, Wand2, Clock, CheckCircle2, Circle, Pencil,
+  Play, Pause, Square, RotateCcw,
 } from 'lucide-react';
 import { GED_SUBJECT_GUIDE, getNextSession, daysUntil } from '../data/gedGuide.js';
 import { loadProfile } from '../lib/persona.js';
 import '../styles.studyplanner.css';
 
 const DAYS_KEY = 'rebridge_planner_days';
+const TIMER_KEY = 'rebridge_planner_timer';
 // day = { comment, minutes, bySubject:{}, tasks:[{id, subject, text, done}] }
+// timer = { running, startTs, accumSec, subject }
 
 const QUICK_MIN = [10, 30, 60];
 const SUBJECTS = [...GED_SUBJECT_GUIDE.map((s) => s.key), '기타'];
@@ -57,6 +60,15 @@ function fmtMin(m) {
   if (!m) return '0분';
   const h = Math.floor(m / 60), mm = m % 60;
   return h > 0 ? `${h}시간 ${mm ? `${mm}분` : ''}`.trim() : `${mm}분`;
+}
+function fmtClock(sec) {
+  const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
+  const mm = String(m).padStart(2, '0'), ss = String(s).padStart(2, '0');
+  return h > 0 ? `${h}:${mm}:${ss}` : `${mm}:${ss}`;
+}
+function loadTimer() {
+  try { return JSON.parse(localStorage.getItem(TIMER_KEY)) || null; }
+  catch { return null; }
 }
 function ddayMessage(d) {
   if (d == null) return '다음 시험을 차근차근 준비해요.';
@@ -120,12 +132,72 @@ export default function StudyPlannerScreen({ goTo = () => {} }) {
       .map((x, i) => ({ id: `${Date.now()}-${i}`, subject: x.subject, text: x.text, done: false }));
     if (add.length) updateDay({ tasks: [...(day.tasks || []), ...add] });
   }
-  function addMinutes(min) {
+  function addMinutesTo(subject, min) {
     const by = { ...(day.bySubject || {}) };
-    by[subj] = (by[subj] || 0) + min;
+    by[subject] = (by[subject] || 0) + min;
     updateDay({ minutes: (day.minutes || 0) + min, bySubject: by });
   }
   function resetTime() { updateDay({ minutes: 0, bySubject: {} }); }
+
+  // ── 공부 타이머 (백그라운드·새로고침에도 이어짐) ──
+  const [timer, setTimer] = useState(loadTimer);
+  const [, setNowTick] = useState(0);
+
+  useEffect(() => {
+    if (!timer?.running) return;
+    const id = setInterval(() => setNowTick((n) => n + 1), 1000);
+    return () => clearInterval(id);
+  }, [timer?.running]);
+
+  useEffect(() => {
+    try {
+      if (timer) localStorage.setItem(TIMER_KEY, JSON.stringify(timer));
+      else localStorage.removeItem(TIMER_KEY);
+    } catch { /* 무시 */ }
+  }, [timer]);
+
+  const elapsedSec = timer
+    ? timer.accumSec + (timer.running ? Math.floor((Date.now() - timer.startTs) / 1000) : 0)
+    : 0;
+
+  function startTimer() {
+    setTimer({ running: true, startTs: Date.now(), accumSec: 0, subject: subj });
+  }
+  function pauseTimer() {
+    setTimer((t) => (t ? { ...t, running: false, accumSec: t.accumSec + Math.floor((Date.now() - t.startTs) / 1000) } : t));
+  }
+  function resumeTimer() {
+    setTimer((t) => (t ? { ...t, running: true, startTs: Date.now() } : t));
+  }
+  function stopTimer() {
+    const mins = Math.round(elapsedSec / 60);
+    const subject = timer?.subject || subj;
+    setTimer(null);
+    if (mins >= 1) addMinutesTo(subject, mins);
+  }
+
+  // ── 못 끝낸 할 일 이어가기 (오늘 기준, 가장 최근 미완료일) ──
+  const carryover = useMemo(() => {
+    if (selected !== todayStr) return null;
+    const past = Object.keys(days).filter((k) => k < todayStr).sort().reverse();
+    for (const k of past) {
+      const undone = (days[k].tasks || []).filter((t) => !t.done);
+      if (undone.length) {
+        const d = new Date(k + 'T00:00:00');
+        return { date: k, label: `${d.getMonth() + 1}월 ${d.getDate()}일`, tasks: undone };
+      }
+    }
+    return null;
+  }, [days, selected, todayStr]);
+
+  function carryOver() {
+    if (!carryover) return;
+    const existing = new Set((day.tasks || []).map((x) => `${x.subject}|${x.text}`));
+    const add = carryover.tasks
+      .filter((x) => !existing.has(`${x.subject}|${x.text}`))
+      .map((x, i) => ({ id: `${Date.now()}-c${i}`, subject: x.subject, text: x.text, done: false }));
+    if (add.length) updateDay({ tasks: [...(day.tasks || []), ...add] });
+  }
 
   const cells = useMemo(() => {
     const first = new Date(view.y, view.m, 1);
@@ -155,6 +227,31 @@ export default function StudyPlannerScreen({ goTo = () => {} }) {
     .filter((g) => g.items.length > 0);
   const taskTotal = (day.tasks || []).length;
   const taskDone = (day.tasks || []).filter((t) => t.done).length;
+
+  // ── 주간·연속 통계 ──
+  const stats = useMemo(() => {
+    const studied = (dd) => !!dd && ((dd.minutes || 0) > 0 || (dd.tasks || []).some((t) => t.done));
+    let streak = 0;
+    const cur = new Date(today);
+    if (!studied(days[todayStr])) cur.setDate(cur.getDate() - 1);
+    for (;;) {
+      if (studied(days[ymd(cur)])) { streak++; cur.setDate(cur.getDate() - 1); }
+      else break;
+    }
+    const wd = (today.getDay() + 6) % 7; // 월요일 시작
+    const ws = new Date(today); ws.setDate(ws.getDate() - wd);
+    let weekTotal = 0; const by = {};
+    for (let i = 0; i < 7; i++) {
+      const dt = new Date(ws); dt.setDate(ws.getDate() + i);
+      const dd = days[ymd(dt)];
+      if (dd) {
+        weekTotal += dd.minutes || 0;
+        Object.entries(dd.bySubject || {}).forEach(([s, m]) => { by[s] = (by[s] || 0) + m; });
+      }
+    }
+    const byArr = Object.entries(by).filter(([, m]) => m > 0).sort((a, b) => b[1] - a[1]);
+    return { streak, weekTotal, byArr };
+  }, [days, today, todayStr]);
 
   return (
     <div className="screen">
@@ -213,8 +310,39 @@ export default function StudyPlannerScreen({ goTo = () => {} }) {
         </div>
       </div>
 
-      {/* 과목 선택 + 시간 기록 */}
-      <p className="planner-list-label2">과목 고르고 → 공부 시간 기록 / 할 일 추가</p>
+      {/* ───────── 이번 주 학습 요약 ───────── */}
+      <div className="planner-week">
+        <div className="planner-week-stats">
+          <div className="planner-week-stat">
+            <span className="planner-week-num"><Flame size={18} /> {stats.streak}일</span>
+            <span className="planner-week-lbl">연속 공부</span>
+          </div>
+          <div className="planner-week-divider" />
+          <div className="planner-week-stat">
+            <span className="planner-week-num">{fmtMin(stats.weekTotal)}</span>
+            <span className="planner-week-lbl">이번 주 공부</span>
+          </div>
+        </div>
+        {stats.byArr.length > 0 ? (
+          <div className="planner-week-bars">
+            {stats.byArr.map(([s, m]) => (
+              <div key={s} className="planner-week-bar">
+                <span className="planner-week-bar-name">{s}</span>
+                <span className="planner-week-bar-track">
+                  <span className="planner-week-bar-fill" style={{ width: `${Math.round((m / stats.byArr[0][1]) * 100)}%` }} />
+                </span>
+                <span className="planner-week-bar-val">{fmtMin(m)}</span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="planner-week-empty">이번 주 공부 기록이 아직 없어요. 타이머로 시작해 볼까요?</p>
+        )}
+      </div>
+
+      {/* ───────── 공부 시간 기록 ───────── */}
+      <div className="planner-section-head"><Clock size={15} /> 공부 시간 기록</div>
+      <p className="planner-hint">과목을 고른 뒤 타이머로 공부 시간을 재요.</p>
       <div className="planner-subj-chips">
         {SUBJECTS.map((s) => (
           <button key={s} className={`planner-subj-chip ${subj === s ? 'on' : ''}`} onClick={() => setSubj(s)}>
@@ -222,15 +350,57 @@ export default function StudyPlannerScreen({ goTo = () => {} }) {
           </button>
         ))}
       </div>
+
+      {/* 타이머 — 오늘만 */}
+      {selected === todayStr ? (
+        <div className={`planner-timer ${timer?.running ? 'run' : ''}`}>
+          <div className="planner-timer-info">
+            <span className="planner-timer-subj">
+              {timer ? `${timer.subject} 공부 중` : `${subj} 준비`}
+            </span>
+            <span className="planner-timer-clock">{fmtClock(elapsedSec)}</span>
+          </div>
+          <div className="planner-timer-btns">
+            {!timer && (
+              <button className="planner-timer-btn start" onClick={startTimer}><Play size={17} /> 시작</button>
+            )}
+            {timer?.running && (
+              <button className="planner-timer-btn pause" onClick={pauseTimer}><Pause size={17} /> 일시정지</button>
+            )}
+            {timer && !timer.running && (
+              <button className="planner-timer-btn start" onClick={resumeTimer}><Play size={17} /> 이어서</button>
+            )}
+            {timer && (
+              <button className="planner-timer-btn stop" onClick={stopTimer}><Square size={15} /> 정지·기록</button>
+            )}
+          </div>
+        </div>
+      ) : (
+        <p className="planner-hint">지난 날짜는 아래 버튼으로 시간을 더할 수 있어요.</p>
+      )}
+
+      {/* 빠른 추가(보조) */}
       <div className="planner-time-add">
         {QUICK_MIN.map((m) => (
-          <button key={m} className="planner-add-btn" onClick={() => addMinutes(m)}>
+          <button key={m} className="planner-add-btn" onClick={() => addMinutesTo(subj, m)}>
             +{m >= 60 ? '1시간' : `${m}분`}
           </button>
         ))}
       </div>
 
-      {/* 할 일 추가 */}
+      {/* ───────── 할 일 ───────── */}
+      <div className="planner-section-head" style={{ marginTop: 22 }}>
+        <CheckCircle2 size={15} /> {selLabel} 할 일
+        {taskTotal > 0 && <span className="planner-task-count">{taskDone}/{taskTotal} 완료</span>}
+      </div>
+
+      {carryover && (
+        <button className="planner-carry" onClick={carryOver}>
+          <RotateCcw size={15} />
+          <span>{carryover.label}에 못 끝낸 할 일 {carryover.tasks.length}개 이어가기</span>
+        </button>
+      )}
+
       <div className="planner-task-input">
         <span className="planner-task-subj">{subj}</span>
         <input
@@ -259,11 +429,6 @@ export default function StudyPlannerScreen({ goTo = () => {} }) {
         </div>
       </div>
 
-      {/* 데일리 플래너 — 과목별 할 일 */}
-      <div className="planner-daily-head">
-        <span className="planner-list-label2">{selLabel} 할 일</span>
-        {taskTotal > 0 && <span className="planner-task-count">{taskDone}/{taskTotal} 완료</span>}
-      </div>
       {grouped.length === 0 ? (
         <p className="planner-empty">아직 할 일이 없어요. 위에서 직접 적거나 추천 플래너를 담아보세요.</p>
       ) : (
