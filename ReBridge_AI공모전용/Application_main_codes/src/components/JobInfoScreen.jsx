@@ -4,7 +4,7 @@ import {
 } from 'lucide-react';
 import { loadProfile } from '../lib/persona.js';
 import { enrichJob } from '../lib/careernet.js';
-import { CATALOG_FIELDS, catalogFor } from '../data/careerData.js';
+import { CATALOG_FIELDS, catalogFor, PSYCH_TESTS } from '../data/careerData.js';
 import { getProgram } from '../data/jobData.js';
 import '../styles.job.css';
 
@@ -127,10 +127,49 @@ export default function JobInfoScreen({ goBack = () => {}, goTo = () => {} }) {
         })}
       </div>
 
+      {/* 진로심리검사 — 뭐가 맞을지 모를 때 나부터 알아보기 */}
+      <div className="ji-test-sec">
+        <p className="ji-test-head">아직 뭐가 맞을지 모르겠다면</p>
+        <p className="ji-test-sub">
+          커리어넷 진로심리검사로 나를 먼저 알아봐요. 모두 <b>무료</b>예요.
+        </p>
+        <PsychGroup tests={PSYCH_TESTS.filter((t) => t.target === '청소년')} />
+        {PSYCH_TESTS.some((t) => t.target === '성인') && (
+          <>
+            <p className="ji-test-glabel">만 18세 이상이라면, 성인용 검사도 있어요</p>
+            <PsychGroup tests={PSYCH_TESTS.filter((t) => t.target === '성인')} />
+          </>
+        )}
+      </div>
+
       <p className="note" style={{ marginTop: 18 }}>
         직업 설명은 <b>커리어넷(한국직업능력연구원)</b> 자료예요. 더 많은 직업은
         커리어넷에서 볼 수 있지만, 여기선 <b>지금 닿을 수 있는 길</b>부터 보여드려요.
       </p>
+    </div>
+  );
+}
+
+function PsychGroup({ tests }) {
+  return (
+    <div className="ji-test-list">
+      {tests.map((t) => (
+        <a
+          key={t.id}
+          className="ji-test"
+          href={t.url}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <span className="ji-test-text">
+            <span className="ji-test-name">
+              {t.name}<span className="ji-test-min">{t.minutes}</span>
+            </span>
+            <span className="ji-test-desc">{t.desc}</span>
+          </span>
+          <ExternalLink size={15} />
+        </a>
+      ))}
     </div>
   );
 }
