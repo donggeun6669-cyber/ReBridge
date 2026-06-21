@@ -1,13 +1,15 @@
-// CommunityPostScreen — 글 상세 + 댓글(1단 답글·댓글공감). 읽기는 누구나, 쓰기/공감은 닉네임 필요.
-//   미로그인 첫 행동 시 인라인 닉네임 모달(NicknameGate)로 받고 제자리 복귀 — 로그인 화면으로 안 튕김.
+// CommunityPostScreen — 글 상세 + 댓글. 읽기는 누구나, 쓰기/공감/스크랩/신고는 로그인 필요.
+//   P0: 1단 답글(parent_id)·댓글 공감(♥)·인라인 닉네임 게이트(첫 행동 시 제자리 복귀).
+//   P1: 스크랩 토글, 글/댓글 신고·차단(액션 시트), 태그 칩, 진입 시 알림 본 것으로 표시.
 // props: goTo(screen, params), goBack(), id(글 id)
 import { useState, useEffect, useCallback } from 'react';
-import { ArrowLeft, Heart, Send, Trash2, CornerDownRight } from 'lucide-react';
+import { ArrowLeft, Heart, Send, Trash2, Bookmark, MoreHorizontal, CornerDownRight } from 'lucide-react';
 import {
   getPost, listComments, addComment, toggleReaction, toggleCommentReaction,
-  deletePost, timeAgo,
+  toggleBookmark, deletePost, markPostSeen, tagLabel, timeAgo,
 } from '../lib/community.js';
 import { AuthorLine } from './CommunityBadge.jsx';
+import CommunityActionSheet from './CommunityActionSheet.jsx';
 import { useAuthUser, NicknameGate } from './AuthScreen.jsx';
 import '../styles.community.css';
 
@@ -20,12 +22,17 @@ export default function CommunityPostScreen({ goTo = () => {}, goBack = () => {}
   const [busy, setBusy] = useState(false);
   const [notfound, setNotfound] = useState(false);
   const [gate, setGate] = useState(null);          // 미로그인 첫 행동 대기 { type, ... }
+  const [sheet, setSheet] = useState(null);
+  const [toast, setToast] = useState('');
+
+  const flashToast = (m) => { setToast(m); setTimeout(() => setToast(''), 1800); };
 
   const load = useCallback(async () => {
     const p = await getPost(id);
     if (!p) { setNotfound(true); return; }
     setPost(p);
     setComments(await listComments(id));
+    markPostSeen(id);     // 상세 진입 → 알림 본 것으로
   }, [id]);
 
   useEffect(() => { load(); }, [load, user?.id]);
@@ -44,6 +51,15 @@ export default function CommunityPostScreen({ goTo = () => {}, goBack = () => {}
     if (res.ok) setComments(await listComments(id));
   }, [user, id]);
 
+  const onBookmark = useCallback(async () => {
+    if (!user) { setGate({ type: 'bookmark' }); return; }
+    const res = await toggleBookmark(id);
+    if (res.ok) {
+      setPost((p) => ({ ...p, bookmarkedByMe: res.bookmarked }));
+      flashToast(res.bookmarked ? '스크랩했어요.' : '스크랩을 취소했어요.');
+    }
+  }, [user, id]);
+
   // 댓글/답글 등록. parentId 있으면 1단 답글.
   const submitComment = useCallback(async (parentId) => {
     if (!text.trim()) return;
@@ -54,6 +70,7 @@ export default function CommunityPostScreen({ goTo = () => {}, goBack = () => {}
       setText(''); setReplyTo(null);
       setComments(await listComments(id));
       setPost(await getPost(id));
+      markPostSeen(id);
     }
   }, [id, text]);
 
@@ -73,6 +90,9 @@ export default function CommunityPostScreen({ goTo = () => {}, goBack = () => {}
     } else if (pending?.type === 'commentLike') {
       const res = await toggleCommentReaction(pending.commentId);
       if (res.ok) setComments(await listComments(id));
+    } else if (pending?.type === 'bookmark') {
+      const res = await toggleBookmark(id);
+      if (res.ok) { setPost((p) => ({ ...p, bookmarkedByMe: res.bookmarked })); flashToast(res.bookmarked ? '스크랩했어요.' : '스크랩을 취소했어요.'); }
     } else if (pending?.type === 'comment') {
       submitComment(replyTo?.id || null);
     }
@@ -83,6 +103,25 @@ export default function CommunityPostScreen({ goTo = () => {}, goBack = () => {}
     const res = await deletePost(id);
     if (res.ok) goBack();
   }, [id, goBack]);
+
+  const openPostSheet = () => {
+    if (!user) { setGate({ type: 'none' }); return; }
+    setSheet({
+      target: { type: 'post', id: post.id, authorId: post.author?.id, authorNickname: post.author?.nickname, bookmarked: post.bookmarkedByMe },
+      isMe: post.mine, kind: 'post',
+    });
+  };
+  const openCommentSheet = (c) => {
+    if (!user) { setGate({ type: 'none' }); return; }
+    setSheet({
+      target: { type: 'comment', id: c.id, authorId: c.author?.id, authorNickname: c.author?.nickname },
+      isMe: c.mine, kind: 'comment',
+    });
+  };
+
+  function onReplyClick(c) {
+    setReplyTo({ id: c.id, nickname: c.author?.nickname || '익명' });
+  }
 
   if (notfound) {
     return (
@@ -107,6 +146,9 @@ export default function CommunityPostScreen({ goTo = () => {}, goBack = () => {}
     );
   }
 
+  const boardLabel = post.board === 'review' ? '꿈드림 후기'
+    : post.board === 'center' ? '우리 센터' : '이야기';
+
   // 댓글 수(원댓글 + 답글) 합산 표시.
   const totalComments = comments.reduce((n, c) => n + 1 + (c.replies?.length || 0), 0);
 
@@ -114,7 +156,14 @@ export default function CommunityPostScreen({ goTo = () => {}, goBack = () => {}
     <div key={c.id} className={`cm-comment ${isReply ? 'cm-comment-reply' : ''}`}>
       {isReply && <CornerDownRight size={14} className="cm-reply-arrow" aria-hidden="true" />}
       <div className="cm-comment-main">
-        <AuthorLine author={c.author} when={timeAgo(c.createdAt)} />
+        <div className="cm-comment-head">
+          <AuthorLine author={c.author} when={timeAgo(c.createdAt)} />
+          {!c.mine && (
+            <button className="cm-more-btn" aria-label="댓글 더보기" onClick={() => openCommentSheet(c)}>
+              <MoreHorizontal size={16} />
+            </button>
+          )}
+        </div>
         <p className="cm-comment-body">{c.body}</p>
         <div className="cm-comment-acts">
           <button
@@ -133,23 +182,22 @@ export default function CommunityPostScreen({ goTo = () => {}, goBack = () => {}
     </div>
   );
 
-  function onReplyClick(c) {
-    setReplyTo({ id: c.id, nickname: c.author?.nickname || '익명' });
-  }
-
   return (
     <div className="screen cm-screen">
       <header className="topbar between">
         <button className="icon-btn" aria-label="뒤로" onClick={goBack}><ArrowLeft size={22} /></button>
-        <span className="page-title">{post.board === 'review' ? '꿈드림 후기' : '공감·소통'}</span>
+        <span className="page-title">{boardLabel}</span>
         {post.mine
           ? <button className="icon-btn" aria-label="삭제" onClick={onDelete}><Trash2 size={19} /></button>
-          : <span style={{ width: 38 }} />}
+          : <button className="icon-btn" aria-label="더보기" onClick={openPostSheet}><MoreHorizontal size={20} /></button>}
       </header>
 
       <article className="cm-post">
         <div className="cm-card-top">
-          <AuthorLine author={post.author} when={timeAgo(post.createdAt)} />
+          <span>
+            <AuthorLine author={post.author} when={timeAgo(post.createdAt)} />
+            {post.tag && <span className="cm-tag-pill">{tagLabel(post.tag)}</span>}
+          </span>
         </div>
         <h2 className="cm-post-title">{post.title}</h2>
         <p className="cm-post-body">{post.body}</p>
@@ -158,6 +206,10 @@ export default function CommunityPostScreen({ goTo = () => {}, goBack = () => {}
           <button className={`cm-like-btn ${post.likedByMe ? 'liked' : ''}`} onClick={onLike}>
             <Heart size={17} fill={post.likedByMe ? 'currentColor' : 'none'} />
             공감 {post.likeCount}
+          </button>
+          <button className={`cm-like-btn bm ${post.bookmarkedByMe ? 'on' : ''}`} onClick={onBookmark}>
+            <Bookmark size={17} fill={post.bookmarkedByMe ? 'currentColor' : 'none'} />
+            {post.bookmarkedByMe ? '스크랩됨' : '스크랩'}
           </button>
         </div>
       </article>
@@ -197,6 +249,18 @@ export default function CommunityPostScreen({ goTo = () => {}, goBack = () => {}
           </button>
         </div>
       </form>
+
+      {sheet && (
+        <CommunityActionSheet
+          target={sheet.target}
+          isMe={sheet.isMe}
+          onClose={() => setSheet(null)}
+          onBookmarkToggle={sheet.kind === 'post' ? onBookmark : null}
+          onBlocked={() => { flashToast('차단했어요. 이 사람 글·댓글이 숨겨져요.'); load(); }}
+          onReported={flashToast}
+        />
+      )}
+      {toast && <div className="cm-toast">{toast}</div>}
 
       <NicknameGate open={!!gate} onClose={() => setGate(null)} onDone={onGateDone} />
     </div>
