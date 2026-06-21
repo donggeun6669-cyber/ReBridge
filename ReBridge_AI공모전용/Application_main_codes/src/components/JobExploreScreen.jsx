@@ -1,19 +1,21 @@
 import { useMemo, useState } from 'react';
 import {
   Briefcase, Search, GraduationCap, BadgeCheck, Coins, HeartHandshake,
-  ChevronDown, ChevronRight, ExternalLink, Phone, Sparkles,
+  ChevronDown, ChevronRight, ExternalLink, Phone, Sparkles, Check,
 } from 'lucide-react';
 import { JOB_CATEGORIES, matchPrograms, matchReason } from '../data/jobData.js';
-import { loadProfile } from '../lib/persona.js';
+import { loadProfile, loadJobTarget } from '../lib/persona.js';
 import '../styles.job.css';
 
 const ICONS = { Briefcase, Search, GraduationCap, BadgeCheck, Coins, HeartHandshake };
 
 export default function JobExploreScreen({ goTo = () => {} }) {
   const jp = useMemo(() => loadProfile()?.jobProfile || null, []);
+  const target = useMemo(loadJobTarget, []);
   const { recommended, rest } = useMemo(() => matchPrograms(jp), [jp]);
   const reason = matchReason(jp);
   const [open, setOpen] = useState(null);
+  const stepDone = { profile: !!jp, target: !!target };
 
   function ProgCard(p) {
     return (
@@ -41,6 +43,27 @@ export default function JobExploreScreen({ goTo = () => {} }) {
       <header className="topbar">
         <span className="page-title">취업 정보</span>
       </header>
+
+      {/* 다음 한 걸음 — 나 알아보기 → 직업 고르기 → 준비 */}
+      <div className="job-steps">
+        <button className={`job-step ${stepDone.profile ? 'done' : 'now'}`} onClick={() => goTo('job-questions')}>
+          <span className="job-step-num">{stepDone.profile ? <Check size={13} /> : 1}</span>
+          <span className="job-step-label">나 알아보기</span>
+        </button>
+        <span className="job-step-line" />
+        <button
+          className={`job-step ${stepDone.target ? 'done' : stepDone.profile ? 'now' : ''}`}
+          onClick={() => goTo('job-info')}
+        >
+          <span className="job-step-num">{stepDone.target ? <Check size={13} /> : 2}</span>
+          <span className="job-step-label">직업 고르기</span>
+        </button>
+        <span className="job-step-line" />
+        <button className={`job-step ${stepDone.target ? 'now' : ''}`} onClick={() => goTo('job-roadmap')}>
+          <span className="job-step-num">3</span>
+          <span className="job-step-label">준비하기</span>
+        </button>
+      </div>
 
       {/* 맞춤 추천 — 앱 안에서 설명, 신청만 외부 */}
       <p className="job-sec-label">

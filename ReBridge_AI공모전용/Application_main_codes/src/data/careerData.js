@@ -16,13 +16,13 @@ export const JOB_CATALOG = {
       name: '웹디자이너',
       q: '웹디자이너',
       why: '학위보다 포트폴리오를 중요하게 보고, 단기 웹디자인 훈련으로 시작할 수 있어요.',
-      connect: { label: '내일배움카드로 배우기', programId: 'tomorrow-card' },
+      connect: { label: '국비 직업훈련으로 배우기', programId: 'tomorrow-card' },
     },
     {
       name: '편집기사(영상 편집)',
       q: '편집기사',
       why: '영상 편집 훈련과 작업물 포트폴리오로 실력을 보여 주며 진입할 수 있어요.',
-      connect: { label: '내일배움카드로 배우기', programId: 'tomorrow-card' },
+      connect: { label: '국비 직업훈련으로 배우기', programId: 'tomorrow-card' },
     },
     {
       name: '컴퓨터그래픽디자이너',
@@ -40,7 +40,7 @@ export const JOB_CATALOG = {
       name: '시각디자이너',
       q: '시각디자이너',
       why: '디자인 도구 훈련 뒤 포스터·로고 같은 포트폴리오로 실력을 평가받을 수 있어요.',
-      connect: { label: '내일배움카드로 배우기', programId: 'tomorrow-card' },
+      connect: { label: '국비 직업훈련으로 배우기', programId: 'tomorrow-card' },
     },
     {
       name: '캐드원',
@@ -128,7 +128,7 @@ export const JOB_CATALOG = {
       name: '공작기계조작원',
       q: '공작기계조작원',
       why: 'CNC·선반 실습 중심의 직업훈련으로 장비 조작 기술을 익혀 시작할 수 있어요.',
-      connect: { label: '내일배움카드로 배우기', programId: 'tomorrow-card' },
+      connect: { label: '국비 직업훈련으로 배우기', programId: 'tomorrow-card' },
     },
     {
       name: '도배원',
@@ -172,7 +172,7 @@ export const JOB_CATALOG = {
       name: '전자상거래 운영',
       q: '전자상거래전문가',
       why: '쇼핑몰 운영 도구와 상품 등록 실무를 단기 훈련으로 배워 포트폴리오를 만들 수 있어요.',
-      connect: { label: '내일배움카드로 배우기', programId: 'tomorrow-card' },
+      connect: { label: '국비 직업훈련으로 배우기', programId: 'tomorrow-card' },
     },
     {
       name: '설문조사원',

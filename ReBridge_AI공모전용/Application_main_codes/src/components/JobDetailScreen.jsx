@@ -1,5 +1,5 @@
 import {
-  ArrowLeft, Users, Gift, ListOrdered, Info, ArrowUpRight,
+  ArrowLeft, Users, Gift, ListOrdered, Info, ArrowUpRight, Lock,
 } from 'lucide-react';
 import { getProgram } from '../data/jobData.js';
 import '../styles.job.css';
@@ -43,6 +43,17 @@ export default function JobDetailScreen({ id, goBack = () => {} }) {
         {p.plain && <p className="jd-plain">{p.plain}</p>}
         <p className="jd-summary">{p.summary}</p>
       </div>
+
+      {/* 정직성 — 자격이 학교 밖 청소년에게 불확실하면 먼저 솔직하게 알린다 */}
+      {p.needsCheck && (
+        <div className="jd-check">
+          <Lock size={15} />
+          <p>
+            <b>학교 밖 청소년·검정고시 응시자에게 바로 적용되는지는 확실하지 않아요.</b><br />
+            신청 전 가까운 고용센터(1350)나 꿈드림센터에 "나도 대상인지" 꼭 확인하세요.
+          </p>
+        </div>
+      )}
 
       {/* 이런 분께 */}
       <section className="jd-block">

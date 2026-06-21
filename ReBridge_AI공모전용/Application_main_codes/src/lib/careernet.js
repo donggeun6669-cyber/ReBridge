@@ -126,6 +126,39 @@ export async function enrichJob(q) {
   }
 }
 
+// enrichJob을 상태와 함께 돌려준다 — 화면에서 '실패(다시 시도)'와 '내용 없음'을 구분하기 위함.
+//   { status: 'ok', data }      요약을 가져옴
+//   { status: 'empty' }         호출은 됐지만 요약이 없음(폴백 안내만)
+//   { status: 'error' }         네트워크/서버 실패 → '다시 시도' 노출
+export async function enrichJobResult(q) {
+  if (!q) return { status: 'empty' };
+  const params = new URLSearchParams({
+    path: 'openApi.json',
+    svcType: 'api',
+    svcCode: 'JOB',
+    contentType: 'json',
+    gubun: 'job_dic_list',
+    perPage: '1',
+    searchJobNm: q,
+  });
+  try {
+    const res = await fetch(`/api/careernet?${params}`);
+    if (!res.ok) throw new Error(`careernet ${res.status}`);
+    const data = await res.json();
+    const first = pickList(data).map(normJob).find((j) => j.name);
+    if (!first) return { status: 'empty' };
+    let summary = first.summary;
+    if (!summary && first.seq) {
+      const d = await fetchJobDetail(first.seq);
+      summary = d?.work || '';
+    }
+    if (!summary) return { status: 'empty', data: { seq: first.seq } };
+    return { status: 'ok', data: { summary, seq: first.seq } };
+  } catch {
+    return { status: 'error' };
+  }
+}
+
 // 직업 상세(되는 법/하는 일). seq 없으면 null.
 export async function fetchJobDetail(seq) {
   if (!seq) return null;

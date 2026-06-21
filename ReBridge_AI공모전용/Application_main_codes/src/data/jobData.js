@@ -78,7 +78,7 @@ export const JOB_PROGRAMS = [
       '맞춤 프로그램에 참여하고, 이수 후 수당·다음 단계를 안내받아요.',
     ],
     cautions:
-      '지역마다 운영기관·모집 일정·수당 금액이 달라요. 대상 나이(보통 18~34세)와 세부 요건은 신청 전 온라인청년센터나 관할 기관에서 꼭 확인하세요.',
+      '학교 밖 청소년·검정고시 응시자도 참여 대상이 되는 경우가 많지만, 지역마다 운영기관·모집 일정·수당 금액이 달라요. 대상 나이(보통 18~34세)와 세부 요건은 신청 전 온라인청년센터나 관할 기관에 "나도 참여할 수 있는지" 꼭 확인하세요.',
     applyLabel: '온라인청년센터에서 신청처 찾기',
     applyUrl: 'https://www.youthcenter.go.kr',
     match: { startWith: ['고민 중이에요'], fields: ['any'], undecided: true },
@@ -97,47 +97,48 @@ export const JOB_PROGRAMS = [
       '훈련·일경험까지 연결해서 준비하고 싶은 경우',
     ],
     benefit: [
-      '취업활동계획 수립 + 담당자 1:1 취업지원',
-      '직업훈련·일경험 프로그램 연계',
-      'I유형은 요건 충족 시 구직촉진수당 지급(소득·재산·나이 기준 있음)',
+      '취업 계획을 같이 세우고, 담당자가 1:1로 취업을 도와줘요',
+      '직업훈련·일경험 프로그램으로 연결해줘요',
+      '조건이 되면 준비하는 동안 매달 생활 지원금(구직촉진수당)을 받을 수 있어요',
     ],
     steps: [
-      '고용24에서 온라인 신청하거나 가까운 고용센터를 방문해요.',
-      '유형(I/II) 자격을 확인받아요.',
-      '취업활동계획을 세우고 구직활동·프로그램에 참여해요.',
+      '고용24에서 온라인으로 신청하거나 가까운 고용센터를 방문해요.',
+      '내가 어느 유형(I·II)에 맞는지 확인받아요. (간단히 — I유형은 생활 지원금까지, II유형은 취업 도움 중심이에요.)',
+      '취업 계획을 세우고, 구직활동·프로그램에 참여해요.',
     ],
     cautions:
-      'I유형/II유형에 따라 받는 지원이 다르고, 수당은 소득·재산·나이 요건이 있어요. 최신 지원 기준과 금액은 고용24에서 확인하세요.',
+      '받는 지원은 유형(I·II)에 따라 달라요. 생활 지원금(구직촉진수당)은 소득·재산·나이 요건을 다 채워야 받을 수 있어요. 학교 밖 청소년·검정고시 응시자도 신청 가능한지, 최신 기준·금액과 함께 고용24나 고용센터(1350)에서 꼭 확인하세요.',
     applyLabel: '고용24에서 신청하기',
     applyUrl: 'https://www.work24.go.kr',
     match: { startWith: ['바로 취업할래요'], fields: ['any'] },
   },
   {
     id: 'tomorrow-card',
-    title: '내일배움카드',
+    title: '국비 직업훈련 (내일배움카드)',
     tags: ['직업훈련', '국비지원'],
-    plain: '쉽게 말하면 — 나라가 학원비(훈련비)를 대주는 카드예요.',
-    desc: '직업훈련 비용을 국비로 지원받아 기술을 배워요.',
+    needsCheck: true,
+    plain: '쉽게 말하면 — 나라가 학원비(훈련비)를 대줘서 기술을 배우는 제도예요. 카드 이름이 "내일배움카드"고요.',
+    desc: '직업훈련 비용을 나라가 대주는 제도예요. 학교 밖 청소년은 신청 가능한지 먼저 확인이 필요해요.',
     summary:
-      '직업훈련을 받고 싶은 사람에게 훈련비를 국비로 지원해 주는 카드예요. 카드를 발급받으면 정해진 한도 안에서 HRD-Net에 등록된 다양한 과정을 들을 수 있어요.',
+      '직업훈련을 받고 싶은 사람에게 훈련비를 나라가 지원해 주는 제도예요(카드 이름이 "내일배움카드"). 카드를 발급받으면 정해진 한도 안에서 HRD-Net에 등록된 다양한 과정을 들을 수 있어요. 다만 발급 대상에 나이·상황 요건이 있어서, 학교 밖 청소년·미성년자는 바로 되는지 확인이 필요해요.',
     who: [
-      '대학보다 실무 기술을 빨리 배워서 일하고 싶은 경우',
+      '실무 기술을 빨리 배워서 일하고 싶은 경우',
       'IT·디자인·정비·요리 등 배우고 싶은 분야가 있는 경우',
       '훈련비 부담 때문에 시작을 망설이던 경우',
     ],
     benefit: [
-      '정해진 한도 안에서 훈련비 국비 지원(과정에 따라 일부 자부담)',
+      '정해진 한도 안에서 훈련비 지원(과정에 따라 일부는 본인 부담)',
       'HRD-Net에 등록된 수천 개 과정 중 선택 수강',
       '수료 후 자격·취업 연계까지 이어가기 좋음',
     ],
     steps: [
-      '고용24 또는 HRD-Net에서 내일배움카드 발급을 신청해요.',
-      '훈련 상담을 받고 들을 과정을 정해요.',
-      '과정을 수강하고 수료해요.',
+      '먼저 고용센터나 꿈드림센터에 "내가 발급 대상인지" 물어봐요. (학교 밖 청소년은 이 확인이 가장 중요해요.)',
+      '대상이 되면 고용24 또는 HRD-Net에서 카드 발급을 신청해요.',
+      '훈련 상담을 받고 들을 과정을 정해, 수강하고 수료해요.',
     ],
     cautions:
-      '과정마다 지원율·자부담이 다르고, 발급 대상에 일부 요건이 있어요(미성년자 등은 확인 필요). 정확한 한도·과정 정보는 고용24/HRD-Net에서 확인하세요.',
-    applyLabel: '고용24에서 카드 신청하기',
+      '학교 밖 청소년·미성년자에게 바로 적용되는지는 상황마다 달라요. 된다고 단정하지 말고, 신청 전에 가까운 고용센터(1350)나 꿈드림센터에 "나도 발급 대상인지" 꼭 확인하세요. 과정마다 지원율·본인 부담도 다릅니다.',
+    applyLabel: '고용24에서 자격·발급 확인하기',
     applyUrl: 'https://www.work24.go.kr',
     match: { startWith: ['직업훈련 먼저'], fields: ['IT·디자인', '제조·기술', '서비스·요식'] },
   },
@@ -194,7 +195,7 @@ export const JOB_PROGRAMS = [
       '필기 합격 후 실기까지 통과하면 자격 취득!',
     ],
     cautions:
-      '"기사·산업기사"는 학력·경력 요건이 있어요. 학교 밖 청소년은 보통 "기능사"부터 시작해요. 종목별 일정·응시료는 큐넷에서 확인하세요.',
+      '"기능사"는 학력·나이 제한이 거의 없어 학교 밖 청소년·검정고시 응시자도 바로 도전할 수 있어요. 다만 "기사·산업기사"는 학력·경력 요건이 있으니, 처음엔 "기능사"부터 시작하세요. 종목별 일정·응시료는 큐넷에서 확인하세요.',
     applyLabel: '큐넷에서 접수하기',
     applyUrl: 'https://www.q-net.or.kr',
     match: { startWith: ['자격증 먼저'], fields: ['제조·기술', 'IT·디자인'], noCert: true },
@@ -249,14 +250,20 @@ export function scoreProgram(p, jobProfile) {
   return score;
 }
 
+// 정직성 정렬 보정 — 자격이 불확실한(needsCheck) 제도는 점수가 같을 때 뒤로 보낸다.
+// "학교 밖에 확실히 맞는 것"을 앞에, "확인 필요한 것"을 뒤에 두기 위함.
+function tiebreak(a, b) {
+  if (b.s !== a.s) return b.s - a.s;
+  const ca = a.p.needsCheck ? 1 : 0;
+  const cb = b.p.needsCheck ? 1 : 0;
+  return ca - cb; // needsCheck 아닌 게 먼저
+}
+
 // 추천 우선 정렬 결과 { recommended: [...최대 3], rest: [...나머지] }
 export function matchPrograms(jobProfile) {
-  if (!jobProfile) {
-    return { recommended: JOB_PROGRAMS.slice(0, 3), rest: JOB_PROGRAMS.slice(3) };
-  }
   const ranked = JOB_PROGRAMS
-    .map((p) => ({ p, s: scoreProgram(p, jobProfile) }))
-    .sort((a, b) => b.s - a.s);
+    .map((p, i) => ({ p, s: jobProfile ? scoreProgram(p, jobProfile) : 0, i }))
+    .sort((a, b) => tiebreak(a, b) || a.i - b.i);
   const matched = ranked.filter((r) => r.s > 0).map((r) => r.p);
   const recommended = (matched.length ? matched : ranked.map((r) => r.p)).slice(0, 3);
   const recIds = new Set(recommended.map((p) => p.id));
@@ -299,18 +306,20 @@ export const JOB_QUESTIONS = [
 ];
 
 // ── 준비 로드맵 단계 ──
+// 원칙: 단계 제목·todo에는 행정용어(내일배움카드 등)를 쓰지 않는다.
+//   "기술 배우기" 처럼 쉬운 말로 풀고, 정확한 제도 이름은 상세 화면에서.
 export const JOB_ROADMAP = [
   { id: 'explore', icon: 'Compass', title: '내 관심·적성 알아보기',
-    todo: '직업심리검사로 어떤 일이 맞는지 먼저 파악해요.',
-    cta: { label: '직업심리검사 알아보기', screen: 'job-detail', params: { id: 'voca-psych-test' } } },
-  { id: 'skill', icon: 'GraduationCap', title: '역량 쌓기 (자격증·훈련)',
-    todo: '내일배움카드로 훈련받거나 기능사 자격에 도전해요.',
-    cta: { label: '내일배움카드 알아보기', screen: 'job-detail', params: { id: 'tomorrow-card' } } },
+    todo: '무료 검사로 어떤 일이 나에게 맞는지 먼저 살펴봐요.',
+    cta: { label: '무료 직업검사 알아보기', screen: 'job-detail', params: { id: 'voca-psych-test' } } },
+  { id: 'skill', icon: 'GraduationCap', title: '기술·자격 쌓기',
+    todo: '학력 제한이 거의 없는 기능사 자격에 도전하거나, 나라가 비용을 대주는 직업훈련으로 기술을 배워요.',
+    cta: { label: '학력 제한 낮은 자격부터 보기', screen: 'job-detail', params: { id: 'technician-cert' } } },
   { id: 'find', icon: 'Search', title: '일자리 찾기',
-    todo: '워크넷·고용24에서 내게 맞는 채용을 찾아요.',
-    cta: { label: '취업 지원제도 보기', screen: 'job-detail', params: { id: 'national-employment' } } },
+    todo: '워크넷·고용24에서 내게 맞는 채용을 찾아요. 혼자 막막하면 취업을 도와주는 제도도 있어요.',
+    cta: { label: '취업 도와주는 제도 보기', screen: 'job-detail', params: { id: 'national-employment' } } },
   { id: 'apply', icon: 'FileText', title: '지원·면접 준비',
     todo: '이력서를 정리하고 면접에서 할 말을 미리 연습해요.', cta: null },
   { id: 'work', icon: 'Sparkles', title: '취업·적응',
-    todo: '근로계약서를 꼭 확인하고, 힘들면 1388에 도움을 청해요.', cta: null },
+    todo: '일을 시작하면 근로계약서를 꼭 확인하고, 힘들면 1388에 도움을 청해요.', cta: null },
 ];
