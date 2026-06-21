@@ -96,7 +96,7 @@ export async function createPost({ board, title, body }) {
       .insert({ board, title: t, body: b, author: me.id })
       .select('id')
       .single();
-    if (error) return { ok: false, error: error.message };
+    if (error || !data) return { ok: false, error: '글을 올리지 못했어요. 잠시 후 다시 시도해 주세요.' };
     return { ok: true, id: data.id };
   }
   const posts = mockStore.getPosts();
@@ -120,7 +120,7 @@ export async function addComment(postId, body) {
     const { error } = await supabase
       .from('comments')
       .insert({ post_id: postId, body: b, author: me.id });
-    if (error) return { ok: false, error: error.message };
+    if (error) return { ok: false, error: '댓글을 올리지 못했어요. 잠시 후 다시 시도해 주세요.' };
     return { ok: true };
   }
   const comments = mockStore.getComments();
@@ -139,15 +139,18 @@ export async function toggleReaction(postId) {
   if (!me) return { ok: false, error: '로그인이 필요해요.' };
 
   if (isSupabase) {
-    const { data: existing } = await supabase
+    const { data: existing, error: selErr } = await supabase
       .from('reactions').select('post_id')
       .eq('post_id', postId).eq('user_id', me.id).maybeSingle();
+    if (selErr) return { ok: false, error: '잠시 후 다시 시도해 주세요.' };
     if (existing) {
-      await supabase.from('reactions').delete().eq('post_id', postId).eq('user_id', me.id);
+      const { error: delErr } = await supabase
+        .from('reactions').delete().eq('post_id', postId).eq('user_id', me.id);
+      if (delErr) return { ok: false, error: '잠시 후 다시 시도해 주세요.' };
       return { ok: true, liked: false };
     }
     const { error } = await supabase.from('reactions').insert({ post_id: postId, user_id: me.id });
-    if (error) return { ok: false, error: error.message };
+    if (error) return { ok: false, error: '잠시 후 다시 시도해 주세요.' };
     return { ok: true, liked: true };
   }
   let reactions = mockStore.getReactions();
@@ -165,7 +168,7 @@ export async function deletePost(id) {
   if (!me) return { ok: false, error: '로그인이 필요해요.' };
   if (isSupabase) {
     const { error } = await supabase.from('posts').delete().eq('id', id).eq('author', me.id);
-    if (error) return { ok: false, error: error.message };
+    if (error) return { ok: false, error: '글을 삭제하지 못했어요. 잠시 후 다시 시도해 주세요.' };
     return { ok: true };
   }
   mockStore.setPosts(mockStore.getPosts().filter((p) => !(p.id === id && p.author_id === me.id)));

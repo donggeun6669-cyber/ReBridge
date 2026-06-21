@@ -35,15 +35,20 @@ function cacheAndEmit(user) {
 }
 
 // ── supabase: 세션 → user 정규화 ────────────────────────────────────────────
+// 네트워크/인증 오류는 throw 하지 않고 null 반환(상위에서 캐시 유지로 폴백).
 async function fetchSupabaseUser() {
-  const { data: { user: authUser } } = await supabase.auth.getUser();
-  if (!authUser) return null;
-  const { data: prof } = await supabase
+  const { data, error } = await supabase.auth.getUser();
+  if (error || !data?.user) return null;          // 세션 없음/만료/네트워크 오류
+  const authUser = data.user;
+  const { data: prof, error: profErr } = await supabase
     .from('profiles')
     .select('nickname, verified, verified_center, verified_at, is_staff')
     .eq('id', authUser.id)
     .maybeSingle();
-  if (!prof) return { id: authUser.id, nickname: '익명', verified: false, isStaff: false };
+  // 프로필 조회 자체가 실패(RLS/네트워크)하면 최소 사용자 정보만 반환.
+  if (profErr || !prof) {
+    return { id: authUser.id, nickname: '익명', verified: false, isStaff: false };
+  }
   return {
     id: authUser.id,
     nickname: prof.nickname,
@@ -57,8 +62,13 @@ async function fetchSupabaseUser() {
 // ── 백엔드 → 캐시 동기화(앱/화면 마운트 시) ────────────────────────────────
 export async function refreshUser() {
   if (!isSupabase) return cacheAndEmit(mockStore.getUser());
-  const user = await fetchSupabaseUser();
-  return cacheAndEmit(user);
+  try {
+    const user = await fetchSupabaseUser();
+    return cacheAndEmit(user);
+  } catch {
+    // 네트워크 단절 등 예기치 못한 오류 — 마지막으로 알던 사용자를 유지(로그아웃 처리 안 함).
+    return getCachedUser();
+  }
 }
 
 // ── 가입(= 닉네임 설정). 이미 세션 있으면 닉네임만 갱신. ─────────────────────
@@ -72,18 +82,29 @@ export async function signUp(nickname) {
   }
 
   if (isSupabase) {
-    let { data: { user: authUser } } = await supabase.auth.getUser();
-    if (!authUser) {
-      const { data, error } = await supabase.auth.signInAnonymously();
-      if (error) return { ok: false, error: '가입에 실패했어요. 잠시 후 다시 시도해 주세요.' };
-      authUser = data.user;
+    try {
+      const { data: cur, error: getErr } = await supabase.auth.getUser();
+      if (getErr && getErr.name !== 'AuthSessionMissingError') {
+        // 세션 '없음'은 정상(첫 가입). 그 외 오류(네트워크 등)만 실패 처리.
+        return { ok: false, error: '연결에 문제가 있어요. 잠시 후 다시 시도해 주세요.' };
+      }
+      let authUser = cur?.user || null;
+      if (!authUser) {
+        const { data, error } = await supabase.auth.signInAnonymously();
+        if (error || !data?.user) {
+          return { ok: false, error: '가입에 실패했어요. 잠시 후 다시 시도해 주세요.' };
+        }
+        authUser = data.user;
+      }
+      const { error: upErr } = await supabase
+        .from('profiles')
+        .upsert({ id: authUser.id, nickname: nick }, { onConflict: 'id' });
+      if (upErr) return { ok: false, error: '닉네임 저장에 실패했어요. 잠시 후 다시 시도해 주세요.' };
+      const user = await fetchSupabaseUser();
+      return { ok: true, user: cacheAndEmit(user) };
+    } catch {
+      return { ok: false, error: '연결에 문제가 있어요. 잠시 후 다시 시도해 주세요.' };
     }
-    const { error: upErr } = await supabase
-      .from('profiles')
-      .upsert({ id: authUser.id, nickname: nick }, { onConflict: 'id' });
-    if (upErr) return { ok: false, error: upErr.message };
-    const user = await fetchSupabaseUser();
-    return { ok: true, user: cacheAndEmit(user) };
   }
 
   // 목: 기존 사용자 있으면 닉네임만 교체, 없으면 새로 생성.

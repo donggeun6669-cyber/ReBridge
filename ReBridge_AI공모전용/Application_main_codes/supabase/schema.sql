@@ -15,7 +15,11 @@
 --   5) .env 가 비어 있으면 앱은 자동으로 localStorage 목(mock) 백엔드로 폴백한다.
 -- ============================================================================
 
+-- gen_random_uuid() 사용을 위해 pgcrypto 확장 보장(Supabase 무료 플랜 기본 포함).
+create extension if not exists pgcrypto;
+
 -- 깨끗한 재실행을 위해(개발용). 운영에선 주의.
+-- drop function if exists redeem_code(text);
 -- drop table if exists reactions, comments, posts, verification_codes, profiles cascade;
 
 -- ── 프로필 ───────────────────────────────────────────────────────────────
@@ -124,9 +128,16 @@ set search_path = public
 as $$
 declare
   v_center text;
+  v_rows   int;
 begin
   if auth.uid() is null then
     raise exception 'login required';
+  end if;
+
+  -- 프로필이 먼저 있어야 인증 배지를 붙일 수 있다(닉네임 가입 선행).
+  -- 프로필이 없으면 코드를 소모하지 않고 즉시 예외(트랜잭션 롤백).
+  if not exists (select 1 from profiles where id = auth.uid()) then
+    raise exception 'profile required';
   end if;
 
   update verification_codes
@@ -141,7 +152,16 @@ begin
   update profiles
      set verified = true, verified_center = v_center, verified_at = now()
    where id = auth.uid();
+  get diagnostics v_rows = row_count;
+  if v_rows <> 1 then
+    -- 방어적: 프로필 갱신이 0행이면 코드 소모까지 롤백(원자성 보장).
+    raise exception 'profile update failed';
+  end if;
 
   return json_build_object('ok', true, 'center', v_center);
 end;
 $$;
+
+-- 익명/로그인 사용자가 redeem_code 만 호출하도록 권한을 명시(코드 테이블은 직접 못 봄).
+revoke all on function redeem_code(text) from public;
+grant execute on function redeem_code(text) to anon, authenticated;
