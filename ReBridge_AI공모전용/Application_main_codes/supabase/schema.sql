@@ -54,14 +54,29 @@ create table if not exists posts (
 create index if not exists posts_board_created_idx on posts (board, created_at desc);
 
 -- ── 댓글 ─────────────────────────────────────────────────────────────────
+-- parent_id: 대댓글(1단 답글)용. null=원댓글, 값 있으면 그 댓글의 답글.
 create table if not exists comments (
   id          uuid primary key default gen_random_uuid(),
   post_id     uuid not null references posts (id) on delete cascade,
   author      uuid not null references profiles (id) on delete cascade,
+  parent_id   uuid references comments (id) on delete cascade,
   body        text not null check (char_length(body) between 1 and 1000),
   created_at  timestamptz not null default now()
 );
 create index if not exists comments_post_idx on comments (post_id, created_at);
+
+-- ── 마이그레이션(기존 DB에 안전하게 컬럼 추가 — additive) ─────────────────────
+-- 이미 comments 테이블이 있는 프로젝트는 위 create 가 무시되므로, 컬럼을 따로 추가.
+alter table comments add column if not exists parent_id uuid references comments (id) on delete cascade;
+create index if not exists comments_parent_idx on comments (parent_id);
+
+-- ── 댓글 공감(♥) ─────────────────────────────────────────────────────────
+create table if not exists comment_reactions (
+  comment_id uuid not null references comments (id) on delete cascade,
+  user_id    uuid not null references profiles (id) on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key (comment_id, user_id)
+);
 
 -- ── 공감(좋아요) ─────────────────────────────────────────────────────────
 create table if not exists reactions (
@@ -79,6 +94,7 @@ alter table verification_codes enable row level security;
 alter table posts              enable row level security;
 alter table comments           enable row level security;
 alter table reactions          enable row level security;
+alter table comment_reactions  enable row level security;
 
 -- 프로필: 공개 읽기(닉네임·배지 표시용), 본인만 생성/수정.
 create policy "profiles read"   on profiles for select using (true);
@@ -109,6 +125,11 @@ create policy "comments delete" on comments for delete using (auth.uid() = autho
 create policy "reactions read"   on reactions for select using (true);
 create policy "reactions insert" on reactions for insert with check (auth.uid() = user_id);
 create policy "reactions delete" on reactions for delete using (auth.uid() = user_id);
+
+-- 댓글 공감: 공개 읽기(카운트), 본인 것만 추가/취소.
+create policy "comment_reactions read"   on comment_reactions for select using (true);
+create policy "comment_reactions insert" on comment_reactions for insert with check (auth.uid() = user_id);
+create policy "comment_reactions delete" on comment_reactions for delete using (auth.uid() = user_id);
 
 -- ============================================================================
 -- RPC — 인증코드 사용(원자적). 학생은 코드 테이블을 직접 못 보지만 이 함수로 redeem.
