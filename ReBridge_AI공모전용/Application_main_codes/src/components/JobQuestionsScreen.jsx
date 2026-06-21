@@ -35,11 +35,11 @@ export default function JobQuestionsScreen({ goTo = () => {}, goBack = () => {},
         <span className="page-title">내 취업 유형</span>
       </header>
 
-      <div className="intro-line">몇 가지만 알려주세요</div>
+      <div className="intro-line">4가지만 골라주세요</div>
       <div className="intro-sub">
-        답에 맞춰 어떤 길과 지원이 있는지 안내해드려요.
+        고른 답에 맞춰 나에게 맞는 길을 알려드려요.
         <br />
-        모르는 건 비워둬도 괜찮아요.
+        모르는 건 안 골라도 괜찮아요.
       </div>
 
       {JOB_QUESTIONS.map((q) => (
@@ -62,9 +62,9 @@ export default function JobQuestionsScreen({ goTo = () => {}, goBack = () => {},
 
       <div className="form-foot">
         <button className="cta" onClick={submit}>
-          {answeredCount > 0 ? '저장하고 맞춤 정보 보기' : '건너뛰고 둘러보기'}
+          {answeredCount > 0 ? '다 골랐어요, 다음으로' : '그냥 둘러볼래요'}
         </button>
-        <p className="reassure">입력한 정보는 이 기기에만 저장돼요. 로그인 필요 없어요.</p>
+        <p className="reassure">고른 답은 이 폰에만 저장돼요. 로그인 안 해도 돼요.</p>
       </div>
     </div>
   );

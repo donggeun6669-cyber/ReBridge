@@ -17,24 +17,24 @@ export default function JobPsychScreen({ goBack = () => {} }) {
 
       <div className="srm-intro">
         <span className="srm-intro-kicker">나부터 알아보기</span>
-        <h2 className="srm-intro-title">뭐가 맞을지 모르겠다면,<br />나를 먼저 알아봐요</h2>
+        <h2 className="srm-intro-title">뭐가 맞을지 모르겠다면<br />나를 먼저 알아봐요</h2>
       </div>
 
       <p className="job-reason" style={{ marginBottom: 13 }}>
-        커리어넷 진로심리검사예요. 모두 <b>무료</b>고, 결과로 어울리는 분야를 추천받아요.
+        나라에서 만든 검사예요. 모두 <b>무료</b>고, 나한테 맞는 일을 알려줘요.
       </p>
 
       <PsychGroup tests={youth} />
 
       {adult.length > 0 && (
         <>
-          <p className="ji-test-glabel">만 18세 이상이라면, 성인용 검사도 있어요</p>
+          <p className="ji-test-glabel">만 18세가 넘었다면, 어른용 검사도 있어요</p>
           <PsychGroup tests={adult} />
         </>
       )}
 
       <p className="note" style={{ marginTop: 18 }}>
-        검사 결과는 정답이 아니라 참고예요. 여러 검사를 함께 보면 방향을 더 또렷하게 잡을 수 있어요.
+        검사 결과는 정답이 아니라 참고예요. 여러 개 해보면 방향이 더 또렷해져요.
       </p>
     </div>
   );

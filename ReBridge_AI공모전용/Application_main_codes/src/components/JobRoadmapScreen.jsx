@@ -37,11 +37,11 @@ export default function JobRoadmapScreen({ goTo = () => {} }) {
       </header>
 
       <div className="srm-intro">
-        <span className="srm-intro-kicker">3단계 · 준비 로드맵</span>
+        <span className="srm-intro-kicker">3단계 · 준비하기</span>
         <h2 className="srm-intro-title">
           {target
-            ? <>{target.name},<br />여기까지 같이 가요</>
-            : <>관심 파악부터 첫 출근까지,<br />한 단계씩 같이 가요</>}
+            ? <>{target.name},<br />한 칸씩 같이 가요</>
+            : <>첫 출근까지<br />한 칸씩 같이 가요</>}
         </h2>
       </div>
 
@@ -68,13 +68,13 @@ export default function JobRoadmapScreen({ goTo = () => {} }) {
 
       {target ? (
         <button className="srm-cta" onClick={() => goTo('job-info')} style={{ margin: '0 0 14px' }}>
-          <Target size={15} /> 내 목표 직업 · {target.name} (바꾸기)
+          <Target size={15} /> 내 목표: {target.name} · 바꾸기
         </button>
       ) : (
         <button className="ji-connect" onClick={() => goTo('job-info')} style={{ marginBottom: 14 }}>
           <span className="ji-connect-text">
-            <span className="ji-connect-label">먼저 목표 직업을 정해볼까요?</span>
-            <span className="ji-connect-sub">직업을 고르면 단계마다 할 일이 또렷해져요</span>
+            <span className="ji-connect-label">먼저 하고 싶은 일을 골라요</span>
+            <span className="ji-connect-sub">고르면 단계마다 할 일이 또렷해져요</span>
           </span>
           <ChevronRight size={17} />
         </button>
@@ -109,7 +109,7 @@ export default function JobRoadmapScreen({ goTo = () => {} }) {
       </div>
 
       <p className="note" style={{ marginTop: 8 }}>
-        각 단계의 자세한 정보는 공식 기관으로 연결돼요. 막히면 청소년상담 1388에 도움을 청해요.
+        막히면 혼자 끙끙대지 말고 1388에 전화해요. 24시간 무료예요.
       </p>
     </div>
   );

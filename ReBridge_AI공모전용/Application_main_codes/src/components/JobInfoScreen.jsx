@@ -11,11 +11,11 @@ import '../styles.job.css';
 // 연결 경로에서 한눈 칩 도출 — 학교 밖 청소년이 가장 궁금한 '학력/돈/방법'.
 // 정직성: '무료/국비' 처럼 단정하지 않는다(자격이 불확실한 제도가 섞여 있음).
 function metaChips(item) {
-  const chips = ['학력 무관'];
+  const chips = ['학력 없어도 돼요'];
   const pid = item.connect?.programId;
-  if (pid === 'tomorrow-card') chips.push('국비 직업훈련');
-  else if (pid === 'technician-cert') chips.push('국가기능사 자격');
-  else if (pid === 'national-employment') chips.push('단기 교육 → 취업');
+  if (pid === 'tomorrow-card') chips.push('나라가 학원비 지원');
+  else if (pid === 'technician-cert') chips.push('자격증으로 시작');
+  else if (pid === 'national-employment') chips.push('짧게 배우고 취업');
   return chips;
 }
 
@@ -69,13 +69,13 @@ export default function JobInfoScreen({ goBack = () => {}, goTo = () => {} }) {
 
       <div className="srm-intro">
         <span className="srm-intro-kicker">2단계 · 직업 고르기</span>
-        <h2 className="srm-intro-title">학력보다 기술,<br />지금 시작할 수 있는 일</h2>
+        <h2 className="srm-intro-title">학력 없이도<br />지금 시작할 수 있는 일</h2>
       </div>
 
       <p className="job-reason" style={{ marginBottom: 13 }}>
         <Sparkles size={13} style={{ verticalAlign: '-2px', marginRight: 5 }} />
-        학위가 꼭 필요한 직업은 빼고, <b>학력 제한이 낮거나 자격·훈련으로 시작</b>할 수 있는
-        직업만 골라 모았어요. 마음에 드는 직업을 고르면 <b>맞춤 로드맵</b>으로 이어져요.
+        <b>학교를 다 마치지 않아도 시작할 수 있는 일</b>만 모았어요.<br />
+        마음에 드는 일을 누르면, 준비하는 방법을 알려줘요.
       </p>
 
       {/* 분야 칩 */}
@@ -133,7 +133,7 @@ export default function JobInfoScreen({ goBack = () => {}, goTo = () => {} }) {
                     </div>
                   ) : (
                     <p className="ji-detail-empty">
-                      이 일이 마음에 들면, 아래에서 바로 준비를 이어갈 수 있어요.
+                      이 일이 마음에 들면, 아래 버튼을 눌러요.
                     </p>
                   )}
 
@@ -154,9 +154,9 @@ export default function JobInfoScreen({ goBack = () => {}, goTo = () => {} }) {
                       onClick={() => saveTarget(item)}
                     >
                       <span className="ji-connect-text">
-                        <span className="ji-connect-label">이 직업으로 준비 시작</span>
+                        <span className="ji-connect-label">이걸로 시작할래요</span>
                         <span className="ji-connect-sub">
-                          {item.connect ? item.connect.label : '목표로 정하고 로드맵 보기'}
+                          {item.connect ? item.connect.label : '목표로 정하고 준비하기'}
                         </span>
                       </span>
                       <ArrowRight size={17} />
@@ -183,16 +183,16 @@ export default function JobInfoScreen({ goBack = () => {}, goTo = () => {} }) {
       {/* 뭐가 맞을지 모를 때 — 진로심리검사로 분리 */}
       <button className="ji-connect" onClick={() => goTo('job-psych')} style={{ marginTop: 16 }}>
         <span className="ji-connect-text">
-          <span className="ji-connect-label">아직 뭐가 맞을지 모르겠다면</span>
-          <span className="ji-connect-sub">진로심리검사로 나부터 알아보기</span>
+          <span className="ji-connect-label">아직 뭐가 맞을지 모르겠어요</span>
+          <span className="ji-connect-sub">간단한 검사로 나부터 알아봐요</span>
         </span>
         <Compass size={17} />
       </button>
 
       <p className="note" style={{ marginTop: 18 }}>
         <Lock size={12} style={{ verticalAlign: '-2px', marginRight: 4 }} />
-        직업 설명은 <b>커리어넷(한국직업능력연구원)</b> 자료예요. 자격·비용 조건은 제도마다 다를 수 있어,
-        실제 신청 전 공식 기관 확인을 함께 안내해요.
+        직업 설명은 나라에서 만든 <b>커리어넷</b> 자료예요. 자격·돈은 곳마다 다를 수 있어,
+        신청 전에 꼭 확인하라고 알려드려요.
       </p>
     </div>
   );
