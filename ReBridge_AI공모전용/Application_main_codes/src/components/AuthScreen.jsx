@@ -23,6 +23,58 @@ export function useAuthUser() {
   return user;
 }
 
+// NicknameGate — 미로그인 사용자가 '첫 행동'(글쓰기·댓글·공감)을 할 때 뜨는 인라인 닉네임 모달.
+//   읽기는 자유, 첫 행동 시 1탭 닉네임 → 제자리 복귀. 로그인 화면으로 튕기지 않는다.
+// props: open, onClose(), onDone()  — onDone 은 가입 성공 후 호출(원래 하려던 행동 재개용).
+export function NicknameGate({ open, onClose = () => {}, onDone = () => {} }) {
+  const [nickname, setNickname] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState('');
+
+  if (!open) return null;
+
+  const submit = async (e) => {
+    e.preventDefault();
+    setErr(''); setBusy(true);
+    const res = await signUp(nickname);
+    setBusy(false);
+    if (!res.ok) { setErr(res.error); return; }
+    setNickname('');
+    onDone(res.user);
+  };
+
+  return (
+    <div className="cm-gate-overlay" role="dialog" aria-modal="true" onClick={onClose}>
+      <div className="cm-gate" onClick={(e) => e.stopPropagation()}>
+        <span className="cm-gate-kicker">
+          <Sparkles size={13} style={{ verticalAlign: '-2px', marginRight: 4 }} />
+          읽기는 자유! 글·댓글·공감만 닉네임이 필요해요
+        </span>
+        <h3 className="cm-gate-title">닉네임만 정하면 바로 시작</h3>
+        <p className="cm-gate-sub">실명·전화번호는 쓰지 마세요. 익명으로 활동해요.</p>
+        <form className="cm-form" onSubmit={submit}>
+          <input
+            className="cm-input"
+            value={nickname}
+            onChange={(e) => setNickname(e.target.value)}
+            placeholder="예: 봄바람, 새벽3시"
+            maxLength={20}
+            autoComplete="off"
+            autoFocus
+          />
+          {err && <p className="cm-err">{err}</p>}
+          <button className="cm-btn primary" disabled={busy || !nickname.trim()}>
+            {busy ? '시작하는 중…' : '닉네임으로 시작하기'}
+          </button>
+          <button type="button" className="cm-btn ghost sm cm-gate-cancel" onClick={onClose}>
+            나중에
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 export default function AuthScreen({ goBack = () => {} }) {
   const user = useAuthUser();
   const [nickname, setNickname] = useState('');

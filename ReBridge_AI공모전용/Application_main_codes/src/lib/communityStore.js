@@ -9,6 +9,7 @@ const KEYS = {
   posts: 'rb_comm_posts',
   comments: 'rb_comm_comments',
   reactions: 'rb_comm_reactions',
+  commentReactions: 'rb_comm_comment_reactions',  // 댓글 공감(♥)
 };
 
 function read(key, fallback) {
@@ -68,6 +69,8 @@ export const mockStore = {
   setComments(list) { return write(KEYS.comments, list); },
   getReactions() { return read(KEYS.reactions, []); },
   setReactions(list) { return write(KEYS.reactions, list); },
+  getCommentReactions() { return read(KEYS.commentReactions, []); },
+  setCommentReactions(list) { return write(KEYS.commentReactions, list); },
 };
 
 // 간단한 랜덤 id(목 전용). crypto 있으면 사용.

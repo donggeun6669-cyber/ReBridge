@@ -16,7 +16,8 @@ export const BOARDS = [
 ];
 
 // ── 목록 ────────────────────────────────────────────────────────────────
-export async function listPosts(board = 'review') {
+// sort: 'recent'(최신, 기본) | 'popular'(인기 = 공감수 내림차순, 동률이면 최신)
+export async function listPosts(board = 'review', sort = 'recent') {
   const me = getCachedUser();
   if (isSupabase) {
     const { data, error } = await supabase
@@ -27,15 +28,22 @@ export async function listPosts(board = 'review') {
       .eq('board', board)
       .order('created_at', { ascending: false });
     if (error) return [];
-    return (data || []).map((p) => normalize(p, me));
+    return sortPosts((data || []).map((p) => normalize(p, me)), sort);
   }
   // 목
   const posts = mockStore.getPosts().filter((p) => p.board === board);
   const reactions = mockStore.getReactions();
   const comments = mockStore.getComments();
-  return posts
-    .sort((a, b) => b.created_at - a.created_at)
-    .map((p) => normalizeMock(p, reactions, comments, me));
+  const list = posts.map((p) => normalizeMock(p, reactions, comments, me));
+  return sortPosts(list, sort);
+}
+
+// 정규화된 글 목록을 정렬(최신/인기). 공통 사용.
+function sortPosts(list, sort) {
+  if (sort === 'popular') {
+    return [...list].sort((a, b) => (b.likeCount - a.likeCount) || (b.createdAt - a.createdAt));
+  }
+  return [...list].sort((a, b) => b.createdAt - a.createdAt);
 }
 
 // ── 단일 글 + 댓글 ──────────────────────────────────────────────────────────
@@ -57,28 +65,61 @@ export async function getPost(id) {
   return normalizeMock(p, mockStore.getReactions(), mockStore.getComments(), me);
 }
 
+// 댓글 목록 — 1단 답글(parent_id) 트리로 반환.
+//   반환: [{ ...comment, replies: [ ...comment ] }]  (원댓글만 최상위, replies 는 시간순)
+//   각 comment: { id, body, createdAt, author, mine, parentId, likeCount, likedByMe }
 export async function listComments(postId) {
   const me = getCachedUser();
+  let flat;
   if (isSupabase) {
     const { data, error } = await supabase
       .from('comments')
-      .select('id, body, created_at, author, profiles:author (nickname, verified, verified_center)')
+      .select('id, body, created_at, author, parent_id, ' +
+        'profiles:author (nickname, verified, verified_center), comment_reactions (user_id)')
       .eq('post_id', postId)
       .order('created_at', { ascending: true });
     if (error) return [];
-    return (data || []).map((c) => ({
-      id: c.id, body: c.body, createdAt: new Date(c.created_at).getTime(),
-      author: authorOf(c.profiles), mine: me?.id === c.author,
-    }));
+    flat = (data || []).map((c) => {
+      const rs = c.comment_reactions || [];
+      return {
+        id: c.id, body: c.body, createdAt: new Date(c.created_at).getTime(),
+        author: authorOf(c.profiles), mine: me?.id === c.author,
+        parentId: c.parent_id || null,
+        likeCount: rs.length,
+        likedByMe: me ? rs.some((r) => r.user_id === me.id) : false,
+      };
+    });
+  } else {
+    const cr = mockStore.getCommentReactions();
+    flat = mockStore.getComments()
+      .filter((c) => c.post_id === postId)
+      .sort((a, b) => a.created_at - b.created_at)
+      .map((c) => {
+        const rs = cr.filter((r) => r.comment_id === c.id);
+        return {
+          id: c.id, body: c.body, createdAt: c.created_at,
+          author: { nickname: c.author_nickname, verified: c.author_verified, center: c.author_center },
+          mine: me?.id === c.author_id,
+          parentId: c.parent_id || null,
+          likeCount: rs.length,
+          likedByMe: me ? rs.some((r) => r.user_id === me.id) : false,
+        };
+      });
   }
-  return mockStore.getComments()
-    .filter((c) => c.post_id === postId)
-    .sort((a, b) => a.created_at - b.created_at)
-    .map((c) => ({
-      id: c.id, body: c.body, createdAt: c.created_at,
-      author: { nickname: c.author_nickname, verified: c.author_verified, center: c.author_center },
-      mine: me?.id === c.author_id,
-    }));
+  return nestComments(flat);
+}
+
+// 평면 목록 → 1단 트리. 부모가 없는(또는 부모를 못 찾는) 댓글은 최상위로.
+function nestComments(flat) {
+  const byId = new Map(flat.map((c) => [c.id, { ...c, replies: [] }]));
+  const roots = [];
+  for (const c of byId.values()) {
+    const parent = c.parentId ? byId.get(c.parentId) : null;
+    if (parent && parent.id !== c.id) parent.replies.push(c);
+    else roots.push(c);
+  }
+  // 원댓글은 시간순(이미 정렬됨), 답글도 시간순 유지.
+  return roots;
 }
 
 // ── 작성(로그인 필요) ───────────────────────────────────────────────────────
@@ -96,7 +137,7 @@ export async function createPost({ board, title, body }) {
       .insert({ board, title: t, body: b, author: me.id })
       .select('id')
       .single();
-    if (error) return { ok: false, error: error.message };
+    if (error || !data) return { ok: false, error: '글을 올리지 못했어요. 잠시 후 다시 시도해 주세요.' };
     return { ok: true, id: data.id };
   }
   const posts = mockStore.getPosts();
@@ -110,7 +151,8 @@ export async function createPost({ board, title, body }) {
   return { ok: true, id };
 }
 
-export async function addComment(postId, body) {
+// parentId 가 있으면 1단 답글로 작성(중첩 답글의 답글은 같은 부모로 묶음).
+export async function addComment(postId, body, parentId = null) {
   const me = getCachedUser();
   if (!me) return { ok: false, error: '로그인이 필요해요.' };
   const b = String(body || '').trim();
@@ -119,18 +161,47 @@ export async function addComment(postId, body) {
   if (isSupabase) {
     const { error } = await supabase
       .from('comments')
-      .insert({ post_id: postId, body: b, author: me.id });
-    if (error) return { ok: false, error: error.message };
+      .insert({ post_id: postId, body: b, author: me.id, parent_id: parentId || null });
+    if (error) return { ok: false, error: '댓글을 올리지 못했어요. 잠시 후 다시 시도해 주세요.' };
     return { ok: true };
   }
   const comments = mockStore.getComments();
   comments.push({
     id: rid('cmt'), post_id: postId, body: b, created_at: Date.now(),
+    parent_id: parentId || null,
     author_id: me.id, author_nickname: me.nickname,
     author_verified: !!me.verified, author_center: me.verifiedCenter || null,
   });
   mockStore.setComments(comments);
   return { ok: true };
+}
+
+// ── 댓글 공감(♥) 토글(로그인 필요). 반환: 토글 후 liked 여부 ─────────────────
+export async function toggleCommentReaction(commentId) {
+  const me = getCachedUser();
+  if (!me) return { ok: false, error: '로그인이 필요해요.' };
+
+  if (isSupabase) {
+    const { data: existing } = await supabase
+      .from('comment_reactions').select('comment_id')
+      .eq('comment_id', commentId).eq('user_id', me.id).maybeSingle();
+    if (existing) {
+      await supabase.from('comment_reactions').delete()
+        .eq('comment_id', commentId).eq('user_id', me.id);
+      return { ok: true, liked: false };
+    }
+    const { error } = await supabase.from('comment_reactions')
+      .insert({ comment_id: commentId, user_id: me.id });
+    if (error) return { ok: false, error: error.message };
+    return { ok: true, liked: true };
+  }
+  let cr = mockStore.getCommentReactions();
+  const i = cr.findIndex((r) => r.comment_id === commentId && r.user_id === me.id);
+  let liked;
+  if (i >= 0) { cr.splice(i, 1); liked = false; }
+  else { cr.push({ comment_id: commentId, user_id: me.id }); liked = true; }
+  mockStore.setCommentReactions(cr);
+  return { ok: true, liked };
 }
 
 // ── 공감 토글(로그인 필요). 반환: 토글 후 liked 여부 ──────────────────────────
@@ -139,15 +210,18 @@ export async function toggleReaction(postId) {
   if (!me) return { ok: false, error: '로그인이 필요해요.' };
 
   if (isSupabase) {
-    const { data: existing } = await supabase
+    const { data: existing, error: selErr } = await supabase
       .from('reactions').select('post_id')
       .eq('post_id', postId).eq('user_id', me.id).maybeSingle();
+    if (selErr) return { ok: false, error: '잠시 후 다시 시도해 주세요.' };
     if (existing) {
-      await supabase.from('reactions').delete().eq('post_id', postId).eq('user_id', me.id);
+      const { error: delErr } = await supabase
+        .from('reactions').delete().eq('post_id', postId).eq('user_id', me.id);
+      if (delErr) return { ok: false, error: '잠시 후 다시 시도해 주세요.' };
       return { ok: true, liked: false };
     }
     const { error } = await supabase.from('reactions').insert({ post_id: postId, user_id: me.id });
-    if (error) return { ok: false, error: error.message };
+    if (error) return { ok: false, error: '잠시 후 다시 시도해 주세요.' };
     return { ok: true, liked: true };
   }
   let reactions = mockStore.getReactions();
@@ -165,12 +239,15 @@ export async function deletePost(id) {
   if (!me) return { ok: false, error: '로그인이 필요해요.' };
   if (isSupabase) {
     const { error } = await supabase.from('posts').delete().eq('id', id).eq('author', me.id);
-    if (error) return { ok: false, error: error.message };
+    if (error) return { ok: false, error: '글을 삭제하지 못했어요. 잠시 후 다시 시도해 주세요.' };
     return { ok: true };
   }
   mockStore.setPosts(mockStore.getPosts().filter((p) => !(p.id === id && p.author_id === me.id)));
+  const removedIds = mockStore.getComments().filter((c) => c.post_id === id).map((c) => c.id);
   mockStore.setComments(mockStore.getComments().filter((c) => c.post_id !== id));
   mockStore.setReactions(mockStore.getReactions().filter((r) => r.post_id !== id));
+  mockStore.setCommentReactions(
+    mockStore.getCommentReactions().filter((r) => !removedIds.includes(r.comment_id)));
   return { ok: true };
 }
 

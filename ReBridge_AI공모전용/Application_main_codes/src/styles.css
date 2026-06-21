@@ -4139,3 +4139,104 @@ button {
 .kdream-footer-note b { color: var(--text); }
 .kdream-source { font-size: 11px !important; margin-top: 4px !important; }
 
+
+/* ===== 상태기반 홈: 미정(예시) ===== */
+.home-lead {
+  margin: 8px 0 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-sub);
+}
+.home-examples {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 18px;
+}
+.home-example-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 14px 16px;
+  cursor: pointer;
+}
+.home-example-row:active { transform: scale(0.99); }
+.home-example-ico {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--r-sm);
+  background: var(--brand-tint);
+  color: var(--brand-deep);
+  flex: none;
+}
+.home-example-text { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.home-example-title { font-size: 15px; font-weight: 600; color: var(--text); }
+.home-example-sub { font-size: 12.5px; color: var(--text-sub); margin-top: 2px; }
+.home-example-arrow { color: var(--text-sub); flex: none; }
+.home-browse {
+  display: block;
+  width: 100%;
+  margin-top: 14px;
+  padding: 12px;
+  font-size: 13.5px;
+  color: var(--brand-deep);
+  background: var(--brand-tint);
+  border: none;
+  border-radius: var(--r-md);
+  cursor: pointer;
+}
+
+/* ===== 상태기반 홈: 트랙 확정(TrackShell) ===== */
+.track-shell { display: flex; flex-direction: column; min-height: 100%; }
+.track-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 18px 8px;
+}
+.track-kicker { margin: 0; font-size: 12.5px; color: var(--text-sub); }
+.track-name { margin: 2px 0 0; font-size: 18px; font-weight: 700; color: var(--text); }
+.track-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12.5px;
+  color: var(--text-sub);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--r-pill);
+  padding: 6px 12px;
+  cursor: pointer;
+}
+.track-tabs {
+  display: flex;
+  gap: 7px;
+  padding: 6px 16px 12px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.track-tab {
+  white-space: nowrap;
+  font-size: 13.5px;
+  color: var(--text-sub);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--r-pill);
+  padding: 7px 14px;
+  cursor: pointer;
+}
+.track-tab.active {
+  color: var(--brand-deep);
+  background: var(--brand-tint);
+  border-color: transparent;
+  font-weight: 600;
+}
+.track-body { flex: 1; }

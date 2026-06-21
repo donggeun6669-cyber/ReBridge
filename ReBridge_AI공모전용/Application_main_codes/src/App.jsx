@@ -32,19 +32,19 @@ import CommunityScreen from './components/CommunityScreen.jsx';
 import CommunityPostScreen from './components/CommunityPostScreen.jsx';
 import CommunityWriteScreen from './components/CommunityWriteScreen.jsx';
 import AuthScreen from './components/AuthScreen.jsx';
+import SupportScreen from './components/SupportScreen.jsx';
 import BottomNav from './components/BottomNav.jsx';
 import SplashScreen from './components/SplashScreen.jsx';
 import { getPersona, getNav, activeTabId, loadProfile } from './lib/persona.js';
 
-// 하단 탭의 루트 화면들(여기로 가면 스택 리셋). persona별로 탭이 달라도 모두 포함.
-// univ-explore는 제외: tested는 탭(BottomNav가 리셋), studying은 프로필 경유 서브화면(push해야 뒤로가기 됨).
-const TAB_ROOTS = ['home', 'ged-guide', 'explore', 'roadmap', 'study-roadmap', 'study-planner', 'mypage',
-  'job-home', 'job-explore', 'job-roadmap', 'community'];
+// 하단 글로벌 탭의 루트 화면들(여기로 가면 스택 리셋). 항상 고정 4개.
+// 트랙 화면(학습/대입/직업)은 홈 안의 TrackShell이 그리므로 여기 없음.
+const TAB_ROOTS = ['home', 'support', 'community', 'mypage'];
 
 const KNOWN_SCREENS = [
   'guide', 'results', 'detail', 'documents', 'saved', 'map', 'help',
   'checklist', 'forms-guide', 'dreamdrive', 'ged-guide', 'univ-explore', 'path',
-  'onboarding', 'study-roadmap', 'study-planner',
+  'onboarding', 'study-roadmap', 'study-planner', 'support',
   'job-home', 'job-explore', 'job-roadmap', 'job-questions', 'job-detail', 'job-info', 'job-psych',
   'community', 'community-post', 'community-write', 'community-auth',
 ];
@@ -62,13 +62,8 @@ export default function App() {
 
   function handleSplashDone() {
     setSplash(false);
-    const persona = getPersona();
-    if (!persona) {
-      setStack([{ screen: 'onboarding', params: {} }]);
-    } else {
-      const { landing } = getNav(persona);
-      setStack([{ screen: jobLandingFor(landing), params: {} }]);
-    }
+    // 온보딩 필터 없음 — 누구나 홈으로. 홈이 '상태'에 따라 미정/트랙을 그린다.
+    setStack([{ screen: 'home', params: {} }]);
   }
 
   function handleProfileComplete() {
@@ -111,10 +106,10 @@ export default function App() {
 
   const isMainScreen = [...TAB_ROOTS, 'profile', 'onboarding'].includes(screen);
 
-  // persona 기반 하단 탭 (없으면 BottomNav 기본 폴백)
+  // 하단 탭은 항상 고정(홈·지원·커뮤니티·MY). 온보딩/프로필 화면에서만 숨김.
   const persona = getPersona();
-  const nav = getNav(persona);
-  const showNav = !splash && persona && !['onboarding', 'profile'].includes(screen);
+  const nav = getNav();
+  const showNav = !splash && !['onboarding', 'profile'].includes(screen);
 
   return (
     <div className="app-shell">
@@ -123,7 +118,8 @@ export default function App() {
 
         {!splash && screen === 'onboarding'  && <OnboardingScreen goTo={goTo} presetTrack={params.presetTrack} />}
 
-        {!splash && screen === 'home'        && <HomeScreen goTo={goTo} />}
+        {!splash && screen === 'home'        && <HomeScreen goTo={goTo} goBack={goBack} />}
+        {!splash && screen === 'support'     && <SupportScreen goTo={goTo} goBack={goBack} />}
         {!splash && screen === 'explore'     && <CareerHubScreen goTo={goTo} persona={persona} />}
         {!splash && screen === 'univ-explore' && <ExploreScreen goTo={goTo} goBack={goBack} canGoBack={stack.length > 1} />}
         {!splash && screen === 'path'        && (
@@ -192,7 +188,7 @@ export default function App() {
         )}
 
         {showNav && (
-          <BottomNav tabs={nav.tabs} active={activeTabId(screen, persona)} goTo={goToTab} />
+          <BottomNav tabs={nav.tabs} active={activeTabId(screen)} goTo={goToTab} />
         )}
       </div>
     </div>

@@ -15,7 +15,11 @@
 --   5) .env 가 비어 있으면 앱은 자동으로 localStorage 목(mock) 백엔드로 폴백한다.
 -- ============================================================================
 
+-- gen_random_uuid() 사용을 위해 pgcrypto 확장 보장(Supabase 무료 플랜 기본 포함).
+create extension if not exists pgcrypto;
+
 -- 깨끗한 재실행을 위해(개발용). 운영에선 주의.
+-- drop function if exists redeem_code(text);
 -- drop table if exists reactions, comments, posts, verification_codes, profiles cascade;
 
 -- ── 프로필 ───────────────────────────────────────────────────────────────
@@ -54,14 +58,29 @@ create table if not exists posts (
 create index if not exists posts_board_created_idx on posts (board, created_at desc);
 
 -- ── 댓글 ─────────────────────────────────────────────────────────────────
+-- parent_id: 대댓글(1단 답글)용. null=원댓글, 값 있으면 그 댓글의 답글.
 create table if not exists comments (
   id          uuid primary key default gen_random_uuid(),
   post_id     uuid not null references posts (id) on delete cascade,
   author      uuid not null references profiles (id) on delete cascade,
+  parent_id   uuid references comments (id) on delete cascade,
   body        text not null check (char_length(body) between 1 and 1000),
   created_at  timestamptz not null default now()
 );
 create index if not exists comments_post_idx on comments (post_id, created_at);
+
+-- ── 마이그레이션(기존 DB에 안전하게 컬럼 추가 — additive) ─────────────────────
+-- 이미 comments 테이블이 있는 프로젝트는 위 create 가 무시되므로, 컬럼을 따로 추가.
+alter table comments add column if not exists parent_id uuid references comments (id) on delete cascade;
+create index if not exists comments_parent_idx on comments (parent_id);
+
+-- ── 댓글 공감(♥) ─────────────────────────────────────────────────────────
+create table if not exists comment_reactions (
+  comment_id uuid not null references comments (id) on delete cascade,
+  user_id    uuid not null references profiles (id) on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key (comment_id, user_id)
+);
 
 -- ── 공감(좋아요) ─────────────────────────────────────────────────────────
 create table if not exists reactions (
@@ -79,6 +98,7 @@ alter table verification_codes enable row level security;
 alter table posts              enable row level security;
 alter table comments           enable row level security;
 alter table reactions          enable row level security;
+alter table comment_reactions  enable row level security;
 
 -- 프로필: 공개 읽기(닉네임·배지 표시용), 본인만 생성/수정.
 create policy "profiles read"   on profiles for select using (true);
@@ -110,6 +130,11 @@ create policy "reactions read"   on reactions for select using (true);
 create policy "reactions insert" on reactions for insert with check (auth.uid() = user_id);
 create policy "reactions delete" on reactions for delete using (auth.uid() = user_id);
 
+-- 댓글 공감: 공개 읽기(카운트), 본인 것만 추가/취소.
+create policy "comment_reactions read"   on comment_reactions for select using (true);
+create policy "comment_reactions insert" on comment_reactions for insert with check (auth.uid() = user_id);
+create policy "comment_reactions delete" on comment_reactions for delete using (auth.uid() = user_id);
+
 -- ============================================================================
 -- RPC — 인증코드 사용(원자적). 학생은 코드 테이블을 직접 못 보지만 이 함수로 redeem.
 --   · 미사용 코드면 used_by/used_at 기록 + 호출자 프로필을 verified 로 갱신.
@@ -124,9 +149,16 @@ set search_path = public
 as $$
 declare
   v_center text;
+  v_rows   int;
 begin
   if auth.uid() is null then
     raise exception 'login required';
+  end if;
+
+  -- 프로필이 먼저 있어야 인증 배지를 붙일 수 있다(닉네임 가입 선행).
+  -- 프로필이 없으면 코드를 소모하지 않고 즉시 예외(트랜잭션 롤백).
+  if not exists (select 1 from profiles where id = auth.uid()) then
+    raise exception 'profile required';
   end if;
 
   update verification_codes
@@ -141,7 +173,16 @@ begin
   update profiles
      set verified = true, verified_center = v_center, verified_at = now()
    where id = auth.uid();
+  get diagnostics v_rows = row_count;
+  if v_rows <> 1 then
+    -- 방어적: 프로필 갱신이 0행이면 코드 소모까지 롤백(원자성 보장).
+    raise exception 'profile update failed';
+  end if;
 
   return json_build_object('ok', true, 'center', v_center);
 end;
 $$;
+
+-- 익명/로그인 사용자가 redeem_code 만 호출하도록 권한을 명시(코드 테이블은 직접 못 봄).
+revoke all on function redeem_code(text) from public;
+grant execute on function redeem_code(text) to anon, authenticated;

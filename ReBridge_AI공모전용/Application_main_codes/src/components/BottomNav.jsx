@@ -1,6 +1,6 @@
-import { Home, Search, Route, User, GraduationCap, Compass, ListChecks, Briefcase, Users } from 'lucide-react';
+import { Home, Search, Route, User, GraduationCap, Compass, ListChecks, Briefcase, Users, Gift, MessageCircle } from 'lucide-react';
 
-const ICONS = { Home, Search, Route, User, GraduationCap, Compass, ListChecks, Briefcase, Users };
+const ICONS = { Home, Search, Route, User, GraduationCap, Compass, ListChecks, Briefcase, Users, Gift, MessageCircle };
 
 // 기본 탭(persona 없을 때 폴백) — 기존 입시 앱 구성
 const DEFAULT_TABS = [

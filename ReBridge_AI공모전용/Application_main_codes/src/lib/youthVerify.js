@@ -55,7 +55,8 @@ export async function issueCode({ centerId, issuedBy } = {}) {
     const { error } = await supabase
       .from('verification_codes')
       .insert({ code, center_id: centerId || 'unknown', issued_by: issuedBy || null });
-    if (error) return { ok: false, error: error.message };
+    // 실무자(is_staff)가 아니면 RLS가 막는다 — 친절한 안내로 변환.
+    if (error) return { ok: false, error: '코드 발급 권한이 없거나 연결에 문제가 있어요.' };
     return { ok: true, code };
   }
   // 목: 발급 목록에 추가

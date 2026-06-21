@@ -2,41 +2,63 @@
 //   로그인 없이 읽기 가능. 글쓰기/공감은 로그인 필요 → 미로그인 시 로그인 화면으로.
 // props: goTo(screen, params), goBack()
 import { useState, useEffect, useCallback } from 'react';
-import { PenSquare, Heart, MessageCircle, Users, LogIn } from 'lucide-react';
+import { PenSquare, Heart, MessageCircle, Users, LogIn, Clock, Flame } from 'lucide-react';
 import { BOARDS, listPosts, toggleReaction, timeAgo } from '../lib/community.js';
 import { AuthorLine } from './CommunityBadge.jsx';
-import { useAuthUser } from './AuthScreen.jsx';
+import { useAuthUser, NicknameGate } from './AuthScreen.jsx';
 import '../styles.community.css';
+
+const SORTS = [
+  { id: 'recent', label: '최신', icon: Clock },
+  { id: 'popular', label: '인기', icon: Flame },
+];
 
 export default function CommunityScreen({ goTo = () => {}, goBack = () => {} }) {
   const user = useAuthUser();
   const [board, setBoard] = useState('review');
+  const [sort, setSort] = useState('recent');
   const [posts, setPosts] = useState(null);   // null = 로딩
+  const [gate, setGate] = useState(null);      // 미로그인 첫 행동 시 뜨는 닉네임 모달의 '대기 중 행동'
 
-  const load = useCallback(async (b) => {
+  const load = useCallback(async (b, s) => {
     setPosts(null);
-    setPosts(await listPosts(b));
+    setPosts(await listPosts(b, s));
   }, []);
 
-  useEffect(() => { load(board); }, [board, load]);
+  useEffect(() => { load(board, sort); }, [board, sort, load]);
   // 로그인 상태가 바뀌면 '내 공감' 표시가 달라지므로 다시 로드.
-  useEffect(() => { load(board); }, [user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { load(board, sort); }, [user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onWrite = useCallback(() => {
-    if (!user) { goTo('community-auth'); return; }
+    if (!user) { setGate({ type: 'write' }); return; }
     goTo('community-write', { board });
   }, [user, board, goTo]);
 
   const onLike = useCallback(async (e, id) => {
     e.stopPropagation();
-    if (!user) { goTo('community-auth'); return; }
+    if (!user) { setGate({ type: 'like', id }); return; }
     const res = await toggleReaction(id);
     if (res.ok) {
       setPosts((list) => list.map((p) => p.id === id
         ? { ...p, likedByMe: res.liked, likeCount: p.likeCount + (res.liked ? 1 : -1) }
         : p));
     }
-  }, [user, goTo]);
+  }, [user]);
+
+  // 닉네임 가입 완료 후, 대기 중이던 행동을 이어서 수행.
+  const onGateDone = useCallback(async () => {
+    const pending = gate;
+    setGate(null);
+    if (pending?.type === 'write') { goTo('community-write', { board }); return; }
+    if (pending?.type === 'like') {
+      const res = await toggleReaction(pending.id);
+      if (res.ok) {
+        setPosts((list) => list.map((p) => p.id === pending.id
+          ? { ...p, likedByMe: res.liked, likeCount: p.likeCount + (res.liked ? 1 : -1) }
+          : p));
+      }
+    }
+  }, [gate, board, goTo]);
 
   return (
     <div className="screen cm-screen">
@@ -70,6 +92,21 @@ export default function CommunityScreen({ goTo = () => {}, goBack = () => {} }) 
             {b.label}
           </button>
         ))}
+      </div>
+
+      <div className="cm-sort">
+        {SORTS.map((s) => {
+          const Icon = s.icon;
+          return (
+            <button
+              key={s.id}
+              className={`cm-sort-btn ${sort === s.id ? 'sel' : ''}`}
+              onClick={() => setSort(s.id)}
+            >
+              <Icon size={13} /> {s.label}
+            </button>
+          );
+        })}
       </div>
 
       <div className="cm-list">
@@ -110,6 +147,8 @@ export default function CommunityScreen({ goTo = () => {}, goBack = () => {} }) 
         <PenSquare size={20} />
         <span>글쓰기</span>
       </button>
+
+      <NicknameGate open={!!gate} onClose={() => setGate(null)} onDone={onGateDone} />
     </div>
   );
 }
