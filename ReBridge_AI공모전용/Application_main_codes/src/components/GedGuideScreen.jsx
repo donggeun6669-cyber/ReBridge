@@ -2,9 +2,10 @@ import { useMemo, useState } from 'react';
 import {
   ChevronDown, ExternalLink, CalendarClock, FileText,
   ClipboardList, Award, CheckCircle2, BookOpen, Calculator, Languages,
-  Globe2, FlaskConical, Landmark, Info, Target,
+  Globe2, FlaskConical, Landmark, Info, Target, ListChecks,
 } from 'lucide-react';
 import LogoMark from './LogoMark.jsx';
+import '../styles.study.css';
 import {
   GED_LINKS, PASS_RULE, GED_SUBJECT_GUIDE, GED_ELECTIVE_NOTE,
   getNextSession, daysUntil, formatKDate,
@@ -43,6 +44,15 @@ export default function GedGuideScreen({ goTo = () => {} }) {
     .filter((v) => v != null && v !== '');
   const avg = entered.length ? Math.round(entered.reduce((a, b) => a + b, 0) / entered.length) : null;
   const passLine = PASS_RULE.passAverage;
+
+  // 가장 약한 과목 (플래너로 연결)
+  const weakSubject = useMemo(() => {
+    const arr = GED_SUBJECT_GUIDE
+      .map((s) => ({ key: s.key, v: scores[s.key] }))
+      .filter((x) => x.v != null && x.v !== '')
+      .sort((a, b) => a.v - b.v);
+    return arr[0] || null;
+  }, [scores]);
 
   const session = useMemo(() => getNextSession(), []);
   const dday = session ? daysUntil(session.examDate) : null;
@@ -204,6 +214,21 @@ export default function GedGuideScreen({ goTo = () => {} }) {
             </div>
           )}
           <p className="gedh-mock-note">점수는 이 기기에만 저장돼요. 선택 과목은 빼고 필수 6과목으로만 가늠해요.</p>
+
+          {weakSubject && (
+            <button className="study-ged-weakcta" onClick={() => goTo('study-planner')}>
+              <span className="study-ged-weakcta-ico"><ListChecks size={18} /></span>
+              <span className="study-ged-weakcta-body">
+                <span className="study-ged-weakcta-title">
+                  {weakSubject.v < passLine
+                    ? `${weakSubject.key}이(가) 가장 약해요 (${weakSubject.v}점)`
+                    : `${weakSubject.key} 점수가 가장 낮아요 (${weakSubject.v}점)`}
+                </span>
+                <span className="study-ged-weakcta-sub">플래너에서 {weakSubject.key} 보완 할 일을 담아 공부해요</span>
+              </span>
+              <ExternalLink size={15} style={{ transform: 'rotate(-45deg)' }} />
+            </button>
+          )}
         </div>
       </div>
 
