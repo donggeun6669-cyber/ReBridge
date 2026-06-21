@@ -1,11 +1,14 @@
-// CommunityPostScreen — 글 상세 + 댓글. 읽기는 누구나, 댓글·공감은 로그인 필요.
+// CommunityPostScreen — 글 상세 + 댓글. 읽기는 누구나, 댓글·공감·스크랩·신고는 로그인 필요.
+//   P1: 스크랩 토글, 글/댓글 신고·차단(액션 시트). 진입 시 알림 본 것으로 표시.
 // props: goTo(screen, params), goBack(), id(글 id)
 import { useState, useEffect, useCallback } from 'react';
-import { ArrowLeft, Heart, Send, Trash2 } from 'lucide-react';
+import { ArrowLeft, Heart, Send, Trash2, Bookmark, MoreHorizontal } from 'lucide-react';
 import {
-  getPost, listComments, addComment, toggleReaction, deletePost, timeAgo,
+  getPost, listComments, addComment, toggleReaction, toggleBookmark, deletePost,
+  markPostSeen, tagLabel, timeAgo,
 } from '../lib/community.js';
 import { AuthorLine } from './CommunityBadge.jsx';
+import CommunityActionSheet from './CommunityActionSheet.jsx';
 import { useAuthUser } from './AuthScreen.jsx';
 import '../styles.community.css';
 
@@ -16,12 +19,17 @@ export default function CommunityPostScreen({ goTo = () => {}, goBack = () => {}
   const [text, setText] = useState('');
   const [busy, setBusy] = useState(false);
   const [notfound, setNotfound] = useState(false);
+  const [sheet, setSheet] = useState(null);
+  const [toast, setToast] = useState('');
+
+  const flashToast = (m) => { setToast(m); setTimeout(() => setToast(''), 1800); };
 
   const load = useCallback(async () => {
     const p = await getPost(id);
     if (!p) { setNotfound(true); return; }
     setPost(p);
     setComments(await listComments(id));
+    markPostSeen(id);     // 상세 진입 → 알림 본 것으로
   }, [id]);
 
   useEffect(() => { load(); }, [load, user?.id]);
@@ -34,6 +42,15 @@ export default function CommunityPostScreen({ goTo = () => {}, goBack = () => {}
     }
   }, [user, id, goTo]);
 
+  const onBookmark = useCallback(async () => {
+    if (!user) { goTo('community-auth'); return; }
+    const res = await toggleBookmark(id);
+    if (res.ok) {
+      setPost((p) => ({ ...p, bookmarkedByMe: res.bookmarked }));
+      flashToast(res.bookmarked ? '스크랩했어요.' : '스크랩을 취소했어요.');
+    }
+  }, [user, id, goTo]);
+
   const onComment = useCallback(async (e) => {
     e.preventDefault();
     if (!user) { goTo('community-auth'); return; }
@@ -41,7 +58,7 @@ export default function CommunityPostScreen({ goTo = () => {}, goBack = () => {}
     setBusy(true);
     const res = await addComment(id, text);
     setBusy(false);
-    if (res.ok) { setText(''); setComments(await listComments(id)); setPost(await getPost(id)); }
+    if (res.ok) { setText(''); setComments(await listComments(id)); setPost(await getPost(id)); markPostSeen(id); }
   }, [user, id, text, goTo]);
 
   const onDelete = useCallback(async () => {
@@ -49,6 +66,21 @@ export default function CommunityPostScreen({ goTo = () => {}, goBack = () => {}
     const res = await deletePost(id);
     if (res.ok) goBack();
   }, [id, goBack]);
+
+  const openPostSheet = () => {
+    if (!user) { goTo('community-auth'); return; }
+    setSheet({
+      target: { type: 'post', id: post.id, authorId: post.author?.id, authorNickname: post.author?.nickname, bookmarked: post.bookmarkedByMe },
+      isMe: post.mine, kind: 'post',
+    });
+  };
+  const openCommentSheet = (c) => {
+    if (!user) { goTo('community-auth'); return; }
+    setSheet({
+      target: { type: 'comment', id: c.id, authorId: c.author?.id, authorNickname: c.author?.nickname },
+      isMe: c.mine, kind: 'comment',
+    });
+  };
 
   if (notfound) {
     return (
@@ -73,19 +105,25 @@ export default function CommunityPostScreen({ goTo = () => {}, goBack = () => {}
     );
   }
 
+  const boardLabel = post.board === 'review' ? '꿈드림 후기'
+    : post.board === 'center' ? '우리 센터' : '이야기';
+
   return (
     <div className="screen cm-screen">
       <header className="topbar between">
         <button className="icon-btn" aria-label="뒤로" onClick={goBack}><ArrowLeft size={22} /></button>
-        <span className="page-title">{post.board === 'review' ? '꿈드림 후기' : '공감·소통'}</span>
+        <span className="page-title">{boardLabel}</span>
         {post.mine
           ? <button className="icon-btn" aria-label="삭제" onClick={onDelete}><Trash2 size={19} /></button>
-          : <span style={{ width: 38 }} />}
+          : <button className="icon-btn" aria-label="더보기" onClick={openPostSheet}><MoreHorizontal size={20} /></button>}
       </header>
 
       <article className="cm-post">
         <div className="cm-card-top">
-          <AuthorLine author={post.author} when={timeAgo(post.createdAt)} />
+          <span>
+            <AuthorLine author={post.author} when={timeAgo(post.createdAt)} />
+            {post.tag && <span className="cm-tag-pill">{tagLabel(post.tag)}</span>}
+          </span>
         </div>
         <h2 className="cm-post-title">{post.title}</h2>
         <p className="cm-post-body">{post.body}</p>
@@ -94,6 +132,10 @@ export default function CommunityPostScreen({ goTo = () => {}, goBack = () => {}
           <button className={`cm-like-btn ${post.likedByMe ? 'liked' : ''}`} onClick={onLike}>
             <Heart size={17} fill={post.likedByMe ? 'currentColor' : 'none'} />
             공감 {post.likeCount}
+          </button>
+          <button className={`cm-like-btn bm ${post.bookmarkedByMe ? 'on' : ''}`} onClick={onBookmark}>
+            <Bookmark size={17} fill={post.bookmarkedByMe ? 'currentColor' : 'none'} />
+            {post.bookmarkedByMe ? '스크랩됨' : '스크랩'}
           </button>
         </div>
       </article>
@@ -105,7 +147,14 @@ export default function CommunityPostScreen({ goTo = () => {}, goBack = () => {}
         ) : (
           comments.map((c) => (
             <div key={c.id} className="cm-comment">
-              <AuthorLine author={c.author} when={timeAgo(c.createdAt)} />
+              <div className="cm-comment-head">
+                <AuthorLine author={c.author} when={timeAgo(c.createdAt)} />
+                {!c.mine && (
+                  <button className="cm-more-btn" aria-label="댓글 더보기" onClick={() => openCommentSheet(c)}>
+                    <MoreHorizontal size={16} />
+                  </button>
+                )}
+              </div>
               <p className="cm-comment-body">{c.body}</p>
             </div>
           ))
@@ -125,6 +174,18 @@ export default function CommunityPostScreen({ goTo = () => {}, goBack = () => {}
           <Send size={18} />
         </button>
       </form>
+
+      {sheet && (
+        <CommunityActionSheet
+          target={sheet.target}
+          isMe={sheet.isMe}
+          onClose={() => setSheet(null)}
+          onBookmarkToggle={sheet.kind === 'post' ? onBookmark : null}
+          onBlocked={() => { flashToast('차단했어요. 이 사람 글·댓글이 숨겨져요.'); load(); }}
+          onReported={flashToast}
+        />
+      )}
+      {toast && <div className="cm-toast">{toast}</div>}
     </div>
   );
 }
