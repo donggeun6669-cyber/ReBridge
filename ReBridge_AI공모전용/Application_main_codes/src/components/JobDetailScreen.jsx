@@ -88,11 +88,12 @@ export default function JobDetailScreen({ id, goBack = () => {} }) {
       </section>
 
       {/* 외부 연결은 '신청' 한 곳만 */}
+      <p className="jd-apply-hint">아래 버튼을 누르면 신청 사이트로 가요</p>
       <a className="jd-apply" href={p.applyUrl} target="_blank" rel="noopener noreferrer">
         {p.applyLabel} <ArrowUpRight size={18} />
       </a>
       <p className="note jd-foot">
-        설명은 앱에서 끝까지 안내했어요. 위 버튼은 <b>실제 신청·접수</b>를 위해 공식 사이트로 연결돼요.
+        설명은 앱에서 다 했어요. 위 버튼은 <b>진짜 신청</b>할 때만 공식 사이트로 가요.
       </p>
     </div>
   );

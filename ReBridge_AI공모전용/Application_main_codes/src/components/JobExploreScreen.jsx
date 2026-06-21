@@ -68,7 +68,7 @@ export default function JobExploreScreen({ goTo = () => {} }) {
       {/* 맞춤 추천 — 앱 안에서 설명, 신청만 외부 */}
       <p className="job-sec-label">
         <Sparkles size={13} style={{ verticalAlign: '-2px', marginRight: 4 }} />
-        {jp ? '나에게 맞는 것부터' : '이런 지원이 있어요'}
+        {jp ? '나에게 맞는 것부터' : '이런 도움이 있어요'}
       </p>
       {reason && <p className="job-reason">{reason}</p>}
       <div className="job-prog-list">
@@ -79,7 +79,7 @@ export default function JobExploreScreen({ goTo = () => {} }) {
       {rest.length > 0 && (
         <>
           <p className="job-sec-label" style={{ marginTop: 24 }}>
-            다른 지원도 둘러보기 <span className="job-sec-count">{rest.length}</span>
+            다른 도움도 보기 <span className="job-sec-count">{rest.length}</span>
           </p>
           <div className="job-prog-list">
             {rest.map(ProgCard)}
@@ -88,7 +88,7 @@ export default function JobExploreScreen({ goTo = () => {} }) {
       )}
 
       {/* 공식 포털 빠른 연결 (검색·접수형 포털) */}
-      <p className="job-sec-label" style={{ marginTop: 24 }}>공식 포털 바로가기</p>
+      <p className="job-sec-label" style={{ marginTop: 24 }}>공식 사이트 바로가기</p>
       <div className="job-cat-grid">
         {JOB_CATEGORIES.map((c) => {
           const Icon = ICONS[c.icon] || Briefcase;
@@ -132,8 +132,8 @@ export default function JobExploreScreen({ goTo = () => {} }) {
       </div>
 
       <p className="note" style={{ marginTop: 20 }}>
-        프로그램 설명은 <b>앱 안에서</b> 안내하고, 실제 신청·접수만 공식 기관으로 연결해요.
-        정확한 자격·일정·금액은 신청 화면에서 확인해요.
+        설명은 <b>앱 안에서</b> 다 해드려요. 진짜 신청만 공식 사이트로 가요.
+        정확한 조건·돈은 신청할 때 확인해요.
       </p>
     </div>
   );

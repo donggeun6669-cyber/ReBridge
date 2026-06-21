@@ -46,8 +46,8 @@ export default function JobHomeScreen({ goTo = () => {} }) {
       {!jp ? (
         <button className="home-cta-card job-cta" onClick={() => goTo('job-questions')}>
           <div className="home-cta-inner">
-            <span className="home-cta-label">몇 가지 질문으로</span>
-            <span className="home-cta-title">내 취업 유형부터 알아보기</span>
+            <span className="home-cta-label">4가지만 골라요</span>
+            <span className="home-cta-title">나부터 알아보기</span>
           </div>
           <span className="home-cta-arrow"><ArrowRight size={24} /></span>
         </button>
@@ -57,7 +57,7 @@ export default function JobHomeScreen({ goTo = () => {} }) {
             <span className="home-cta-label">
               {jp?.interest && jp.interest !== '아직 몰라요' ? `${jp.interest} 쪽으로` : '먼저'}
             </span>
-            <span className="home-cta-title">목표 직업 하나 정하기</span>
+            <span className="home-cta-title">하고 싶은 일 하나 고르기</span>
           </div>
           <span className="home-cta-arrow"><ArrowRight size={24} /></span>
         </button>
@@ -81,8 +81,8 @@ export default function JobHomeScreen({ goTo = () => {} }) {
             <button className="home-quick-row" onClick={() => goTo('job-roadmap')}>
               <span className="home-quick-ico ico-green"><Target size={18} /></span>
               <span className="home-quick-text">
-                <span className="home-quick-title">{target.name} 준비 로드맵</span>
-                <span className="home-quick-sub">전체 단계 한눈에 보기</span>
+                <span className="home-quick-title">{target.name} 준비하기</span>
+                <span className="home-quick-sub">단계를 한눈에 보기</span>
               </span>
               <ChevronRight size={16} className="home-quick-arrow" />
             </button>
@@ -93,8 +93,8 @@ export default function JobHomeScreen({ goTo = () => {} }) {
           <button className="home-quick-row" onClick={() => goTo('job-questions')}>
             <span className="home-quick-ico ico-gold"><Briefcase size={18} /></span>
             <span className="home-quick-text">
-              <span className="home-quick-title">내 취업 유형 다시 보기</span>
-              <span className="home-quick-sub">답변 바꾸면 추천도 바뀌어요</span>
+              <span className="home-quick-title">내 답 다시 보기</span>
+              <span className="home-quick-sub">답을 바꾸면 추천도 바뀌어요</span>
             </span>
             <ChevronRight size={16} className="home-quick-arrow" />
           </button>
@@ -105,7 +105,7 @@ export default function JobHomeScreen({ goTo = () => {} }) {
       <div className="home-section">
         <p className="home-section-label">
           <Sparkles size={13} style={{ verticalAlign: '-2px', marginRight: 4 }} />
-          {jp ? '나에게 맞는 지원이에요' : '이런 지원, 받을 수 있어요'}
+          {jp ? '나에게 맞는 도움이에요' : '이런 도움을 받을 수 있어요'}
         </p>
         {reason && <p className="job-reason">{reason}</p>}
         <div className="job-prog-list">
