@@ -1,11 +1,32 @@
 import { useMemo } from 'react';
 import {
   BookOpen, ClipboardList, FileText, Award, Building2, Briefcase, Compass,
-  ChevronRight,
+  ChevronRight, Flame, ListChecks,
 } from 'lucide-react';
-import { getNextSession, daysUntil, formatKDate } from '../data/gedGuide.js';
+import { getNextSession, daysUntil, formatKDate, PASS_RULE, GED_SUBJECT_GUIDE } from '../data/gedGuide.js';
 import { getPersona } from '../lib/persona.js';
 import '../styles.studyroadmap.css';
+import '../styles.study.css';
+
+const DAYS_KEY = 'rebridge_planner_days';
+const MOCK_KEY = 'rebridge_mock_scores';
+
+function loadDays() {
+  try { return JSON.parse(localStorage.getItem(DAYS_KEY)) || {}; }
+  catch { return {}; }
+}
+function loadScores() {
+  try { return JSON.parse(localStorage.getItem(MOCK_KEY)) || {}; }
+  catch { return {}; }
+}
+function ymd(d) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+function fmtMin(m) {
+  if (!m) return '0분';
+  const h = Math.floor(m / 60), mm = m % 60;
+  return h > 0 ? `${h}시간 ${mm ? `${mm}분` : ''}`.trim() : `${mm}분`;
+}
 
 // 목표별 마지막 단계(검정고시 합격 이후)
 const GOAL_FINAL = {
@@ -34,6 +55,42 @@ export default function StudyRoadmapScreen({ goTo = () => {} }) {
   const goal = persona?.goal || 'undecided';
   const session = useMemo(() => getNextSession(), []);
   const final = GOAL_FINAL[goal] || GOAL_FINAL.undecided;
+
+  // 살아있는 진행 — 플래너·모의점수와 연동
+  const live = useMemo(() => {
+    const days = loadDays();
+    const scores = loadScores();
+    const today = new Date();
+    const todayStr = ymd(today);
+
+    let totalMin = 0;
+    const studied = (dd) => !!dd && ((dd.minutes || 0) > 0 || (dd.tasks || []).some((t) => t.done));
+    Object.values(days).forEach((d) => { totalMin += d.minutes || 0; });
+
+    // 연속일
+    let streak = 0;
+    const cur = new Date(today);
+    if (!studied(days[todayStr])) cur.setDate(cur.getDate() - 1);
+    for (;;) { if (studied(days[ymd(cur)])) { streak++; cur.setDate(cur.getDate() - 1); } else break; }
+
+    // 모의 평균
+    const entered = GED_SUBJECT_GUIDE.map((s) => scores[s.key]).filter((v) => v != null && v !== '');
+    const avg = entered.length ? Math.round(entered.reduce((a, b) => a + b, 0) / entered.length) : null;
+    const passLine = PASS_RULE.passAverage;
+
+    // 합격까지 진행률 — 평균 점수 기준(없으면 공부일로 가늠)
+    let pct, msg;
+    if (avg != null) {
+      pct = Math.min(100, Math.round((avg / passLine) * 100));
+      msg = avg >= passLine
+        ? `모의 평균 ${avg}점 — 합격선을 넘었어요! 이대로 굳혀요.`
+        : `모의 평균 ${avg}점 — 합격선까지 평균 ${passLine - avg}점 남았어요.`;
+    } else {
+      pct = totalMin > 0 ? Math.min(60, Math.round(totalMin / 60)) : 0;
+      msg = '과목 가이드에서 모의 점수를 적으면 합격까지 진행률이 보여요.';
+    }
+    return { totalMin, streak, avg, passLine, pct, msg, hasData: totalMin > 0 || avg != null };
+  }, []);
 
   const steps = useMemo(() => {
     const list = [
@@ -96,6 +153,27 @@ export default function StudyRoadmapScreen({ goTo = () => {} }) {
           지금부터 {goal === 'university' ? '대학' : goal === 'job' ? '취업' : '내 길'}까지,<br />
           한 걸음씩 같이 가요
         </h2>
+      </div>
+
+      {/* 살아있는 진행 — 플래너·모의점수 연동 */}
+      <div className="study-rm-progress">
+        <div className="study-rm-progress-head">
+          <span className="study-rm-progress-title">검정고시 합격까지</span>
+          <span className="study-rm-progress-pct">{live.pct}%</span>
+        </div>
+        <div className="study-rm-progress-bar">
+          <span className="study-rm-progress-fill" style={{ width: `${live.pct}%` }} />
+        </div>
+        <p className="study-rm-progress-sub">{live.msg}</p>
+        {live.hasData && (
+          <p className="study-rm-progress-sub" style={{ marginTop: 6 }}>
+            지금까지 <b>{fmtMin(live.totalMin)}</b> 공부
+            {live.streak > 0 && <> · <b><Flame size={12} style={{ verticalAlign: '-1px' }} /> {live.streak}일 연속</b></>}
+          </p>
+        )}
+        <button className="study-rm-link" onClick={() => goTo('study-planner')}>
+          <ListChecks size={14} /> 오늘 할 일·타이머 하러 가기
+        </button>
       </div>
 
       <div className="srm-timeline">
