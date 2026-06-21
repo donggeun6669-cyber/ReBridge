@@ -58,13 +58,14 @@ export function getNav(persona) {
     careerHub: { id: 'explore', label: '진로 탐색', icon: 'Compass', screen: 'explore' },
     roadmap: { id: 'roadmap', label: '로드맵', icon: 'Route', screen: 'roadmap' },
     studyRoadmap: { id: 'roadmap', label: '로드맵', icon: 'Route', screen: 'study-roadmap' },
+    community: { id: 'community', label: '커뮤니티', icon: 'Users', screen: 'community' },
     mypage: { id: 'mypage', label: '프로필', icon: 'User', screen: 'mypage' },
   };
 
   // 검정고시 공부 중 — 학습 홈 중심. 진로 탐색 없음. 로드맵은 '공부 로드맵'.
   if (goal === 'university' && stage === 'studying') {
     return {
-      tabs: [TAB.studyHome, TAB.planner, TAB.studyRoadmap, TAB.mypage],
+      tabs: [TAB.studyHome, TAB.planner, TAB.studyRoadmap, TAB.community, TAB.mypage],
       landing: 'ged-guide',
     };
   }
@@ -76,6 +77,7 @@ export function getNav(persona) {
         { id: 'home', label: '홈', icon: 'Home', screen: 'job-home' },
         { id: 'explore', label: '정보탐색', icon: 'Search', screen: 'job-explore' },
         { id: 'roadmap', label: '준비', icon: 'Route', screen: 'job-roadmap' },
+        TAB.community,
         { id: 'mypage', label: '프로필', icon: 'User', screen: 'mypage' },
       ],
       landing: 'job-home',
@@ -83,13 +85,13 @@ export function getNav(persona) {
   }
   if (goal === 'undecided') {
     return {
-      tabs: [TAB.careerHub, TAB.mypage],
+      tabs: [TAB.careerHub, TAB.community, TAB.mypage],
       landing: 'explore',
     };
   }
   // tested + university = 기존 완성 앱
   return {
-    tabs: [TAB.exploreHome, TAB.univExplore, TAB.roadmap, TAB.mypage],
+    tabs: [TAB.exploreHome, TAB.univExplore, TAB.roadmap, TAB.community, TAB.mypage],
     landing: 'home',
   };
 }
@@ -98,6 +100,7 @@ export function getNav(persona) {
 export function activeTabId(screen, persona = null) {
   // 공부 중(대학) 유저는 '탐색' 탭이 '플래너'다. 대학 관련 화면은 프로필 경유라 프로필 탭으로.
   const studying = persona?.stage === 'studying' && persona?.goal === 'university';
+  if (['community', 'community-post', 'community-write', 'community-auth'].includes(screen)) return 'community';
   if (['home', 'ged-guide', 'job-home', 'job-questions'].includes(screen)) return 'home';
   if (['mypage', 'saved', 'help', 'profile'].includes(screen)) return 'mypage';
   if (['roadmap', 'study-roadmap', 'job-roadmap', 'checklist', 'forms-guide', 'dreamdrive'].includes(screen)) return 'roadmap';

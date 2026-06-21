@@ -28,6 +28,10 @@ import JobDetailScreen from './components/JobDetailScreen.jsx';
 import JobInfoScreen from './components/JobInfoScreen.jsx';
 import JobPsychScreen from './components/JobPsychScreen.jsx';
 import OnboardingScreen from './components/OnboardingScreen.jsx';
+import CommunityScreen from './components/CommunityScreen.jsx';
+import CommunityPostScreen from './components/CommunityPostScreen.jsx';
+import CommunityWriteScreen from './components/CommunityWriteScreen.jsx';
+import AuthScreen from './components/AuthScreen.jsx';
 import BottomNav from './components/BottomNav.jsx';
 import SplashScreen from './components/SplashScreen.jsx';
 import { getPersona, getNav, activeTabId, loadProfile } from './lib/persona.js';
@@ -35,13 +39,14 @@ import { getPersona, getNav, activeTabId, loadProfile } from './lib/persona.js';
 // 하단 탭의 루트 화면들(여기로 가면 스택 리셋). persona별로 탭이 달라도 모두 포함.
 // univ-explore는 제외: tested는 탭(BottomNav가 리셋), studying은 프로필 경유 서브화면(push해야 뒤로가기 됨).
 const TAB_ROOTS = ['home', 'ged-guide', 'explore', 'roadmap', 'study-roadmap', 'study-planner', 'mypage',
-  'job-home', 'job-explore', 'job-roadmap'];
+  'job-home', 'job-explore', 'job-roadmap', 'community'];
 
 const KNOWN_SCREENS = [
   'guide', 'results', 'detail', 'documents', 'saved', 'map', 'help',
   'checklist', 'forms-guide', 'dreamdrive', 'ged-guide', 'univ-explore', 'path',
   'onboarding', 'study-roadmap', 'study-planner',
   'job-home', 'job-explore', 'job-roadmap', 'job-questions', 'job-detail', 'job-info', 'job-psych',
+  'community', 'community-post', 'community-write', 'community-auth',
 ];
 
 // 직업 트랙은 답변(jobProfile)이 있어야 맞춤 안내가 되므로, 없으면 질문부터.
@@ -161,6 +166,10 @@ export default function App() {
         {!splash && screen === 'job-detail'    && <JobDetailScreen id={params.id} goBack={goBack} />}
         {!splash && screen === 'job-info'      && <JobInfoScreen goBack={goBack} goTo={goTo} />}
         {!splash && screen === 'job-psych'     && <JobPsychScreen goBack={goBack} />}
+        {!splash && screen === 'community'       && <CommunityScreen goTo={goTo} goBack={goBack} />}
+        {!splash && screen === 'community-post'  && <CommunityPostScreen goTo={goTo} goBack={goBack} id={params.id} />}
+        {!splash && screen === 'community-write' && <CommunityWriteScreen goTo={goTo} goBack={goBack} board={params.board} />}
+        {!splash && screen === 'community-auth'  && <AuthScreen goBack={goBack} />}
 
         {/* 미구현 화면 fallback */}
         {!splash && !isMainScreen && !KNOWN_SCREENS.includes(screen) && (
