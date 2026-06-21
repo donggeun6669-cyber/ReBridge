@@ -12,6 +12,7 @@
     "verify": "node verify-deploy.mjs"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.108.2",
     "@vitejs/plugin-react": "^4.3.4",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.468.0",
