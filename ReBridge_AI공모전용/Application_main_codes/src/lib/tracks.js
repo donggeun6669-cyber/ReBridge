@@ -10,7 +10,7 @@ export const TRACKS = {
     subtabs: [
       { key: 'roadmap', label: '로드맵', screen: 'study-roadmap' },
       { key: 'plan',    label: '플래너', screen: 'study-planner' },
-      { key: 'guide',   label: '과목가이드', screen: 'ged-guide' },
+      { key: 'univ',    label: '대학',   screen: 'univ-explore' },
     ],
   },
   univ: {
