@@ -244,11 +244,11 @@ export default function MyPageScreen({ goTo = () => {}, goBack = () => {} }) {
           </>
         )}
 
-        {/* persona 없음 + 프로필 없음: 처음 입력 CTA */}
-        {!persona && chips.length === 0 && (
+        {/* persona 없음 + 프로필 없음: 처음 입력 CTA (취업은 위 '취업 유형 알아보기'가 대신함) */}
+        {!persona && !isJob && chips.length === 0 && (
           <button className="mp-setup-cta" onClick={() => goTo('profile')}>
             <GraduationCap size={16} />
-            내 정보 입력하고 맞춤 대학 찾기
+            {isStudy ? '내 정보 입력하고 공부 계획 세우기' : '내 정보 입력하고 맞춤 대학 찾기'}
             <ChevronRight size={15} />
           </button>
         )}
