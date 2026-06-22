@@ -74,13 +74,16 @@
 
 /* 글쓰기 FAB */
 .cm-fab {
-  position: fixed; right: 18px; bottom: 84px; z-index: 30;
+  position: sticky;
+  bottom: 16px;
+  align-self: flex-end;
+  margin-top: 4px;
+  z-index: 30;
   display: inline-flex; align-items: center; gap: 7px;
   background: var(--grad-brand); color: #fff; border: none;
   padding: 12px 18px; border-radius: var(--r-pill); font-size: 14px; font-weight: 700;
   box-shadow: var(--shadow-brand); cursor: pointer;
 }
-.app-frame { position: relative; }
 
 /* ── 글 상세 ── */
 .cm-post { background: var(--card); border-radius: var(--r-md); padding: 16px; box-shadow: var(--shadow-sm); margin-bottom: 14px; }

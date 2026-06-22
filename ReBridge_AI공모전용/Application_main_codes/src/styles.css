@@ -4195,8 +4195,15 @@ button {
 }
 
 /* ===== 상태기반 홈: 트랙 확정(TrackShell) ===== */
-.track-shell { display: flex; flex-direction: column; min-height: 100%; }
+.track-shell {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
 .track-head {
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -4217,11 +4224,13 @@ button {
   cursor: pointer;
 }
 .track-tabs {
+  flex: 0 0 auto;
   display: flex;
   gap: 7px;
   padding: 6px 16px 12px;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  border-bottom: 1px solid var(--border);
 }
 .track-tab {
   white-space: nowrap;
@@ -4239,4 +4248,11 @@ button {
   border-color: transparent;
   font-weight: 600;
 }
-.track-body { flex: 1; }
+.track-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+/* 트랙 안에 들어온 기존 화면은 셸이 스크롤을 관리하므로 위쪽 군더더기 여백만 정리 */
+.track-body > .screen { animation: none; }
