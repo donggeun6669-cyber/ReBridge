@@ -28,6 +28,8 @@ import JobQuestionsScreen from './components/JobQuestionsScreen.jsx';
 import JobDetailScreen from './components/JobDetailScreen.jsx';
 import JobInfoScreen from './components/JobInfoScreen.jsx';
 import JobPsychScreen from './components/JobPsychScreen.jsx';
+import JobTrainingScreen from './components/JobTrainingScreen.jsx';
+import JobApplyScreen from './components/JobApplyScreen.jsx';
 import OnboardingScreen from './components/OnboardingScreen.jsx';
 import CommunityScreen from './components/CommunityScreen.jsx';
 import CommunityPostScreen from './components/CommunityPostScreen.jsx';
@@ -47,6 +49,7 @@ const KNOWN_SCREENS = [
   'checklist', 'forms-guide', 'dreamdrive', 'ged-guide', 'univ-explore', 'path',
   'onboarding', 'study-roadmap', 'study-planner', 'support',
   'job-home', 'job-explore', 'job-roadmap', 'job-questions', 'job-detail', 'job-info', 'job-psych',
+  'job-training', 'job-apply',
   'community', 'community-post', 'community-write', 'community-auth',
 ];
 
@@ -166,6 +169,8 @@ export default function App() {
         {!splash && screen === 'job-detail'    && <JobDetailScreen id={params.id} goBack={goBack} />}
         {!splash && screen === 'job-info'      && <JobInfoScreen goBack={goBack} goTo={goTo} />}
         {!splash && screen === 'job-psych'     && <JobPsychScreen goBack={goBack} />}
+        {!splash && screen === 'job-training'  && <JobTrainingScreen goBack={goBack} goTo={goTo} />}
+        {!splash && screen === 'job-apply'     && <JobApplyScreen goBack={goBack} goTo={goTo} />}
         {!splash && screen === 'community'       && <CommunityScreen goTo={goTo} goBack={goBack} />}
         {!splash && screen === 'community-post'  && <CommunityPostScreen goTo={goTo} goBack={goBack} id={params.id} />}
         {!splash && screen === 'community-write' && <CommunityWriteScreen goTo={goTo} goBack={goBack} board={params.board} />}

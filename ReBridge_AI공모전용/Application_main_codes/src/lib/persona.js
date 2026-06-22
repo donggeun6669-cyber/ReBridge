@@ -30,17 +30,85 @@ export function savePersona({ stage, goal }) {
   return next;
 }
 
-// 취업 트랙 — '내 목표 직업' 저장/조회. target = { name, field, programId, programLabel } | null
-export function setJobTarget(target) {
+// 취업 트랙 — 관심 직업을 1~3개 저장한다. job = { name, field, programId, programLabel }
+const MAX_SAVED_JOBS = 3;
+
+export function loadSavedJobs() {
+  return loadProfile()?.jobProfile?.savedJobs || [];
+}
+
+function persistJobProfile(patch) {
   const prev = loadProfile() || {};
-  const jobProfile = { ...(prev.jobProfile || {}), target: target || undefined };
+  const jobProfile = { ...(prev.jobProfile || {}), ...patch };
   const next = { ...prev, jobProfile };
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(next)); } catch { /* 무시 */ }
   return next;
 }
 
+// 직업 저장 토글. 이미 있으면 제거, 없으면 추가(최대 3개).
+// 반환: { jobs, added, full } — full=true면 3개가 차서 추가 못 함.
+export function toggleSavedJob(job) {
+  const jobs = loadSavedJobs();
+  const idx = jobs.findIndex((j) => j.name === job.name && j.field === job.field);
+  if (idx >= 0) {
+    const nextJobs = jobs.filter((_, i) => i !== idx);
+    persistJobProfile({ savedJobs: nextJobs });
+    const primary = loadProfile()?.jobProfile?.primaryJob;
+    if (primary && primary.name === job.name && primary.field === job.field) {
+      persistJobProfile({ primaryJob: nextJobs[0] || undefined });
+    }
+    return { jobs: nextJobs, added: false, full: false };
+  }
+  if (jobs.length >= MAX_SAVED_JOBS) return { jobs, added: false, full: true };
+  const nextJobs = [...jobs, job];
+  persistJobProfile({ savedJobs: nextJobs });
+  if (nextJobs.length === 1) persistJobProfile({ primaryJob: job });
+  return { jobs: nextJobs, added: true, full: false };
+}
+
+export function isJobSaved(name, field) {
+  return loadSavedJobs().some((j) => j.name === name && j.field === field);
+}
+
+// 주 직업(로드맵을 보여줄 직업) 설정/조회.
+export function setPrimaryJob(job) {
+  return persistJobProfile({ primaryJob: job || undefined });
+}
+export function loadPrimaryJob() {
+  const jp = loadProfile()?.jobProfile;
+  if (!jp) return null;
+  return jp.primaryJob || (jp.savedJobs && jp.savedJobs[0]) || jp.target || null;
+}
+
+// ── 하위호환: 기존 화면들이 쓰는 단일 target API ──
+export function setJobTarget(target) {
+  if (!target) return persistJobProfile({ target: undefined });
+  const jobs = loadSavedJobs();
+  const exists = jobs.some((j) => j.name === target.name && j.field === target.field);
+  const nextJobs = exists ? jobs : [...jobs, target].slice(0, MAX_SAVED_JOBS);
+  return persistJobProfile({ savedJobs: nextJobs, primaryJob: target, target });
+}
 export function loadJobTarget() {
-  return loadProfile()?.jobProfile?.target || null;
+  return loadPrimaryJob();
+}
+
+// ── 직업 준비 단계 진행 체크 (로드맵 멘토용) ──
+// 저장: jobProfile.progress = { [`${name}::${field}`]: { [stageKey]: true } }
+function jobKey(name, field) { return `${name}::${field}`; }
+
+export function loadJobProgress(name, field) {
+  const all = loadProfile()?.jobProfile?.progress || {};
+  return all[jobKey(name, field)] || {};
+}
+export function toggleJobStage(name, field, stageKey) {
+  const prev = loadProfile() || {};
+  const all = { ...(prev.jobProfile?.progress || {}) };
+  const key = jobKey(name, field);
+  const cur = { ...(all[key] || {}) };
+  cur[stageKey] = !cur[stageKey];
+  all[key] = cur;
+  persistJobProfile({ progress: all });
+  return cur;
 }
 
 // 활성 트랙(목표) — 'study' | 'univ' | 'job' | null(미정). 홈이 이 값으로 상태를 그린다.

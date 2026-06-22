@@ -119,39 +119,8 @@ export default function MyPageScreen({ goTo = () => {}, goBack = () => {} }) {
         <span className="page-title">프로필</span>
       </header>
 
-      {/* 내 상황 카드 — persona가 설정된 경우만 표시 */}
-      {persona && (
-        <div className="mp-persona-card">
-          <div className="mp-persona-top">
-            <span className="mp-persona-label">내 상황</span>
-            <button className="mp-persona-reset" onClick={() => goTo('onboarding')}>
-              <RefreshCw size={12} />
-              상황 다시 고르기
-            </button>
-          </div>
-          <div className="mp-persona-chips">
-            {track && (
-              <span className="mp-persona-chip mp-persona-chip--stage">
-                {isJob ? <Briefcase size={13} /> : isStudy ? <GraduationCap size={13} /> : <Target size={13} />}
-                {TRACK_LABEL[track]}
-              </span>
-            )}
-            <span className="mp-persona-chip mp-persona-chip--stage">
-              {stage === 'studying'
-                ? <GraduationCap size={13} />
-                : <ClipboardCheck size={13} />}
-              {STAGE_LABEL[stage] || stage}
-            </span>
-            <span className="mp-persona-chip mp-persona-chip--goal">
-              <GoalIcon goal={goal} />
-              {GOAL_LABEL[goal] || goal}
-            </span>
-          </div>
-        </div>
-      )}
-
       {/* 프로필 카드 */}
-      <div className="mp-card" style={{ marginTop: persona ? 18 : 6 }}>
+      <div className="mp-card" style={{ marginTop: 6 }}>
         <div className="mp-card-header">
           <span className="mp-avatar">
             <User size={30} color="#fff" />
@@ -262,6 +231,37 @@ export default function MyPageScreen({ goTo = () => {}, goBack = () => {} }) {
           </div>
         )}
       </div>
+
+      {/* 내 상황 카드 — persona가 설정된 경우만 표시 */}
+      {persona && (
+        <div className="mp-persona-card" style={{ marginTop: 18 }}>
+          <div className="mp-persona-top">
+            <span className="mp-persona-label">내 상황</span>
+            <button className="mp-persona-reset" onClick={() => goTo('onboarding')}>
+              <RefreshCw size={12} />
+              상황 다시 고르기
+            </button>
+          </div>
+          <div className="mp-persona-chips">
+            {track && (
+              <span className="mp-persona-chip mp-persona-chip--stage">
+                {isJob ? <Briefcase size={13} /> : isStudy ? <GraduationCap size={13} /> : <Target size={13} />}
+                {TRACK_LABEL[track]}
+              </span>
+            )}
+            <span className="mp-persona-chip mp-persona-chip--stage">
+              {stage === 'studying'
+                ? <GraduationCap size={13} />
+                : <ClipboardCheck size={13} />}
+              {STAGE_LABEL[stage] || stage}
+            </span>
+            <span className="mp-persona-chip mp-persona-chip--goal">
+              <GoalIcon goal={goal} />
+              {GOAL_LABEL[goal] || goal}
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* 메뉴 그룹 */}
       <p className="mp-section-label">{toolsLabel}</p>

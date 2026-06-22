@@ -115,6 +115,11 @@ button {
   flex-direction: column;
   padding: 0 20px 44px;
 }
+/* .screen은 flex column이라 콘텐츠가 화면보다 길면 자식이 flex-shrink로 찌부러진다.
+   카드들은 overflow:hidden이라 찌부러지면 내용이 잘림 → 자식은 줄어들지 말고 스크롤되게 한다. */
+.screen > * {
+  flex-shrink: 0;
+}
 
 /* =====================================================================
    Bottom tab bar

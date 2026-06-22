@@ -1,94 +1,44 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowLeft, ChevronRight, MapPin, X } from 'lucide-react';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import universities from '../data/universities.json';
 import { getExploreList } from '../lib/analysis.js';
 
-const KAKAO_KEY = '1be261c8c8703e28f0be58b4c193468e';
-
-/* ── Kakao Maps SDK 동적 로드 (autoload=false + clusterer 라이브러리) ── */
-function loadKakao() {
-  if (typeof window === 'undefined') return Promise.reject(new Error('no window'));
-  // 이미 완전히 로드된 경우
-  if (window.kakao?.maps?.Map) return Promise.resolve(window.kakao.maps);
-
-  return new Promise((resolve, reject) => {
-    // 스크립트 태그는 이미 있지만 아직 로딩 중인 경우 — 폴링으로 대기
-    if (document.getElementById('kakao-sdk')) {
-      const tid = setInterval(() => {
-        if (window.kakao?.maps?.Map) { clearInterval(tid); resolve(window.kakao.maps); }
-      }, 100);
-      setTimeout(() => { clearInterval(tid); reject(new Error('timeout')); }, 12000);
-      return;
-    }
-    const s = document.createElement('script');
-    s.id = 'kakao-sdk';
-    s.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_KEY}&autoload=false&libraries=clusterer`;
-    s.async = true;
-    s.onload = () => window.kakao.maps.load(() => resolve(window.kakao.maps));
-    s.onerror = () => reject(new Error('Kakao SDK 로드 실패'));
-    document.head.appendChild(s);
-  });
-}
-
-/* ── 색상 원형 SVG 마커 이미지 생성 ── */
-function makeMarkerImage(maps, hasGed) {
-  const fill = hasGed ? '#2E8BD0' : '#C4BFCF';
-  const stroke = hasGed ? '#fff' : '#E5E0EF';
-  const svg = encodeURIComponent(
-    `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14">` +
-    `<circle cx="7" cy="7" r="5.5" fill="${fill}" stroke="${stroke}" stroke-width="1.5"/>` +
-    `</svg>`
-  );
-  return new maps.MarkerImage(
-    `data:image/svg+xml;charset=utf-8,${svg}`,
-    new maps.Size(14, 14),
-    { offset: new maps.Point(7, 7) }
-  );
-}
-
-/* ── 클러스터 스타일 (네이비 원형 뱃지) ── */
-const CLUSTER_STYLES = [{
-  width: '40px', height: '40px',
-  background: 'rgba(46,139,208,0.88)',
-  borderRadius: '50%',
-  color: '#fff',
-  textAlign: 'center',
-  lineHeight: '40px',
-  fontSize: '13px',
-  fontWeight: '700',
-  boxShadow: '0 2px 8px rgba(46,139,208,0.35)',
-}];
+// Leaflet + OpenStreetMap — API 키·도메인 등록이 필요 없는 무료 지도.
+// (카카오 지도 SDK는 허용 도메인 등록이 필요해 배포·로컬에서 막히는 문제가 있어 교체함.)
 
 const FILTERS = ['전체', '검정고시 전형', '4년제', '전문대'];
 
+const TILE_URL = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+const TILE_ATTR = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+
 export default function MapScreen({ goTo = () => {}, goBack = () => {} }) {
   const containerRef = useRef(null);
-  const mapRef      = useRef(null);
-  const mapsRef     = useRef(null);
-  const clusterRef  = useRef(null);
+  const mapRef       = useRef(null);
+  const layerRef     = useRef(null);
 
   const [status,   setStatus]   = useState('loading'); // loading | ready | error
   const [selected, setSelected] = useState(null);
   const [filter,   setFilter]   = useState('전체');
 
-  /* ── 대학 포인트 데이터 (좌표 + 검정고시 전형 수) ── */
+  /* ── 대학 포인트 (좌표 + 검정고시 전형 수) ── */
   const points = useMemo(() => {
     const elig = new Map(getExploreList().map((s) => [s.univId, s.eligibleCount]));
     return universities
       .filter((u) => u.lat != null && u.lng != null)
       .map((u) => ({
-        univId:        u.univId,
-        name:          u.name,
-        region:        u.region,
-        kind:          u.kind || '대학교',
+        univId: u.univId,
+        name: u.name,
+        region: u.region,
+        kind: u.kind || '대학교',
         establishment: u.establishment || '',
-        lat:           u.lat,
-        lng:           u.lng,
+        lat: u.lat,
+        lng: u.lng,
         eligibleCount: elig.get(u.univId) || 0,
       }));
   }, []);
 
-  /* ── 필터 적용 ── */
   const filtered = useMemo(() => {
     if (filter === '검정고시 전형') return points.filter((p) => p.eligibleCount > 0);
     if (filter === '4년제')        return points.filter((p) => p.kind !== '전문대학');
@@ -98,59 +48,50 @@ export default function MapScreen({ goTo = () => {}, goBack = () => {} }) {
 
   /* ── 지도 초기화 (마운트 1회) ── */
   useEffect(() => {
-    let cancelled = false;
-    loadKakao()
-      .then((maps) => {
-        if (cancelled || !containerRef.current || mapRef.current) return;
-
-        const map = new maps.Map(containerRef.current, {
-          center: new maps.LatLng(36.5, 127.8),
-          level: 8,
-        });
-        mapRef.current   = map;
-        mapsRef.current  = maps;
-        clusterRef.current = new maps.MarkerClusterer({
-          map,
-          averageCenter: true,
-          minLevel: 5,
-          disableClickZoom: false,
-          styles: CLUSTER_STYLES,
-        });
-
-        if (!cancelled) setStatus('ready');
-      })
-      .catch(() => {
-        if (!cancelled) setStatus('error');
+    if (!containerRef.current || mapRef.current) return;
+    try {
+      const map = L.map(containerRef.current, {
+        center: [36.3, 127.8],
+        zoom: 7,
+        zoomControl: true,
+        attributionControl: true,
       });
-
+      L.tileLayer(TILE_URL, { attribution: TILE_ATTR, maxZoom: 18 }).addTo(map);
+      layerRef.current = L.layerGroup().addTo(map);
+      mapRef.current = map;
+      // 컨테이너가 늦게 잡히는 경우 대비 — 크기 재계산
+      setTimeout(() => { try { map.invalidateSize(); } catch { /* 무시 */ } }, 60);
+      setStatus('ready');
+    } catch {
+      setStatus('error');
+    }
     return () => {
-      cancelled = true;
-      if (mapRef.current) { mapRef.current = null; }
+      if (mapRef.current) { mapRef.current.remove(); mapRef.current = null; layerRef.current = null; }
     };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
-  /* ── 마커 갱신 (필터 변경 or 지도 준비 완료 시) ── */
+  /* ── 마커 갱신 (필터·준비 상태 변경 시) ── */
   useEffect(() => {
-    const maps    = mapsRef.current;
-    const cluster = clusterRef.current;
-    if (!maps || !cluster) return;
+    const layer = layerRef.current;
+    if (!layer || status !== 'ready') return;
+    layer.clearLayers();
 
-    cluster.clear();
-
-    const markers = filtered.map((p) => {
-      const marker = new maps.Marker({
-        position: new maps.LatLng(p.lat, p.lng),
-        image:    makeMarkerImage(maps, p.eligibleCount > 0),
-        title:    p.name,
+    filtered.forEach((p) => {
+      const hasGed = p.eligibleCount > 0;
+      const marker = L.circleMarker([p.lat, p.lng], {
+        radius: 6,
+        fillColor: hasGed ? '#2E8BD0' : '#C4BFCF',
+        color: '#fff',
+        weight: 1.5,
+        opacity: 1,
+        fillOpacity: 1,
       });
-      maps.event.addListener(marker, 'click', () => setSelected(p));
-      return marker;
+      marker.on('click', () => setSelected(p));
+      marker.bindTooltip(p.name, { direction: 'top', offset: [0, -4] });
+      layer.addLayer(marker);
     });
-
-    cluster.addMarkers(markers);
   }, [filtered, status]);
 
-  /* ── 선택 초기화 (필터 바뀔 때) ── */
   const handleFilter = (opt) => {
     setFilter(opt);
     setSelected(null);
