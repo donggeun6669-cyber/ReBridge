@@ -1,0 +1,276 @@
+/* =====================================================================
+   styles.study.css — 학습 트랙 열품타/모트모트급 추가 UI
+   - 누적 대시보드 / 뽀모도로 / 스트릭·게이미피케이션 / 일일 회고 / 화면 연결
+   - 전역 토큰(styles.css)만 참조. planner-* 와 충돌하지 않게 study-* 접두사 사용.
+   ===================================================================== */
+
+/* ───────── 플래너 내부 서브탭 (오늘 · 기록) ───────── */
+.study-subtab {
+  display: flex; gap: 6px; padding: 4px;
+  background: var(--bg-soft); border-radius: var(--r-pill);
+  margin: 2px 0 16px;
+}
+.study-subtab-btn {
+  flex: 1; padding: 9px 0; border-radius: var(--r-pill);
+  font-size: 13.5px; font-weight: 800; color: var(--text-sub);
+  transition: background 0.15s, color 0.15s;
+}
+.study-subtab-btn.on { background: var(--card); color: var(--brand-deep); box-shadow: var(--shadow-sm); }
+
+/* ───────── 약점 과목 추천(모의점수 ↔ 플래너 연결) ───────── */
+.study-weak {
+  display: flex; align-items: center; gap: 12px;
+  width: 100%; text-align: left;
+  padding: 13px 15px; margin-bottom: 14px; border-radius: var(--r-md);
+  background: var(--caution-soft); border: 1px solid #F6DDAE;
+}
+.study-weak-ico { flex: 0 0 38px; width: 38px; height: 38px; display: grid; place-items: center;
+  border-radius: 11px; background: #fff; color: var(--caution); }
+.study-weak-body { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.study-weak-title { font-size: 13.5px; font-weight: 800; color: #8A5A12; }
+.study-weak-sub { font-size: 11.5px; color: #9A6A2A; line-height: 1.4; }
+.study-weak-cta { flex: 0 0 auto; font-size: 12px; font-weight: 800; color: #fff;
+  background: var(--caution); padding: 7px 12px; border-radius: var(--r-pill); }
+.study-weak-cta:active { filter: brightness(0.96); }
+
+/* ───────── 뽀모도로 모드 토글 ───────── */
+.study-mode {
+  display: flex; gap: 6px; padding: 4px;
+  background: var(--bg-soft); border-radius: var(--r-pill); margin-bottom: 10px;
+}
+.study-mode-btn {
+  flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+  padding: 8px 0; border-radius: var(--r-pill);
+  font-size: 12.5px; font-weight: 800; color: var(--text-sub);
+}
+.study-mode-btn.on { background: var(--card); color: var(--brand-deep); box-shadow: var(--shadow-sm); }
+
+/* 뽀모도로 타이머 카드 */
+.study-pomo {
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--r-lg);
+  box-shadow: var(--shadow-sm); padding: 18px 16px; margin-bottom: 12px;
+  text-align: center;
+}
+.study-pomo.focus { border-color: var(--brand); }
+.study-pomo.brk { border-color: var(--green); }
+.study-pomo-phase {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12.5px; font-weight: 800; padding: 5px 12px; border-radius: var(--r-pill);
+  margin-bottom: 12px;
+}
+.study-pomo.focus .study-pomo-phase { color: var(--brand-deep); background: var(--brand-tint); }
+.study-pomo.brk .study-pomo-phase { color: var(--green-dark); background: var(--green-soft); }
+
+/* 원형 진행 링 */
+.study-ring { position: relative; width: 196px; height: 196px; margin: 0 auto 6px; }
+.study-ring svg { transform: rotate(-90deg); width: 100%; height: 100%; }
+.study-ring-track { fill: none; stroke: var(--bg-soft); }
+.study-ring-prog { fill: none; stroke-linecap: round; transition: stroke-dashoffset 0.9s linear; }
+.study-pomo.focus .study-ring-prog { stroke: var(--brand); }
+.study-pomo.brk .study-ring-prog { stroke: var(--green); }
+.study-ring-center {
+  position: absolute; inset: 0; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 3px;
+}
+.study-ring-time { font-size: 40px; font-weight: 800; color: var(--text); font-variant-numeric: tabular-nums; letter-spacing: -1px; }
+.study-ring-sub { font-size: 12px; font-weight: 700; color: var(--text-sub); }
+
+.study-pomo-subjrow { font-size: 12px; font-weight: 700; color: var(--text-sub); margin: 2px 0 14px; }
+.study-pomo-subjrow b { color: var(--brand-deep); }
+
+.study-pomo-btns { display: flex; gap: 8px; justify-content: center; }
+.study-pomo-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 11px 20px; border-radius: var(--r-pill); font-size: 14px; font-weight: 800;
+}
+.study-pomo-btn.primary { background: var(--brand); color: #fff; box-shadow: var(--shadow-brand); }
+.study-pomo-btn.ghost { background: var(--bg-soft); color: var(--text); border: 1px solid var(--border); }
+.study-pomo-btn:active { filter: brightness(0.96); }
+
+.study-pomo-cycles { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 14px; }
+.study-pomo-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--bg-soft); border: 1.5px solid var(--border); }
+.study-pomo-dot.on { background: var(--brand); border-color: var(--brand); }
+.study-pomo-cyclelbl { font-size: 12px; font-weight: 700; color: var(--text-sub); margin-left: 4px; }
+
+/* ───────── 일일 회고 카드 ───────── */
+.study-reflect {
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--r-lg);
+  box-shadow: var(--shadow-sm); padding: 16px; margin-bottom: 16px;
+}
+.study-reflect-head { display: flex; align-items: center; gap: 7px; font-size: 14px; font-weight: 800; color: var(--text); margin-bottom: 14px; }
+.study-reflect-head svg { color: var(--brand-deep); }
+.study-reflect-q { font-size: 12px; font-weight: 700; color: var(--text-sub); margin-bottom: 8px; }
+.study-faces { display: flex; gap: 8px; margin-bottom: 16px; }
+.study-face {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 10px 0; border-radius: var(--r-md); background: var(--bg-soft);
+  border: 1.5px solid transparent; font-size: 22px;
+}
+.study-face-lbl { font-size: 10.5px; font-weight: 700; color: var(--text-sub); }
+.study-face.on { background: var(--brand-tint); border-color: var(--brand); }
+.study-face.on .study-face-lbl { color: var(--brand-deep); }
+
+.study-focusrow { display: flex; gap: 6px; margin-bottom: 16px; }
+.study-focus-pip {
+  flex: 1; height: 32px; border-radius: 9px; background: var(--bg-soft);
+  display: grid; place-items: center; font-size: 12px; font-weight: 800; color: var(--text-sub);
+  border: 1.5px solid transparent;
+}
+.study-focus-pip.on { background: var(--green-soft); color: var(--green-dark); border-color: var(--green); }
+
+.study-reflect-input {
+  width: 100%; resize: none; border: 1px solid var(--border); border-radius: var(--r-md);
+  padding: 11px 13px; font-size: 13.5px; font-family: inherit; color: var(--text);
+  background: var(--bg-soft); line-height: 1.5;
+}
+.study-reflect-input:focus { outline: none; border-color: var(--brand); background: #fff; }
+.study-reflect-saved { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 700; color: var(--green-dark); margin-top: 8px; }
+
+/* ═════════ 누적 대시보드(기록 탭) ═════════ */
+.study-dash-hero {
+  background: var(--grad-brand); color: #fff; border-radius: var(--r-lg);
+  box-shadow: var(--shadow-brand); padding: 20px; margin-bottom: 16px;
+}
+.study-dash-hero-lbl { font-size: 12.5px; font-weight: 700; opacity: 0.92; }
+.study-dash-hero-val { font-size: 34px; font-weight: 800; line-height: 1.1; margin: 4px 0 2px; letter-spacing: -0.5px; }
+.study-dash-hero-sub { font-size: 12px; opacity: 0.9; }
+.study-dash-hero-stats { display: flex; gap: 10px; margin-top: 16px; }
+.study-dash-hero-stat { flex: 1; background: rgba(255,255,255,0.16); border-radius: var(--r-md); padding: 11px 12px; }
+.study-dash-hero-stat-num { font-size: 18px; font-weight: 800; }
+.study-dash-hero-stat-lbl { font-size: 11px; opacity: 0.9; margin-top: 1px; }
+
+.study-card {
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--r-lg);
+  box-shadow: var(--shadow-sm); padding: 16px; margin-bottom: 16px;
+}
+.study-card-head { display: flex; align-items: center; gap: 7px; font-size: 14px; font-weight: 800; color: var(--text); margin-bottom: 4px; }
+.study-card-head svg { color: var(--brand-deep); }
+.study-card-head .study-card-aside { margin-left: auto; font-size: 12px; font-weight: 700; color: var(--text-sub); }
+.study-card-sub { font-size: 11.5px; color: var(--text-sub); margin-bottom: 14px; }
+
+/* 월별 일별 막대 그래프 */
+.study-monthnav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.study-monthnav-title { font-size: 13.5px; font-weight: 800; color: var(--text); }
+.study-monthnav-btn { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 8px; color: var(--text-sub); background: var(--bg-soft); }
+.study-monthnav-btn:disabled { opacity: 0.35; }
+.study-bars {
+  display: flex; align-items: flex-end; gap: 3px; height: 116px;
+  padding-top: 6px; border-bottom: 1px solid var(--border);
+}
+.study-bar-col { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; height: 100%; min-width: 0; }
+.study-bar { width: 100%; min-height: 2px; border-radius: 3px 3px 0 0; background: var(--brand); opacity: 0.88; }
+.study-bar.zero { background: var(--bg-soft); }
+.study-bar.today { background: var(--coral); opacity: 1; }
+.study-bars-axis { display: flex; justify-content: space-between; font-size: 10px; color: var(--text-sub); margin-top: 6px; }
+
+/* 과목별 누적·비중 */
+.study-subjbars { display: flex; flex-direction: column; gap: 10px; }
+.study-subjbar { display: flex; align-items: center; gap: 10px; }
+.study-subjbar-name { flex: 0 0 46px; font-size: 12.5px; font-weight: 700; color: var(--text); }
+.study-subjbar-track { flex: 1; height: 10px; border-radius: 999px; background: var(--bg-soft); overflow: hidden; }
+.study-subjbar-fill { display: block; height: 100%; border-radius: 999px; background: var(--grad-brand); }
+.study-subjbar-val { flex: 0 0 auto; min-width: 78px; text-align: right; font-size: 11.5px; font-weight: 700; color: var(--text-sub); }
+.study-subjbar-pct { color: var(--brand-deep); font-weight: 800; }
+.study-empty { font-size: 13px; color: var(--text-sub); padding: 18px; text-align: center; background: var(--bg-soft); border-radius: var(--r-md); }
+
+/* ───────── 스트릭/게이미피케이션 ───────── */
+.study-streak {
+  display: flex; align-items: center; gap: 16px;
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--r-lg);
+  box-shadow: var(--shadow-sm); padding: 16px; margin-bottom: 16px;
+}
+.study-flame {
+  flex: 0 0 64px; width: 64px; height: 64px; border-radius: 50%;
+  display: grid; place-items: center; position: relative;
+  background: radial-gradient(circle at 50% 35%, #FFE2B0, #FFC061);
+  color: #E8740C;
+}
+.study-flame.cold { background: var(--bg-soft); color: var(--text-sub); }
+.study-flame-num { position: absolute; bottom: -4px; right: -4px; background: var(--coral); color: #fff;
+  font-size: 11px; font-weight: 800; min-width: 22px; height: 22px; padding: 0 5px; border-radius: 999px;
+  display: grid; place-items: center; border: 2px solid var(--card); }
+.study-streak-body { flex: 1; }
+.study-streak-title { font-size: 16px; font-weight: 800; color: var(--text); }
+.study-streak-sub { font-size: 12px; color: var(--text-sub); margin-top: 3px; line-height: 1.45; }
+
+/* 주간 목표 진행 */
+.study-goal {
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--r-lg);
+  box-shadow: var(--shadow-sm); padding: 16px; margin-bottom: 16px;
+}
+.study-goal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.study-goal-title { display: inline-flex; align-items: center; gap: 7px; font-size: 14px; font-weight: 800; color: var(--text); }
+.study-goal-title svg { color: var(--brand-deep); }
+.study-goal-edit { font-size: 12px; font-weight: 700; color: var(--brand-deep); background: var(--brand-tint); padding: 5px 11px; border-radius: var(--r-pill); }
+.study-goal-bar { height: 12px; border-radius: 999px; background: var(--bg-soft); overflow: hidden; margin-bottom: 8px; }
+.study-goal-fill { display: block; height: 100%; border-radius: 999px; background: var(--grad-warm); transition: width 0.4s; }
+.study-goal-fill.done { background: var(--grad-warm); }
+.study-goal-row { display: flex; align-items: baseline; justify-content: space-between; }
+.study-goal-cur { font-size: 15px; font-weight: 800; color: var(--green-dark); }
+.study-goal-tgt { font-size: 12px; color: var(--text-sub); }
+.study-goal-edit-row { display: flex; gap: 8px; align-items: center; margin-top: 12px; }
+.study-goal-input { flex: 1; border: 1px solid var(--border); border-radius: var(--r-md); padding: 10px 12px; font-size: 14px; font-family: inherit; }
+.study-goal-input:focus { outline: none; border-color: var(--brand); }
+.study-goal-save { flex: 0 0 auto; padding: 10px 16px; border-radius: var(--r-md); background: var(--brand); color: #fff; font-weight: 800; font-size: 13.5px; }
+.study-goal-chips { display: flex; gap: 6px; margin-top: 10px; }
+.study-goal-chip { padding: 6px 12px; border-radius: var(--r-pill); background: var(--bg-soft); font-size: 12px; font-weight: 700; color: var(--text-sub); }
+.study-goal-chip.on { background: var(--brand); color: #fff; }
+
+/* 뱃지 */
+.study-badges { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.study-badge { display: flex; flex-direction: column; align-items: center; gap: 5px; text-align: center; }
+.study-badge-ico {
+  width: 52px; height: 52px; border-radius: 16px; display: grid; place-items: center;
+  background: var(--bg-soft); color: var(--text-sub); font-size: 24px; filter: grayscale(1); opacity: 0.5;
+}
+.study-badge.earned .study-badge-ico { background: var(--brand-tint); filter: none; opacity: 1; }
+.study-badge-name { font-size: 10.5px; font-weight: 700; color: var(--text-sub); line-height: 1.3; }
+.study-badge.earned .study-badge-name { color: var(--text); }
+
+/* ───────── 전체 잔디(연간) ───────── */
+.study-grass-wrap { overflow-x: auto; padding-bottom: 4px; }
+.study-grass { display: grid; grid-auto-flow: column; grid-template-rows: repeat(7, 1fr); gap: 3px; }
+.study-grass-cell { width: 12px; height: 12px; border-radius: 3px; background: var(--bg-soft); }
+.study-grass-cell.lvl1 { background: #DCEFE2; }
+.study-grass-cell.lvl2 { background: #AEDFBE; }
+.study-grass-cell.lvl3 { background: #6FCB8C; }
+.study-grass-cell.lvl4 { background: var(--green); }
+.study-grass-cell.today { box-shadow: 0 0 0 1.5px var(--brand); }
+.study-grass-legend { display: flex; align-items: center; gap: 5px; justify-content: flex-end; margin-top: 10px; font-size: 11px; color: var(--text-sub); }
+.study-grass-legend i { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
+
+/* ───────── 로드맵: 살아있는 일정 진행바 ───────── */
+.study-rm-progress {
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--r-lg);
+  box-shadow: var(--shadow-sm); padding: 16px; margin: 0 0 18px;
+}
+.study-rm-progress-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 10px; }
+.study-rm-progress-title { font-size: 13.5px; font-weight: 800; color: var(--text); }
+.study-rm-progress-pct { font-size: 13.5px; font-weight: 800; color: var(--brand-deep); }
+.study-rm-progress-bar { height: 10px; border-radius: 999px; background: var(--bg-soft); overflow: hidden; margin-bottom: 8px; }
+.study-rm-progress-fill { display: block; height: 100%; border-radius: 999px; background: var(--grad-brand); transition: width 0.4s; }
+.study-rm-progress-sub { font-size: 12px; color: var(--text-sub); line-height: 1.45; }
+.study-rm-progress-sub b { color: var(--brand-deep); }
+
+/* 로드맵 → 플래너로 점프 */
+.study-rm-link {
+  display: inline-flex; align-items: center; gap: 5px;
+  margin-top: 10px; font-size: 12.5px; font-weight: 800; color: var(--brand-deep);
+  background: var(--brand-tint); padding: 8px 13px; border-radius: var(--r-pill);
+}
+.study-rm-link:active { filter: brightness(0.97); }
+
+/* GED 가이드 → 약점 과목 추천 → 플래너 CTA */
+.study-ged-weakcta {
+  display: flex; align-items: center; gap: 10px; width: 100%; text-align: left;
+  margin-top: 12px; padding: 13px 15px; border-radius: var(--r-md);
+  background: var(--brand-tint); border: 1px solid #C9E2F6;
+}
+.study-ged-weakcta-ico { flex: 0 0 36px; width: 36px; height: 36px; display: grid; place-items: center;
+  border-radius: 10px; background: #fff; color: var(--brand-deep); }
+.study-ged-weakcta-body { flex: 1; }
+.study-ged-weakcta-title { font-size: 13px; font-weight: 800; color: var(--brand-deep); }
+.study-ged-weakcta-sub { font-size: 11.5px; color: var(--text-sub); margin-top: 1px; }
+
+/* ── 플래너 할 일: 줄글 입력 → 평평한 체크리스트 ── */
+.planner-tasklist { display: flex; flex-direction: column; gap: 6px; }

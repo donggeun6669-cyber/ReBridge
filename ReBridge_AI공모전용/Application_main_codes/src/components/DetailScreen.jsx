@@ -8,7 +8,7 @@ import { isBookmarked, toggleBookmark } from '../lib/bookmarks.js';
 import {
   evaluateAdmission, coachLine, gedAffinity, admissionChance,
   getComparative, comparativeAvailability, gedFit,
-  applyComparativeConversion, gedAverage,
+  applyComparativeConversion, gedAverage, gradeToMinAvg,
 } from '../lib/scoreEngine.js';
 import DocumentsChecklist from './DocumentsChecklist.jsx';
 import ChanceGauge from './ChanceGauge.jsx';
@@ -132,6 +132,8 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
   const noRows = rows.filter((r) => r.gedEligible === '불가');
 
   const hasScore = !!(profile && profile.gedScores && profile.gedAvg != null);
+  const isTarget = hasScore && profile.scoreMode === 'target'; // 공부 중 = 목표 점수
+  const myAvg = hasScore ? profile.gedAvg : null;
   const realUnivId = univ.univId;
   const comp = getComparative(realUnivId);
   const compAvail = comparativeAvailability(comp);
@@ -155,7 +157,7 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
     if (levels.length === 0) {
       coachSummary = `검정고시로 지원 가능한 전형이 ${eligibleCount}개 있어요. 다만 작년 합격선 자료가 없어 점수 비교는 어려워요.`;
     } else if (safe > 0) {
-      coachSummary = `지금 점수(평균 ${profile.gedAvg}점)면 ${safe}개 전형이 적정~안정권이에요. 충분히 노려볼 만해요!`;
+      coachSummary = `${isTarget ? '목표' : '지금'} 점수(평균 ${profile.gedAvg}점)면 ${safe}개 전형이 적정~안정권이에요. 충분히 노려볼 만해요!`;
     } else if (reach > 0) {
       coachSummary = `조금 부족하지만 ${reach}개 전형은 소신 지원이 가능해요. 합격선까지 얼마 안 남았어요.`;
     } else {
@@ -294,6 +296,24 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
                               {' '}({ev.cutType}{ev.cutN ? ` · 표본 ${ev.cutN}명` : ''})
                             </span>
                           </div>
+                          {/* 몇 점 맞아야 하는지 글로 풀어주기 */}
+                          {(() => {
+                            const need = gradeToMinAvg(ev.cutGrade);
+                            if (need == null || need <= 0) return null;
+                            return (
+                              <div className="adm-need">
+                                <Target size={13} />
+                                <span>
+                                  검정고시 <b>평균 약 {need}점</b> 이상이면 이 합격선에 닿아요.
+                                  {myAvg != null && (
+                                    myAvg >= need
+                                      ? ` ${isTarget ? '목표' : '내'} 평균 ${myAvg}점이면 충분해요 👍`
+                                      : ` ${isTarget ? '목표' : '내'} 평균 ${myAvg}점에서 약 ${Math.round((need - myAvg) * 10) / 10}점 더 필요해요.`
+                                  )}
+                                </span>
+                              </div>
+                            );
+                          })()}
                           <div className="adm-disclaimer">
                             작년(2025) 9등급제 입결로 추정한 <b>참고용 예상</b>이에요. 2028학년도는 5등급제로 바뀌어 제도가 달라, 실제와 차이가 있을 수 있어요.
                           </div>

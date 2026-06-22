@@ -4,8 +4,10 @@
 //    (지금 값은 예년 패턴 기준 근삿값)
 
 // 고졸 검정고시: 연 2회
+// 1회는 2026년 공식 공고 확인값(접수 2/9, 시험 4/4, 발표 5/8).
+// 2회는 2026-06-10 기준 공식 공고 미게시 → 예년 패턴 근삿값 유지.
 export const GED_SESSIONS = [
-  { round: 1, label: '1회', apply: [2, 1], exam: [4, 12], result: [5, 15] },
+  { round: 1, label: '1회', apply: [2, 9], exam: [4, 4], result: [5, 8] },
   { round: 2, label: '2회', apply: [6, 15], exam: [8, 8], result: [8, 28] },
 ];
 

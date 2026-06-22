@@ -1,5 +1,25 @@
-// logo.png 디자인(다리 + 웃는 별)을 그대로 두고, 배경색만 브랜드 그라데이션으로 변경
+import { useState } from 'react';
+
+// 검고담임(Gumgo Mentor) 로고
+// 1순위: public/GumgomentorLOGO.png (실제 캐릭터 이미지)
+// 폴백: 이미지가 없거나 로드 실패 시 말풍선+체크 SVG (브랜드 초록/파랑)
 export default function LogoMark({ size = 24 }) {
+  const [imgFailed, setImgFailed] = useState(false);
+
+  if (!imgFailed) {
+    return (
+      <img
+        src="/GumgomentorLOGO.png"
+        width={size}
+        height={size}
+        alt="검고담임 로고"
+        className="logo-mark"
+        style={{ objectFit: 'contain', display: 'block' }}
+        onError={() => setImgFailed(true)}
+      />
+    );
+  }
+
   return (
     <svg
       width={size}
@@ -8,46 +28,26 @@ export default function LogoMark({ size = 24 }) {
       fill="none"
       className="logo-mark"
       role="img"
-      aria-label="ReBridge 로고"
+      aria-label="검고담임 로고"
       xmlns="http://www.w3.org/2000/svg"
     >
       <defs>
         <linearGradient id="logoGrad" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#ffae5d" />
-          <stop offset="1" stopColor="#ff6f61" />
+          <stop offset="0" stopColor="#2E8BD0" />
+          <stop offset="1" stopColor="#36B85A" />
         </linearGradient>
       </defs>
-
-      {/* 배경: 남색 → 브랜드 그라데이션 */}
-      <rect x="8" y="8" width="80" height="80" rx="20" fill="url(#logoGrad)" />
-
-      {/* 다리 (흰색 유지) */}
+      <rect x="8" y="8" width="80" height="80" rx="22" fill="url(#logoGrad)" />
       <path
-        d="M26 65V55C26 42.85 35.85 33 48 33C60.15 33 70 42.85 70 55V65"
-        stroke="#FFFFFF"
-        strokeWidth="8"
-        strokeLinecap="square"
+        d="M30 26h36a10 10 0 0 1 10 10v18a10 10 0 0 1-10 10H46l-12 11v-11h-4a10 10 0 0 1-10-10V36a10 10 0 0 1 10-10Z"
+        fill="#FFFFFF"
       />
-      <path d="M26 62H70" stroke="#FFFFFF" strokeWidth="8" strokeLinecap="square" />
-      <path d="M39 39V62" stroke="#FFFFFF" strokeWidth="5" strokeLinecap="round" />
-      <path d="M48 34V62" stroke="#FFFFFF" strokeWidth="5" strokeLinecap="round" />
-      <path d="M57 39V62" stroke="#FFFFFF" strokeWidth="5" strokeLinecap="round" />
-
-      {/* 웃는 별 (노란색 유지) */}
       <path
-        d="M68.8 22.8L71.56 28.48L77.8 29.36L73.28 33.8L74.36 40L68.8 37.08L63.24 40L64.32 33.8L59.8 29.36L66.04 28.48L68.8 22.8Z"
-        fill="#FFE08C"
-        stroke="#E3B83C"
-        strokeWidth="1.4"
-        strokeLinejoin="round"
-      />
-      <circle cx="66.2" cy="31.6" r="1.2" fill="#e8503f" />
-      <circle cx="71.4" cy="31.6" r="1.2" fill="#e8503f" />
-      <path
-        d="M65.9 34.8C67.4 36.2 70.2 36.2 71.7 34.8"
-        stroke="#e8503f"
-        strokeWidth="1.4"
+        d="M37 45.5 L45 53.5 L61 36.5"
+        stroke="#36B85A"
+        strokeWidth="7.5"
         strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </svg>
   );

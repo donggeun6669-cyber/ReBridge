@@ -5,35 +5,11 @@ import {
   Info, Search, Bookmark, Flag,
 } from 'lucide-react';
 import { buildRoadmap } from '../lib/roadmap.js';
-import { getExploreList, getUniversityDetail } from '../lib/analysis.js';
-import { evaluateAdmission, admissionChance, estimateGrade } from '../lib/scoreEngine.js';
+import { getUniversityDetail } from '../lib/analysis.js';
+import { evaluateAdmission, admissionChance } from '../lib/scoreEngine.js';
 import { getBookmarks } from '../lib/bookmarks.js';
 
 const STORAGE_KEY = 'rebridge_profile';
-
-// 프로필 점수로 전체 대학을 훑어 칸수 분포(안정/적정/소신)를 센다 — 로드맵 개인화용.
-function computeFit(profile) {
-  const list = getExploreList();
-  let safe = 0;
-  let fit = 0;
-  let reach = 0;
-  for (const s of list) {
-    if (!s.bestType) continue;
-    const ev = evaluateAdmission(profile, {
-      univId: s.univId,
-      admissionType: s.bestType,
-      admissionName: s.bestName,
-      gedEligible: s.bestGedEligible,
-    });
-    if (!ev.applicable) continue;
-    const c = admissionChance(ev);
-    if (!c) continue;
-    if (c.level >= 5) safe += 1;
-    else if (c.level === 4) fit += 1;
-    else if (c.level === 3) reach += 1;
-  }
-  return { safe, fit, reach };
-}
 
 const ICONS = {
   ClipboardList, FileText, Scale, CalendarDays, Target, MessageCircle, CheckCircle2,
@@ -74,21 +50,19 @@ export default function RoadmapScreen({ goTo = () => {} }) {
 
   // 개인 맞춤 — 점수가 있으면 칸수 분포, 관심 대학 수.
   const hasScore = !!(profile.gedScores && profile.gedAvg != null);
-  const myGrade = hasScore ? estimateGrade(profile.gedAvg) : null;
-  const fit = useMemo(() => (hasScore ? computeFit(profile) : null), [profile, hasScore]);
   const bookmarkCount = useMemo(() => getBookmarks().length, []);
 
   // 단계별 개인 맞춤 액션(버튼) — id로 매칭.
   function stageAction(id) {
     if (id === 'target') {
       return hasScore
-        ? { label: '내 점수로 가능성순 보기', icon: Search, onClick: () => goTo('explore') }
-        : { label: '대학 둘러보기', icon: Search, onClick: () => goTo('explore') };
+        ? { label: '내 점수로 가능성순 보기', icon: Search, onClick: () => goTo('univ-explore') }
+        : { label: '대학 둘러보기', icon: Search, onClick: () => goTo('univ-explore') };
     }
     if (id === 'susi') {
       return bookmarkCount > 0
         ? { label: `관심 대학 ${bookmarkCount}곳 보기`, icon: Bookmark, onClick: () => goTo('saved') }
-        : { label: '관심 대학 담으러 가기', icon: Bookmark, onClick: () => goTo('explore') };
+        : { label: '관심 대학 담으러 가기', icon: Bookmark, onClick: () => goTo('univ-explore') };
     }
     return null;
   }
@@ -128,104 +102,10 @@ export default function RoadmapScreen({ goTo = () => {} }) {
         <span className="page-title">내 로드맵</span>
       </header>
 
-      <div className="intro-line">지금 너는 여기 있어요</div>
+      <div className="intro-line">지금 나는 여기 있어요</div>
       <div className="intro-sub">
         검정고시부터 대학 등록까지, 다음에 뭘 언제 해야 하는지 같이 챙길게요.
       </div>
-
-      {/* 내 상황 — 점수/관심대학과 연동한 개인 맞춤 요약 */}
-      {(hasScore || bookmarkCount > 0) && (
-        <div className="rm-mystatus">
-          <span className="mini-label">내 상황</span>
-          {hasScore && (
-            <p className="rm-mystatus-line">
-              평균 <b>{profile.gedAvg}점</b>
-              {myGrade != null ? ` · 추정 ${myGrade}등급` : ''} 기준,
-              지금 점수로 <b className="tone-good">안정 {fit.safe}</b> ·{' '}
-              <b className="tone-ok">적정 {fit.fit}</b> · <b className="tone-warn">소신 {fit.reach}</b>곳이 있어요.
-            </p>
-          )}
-          {!hasScore && (
-            <p className="rm-mystatus-line">
-              점수를 넣으면 지금 어디가 안정·적정인지 로드맵에 맞춰 알려드려요.
-            </p>
-          )}
-          <div className="rm-mystatus-actions">
-            <button className="rm-chip-btn" onClick={() => goTo('explore')}>
-              <Search size={14} /> {hasScore ? '가능성순으로 보기' : '대학 둘러보기'}
-            </button>
-            {bookmarkCount > 0 ? (
-              <button className="rm-chip-btn" onClick={() => goTo('saved')}>
-                <Bookmark size={14} /> 관심 대학 {bookmarkCount}곳
-              </button>
-            ) : (
-              !hasScore && (
-                <button className="rm-chip-btn" onClick={() => goTo('profile')}>
-                  내 점수 입력
-                </button>
-              )
-            )}
-          </div>
-          {hasScore && (
-            <p className="rm-mystatus-note">
-              <Info size={11} /> 안정·적정·소신은 작년 합격선 자료가 있는 전형 기준이에요(참고용).
-            </p>
-          )}
-        </div>
-      )}
-
-      {/* 목표 대학까지 — 관심 대학을 등록하면 합격선까지 몇 점 더 필요한지 */}
-      {hasScore && (
-        <div className="rm-targets">
-          <span className="mini-label"><Flag size={12} /> 목표 대학까지</span>
-          {targets.length === 0 ? (
-            <div className="rm-targets-empty">
-              <p>가고 싶은 대학을 <b>관심 대학</b>으로 담으면, 합격선까지 <b>몇 점이 더 필요한지</b> 여기서 챙겨드려요.</p>
-              <button className="rm-chip-btn" onClick={() => goTo('explore')}>
-                <Search size={14} /> 대학 담으러 가기
-              </button>
-            </div>
-          ) : (
-            <ul className="rm-target-list">
-              {targets.map((t) => {
-                const g = gapText(t);
-                const showQuestions = t.ev?.shortPoints > 0 && t.ev?.perSubjectQuestions > 0;
-                return (
-                  <li key={t.id}>
-                    <button
-                      className="rm-target-row"
-                      onClick={() => goTo('detail', { univ: t.name, univId: t.id })}
-                    >
-                      <div className="rm-target-info">
-                        <span className="rm-target-name">{t.name}</span>
-                        <span className={`rm-target-gap tone-${g.tone}`}>{g.text}</span>
-                        {showQuestions && (
-                          <div className="rm-inverse-msg">
-                            <span className="rm-inverse-ico">🎯</span>
-                            <span>
-                              <b>과목당 {t.ev.perSubjectQuestions}문제</b>씩
-                              더 맞히면 돼요
-                              {t.ev.totalQuestions > 0 && (
-                                <span className="rm-total-q">
-                                  (전체 약 {t.ev.totalQuestions}문제)
-                                </span>
-                              )}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                      <ChevronRight size={16} className="rm-target-arrow" />
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-          <p className="rm-targets-note">
-            <Info size={11} /> 부족 점수는 작년(2025) 합격선 기준 추정이에요 · 참고용.
-          </p>
-        </div>
-      )}
 
       {nextStage && (
         <div className="rm-next">
@@ -284,6 +164,66 @@ export default function RoadmapScreen({ goTo = () => {} }) {
           );
         })}
       </div>
+
+      {/* 목표 대학까지 — 관심 대학을 등록하면 합격선까지 몇 점 더 필요한지 */}
+      <div className="rm-targets">
+          <span className="mini-label"><Flag size={12} /> 목표 대학까지</span>
+          {!hasScore ? (
+            <div className="rm-targets-empty">
+              <p><b>내 점수</b>를 넣고 관심 대학을 담으면, 합격선까지 <b>몇 점이 더 필요한지</b> 챙겨드려요.</p>
+              <button className="rm-chip-btn" onClick={() => goTo('profile')}>
+                내 점수 입력
+              </button>
+            </div>
+          ) : targets.length === 0 ? (
+            <div className="rm-targets-empty">
+              <p>가고 싶은 대학을 <b>관심 대학</b>으로 담으면, 합격선까지 <b>몇 점이 더 필요한지</b> 여기서 챙겨드려요.</p>
+              <button className="rm-chip-btn" onClick={() => goTo('univ-explore')}>
+                <Search size={14} /> 대학 담으러 가기
+              </button>
+            </div>
+          ) : (
+            <ul className="rm-target-list">
+              {targets.map((t) => {
+                const g = gapText(t);
+                const showQuestions = t.ev?.shortPoints > 0 && t.ev?.perSubjectQuestions > 0;
+                return (
+                  <li key={t.id}>
+                    <button
+                      className="rm-target-row"
+                      onClick={() => goTo('detail', { univ: t.name, univId: t.id })}
+                    >
+                      <div className="rm-target-info">
+                        <span className="rm-target-name">{t.name}</span>
+                        <span className={`rm-target-gap tone-${g.tone}`}>{g.text}</span>
+                        {showQuestions && (
+                          <div className="rm-inverse-msg">
+                            <span className="rm-inverse-ico">🎯</span>
+                            <span>
+                              <b>과목당 {t.ev.perSubjectQuestions}문제</b>씩
+                              더 맞히면 돼요
+                              {t.ev.totalQuestions > 0 && (
+                                <span className="rm-total-q">
+                                  (전체 약 {t.ev.totalQuestions}문제)
+                                </span>
+                              )}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      <ChevronRight size={16} className="rm-target-arrow" />
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+          {hasScore && targets.length > 0 && (
+            <p className="rm-targets-note">
+              <Info size={11} /> 부족 점수는 작년(2025) 합격선 기준 추정이에요 · 참고용.
+            </p>
+          )}
+        </div>
 
       <p className="note">
         일정은 예년 패턴 기준이에요. 정확한 날짜는 시도교육청·대학 입학처 공고로 꼭 확인해요.

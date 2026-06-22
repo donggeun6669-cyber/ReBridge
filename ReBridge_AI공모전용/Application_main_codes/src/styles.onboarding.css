@@ -1,0 +1,66 @@
+/* =====================================================================
+   OnboardingScreen — 상황 선택 (persona)
+   ===================================================================== */
+.onb-screen { display: flex; flex-direction: column; }
+.onb-top {
+  display: flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 14px 2px 4px;
+}
+.onb-progress { display: flex; gap: 6px; margin: 6px 2px 22px; }
+.onb-dot {
+  width: 26px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border);
+  transition: background 0.2s;
+}
+.onb-dot.on { background: var(--brand); }
+
+.onb-q {
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -0.5px;
+  color: var(--text);
+}
+.onb-q .accent {
+  background: var(--grad-brand);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.onb-sub { font-size: 14px; color: var(--text-sub); margin: 10px 0 24px; line-height: 1.5; }
+
+.onb-opts { display: flex; flex-direction: column; gap: 12px; }
+.onb-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 18px;
+  border-radius: var(--r-lg);
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  text-align: left;
+  transition: transform 0.12s, border-color 0.12s;
+}
+.onb-card:active { transform: scale(0.98); }
+.oc-brand:active { border-color: var(--brand); }
+.oc-green:active { border-color: var(--green); }
+.oc-gold:active  { border-color: #46B6AE; }
+.onb-card-ico {
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+}
+.onb-card-body { flex: 1; display: flex; flex-direction: column; }
+.onb-card-title { font-size: 16.5px; font-weight: 800; color: var(--text); }
+.onb-card-desc { font-size: 13px; color: var(--text-sub); margin-top: 3px; line-height: 1.4; }
+.onb-card-arrow { color: var(--text-sub); flex: 0 0 auto; }
+
+.onb-note { margin-top: auto; padding-top: 28px; }

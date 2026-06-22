@@ -532,7 +532,7 @@
 "cutGradeAvg": null,
 "cutGrade70": 5.04,
 "cutScoreAvg": null,
-"cutScore70": 870.17,
+"cutScore70": null,
 "n": 120,
 "confidence": "high"
 },
@@ -594,7 +594,7 @@
 "cutGradeAvg": null,
 "cutGrade70": 4.8,
 "cutScoreAvg": null,
-"cutScore70": 899.62,
+"cutScore70": null,
 "n": 68,
 "confidence": "high"
 },

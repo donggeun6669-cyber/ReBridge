@@ -1,146 +1,73 @@
-import {
-  ArrowRight, HelpCircle, Sparkles, Scale, Target,
-  ChevronRight, ArrowLeftRight, Layers, CalendarDays,
-  MessageCircle, BarChart3, FileText, ClipboardCheck, BookOpen, Heart,
-} from 'lucide-react';
+import { useState } from 'react';
+import { Pencil, School, Briefcase, ChevronRight } from 'lucide-react';
 import LogoMark from './LogoMark.jsx';
+import TrackShell from './TrackShell.jsx';
+import { getActiveTrack, setActiveTrack } from '../lib/persona.js';
 
-const HELP = [
-  { icon: HelpCircle,    color: 'brand', title: '전형이 뭐예요?',                topic: 'types'       },
-  { icon: Sparkles,      color: 'green', title: '검정고시도 수시 돼요?',          topic: 'susi'        },
-  { icon: Scale,         color: 'coral', title: '비교내신이 뭐예요?',             topic: 'compare'     },
-  { icon: Target,        color: 'brand', title: '수능 최저가 뭐예요?',            topic: 'csat'        },
-  { icon: Target,        color: 'brand', title: '100점이면 교과 전형 돼요?',      topic: 'gedLimit'    },
-  { icon: FileText,      color: 'coral', title: '합격증명서 vs 성적증명서?',      topic: 'docs'        },
-  { icon: ArrowLeftRight,color: 'gold',  title: '수시 vs 정시, 차이는?',          topic: 'susiJeongsi' },
-  { icon: Layers,        color: 'brand', title: '수시 몇 개까지 써요?',           topic: 'count'       },
-  { icon: CalendarDays,  color: 'coral', title: '원서 언제, 어떻게 내요?',        topic: 'apply'       },
-  { icon: BarChart3,     color: 'brand', title: '나이스 온라인 신청이 뭐예요?',   topic: 'naice'       },
-  { icon: MessageCircle, color: 'green', title: '논술 전형이 왜 유리해요?',       topic: 'essay'       },
+// 길을 아직 안 정한 사람에게 보여줄 예시(=부드러운 트랙 선택). 필터를 앞에 강요하지 않는다.
+const EXAMPLES = [
+  { track: 'study', icon: Pencil,    title: '검정고시부터 준비할래요', sub: '시험 일정·공부 플래너' },
+  { track: 'univ',  icon: School,    title: '대학에 가고 싶어요',     sub: '내 점수로 갈 수 있는 곳' },
+  { track: 'job',   icon: Briefcase, title: '일·진로를 찾고 있어요',   sub: '어떤 일이 있는지 보기' },
 ];
 
-export default function HomeScreen({ goTo = () => {} }) {
-  function goToMatch() {
-    try {
-      const p = JSON.parse(localStorage.getItem('rebridge_profile'));
-      goTo(p && Object.keys(p).length > 0 ? 'results' : 'profile');
-    } catch {
-      goTo('profile');
-    }
+// 홈 = "지금 내 상태".
+//  - 트랙 미정: 예시를 보여주고 부드럽게 고르게 유도.
+//  - 트랙 확정: 그 트랙의 로드맵/도구를 TrackShell로.
+export default function HomeScreen({ goTo = () => {}, goBack = () => {} }) {
+  const [track, setTrack] = useState(getActiveTrack());
+
+  function choose(t) {
+    setActiveTrack(t);
+    setTrack(t);
+    window.scrollTo(0, 0);
+  }
+  function switchTrack() {
+    setActiveTrack(null);
+    setTrack(null);
+    window.scrollTo(0, 0);
+  }
+
+  if (track) {
+    return <TrackShell trackId={track} goTo={goTo} goBack={goBack} onSwitch={switchTrack} />;
   }
 
   return (
     <div className="screen">
-      {/* 상단바 */}
       <header className="topbar">
         <span className="brand-lockup">
           <LogoMark size={24} />
-          <span className="wordmark">Re:Bridge</span>
+          <span className="wordmark">검고담임</span>
         </span>
       </header>
 
-      {/* 히어로 — 간결하게 */}
       <section className="home-hero">
-        <p className="home-kicker">검정고시 맞춤 입시</p>
-        <h1 className="home-title">
-          우리도 갈 수 있는<br />
-          <span className="accent">대학, 찾아드려요</span>
-        </h1>
+        <p className="home-kicker">함께 가요</p>
+        <h1 className="home-title">아직 시작 전이에요</h1>
+        <p className="home-lead">비슷한 친구들은 이렇게 시작했어요.<br />눌러보면 나에게 맞춰드려요.</p>
       </section>
 
-      {/* 메인 CTA — 카드형 */}
-      <button className="home-cta-card" onClick={goToMatch}>
-        <div className="home-cta-inner">
-          <span className="home-cta-label">내 검정고시 점수로</span>
-          <span className="home-cta-title">맞는 대학 찾기</span>
-        </div>
-        <span className="home-cta-arrow"><ArrowRight size={24} /></span>
+      <div className="home-examples">
+        {EXAMPLES.map(({ track: t, icon: Icon, title, sub }) => (
+          <button key={t} className="home-example-row" onClick={() => choose(t)}>
+            <span className="home-example-ico"><Icon size={20} /></span>
+            <span className="home-example-text">
+              <span className="home-example-title">{title}</span>
+              <span className="home-example-sub">{sub}</span>
+            </span>
+            <ChevronRight size={18} className="home-example-arrow" />
+          </button>
+        ))}
+      </div>
+
+      <button className="home-browse" onClick={() => goTo('community')}>
+        아직 잘 모르겠어요 · 다른 친구들 이야기 둘러보기
       </button>
 
-      {/* 빠른 접근 */}
-      <div className="home-section">
-        <p className="home-section-label">바로가기</p>
-        <div className="home-quick-list">
-          <button className="home-quick-row" onClick={() => goTo('roadmap')}>
-            <span className="home-quick-ico ico-brand">
-              <CalendarDays size={18} />
-            </span>
-            <span className="home-quick-text">
-              <span className="home-quick-title">지금 내가 뭘 해야 할 때일까요?</span>
-              <span className="home-quick-sub">지금 시기에 맞는 할 일 확인</span>
-            </span>
-            <ChevronRight size={16} className="home-quick-arrow" />
-          </button>
-          <div className="home-divider" />
-          <button className="home-quick-row" onClick={() => goTo('checklist')}>
-            <span className="home-quick-ico ico-coral">
-              <ClipboardCheck size={18} />
-            </span>
-            <span className="home-quick-text">
-              <span className="home-quick-title">내 서류 체크리스트</span>
-              <span className="home-quick-sub">합격증명서·성적증명서 등 빠짐없이</span>
-            </span>
-            <ChevronRight size={16} className="home-quick-arrow" />
-          </button>
-          <div className="home-divider" />
-          <button className="home-quick-row" onClick={() => goTo('forms-guide')}>
-            <span className="home-quick-ico ico-gold">
-              <BookOpen size={18} />
-            </span>
-            <span className="home-quick-text">
-              <span className="home-quick-title">학생부 대체서식 안내</span>
-              <span className="home-quick-sub">학종 지원할 때 내는 서류</span>
-            </span>
-            <ChevronRight size={16} className="home-quick-arrow" />
-          </button>
-          <div className="home-divider" />
-          <button className="home-quick-row" onClick={() => goTo('help')}>
-            <span className="home-quick-ico ico-green">
-              <MessageCircle size={18} />
-            </span>
-            <span className="home-quick-text">
-              <span className="home-quick-title">담임에게 물어보기</span>
-              <span className="home-quick-sub">막히면 여기서 바로 질문해요</span>
-            </span>
-            <ChevronRight size={16} className="home-quick-arrow" />
-          </button>
-          <div className="home-divider" />
-          <button className="home-quick-row" onClick={() => goTo('dreamdrive')}>
-            <span className="home-quick-ico ico-coral">
-              <Heart size={18} />
-            </span>
-            <span className="home-quick-text">
-              <span className="home-quick-title">꿈드림센터 찾기</span>
-              <span className="home-quick-sub">검정고시·자립 무료 지원 기관 전국 안내</span>
-            </span>
-            <ChevronRight size={16} className="home-quick-arrow" />
-          </button>
-        </div>
-      </div>
-
-      {/* 입시 용어 FAQ — 2열 그리드 */}
-      <div className="home-section">
-        <p className="home-section-label">입시 용어 &amp; 궁금한 점</p>
-        <div className="home-faq-grid">
-          {HELP.map(({ icon: Icon, color, title, topic }) => (
-            <button
-              key={topic}
-              className={`home-faq-item faq-${color}`}
-              onClick={() => goTo('guide', { topic })}
-            >
-              <span className={`home-faq-ico ico-${color}`}>
-                <Icon size={16} />
-              </span>
-              <span className="home-faq-title">{title}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-
       <p className="note" style={{ marginTop: 28 }}>
-        검정고시로 대학을 준비하는
+        검정고시·진학·진로, 학교 밖 청소년의
         <br />
-        학교 밖 청소년을 위한 앱이에요.
+        다음 한 걸음을 함께 찾는 앱이에요.
       </p>
     </div>
   );

@@ -16,7 +16,7 @@ export default function SplashScreen({ onDone }) {
     <div className={`splash${fading ? ' splash-out' : ''}`}>
       <div className="splash-content">
         <LogoMark size={72} />
-        <span className="splash-wordmark">Re:Bridge</span>
+        <span className="splash-wordmark">검고담임</span>
         <span className="splash-sub">검정고시 맞춤 입시</span>
       </div>
     </div>

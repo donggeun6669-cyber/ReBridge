@@ -1,0 +1,100 @@
+import {
+  ArrowLeft, Users, Gift, ListOrdered, Info, ArrowUpRight, Lock,
+} from 'lucide-react';
+import { getProgram } from '../data/jobData.js';
+import '../styles.job.css';
+
+export default function JobDetailScreen({ id, goBack = () => {} }) {
+  const p = getProgram(id);
+
+  if (!p) {
+    return (
+      <div className="screen">
+        <header className="topbar center">
+          <button className="icon-btn" aria-label="뒤로" onClick={goBack}>
+            <ArrowLeft size={22} />
+          </button>
+          <span className="page-title">정보</span>
+        </header>
+        <div className="placeholder">
+          <h2>정보를 찾을 수 없어요</h2>
+          <p>이전 화면으로 돌아가 다시 시도해 주세요.</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="screen">
+      <header className="topbar center">
+        <button className="icon-btn" aria-label="뒤로" onClick={goBack}>
+          <ArrowLeft size={22} />
+        </button>
+        <span className="page-title">{p.title}</span>
+      </header>
+
+      {/* 헤더 카드 */}
+      <div className="jd-hero">
+        <div className="job-prog-tags">
+          {p.badge && <span className="job-tag badge">{p.badge}</span>}
+          {p.tags.map((t) => <span key={t} className="job-tag">{t}</span>)}
+        </div>
+        <h1 className="jd-title">{p.title}</h1>
+        {p.plain && <p className="jd-plain">{p.plain}</p>}
+        <p className="jd-summary">{p.summary}</p>
+      </div>
+
+      {/* 정직성 — 자격이 학교 밖 청소년에게 불확실하면 먼저 솔직하게 알린다 */}
+      {p.needsCheck && (
+        <div className="jd-check">
+          <Lock size={15} />
+          <p>
+            <b>학교 밖 청소년·검정고시 응시자에게 바로 적용되는지는 확실하지 않아요.</b><br />
+            신청 전 가까운 고용센터(1350)나 꿈드림센터에 "나도 대상인지" 꼭 확인하세요.
+          </p>
+        </div>
+      )}
+
+      {/* 이런 분께 */}
+      <section className="jd-block">
+        <h2 className="jd-h"><Users size={16} /> 이런 분께 맞아요</h2>
+        <ul className="jd-list">
+          {p.who.map((w) => <li key={w}>{w}</li>)}
+        </ul>
+      </section>
+
+      {/* 받는 것 */}
+      <section className="jd-block">
+        <h2 className="jd-h"><Gift size={16} /> 이런 걸 받아요</h2>
+        <ul className="jd-list">
+          {p.benefit.map((b) => <li key={b}>{b}</li>)}
+        </ul>
+      </section>
+
+      {/* 신청 절차 */}
+      <section className="jd-block">
+        <h2 className="jd-h"><ListOrdered size={16} /> 신청은 이렇게</h2>
+        <ol className="jd-steps">
+          {p.steps.map((s, i) => (
+            <li key={s}><span className="jd-step-num">{i + 1}</span><span>{s}</span></li>
+          ))}
+        </ol>
+      </section>
+
+      {/* 주의 */}
+      <section className="jd-note">
+        <h2 className="jd-h"><Info size={16} /> 알아두기</h2>
+        <p>{p.cautions}</p>
+      </section>
+
+      {/* 외부 연결은 '신청' 한 곳만 */}
+      <p className="jd-apply-hint">아래 버튼을 누르면 신청 사이트로 가요</p>
+      <a className="jd-apply" href={p.applyUrl} target="_blank" rel="noopener noreferrer">
+        {p.applyLabel} <ArrowUpRight size={18} />
+      </a>
+      <p className="note jd-foot">
+        설명은 앱에서 다 했어요. 위 버튼은 <b>진짜 신청</b>할 때만 공식 사이트로 가요.
+      </p>
+    </div>
+  );
+}

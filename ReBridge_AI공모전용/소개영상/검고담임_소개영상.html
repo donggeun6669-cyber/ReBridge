@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>검고담임 — 앱 소개 영상</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" />
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css"
+/>
+<style>
+  :root {
+    --blue: #2e8bd0;
+    --green: #36b85a;
+    --navy: #2d4a8a;
+    --ink: #1f2733;
+    --muted: #6b7686;
+    --bg: #f1f5f9;
+    --card: #ffffff;
+    --grad: linear-gradient(120deg, #2e8bd0 0%, #36b85a 100%);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    height: 100%;
+    background: #0b1220;
+    font-family: "Pretendard", -apple-system, "Noto Sans KR", sans-serif;
+    overflow: hidden;
+    color: var(--ink);
+  }
+
+  /* ====== 무대: 16:9 고정, 화면 녹화하기 좋게 중앙 정렬 ====== */
+  #stage {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 100vw;
+    height: 56.25vw;       /* 16:9 */
+    max-height: 100vh;
+    max-width: 177.78vh;
+    background: radial-gradient(130% 130% at 80% 0%, #14233f 0%, #0b1220 55%);
+    overflow: hidden;
+    box-shadow: 0 0 0 100vmax #0b1220;  /* 레터박스 */
+  }
+
+  /* 부드러운 색감 블롭 */
+  .blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(60px);
+    opacity: 0.45;
+    pointer-events: none;
+  }
+  .blob.b1 { width: 40%; height: 70%; left: -8%; top: -20%; background: #2e8bd0; }
+  .blob.b2 { width: 45%; height: 75%; right: -10%; bottom: -25%; background: #36b85a; }
+
+  /* ====== 공통 씬 ====== */
+  .scene {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.55s ease, transform 0.55s ease;
+    transform: translateY(14px) scale(0.99);
+    padding: 6%;
+  }
+  .scene.active {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+  }
+
+  /* 자식 애니메이션은 active일 때만 */
+  .scene .anim { opacity: 0; }
+  .scene.active .anim {
+    animation: rise 0.7s cubic-bezier(.2,.7,.2,1) forwards;
+  }
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(26px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pop {
+    0%   { opacity: 0; transform: scale(0.6); }
+    70%  { opacity: 1; transform: scale(1.06); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+
+  /* ====== 타이포 ====== */
+  .kicker {
+    color: #9fd0f3;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    font-size: 1.5vw;
+    margin-bottom: 1.4vw;
+  }
+  .head {
+    color: #fff;
+    font-weight: 800;
+    line-height: 1.25;
+    font-size: 4.4vw;
+    letter-spacing: -0.02em;
+  }
+  .head .g {
+    background: var(--grad);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .sub {
+    color: #c4cedd;
+    font-weight: 500;
+    font-size: 1.9vw;
+    line-height: 1.6;
+    margin-top: 1.6vw;
+  }
+  .center { text-align: center; }
+
+  /* ====== 씬1 훅 ====== */
+  #s0 .head { font-size: 5vw; }
+  #s0 .dim { color: #7e8aa0; }
+
+  /* ====== 씬2 브랜드 ====== */
+  .brandlogo {
+    width: 16vw; height: 16vw;
+    border-radius: 28%;
+    background: #fff;
+    box-shadow: 0 1.5vw 4vw rgba(0,0,0,.35);
+    object-fit: contain;
+    padding: 1.4vw;
+  }
+  .scene.active .brandlogo { animation: pop 0.8s cubic-bezier(.2,.8,.2,1) forwards; }
+  .wordmark {
+    font-size: 7vw; font-weight: 900; letter-spacing: -0.03em;
+    background: var(--grad);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+
+  /* ====== 좌우 레이아웃 (기능 씬) ====== */
+  .split {
+    display: flex; align-items: center; gap: 5vw;
+    width: 100%; max-width: 86vw; justify-content: center;
+  }
+  .copy { flex: 1; max-width: 38vw; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 0.6vw;
+    background: rgba(255,255,255,.1);
+    border: 1px solid rgba(255,255,255,.18);
+    color: #fff; font-weight: 700;
+    padding: 0.7vw 1.3vw; border-radius: 999px;
+    font-size: 1.4vw; margin-bottom: 1.6vw;
+  }
+  .badge .num {
+    background: var(--grad); color: #fff;
+    width: 2.2vw; height: 2.2vw; border-radius: 50%;
+    display: grid; place-items: center; font-size: 1.2vw;
+  }
+
+  /* ====== 폰 목업 ====== */
+  .phone {
+    flex: 0 0 auto;
+    width: 22vw; height: 45vw;
+    background: #0e1726;
+    border-radius: 4vw;
+    padding: 0.9vw;
+    box-shadow: 0 2vw 5vw rgba(0,0,0,.45), inset 0 0 0 0.3vw #243047;
+    position: relative;
+  }
+  .phone .notch {
+    position: absolute; top: 1.4vw; left: 50%; transform: translateX(-50%);
+    width: 7vw; height: 1.1vw; background: #0b1220; border-radius: 999px; z-index: 5;
+  }
+  .screen {
+    width: 100%; height: 100%;
+    background: var(--bg);
+    border-radius: 3.2vw;
+    overflow: hidden;
+    position: relative;
+    display: flex; flex-direction: column;
+  }
+  .appbar {
+    background: var(--grad);
+    color: #fff; font-weight: 800;
+    padding: 3vw 2vw 1.6vw;
+    font-size: 1.5vw;
+    display: flex; align-items: center; gap: 0.8vw;
+  }
+  .appbar small { font-weight: 500; opacity: .9; font-size: 1vw; display:block; }
+  .scr-body { padding: 1.6vw; display: flex; flex-direction: column; gap: 1.2vw; overflow: hidden; }
+
+  .ucard {
+    background: var(--card); border-radius: 1.6vw;
+    padding: 1.3vw 1.4vw;
+    box-shadow: 0 0.6vw 1.6vw rgba(31,39,51,.07);
+  }
+  .ucard .uni { font-weight: 800; color: var(--ink); font-size: 1.45vw; }
+  .ucard .dept { color: var(--muted); font-size: 1.05vw; margin-top: 0.2vw; }
+
+  /* 칸수 게이지 */
+  .gauge { height: 1vw; background: #e7edf4; border-radius: 999px; margin-top: 1vw; overflow: hidden; }
+  .gauge i { display: block; height: 100%; border-radius: 999px; width: 0; }
+  .scene.active .gauge i { animation: fill 1s ease forwards; animation-delay: .5s; }
+  @keyframes fill { to { width: var(--w); } }
+  .tag {
+    display: inline-block; font-weight: 800; font-size: 1vw;
+    padding: 0.3vw 0.8vw; border-radius: 999px; margin-top: 0.9vw;
+  }
+  .tag.safe { background: #e3f6ea; color: #1f8c44; }
+  .tag.fit  { background: #e4f0fb; color: #1f6fb0; }
+  .tag.try  { background: #fdf0e3; color: #b87a23; }
+
+  /* 점수 입력 칩 */
+  .scorerow { display: flex; gap: 0.7vw; flex-wrap: wrap; }
+  .chip {
+    background: #fff; border: 1px solid #e2e8f0; border-radius: 1vw;
+    padding: 0.7vw 0.9vw; text-align: center; flex: 1; min-width: 4vw;
+  }
+  .chip b { display: block; font-size: 1.5vw; color: var(--blue); }
+  .chip span { font-size: 0.85vw; color: var(--muted); }
+
+  /* FAQ / 멘토 */
+  .faq {
+    background: #fff; border-radius: 1.3vw; padding: 1.1vw 1.2vw;
+    font-size: 1.15vw; font-weight: 600; color: var(--ink);
+    display: flex; align-items: center; gap: 0.8vw;
+    box-shadow: 0 0.5vw 1.4vw rgba(31,39,51,.06);
+  }
+  .faq .q { color: var(--blue); font-weight: 900; }
+  .mentor {
+    background: var(--grad); color: #fff; border-radius: 1.5vw;
+    padding: 1.4vw; text-align: center; font-weight: 800; font-size: 1.35vw;
+    box-shadow: 0 0.8vw 2vw rgba(46,139,208,.35);
+  }
+  .mentor small { display: block; font-weight: 500; opacity: .92; font-size: 0.95vw; margin-top: 0.4vw; }
+  .searchbar {
+    background: #fff; border-radius: 999px; padding: 1.1vw 1.4vw;
+    color: var(--muted); font-size: 1.1vw; display: flex; align-items: center; gap: 0.7vw;
+    box-shadow: 0 0.5vw 1.4vw rgba(31,39,51,.06);
+  }
+
+  /* 로드맵 타임라인 */
+  .tl { position: relative; padding-left: 2.4vw; display: flex; flex-direction: column; gap: 1.3vw; }
+  .tl::before {
+    content: ""; position: absolute; left: 0.85vw; top: 0.5vw; bottom: 0.5vw;
+    width: 0.25vw; background: #d7dfea;
+  }
+  .step { position: relative; }
+  .step .dot {
+    position: absolute; left: -2.05vw; top: 0.1vw;
+    width: 1.5vw; height: 1.5vw; border-radius: 50%;
+    background: #cbd5e1; border: 0.3vw solid var(--bg);
+  }
+  .step.done .dot { background: var(--green); }
+  .step.now .dot { background: var(--blue); box-shadow: 0 0 0 0.5vw rgba(46,139,208,.25); }
+  .step .t { font-weight: 700; font-size: 1.2vw; color: var(--ink); }
+  .step.muted .t { color: #aab4c2; }
+  .nowcard {
+    background: var(--grad); color: #fff; border-radius: 1.5vw; padding: 1.3vw 1.5vw;
+    margin-bottom: 0.4vw; box-shadow: 0 0.8vw 2vw rgba(54,184,90,.3);
+  }
+  .nowcard .dday { font-size: 1.1vw; font-weight: 700; opacity: .95; }
+  .nowcard .todo { font-size: 1.6vw; font-weight: 900; margin-top: 0.3vw; }
+
+  /* ====== 마무리 ====== */
+  #s5 .slogan { font-size: 4.6vw; font-weight: 900; color: #fff; line-height: 1.3; }
+  #s5 .url {
+    margin-top: 2.4vw; display: inline-block;
+    background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.2);
+    color: #cfe3f5; padding: 1vw 2vw; border-radius: 999px; font-size: 1.6vw; font-weight: 700;
+  }
+
+  /* ====== 컨트롤 / 진행바 ====== */
+  #progress {
+    position: absolute; left: 0; bottom: 0; height: 0.5vh;
+    background: var(--grad); width: 0; z-index: 30;
+  }
+  #controls {
+    position: fixed; right: 18px; bottom: 14px; z-index: 50;
+    display: flex; gap: 8px; align-items: center;
+    font-family: "Pretendard", sans-serif;
+  }
+  #controls button {
+    background: rgba(255,255,255,.12); color: #fff; border: 1px solid rgba(255,255,255,.25);
+    border-radius: 999px; padding: 8px 16px; font-size: 13px; font-weight: 700;
+    cursor: pointer; backdrop-filter: blur(6px);
+  }
+  #controls button:hover { background: rgba(255,255,255,.22); }
+  #hint {
+    position: fixed; left: 50%; top: 14px; transform: translateX(-50%);
+    z-index: 50; color: #9fb0c8; font-size: 12px; background: rgba(11,18,32,.7);
+    padding: 6px 14px; border-radius: 999px; font-family: "Pretendard", sans-serif;
+    transition: opacity .4s; border: 1px solid rgba(255,255,255,.1);
+  }
+  .hide { opacity: 0 !important; pointer-events: none; }
+</style>
+</head>
+<body>
+  <div id="hint">스페이스바 = 처음부터 재생 · 화면 녹화하면 그대로 영상이 돼요</div>
+
+  <div id="stage">
+    <div class="blob b1"></div>
+    <div class="blob b2"></div>
+
+    <!-- 씬0: 훅 -->
+    <section class="scene center" id="s0">
+      <div>
+        <div class="head anim" style="animation-delay:.1s">학교 밖이라,</div>
+        <div class="head anim dim" style="animation-delay:.9s">챙겨줄 <span class="g">담임</span>이 없었어요.</div>
+        <div class="sub anim" style="animation-delay:1.9s">입시 정보는 흩어져 있고, 물어볼 곳도 없고…</div>
+      </div>
+    </section>
+
+    <!-- 씬1: 브랜드 -->
+    <section class="scene center" id="s1">
+      <div>
+        <img class="brandlogo anim" src="logo.png" alt="검고담임" style="animation-delay:.1s" />
+        <div class="kicker anim" style="margin-top:2vw;animation-delay:.7s">검정고시 담임선생님</div>
+        <div class="wordmark anim" style="animation-delay:.95s">검고담임</div>
+        <div class="sub anim" style="animation-delay:1.3s">검정고시 점수만 넣으면, 내게 맞는 길을 알려주는 AI 입시 도우미</div>
+      </div>
+    </section>
+
+    <!-- 씬2: 기능1 입시정보 -->
+    <section class="scene" id="s2">
+      <div class="split">
+        <div class="copy">
+          <span class="badge anim" style="animation-delay:.1s"><span class="num">1</span> 입시 정보 제공</span>
+          <div class="head anim" style="font-size:3.6vw;animation-delay:.25s">점수만 넣으면<br /><span class="g">맞는 대학</span>이 보여요</div>
+          <div class="sub anim" style="animation-delay:.6s">합격 가능성을 <b style="color:#fff">칸수 게이지</b>로 한눈에.<br />검정고시 비교내신까지 자동 분석해요.</div>
+        </div>
+        <div class="phone anim" style="animation-delay:.35s">
+          <div class="notch"></div>
+          <div class="screen">
+            <div class="appbar">🎓 나와 맞는 대학 <small>가능성 높은 순</small></div>
+            <div class="scr-body">
+              <div class="scorerow">
+                <div class="chip"><b>92</b><span>국어</span></div>
+                <div class="chip"><b>88</b><span>수학</span></div>
+                <div class="chip"><b>95</b><span>영어</span></div>
+              </div>
+              <div class="ucard">
+                <div class="uni">○○대학교</div>
+                <div class="dept">논술전형 · 인문계열</div>
+                <div class="gauge"><i style="--w:88%;background:var(--green)"></i></div>
+                <span class="tag safe">안정 · 여유 있어요</span>
+              </div>
+              <div class="ucard">
+                <div class="uni">△△대학교</div>
+                <div class="dept">학생부교과 · 사회계열</div>
+                <div class="gauge"><i style="--w:62%;background:var(--blue)"></i></div>
+                <span class="tag fit">적정 · 비슷한 수준</span>
+              </div>
+              <div class="ucard">
+                <div class="uni">□□대학교</div>
+                <div class="dept">논술전형 · 자연계열</div>
+                <div class="gauge"><i style="--w:38%;background:#e0a23c"></i></div>
+                <span class="tag try">소신 · 노려볼 만해요</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 씬3: 기능2 담임에게 물어보기 -->
+    <section class="scene" id="s3">
+      <div class="split">
+        <div class="phone anim" style="animation-delay:.35s">
+          <div class="notch"></div>
+          <div class="screen">
+            <div class="appbar">💬 담임에게 물어보기 <small>모르면 지어내지 않아요</small></div>
+            <div class="scr-body">
+              <div class="searchbar">🔍 무엇이 궁금해요? (예: 수능 안 봐도 돼요?)</div>
+              <div class="faq"><span class="q">Q</span> 검정고시도 수시 되나요?</div>
+              <div class="faq"><span class="q">Q</span> 비교내신이 뭐예요?</div>
+              <div class="faq"><span class="q">Q</span> 논술이 왜 유리해요?</div>
+              <div class="mentor">멘토에게 직접 물어보기
+                <small>검정고시로 대학 간 선배가 진짜 사람으로 답해줘요</small>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="copy">
+          <span class="badge anim" style="animation-delay:.1s"><span class="num">2</span> 담임에게 물어보기</span>
+          <div class="head anim" style="font-size:3.6vw;animation-delay:.25s">막히면?<br /><span class="g">진짜 사람</span>에게 연결</div>
+          <div class="sub anim" style="animation-delay:.6s">사람이 정리한 FAQ로 검색하고,<br />안 풀리면 멘토에게 바로 연결.<br /><b style="color:#fff">AI가 답을 지어내지 않아요.</b></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 씬4: 기능3 내 로드맵 -->
+    <section class="scene" id="s4">
+      <div class="split">
+        <div class="copy">
+          <span class="badge anim" style="animation-delay:.1s"><span class="num">3</span> 내 로드맵 · 핵심 차별점</span>
+          <div class="head anim" style="font-size:3.6vw;animation-delay:.25s">앱이 <span class="g">담임처럼</span><br />챙겨줘요</div>
+          <div class="sub anim" style="animation-delay:.6s">검정고시부터 대학 등록까지,<br />지금 뭘 해야 할지 <b style="color:#fff">D-day</b>로 알려주는<br />개인 맞춤 타임라인.</div>
+        </div>
+        <div class="phone anim" style="animation-delay:.35s">
+          <div class="notch"></div>
+          <div class="screen">
+            <div class="appbar">🗓️ 내 로드맵 <small>지금 너는 여기 있어요</small></div>
+            <div class="scr-body">
+              <div class="nowcard">
+                <div class="dday">📍 지금 할 일 · D-12</div>
+                <div class="todo">수시 원서 접수 (최대 6장)</div>
+              </div>
+              <div class="tl">
+                <div class="step done"><span class="dot"></span><div class="t">검정고시 합격 ✓</div></div>
+                <div class="step done"><span class="dot"></span><div class="t">합격증명서 받기 ✓</div></div>
+                <div class="step now"><span class="dot"></span><div class="t">목표 대학 좁히기 · 원서 접수</div></div>
+                <div class="step muted"><span class="dot"></span><div class="t">면접 · 논술</div></div>
+                <div class="step muted"><span class="dot"></span><div class="t">합격 발표 & 등록</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 씬5: 마무리 -->
+    <section class="scene center" id="s5">
+      <div>
+        <img class="brandlogo anim" src="logo.png" alt="검고담임" style="width:11vw;height:11vw;animation-delay:.1s" />
+        <div class="slogan anim" style="margin-top:2vw;animation-delay:.6s">검정고시생의 담임선생님,<br /><span class="g" style="background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent">검고담임</span></div>
+        <a class="url anim" style="animation-delay:1.3s">rebridge-rho.vercel.app</a>
+      </div>
+    </section>
+
+    <div id="progress"></div>
+  </div>
+
+  <div id="controls">
+    <button id="replay">↻ 처음부터</button>
+  </div>
+
+<script>
+  // 씬별 지속시간(ms) — 총 ~42초
+  const scenes = [
+    { id: "s0", dur: 4000 },
+    { id: "s1", dur: 4200 },
+    { id: "s2", dur: 9000 },
+    { id: "s3", dur: 9000 },
+    { id: "s4", dur: 9500 },
+    { id: "s5", dur: 6000 },
+  ];
+  const total = scenes.reduce((a, s) => a + s.dur, 0);
+
+  const els = scenes.map((s) => document.getElementById(s.id));
+  const bar = document.getElementById("progress");
+  let timers = [];
+  let rafId = null;
+
+  function clearAll() {
+    timers.forEach(clearTimeout);
+    timers = [];
+    if (rafId) cancelAnimationFrame(rafId);
+    els.forEach((e) => e.classList.remove("active"));
+  }
+
+  function play() {
+    clearAll();
+    let acc = 0;
+    scenes.forEach((s, i) => {
+      timers.push(
+        setTimeout(() => {
+          els.forEach((e) => e.classList.remove("active"));
+          els[i].classList.add("active");
+        }, acc)
+      );
+      acc += s.dur;
+    });
+
+    // 진행바
+    const start = performance.now();
+    function tick(now) {
+      const p = Math.min((now - start) / total, 1);
+      bar.style.width = (p * 100) + "%";
+      if (p < 1) rafId = requestAnimationFrame(tick);
+    }
+    rafId = requestAnimationFrame(tick);
+  }
+
+  document.getElementById("replay").addEventListener("click", play);
+  window.addEventListener("keydown", (e) => {
+    if (e.code === "Space") { e.preventDefault(); play(); }
+  });
+
+  // 5초 뒤 상단 힌트 숨김(녹화 깔끔하게)
+  setTimeout(() => document.getElementById("hint").classList.add("hide"), 5000);
+
+  // 폰트/이미지 로드 후 시작
+  window.addEventListener("load", () => setTimeout(play, 600));
+</script>
+</body>
+</html>

@@ -1,6 +1,53 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
-import { ArrowLeft, Phone, MapPin, Search, Navigation, List, Map as MapIcon, X } from 'lucide-react';
+import {
+  ArrowLeft, Phone, MapPin, Search, Navigation, List, Map as MapIcon, X,
+  Wallet, HeartHandshake, Compass, Users, GraduationCap, Lock, Gift,
+} from 'lucide-react';
 import centersRaw from '../data/kkumdrim.json';
+import { getCenterBenefits } from '../lib/benefits';
+
+// 카테고리 icon 이름 → lucide 컴포넌트 매핑
+const BENEFIT_ICONS = { Wallet, HeartHandshake, Compass, Users, GraduationCap };
+
+// "이 센터가 주는 것" 혜택 카테고리 칩 블록
+// 정직성 원칙: 정리된 데이터가 없으면 없는 척하지 않고 자물쇠/문의 폴백을 보여준다.
+function BenefitChips({ center }) {
+  const { categories, note, known } = getCenterBenefits(center);
+
+  if (!known) {
+    return (
+      <div className="kdream-benefit-block">
+        <div className="kdream-benefit-head">
+          <Gift size={13} /> 이 센터가 주는 것
+        </div>
+        <div className="kdream-benefit-locked">
+          <Lock size={13} />
+          <span>아직 정리된 혜택 정보가 없어요. 센터마다 지원이 다르니 <b>직접 문의</b>해 확인해 주세요.</span>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="kdream-benefit-block">
+      <div className="kdream-benefit-head">
+        <Gift size={13} /> 이 센터가 주는 것
+      </div>
+      <div className="kdream-benefit-chips">
+        {categories.map((cat) => {
+          const Icon = BENEFIT_ICONS[cat.icon];
+          return (
+            <span key={cat.id} className="kdream-benefit-chip" title={cat.desc}>
+              {Icon && <Icon size={12} />} {cat.label}
+            </span>
+          );
+        })}
+      </div>
+      {note && <p className="kdream-benefit-note">{note}</p>}
+      <p className="kdream-benefit-disclaimer">※ 정확한 대상·금액은 센터에 확인이 필요해요.</p>
+    </div>
+  );
+}
 
 // 좌표 없는 센터 제외 (지도용)
 const centersWithCoord = centersRaw.filter((c) => c.lat && c.lng);
@@ -314,6 +361,7 @@ export default function DreamdriveScreen({ goBack = () => {} }) {
               {selected._dist != null && selected._dist !== Infinity && (
                 <p className="kdream-near-dist">📍 내 위치에서 {distLabel(selected._dist)}</p>
               )}
+              <BenefitChips center={selected} />
               {selected.phone && (
                 <a className="kdream-action-btn call" href={`tel:${selected.phone}`} style={{ marginTop: 8 }}>
                   <Phone size={14} /> {selected.phone}
@@ -353,6 +401,7 @@ export default function DreamdriveScreen({ goBack = () => {} }) {
                   {c._dist != null && c._dist !== Infinity && (
                     <p className="kdream-near-dist">📍 내 위치에서 {distLabel(c._dist)}</p>
                   )}
+                  <BenefitChips center={c} />
                   <div className="kdream-actions">
                     {c.phone && (
                       <a

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { AlertTriangle, ExternalLink } from 'lucide-react';
 import { GED_SUBJECTS, gedAverage, estimateGrade } from '../lib/scoreEngine';
+import { getPersona } from '../lib/persona';
 
 const CSAT_SUBJECTS = ['국어', '수학', '영어', '탐구1', '탐구2'];
 
@@ -43,6 +44,13 @@ const QUESTIONS = [
 const STORAGE_KEY = 'rebridge_profile';
 
 export default function ProfileScreen({ goTo = () => {}, goBack = () => {}, onComplete }) {
+  // 공부 중(아직 응시 전) 유저는 실제 점수가 없으니 '목표 점수'로 입력받는다.
+  // 목표가 대학/직업/미정 무엇이든, 검정고시를 아직 안 봤으면 성적이 없으므로 목표 점수.
+  const isTarget = (() => {
+    const p = getPersona();
+    return p?.stage === 'studying';
+  })();
+
   const [answers, setAnswers] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
@@ -108,6 +116,7 @@ export default function ProfileScreen({ goTo = () => {}, goBack = () => {}, onCo
       examYear,
       examRound,
       csatGrades: numericCsat,
+      scoreMode: isTarget ? 'target' : 'actual', // 공부 중 = 목표 점수
     };
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(next)); } catch { /* 무시 */ }
     if (onComplete) onComplete();
@@ -120,14 +129,25 @@ export default function ProfileScreen({ goTo = () => {}, goBack = () => {}, onCo
         <span className="page-title">내 정보</span>
       </header>
 
-      <div className="intro-line">몇 가지만 알려주세요</div>
+      <div className="intro-line">{isTarget ? '목표 점수를 정해볼까요?' : '몇 가지만 알려주세요'}</div>
       <div className="intro-sub">
-        검정고시 점수를 넣으면 내게 맞는 대학과 전략을 알려드려요.
-        <br />
-        모르거나 아직 안 본 항목은 비워둬도 괜찮아요.
+        {isTarget ? (
+          <>
+            아직 시험 전이니까 <b>목표 점수</b>를 넣어봐요. 그 점수로 갈 수 있는 대학을 보여드려요.
+            <br />
+            점수는 나중에 언제든 바꿀 수 있어요.
+          </>
+        ) : (
+          <>
+            검정고시 점수를 넣으면 내게 맞는 대학과 전략을 알려드려요.
+            <br />
+            모르거나 아직 안 본 항목은 비워둬도 괜찮아요.
+          </>
+        )}
       </div>
 
-      {/* ── 1. 시험 회차 ── */}
+      {/* ── 1. 시험 회차 (이미 응시한 경우만) ── */}
+      {!isTarget && (
       <div className="field">
         <h3>검정고시 합격 회차</h3>
         <p className="hint">서류 제출 방식이 달라져요. 아직 안 봤으면 건너뛰어도 돼요.</p>
@@ -189,11 +209,16 @@ export default function ProfileScreen({ goTo = () => {}, goBack = () => {}, onCo
           </div>
         )}
       </div>
+      )}
 
       {/* ── 2. 과목별 점수 ── */}
       <div className="field">
-        <h3>검정고시 과목 점수</h3>
-        <p className="hint">과목당 100점 만점. 본 과목만 입력해도 돼요.</p>
+        <h3>{isTarget ? '목표 점수 (과목별)' : '검정고시 과목 점수'}</h3>
+        <p className="hint">
+          {isTarget
+            ? '받고 싶은 목표 점수를 넣어봐요. 과목당 100점 만점.'
+            : '과목당 100점 만점. 본 과목만 입력해도 돼요.'}
+        </p>
         <div className="ged-grid">
           {GED_SUBJECTS.map((s) => (
             <label className="ged-cell" key={s}>
@@ -213,12 +238,14 @@ export default function ProfileScreen({ goTo = () => {}, goBack = () => {}, onCo
         </div>
         {avg != null ? (
           <div className="ged-summary">
-            입력 {filledCount}과목 · 평균 <b>{avg}점</b>
+            {isTarget ? '목표 ' : '입력 '}{filledCount}과목 · {isTarget ? '목표 평균' : '평균'} <b>{avg}점</b>
             <span className="ged-grade"> → 추정 {myGrade}등급</span>
             <span className="ged-note"> (참고용 · 대학별 환산표는 달라요)</span>
           </div>
         ) : (
-          <div className="ged-summary muted">점수를 넣으면 평균과 추정 등급을 보여드려요.</div>
+          <div className="ged-summary muted">
+            {isTarget ? '목표 점수를 넣으면' : '점수를 넣으면'} 평균과 추정 등급을 보여드려요.
+          </div>
         )}
       </div>
 
@@ -272,7 +299,9 @@ export default function ProfileScreen({ goTo = () => {}, goBack = () => {}, onCo
       )}
 
       <div className="form-foot">
-        <button className="cta" onClick={submit}>나에게 맞는 길 보기</button>
+        <button className="cta" onClick={submit}>
+          {isTarget ? '목표로 갈 수 있는 대학 보기' : '나에게 맞는 길 보기'}
+        </button>
         <p className="reassure">입력한 정보는 이 기기에만 저장돼요. 로그인 필요 없어요.</p>
       </div>
     </div>
