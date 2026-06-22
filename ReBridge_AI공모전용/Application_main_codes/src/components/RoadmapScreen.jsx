@@ -107,6 +107,64 @@ export default function RoadmapScreen({ goTo = () => {} }) {
         검정고시부터 대학 등록까지, 다음에 뭘 언제 해야 하는지 같이 챙길게요.
       </div>
 
+      {nextStage && (
+        <div className="rm-next">
+          <span className="mini-label">다음 할 일</span>
+          <div className="rm-next-row">
+            <strong>{nextStage.title}</strong>
+            {nextStage.dday && <span className="rm-dday">{nextStage.dday}</span>}
+          </div>
+          <p>{nextStage.todo}</p>
+        </div>
+      )}
+
+      <div className="rm-timeline">
+        {stages.map((s) => {
+          const Icon = ICONS[s.icon] || CheckCircle2;
+          return (
+            <div className={`rm-stage rm-${s.status}`} key={s.id}>
+              <span className="rm-dot">
+                <Icon size={16} />
+              </span>
+              <div className="rm-stage-body">
+                <div className="rm-stage-head">
+                  <span className="rm-stage-title">{s.title}</span>
+                  {s.status === 'current' && <span className="rm-badge-now">지금 여기</span>}
+                  {s.status === 'done' && <span className="rm-badge-done">완료</span>}
+                  {s.optional && <span className="rm-badge-opt">선택</span>}
+                </div>
+                <div className="rm-stage-when">
+                  {s.dateLabel}
+                  {s.dday && s.status !== 'done' && <b> · {s.dday}</b>}
+                </div>
+                <p className="rm-stage-todo">{s.todo}</p>
+                {s.term && (
+                  <p className="rm-stage-term">
+                    <Info size={12} /> {s.term}
+                  </p>
+                )}
+                {(() => {
+                  const act = stageAction(s.id);
+                  return act ? (
+                    <button className="rm-stage-action" onClick={act.onClick}>
+                      <act.icon size={14} /> {act.label}
+                    </button>
+                  ) : null;
+                })()}
+                {s.guideTopic && (
+                  <button
+                    className="rm-guide-link"
+                    onClick={() => goTo('guide', { topic: s.guideTopic })}
+                  >
+                    자세히 알아보기 <ChevronRight size={16} />
+                  </button>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
       {/* 목표 대학까지 — 관심 대학을 등록하면 합격선까지 몇 점 더 필요한지 */}
       <div className="rm-targets">
           <span className="mini-label"><Flag size={12} /> 목표 대학까지</span>
@@ -166,64 +224,6 @@ export default function RoadmapScreen({ goTo = () => {} }) {
             </p>
           )}
         </div>
-
-      {nextStage && (
-        <div className="rm-next">
-          <span className="mini-label">다음 할 일</span>
-          <div className="rm-next-row">
-            <strong>{nextStage.title}</strong>
-            {nextStage.dday && <span className="rm-dday">{nextStage.dday}</span>}
-          </div>
-          <p>{nextStage.todo}</p>
-        </div>
-      )}
-
-      <div className="rm-timeline">
-        {stages.map((s) => {
-          const Icon = ICONS[s.icon] || CheckCircle2;
-          return (
-            <div className={`rm-stage rm-${s.status}`} key={s.id}>
-              <span className="rm-dot">
-                <Icon size={16} />
-              </span>
-              <div className="rm-stage-body">
-                <div className="rm-stage-head">
-                  <span className="rm-stage-title">{s.title}</span>
-                  {s.status === 'current' && <span className="rm-badge-now">지금 여기</span>}
-                  {s.status === 'done' && <span className="rm-badge-done">완료</span>}
-                  {s.optional && <span className="rm-badge-opt">선택</span>}
-                </div>
-                <div className="rm-stage-when">
-                  {s.dateLabel}
-                  {s.dday && s.status !== 'done' && <b> · {s.dday}</b>}
-                </div>
-                <p className="rm-stage-todo">{s.todo}</p>
-                {s.term && (
-                  <p className="rm-stage-term">
-                    <Info size={12} /> {s.term}
-                  </p>
-                )}
-                {(() => {
-                  const act = stageAction(s.id);
-                  return act ? (
-                    <button className="rm-stage-action" onClick={act.onClick}>
-                      <act.icon size={14} /> {act.label}
-                    </button>
-                  ) : null;
-                })()}
-                {s.guideTopic && (
-                  <button
-                    className="rm-guide-link"
-                    onClick={() => goTo('guide', { topic: s.guideTopic })}
-                  >
-                    자세히 알아보기 <ChevronRight size={16} />
-                  </button>
-                )}
-              </div>
-            </div>
-          );
-        })}
-      </div>
 
       <p className="note">
         일정은 예년 패턴 기준이에요. 정확한 날짜는 시도교육청·대학 입학처 공고로 꼭 확인해요.
