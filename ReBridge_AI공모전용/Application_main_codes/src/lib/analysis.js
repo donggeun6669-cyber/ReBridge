@@ -5,6 +5,7 @@ import admissions from '../data/admissions.json';
 import cutlines from '../data/cutlines_2025.json';
 import comparative from '../data/comparative_2028.json';
 import { evaluateAdmission, admissionChance } from './scoreEngine.js';
+import { TOP_TIER_EXCLUDE } from '../data/topTierExclude.js';
 
 const METRO = new Set(['서울', '경기', '인천']);
 
@@ -153,23 +154,10 @@ export function getExploreList() {
   return out;
 }
 
-// ─── 수시에서 제외할 상위권 대학 ─────────────────────────────────────────
-// 이 대학들은 일반학생 합격선 기준 입결만 있어 검정고시 비교내신으로는
-// 정확한 합격 예측이 불가하고, 실제 합격 사례도 매우 드물어 추천 목록에서 제외.
-// 정시 탭에서는 여전히 지원 자격 확인 가능.
-const SUSI_HARD_EXCLUDE = new Set([
-  'snu',        // 서울대
-  'yonsei',     // 연세대
-  'korea',      // 고려대
-  'skku',       // 성균관대
-  'sogang',     // 서강대
-  'hanyang',    // 한양대
-  'uA0000163',  // 이화여자대학교
-  'cau',        // 중앙대
-  'khu',        // 경희대
-  'uos',        // 서울시립대
-  'hufs',       // 한국외국어대
-]);
+// ─── 추천에서 제외할 상위권 대학 ─────────────────────────────────────────
+// 제외 리스트는 src/data/topTierExclude.js 에서 단일 관리(SKY·서성한 + 최상위 인서울).
+// 추천(수시·정시) 경로에만 적용하고, 전체 목록/검색에는 그대로 노출한다.
+const SUSI_HARD_EXCLUDE = TOP_TIER_EXCLUDE;
 
 // 공통: 카드 항목 생성
 function makeResultItem(u, best, rows, profile, comp) {

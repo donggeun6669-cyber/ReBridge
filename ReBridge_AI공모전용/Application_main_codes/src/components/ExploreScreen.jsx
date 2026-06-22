@@ -1,8 +1,12 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { Search, X, ChevronRight, SlidersHorizontal, Sparkles, Map as MapIcon, ArrowLeft, Target } from 'lucide-react';
 import { getExploreList } from '../lib/analysis.js';
 import { evaluateAdmission, admissionChance, gedFit } from '../lib/scoreEngine.js';
+import { TOP_TIER_EXCLUDE } from '../data/topTierExclude.js';
 import ChanceGauge from './ChanceGauge.jsx';
+
+// 한 번에 보여줄 대학 수 ('더 보기'로 증가)
+const PAGE_SIZE = 20;
 
 const STORAGE_KEY = 'rebridge_profile';
 
@@ -47,6 +51,7 @@ export default function ExploreScreen({ goTo = () => {}, goBack = () => {}, canG
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState('전체');
   const [sort, setSort] = useState('reco');
+  const [visible, setVisible] = useState(PAGE_SIZE); // '더 보기'로 노출 개수 증가
 
   const profile = useMemo(loadProfile, []);
   const all = useMemo(getExploreList, []);
@@ -55,11 +60,18 @@ export default function ExploreScreen({ goTo = () => {}, goBack = () => {}, canG
 
   const isSearching = query.trim() !== '';
 
+  // 추천순(reco) 정렬일 때만 상위권 대학을 추천 후보에서 제외한다.
+  // 가나다순·검색 경로에는 그대로 노출(전체 보기 유지) — 동근님 지시.
+  const excludeTopTier = !isSearching && sort === 'reco';
+
   const list = useMemo(() => {
     const q = query.trim();
-    let rows = all.filter((s) =>
-      isSearching ? s.name.includes(q) : matchFilter(s, filter)
-    );
+    let rows = all.filter((s) => {
+      if (isSearching) return s.name.includes(q);
+      if (!matchFilter(s, filter)) return false;
+      if (excludeTopTier && TOP_TIER_EXCLUDE.has(s.univId)) return false;
+      return true;
+    });
     rows = rows.map((s) => {
       // 프로필 점수 있으면 best 전형에 대해 합격 판정 → 칸수 게이지.
       // 칸수가 안 나오면(수능 기준/합격선 없음) 그 '이유'를 같이 담아 자격만 뜨는 카드를 설명.
@@ -105,7 +117,15 @@ export default function ExploreScreen({ goTo = () => {}, goBack = () => {}, canG
       return a.name.localeCompare(b.name);
     });
     return rows;
-  }, [all, query, filter, sort, isSearching, hasScore, profile]);
+  }, [all, query, filter, sort, isSearching, hasScore, profile, excludeTopTier]);
+
+  // 필터/정렬/검색이 바뀌면 노출 개수를 처음으로 되돌린다.
+  useEffect(() => {
+    setVisible(PAGE_SIZE);
+  }, [query, filter, sort]);
+
+  const shown = list.slice(0, visible);
+  const hasMore = list.length > visible;
 
   return (
     <div className="screen">
@@ -161,6 +181,7 @@ export default function ExploreScreen({ goTo = () => {}, goBack = () => {}, canG
           <div className="explore-toolbar">
             <span className="explore-count">
               <b>{list.length}</b>개 대학
+              {list.length > visible && <span className="explore-count-shown"> · {shown.length}개 표시 중</span>}
             </span>
             <div className="sort-group">
               <SlidersHorizontal size={14} />
@@ -185,6 +206,13 @@ export default function ExploreScreen({ goTo = () => {}, goBack = () => {}, canG
         </div>
       )}
 
+      {excludeTopTier && (
+        <p className="explore-exclude-hint">
+          추천순에는 검정고시 합격 사례가 드문 상위권 대학(SKY·서성한 등)을 빼고 보여줘요.
+          <button className="explore-exclude-link" onClick={() => setSort('name')}>전체 보기</button>
+        </p>
+      )}
+
       {!hasScore && !isSearching && (
         <button className="explore-banner" onClick={() => goTo('profile')}>
           <span className="explore-banner-body">
@@ -195,7 +223,7 @@ export default function ExploreScreen({ goTo = () => {}, goBack = () => {}, canG
       )}
 
       <div className="uni-list" style={{ marginTop: 12 }}>
-        {list.map((s) => (
+        {shown.map((s) => (
           <button
             key={s.univId}
             className="uni-card"
@@ -230,6 +258,15 @@ export default function ExploreScreen({ goTo = () => {}, goBack = () => {}, canG
           </p>
         )}
       </div>
+
+      {hasMore && (
+        <button
+          className="explore-more-btn"
+          onClick={() => setVisible((v) => v + PAGE_SIZE)}
+        >
+          더 보기 <span className="explore-more-count">{list.length - visible}개 남음</span>
+        </button>
+      )}
 
       <p className="note">
         <b>칸수 게이지</b>(안정·적정·소신…)는 내 점수로 본 <b>합격 가능성</b>이에요.

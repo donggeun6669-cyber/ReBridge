@@ -1,17 +1,28 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   ArrowLeft, ChevronDown, Loader2, ExternalLink, Sparkles, Check, Compass,
-  RotateCw, Lock, Plus, ArrowRight,
+  RotateCw, Lock, Plus, ArrowRight, Search, X,
 } from 'lucide-react';
 import { loadProfile, toggleSavedJob, loadSavedJobs, isJobSaved } from '../lib/persona.js';
 import { enrichJobResult } from '../lib/careernet.js';
-import { CATALOG_FIELDS, catalogFor } from '../data/careerData.js';
+import { CATALOG_FIELDS, catalogFor, searchJobs } from '../data/careerData.js';
 import { pathFor } from '../data/careerMentor.js';
 import '../styles.job.css';
 
+// 학력 칩 — '학력 없어도 돼요'(모호) 대신, 직업마다 정확한 뜻으로 보여준다.
+//   cert-free  학력 제한 없는 국가자격(기능사 등)이 있는 길
+//   open       학력보다 실력·포트폴리오·실무를 보는 길
+//   check      학력 무관 여부가 자리마다 달라 확인이 필요한 길
+const EDU_CHIP = {
+  'cert-free': '학력 제한 없는 자격',
+  open: '학교 안 나와도 도전 가능',
+  check: '학력 조건 확인 필요',
+};
+
 // 연결 경로에서 한눈 칩 — 학교 밖 청소년이 가장 궁금한 '학력/돈/방법'.
 function metaChips(item) {
-  const chips = ['학력 없어도 돼요'];
+  // 학력 칩: 직업의 edu 값으로 정확히. (값이 없으면 기본은 '확인 필요' — 단정하지 않음)
+  const chips = [EDU_CHIP[item.edu] || EDU_CHIP.check];
   const pid = item.connect?.programId;
   if (pid === 'tomorrow-card') chips.push('나라가 학원비 지원');
   else if (pid === 'technician-cert') chips.push('자격증으로 시작');
@@ -19,20 +30,29 @@ function metaChips(item) {
   return chips;
 }
 
-export default function JobInfoScreen({ goBack = () => {}, goTo = () => {} }) {
+export default function JobInfoScreen({ goBack = () => {}, goTo = () => {}, initialQuery = '' }) {
   const jp = useMemo(() => loadProfile()?.jobProfile || null, []);
   const initialField = jp?.interest && CATALOG_FIELDS.includes(jp.interest)
     ? jp.interest : 'IT·디자인';
 
   const [field, setField] = useState(initialField);
-  const [openIdx, setOpenIdx] = useState(null);
-  const [enrich, setEnrich] = useState({}); // "field::idx" -> { loading, status, data }
+  const [query, setQuery] = useState(initialQuery); // 홈 통합검색에서 특정 직업으로 점프
+  const [openKey, setOpenKey] = useState(null); // 열린 항목 키 ("분야::이름")
+  const [enrich, setEnrich] = useState({}); // "분야::이름" -> { loading, status, data }
   const [saved, setSaved] = useState(() => loadSavedJobs());
   const [toast, setToast] = useState('');
 
-  const items = catalogFor(field);
+  const searching = query.trim().length > 0;
 
-  useEffect(() => { setOpenIdx(null); }, [field]);
+  // 검색 중이면 전 분야에서 매칭, 아니면 선택한 분야의 큐레이션 목록.
+  // 두 경우 모두 항목에 실제 분야(_field)를 함께 실어 키·저장에 쓴다.
+  const items = useMemo(() => {
+    if (searching) return searchJobs(query);
+    return catalogFor(field).map((it) => ({ ...it, field }));
+  }, [searching, query, field]);
+
+  // 분야 전환 / 검색어 변경 시 열린 항목 닫기
+  useEffect(() => { setOpenKey(null); }, [field, query]);
 
   const flash = useCallback((msg) => {
     setToast(msg);
@@ -42,7 +62,7 @@ export default function JobInfoScreen({ goBack = () => {}, goTo = () => {} }) {
   const onToggle = useCallback((item) => {
     const job = {
       name: item.name,
-      field,
+      field: item.field,
       programId: item.connect?.programId,
       programLabel: item.connect?.label,
     };
@@ -50,7 +70,7 @@ export default function JobInfoScreen({ goBack = () => {}, goTo = () => {} }) {
     if (r.full) { flash('관심 직업은 최대 3개까지예요'); return; }
     setSaved(r.jobs);
     flash(r.added ? `${item.name} 저장했어요` : `${item.name} 뺐어요`);
-  }, [field, flash]);
+  }, [flash]);
 
   const load = useCallback(async (key, q) => {
     setEnrich((e) => ({ ...e, [key]: { loading: true } }));
@@ -58,12 +78,11 @@ export default function JobInfoScreen({ goBack = () => {}, goTo = () => {} }) {
     setEnrich((e) => ({ ...e, [key]: { loading: false, status: r.status, data: r.data } }));
   }, []);
 
-  const toggleOpen = useCallback((idx, item) => {
-    if (openIdx === idx) { setOpenIdx(null); return; }
-    setOpenIdx(idx);
-    const key = `${field}::${idx}`;
+  const toggleOpen = useCallback((key, item) => {
+    if (openKey === key) { setOpenKey(null); return; }
+    setOpenKey(key);
     if (!enrich[key]) load(key, item.q);
-  }, [openIdx, field, enrich, load]);
+  }, [openKey, enrich, load]);
 
   return (
     <div className="screen">
@@ -84,38 +103,68 @@ export default function JobInfoScreen({ goBack = () => {}, goTo = () => {} }) {
         마음에 드는 일을 <b>최대 3개까지</b> 저장해요. 저장하면 그 직업의 <b>단계별 준비</b>를 멘토처럼 알려줘요.
       </p>
 
-      {/* 분야 칩 */}
-      <div className="ji-chips">
-        {CATALOG_FIELDS.map((f) => (
-          <button key={f} className={`ji-chip ${field === f ? 'sel' : ''}`} onClick={() => setField(f)}>
-            {f}
+      {/* 직업 검색 */}
+      <div className="ji-search">
+        <Search size={16} className="ji-search-ico" />
+        <input
+          className="ji-search-input"
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="직업·분야 검색 (예: 영상, 카페, 반려동물)"
+          aria-label="직업 검색"
+        />
+        {query && (
+          <button className="ji-search-clear" onClick={() => setQuery('')} aria-label="검색어 지우기">
+            <X size={16} />
           </button>
-        ))}
+        )}
       </div>
 
+      {/* 분야 칩 — 검색 중에는 숨김 */}
+      {!searching && (
+        <div className="ji-chips">
+          {CATALOG_FIELDS.map((f) => (
+            <button key={f} className={`ji-chip ${field === f ? 'sel' : ''}`} onClick={() => setField(f)}>
+              {f}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {searching && (
+        <p className="job-reason" style={{ marginBottom: 10 }}>
+          {items.length > 0
+            ? <>‘<b>{query.trim()}</b>’ 검색 결과 <b>{items.length}</b>개</>
+            : <>‘<b>{query.trim()}</b>’에 맞는 직업을 못 찾았어요. 다른 말로 검색해 보세요.</>}
+        </p>
+      )}
+
       <div className="ji-list" style={{ paddingBottom: saved.length ? 84 : 0 }}>
-        {items.map((item, idx) => {
-          const isOpen = openIdx === idx;
-          const key = `${field}::${idx}`;
+        {items.map((item) => {
+          const itemField = item.field;
+          const key = `${itemField}::${item.name}`;
+          const isOpen = openKey === key;
           const e = enrich[key];
-          const sel = isJobSaved(item.name, field) || saved.some((j) => j.name === item.name && j.field === field);
-          const oneLiner = pathFor(item.name, field).oneLiner;
+          const sel = isJobSaved(item.name, itemField) || saved.some((j) => j.name === item.name && j.field === itemField);
+          const oneLiner = pathFor(item.name, itemField).oneLiner;
           return (
-            <div key={item.name} className={`ji-item ${isOpen ? 'open' : ''} ${sel ? 'picked' : ''}`}>
+            <div key={key} className={`ji-item ${isOpen ? 'open' : ''} ${sel ? 'picked' : ''}`}>
               <div className="ji-item-head ji-item-head--pick">
                 <button className="ji-pick-btn" onClick={() => onToggle(item)} aria-label={sel ? '저장 취소' : '저장'}>
                   <span className={`ji-pick-box ${sel ? 'on' : ''}`}>
                     {sel ? <Check size={15} /> : <Plus size={15} />}
                   </span>
                 </button>
-                <button className="ji-item-main" onClick={() => toggleOpen(idx, item)}>
+                <button className="ji-item-main" onClick={() => toggleOpen(key, item)}>
                   <span className="ji-item-name">{item.name}</span>
                   <span className="ji-meta">
+                    {searching && <span className="ji-meta-chip ji-meta-field">{itemField}</span>}
                     {metaChips(item).map((c) => <span key={c} className="ji-meta-chip">{c}</span>)}
                   </span>
                   <span className="ji-item-sum">{oneLiner || item.why}</span>
                 </button>
-                <ChevronDown size={18} className="ji-item-chev" onClick={() => toggleOpen(idx, item)} />
+                <ChevronDown size={18} className="ji-item-chev" onClick={() => toggleOpen(key, item)} />
               </div>
               {isOpen && (
                 <div className="ji-item-body">
@@ -155,7 +204,8 @@ export default function JobInfoScreen({ goBack = () => {}, goTo = () => {} }) {
         })}
       </div>
 
-      {/* 뭐가 맞을지 모를 때 — 진로심리검사 */}
+      {/* 뭐가 맞을지 모를 때 — 진로심리검사 (검색 중에는 숨김) */}
+      {!searching && (
       <button className="ji-connect" onClick={() => goTo('job-psych')} style={{ marginTop: 16 }}>
         <span className="ji-connect-text">
           <span className="ji-connect-label">아직 뭐가 맞을지 모르겠어요</span>
@@ -163,6 +213,7 @@ export default function JobInfoScreen({ goBack = () => {}, goTo = () => {} }) {
         </span>
         <Compass size={17} />
       </button>
+      )}
 
       <p className="note" style={{ marginTop: 18 }}>
         <Lock size={12} style={{ verticalAlign: '-2px', marginRight: 4 }} />
