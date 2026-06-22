@@ -4398,6 +4398,13 @@ button {
   position: absolute; right: 10px; display: inline-flex;
   border: none; background: transparent; color: var(--text-sub); cursor: pointer; padding: 6px;
 }
+.th-suggest { display: flex; gap: 8px; flex-wrap: wrap; margin-top: -12px; margin-bottom: 16px; }
+.th-suggest-chip {
+  padding: 6px 14px; border-radius: var(--r-pill);
+  border: 1px solid var(--border); background: var(--card);
+  font-size: 13px; color: var(--text-sub); cursor: pointer;
+}
+.th-suggest-chip:hover { border-color: var(--brand); color: var(--brand); }
 
 .th-section { font-size: 13px; font-weight: 700; color: var(--text-sub); margin: 2px 2px 12px; }
 .th-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
@@ -4416,6 +4423,11 @@ button {
 
 .th-results { display: flex; flex-direction: column; gap: 16px; }
 .th-no { color: var(--text-sub); font-size: 14px; text-align: center; padding: 24px 0; }
+.th-nohit { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 28px 16px 20px; text-align: center; }
+.th-nohit-emoji { color: var(--brand); opacity: .7; }
+.th-nohit-title { font-size: 15px; font-weight: 700; color: var(--text-main); }
+.th-nohit-sub { font-size: 13px; color: var(--text-sub); line-height: 1.6; }
+.th-nohit-btn { display: flex; align-items: center; gap: 6px; margin-top: 10px; padding: 10px 20px; background: var(--brand); color: #fff; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; }
 .th-res-label { font-size: 12px; font-weight: 700; color: var(--text-sub); margin: 0 2px 6px; }
 .th-res-row {
   display: flex; align-items: center; gap: 8px; width: 100%; text-align: left;
@@ -4426,4 +4438,246 @@ button {
 .th-res-sub {
   margin-left: auto; font-size: 12px; color: var(--text-sub);
   flex: 0 0 auto; max-width: 46%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* ── TrackHome v2 검색창 ── */
+.th2-search {
+  position: relative; display: flex; align-items: center;
+  margin-bottom: 8px;
+}
+.th2-search-ico { position: absolute; left: 12px; color: var(--text-sub); }
+.th2-search-input {
+  width: 100%; box-sizing: border-box;
+  padding: 10px 36px 10px 34px;
+  border: 1px solid var(--border); border-radius: var(--r-pill);
+  background: var(--card); font-size: 13px; color: var(--text); outline: none;
+}
+.th2-search-input:focus { border-color: var(--brand); }
+.th2-search-clear {
+  position: absolute; right: 8px; display: inline-flex;
+  border: none; background: transparent; color: var(--text-sub); cursor: pointer; padding: 6px;
+}
+.th2-suggest-wrap { margin-bottom: 14px; }
+.th2-suggest-label { font-size: 11px; font-weight: 700; color: var(--text-sub); margin-bottom: 6px; display: block; }
+.th2-suggest-grid {
+  margin-bottom: 0;
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+.th2-suggest-chip2 {
+  padding: 8px 4px; border-radius: var(--r-sm);
+  border: 1px solid var(--border); background: var(--card);
+  font-size: 11px; font-weight: 600; color: var(--text-sub);
+  cursor: pointer; text-align: center; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.th2-suggest-chip2:hover { border-color: var(--brand); color: var(--brand); }
+
+/* ── TrackHome v2 (세탁 앱 레이아웃) ── */
+.th2-hero { padding: 4px 0 16px; }
+.th2-chip {
+  display: inline-block; background: var(--brand-tint); color: var(--brand-deep);
+  font-size: 10px; font-weight: 700; padding: 3px 10px;
+  border-radius: var(--r-pill); margin-bottom: 8px;
+}
+.th2-title { font-size: 26px; font-weight: 800; color: var(--text); line-height: 1.3; }
+.th2-accent { color: var(--brand); }
+
+.th2-cta {
+  width: 100%; background: var(--grad-brand); border-radius: var(--r-md);
+  padding: 14px 16px; display: flex; align-items: center; justify-content: space-between;
+  border: none; cursor: pointer; margin-bottom: 14px;
+}
+.th2-cta-left { display: flex; flex-direction: column; gap: 3px; text-align: left; }
+.th2-cta-sub { font-size: 10px; color: rgba(255,255,255,.7); }
+.th2-cta-main { font-size: 15px; font-weight: 800; color: #fff; }
+.th2-cta-arrow {
+  width: 30px; height: 30px; background: rgba(255,255,255,.2);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; flex-shrink: 0;
+}
+
+.th2-white-block { padding: 16px 0; margin-bottom: 2px; }
+.th2-gray-block  { background: var(--bg-soft); border-radius: var(--r-lg); padding: 14px 16px; margin-bottom: 10px; }
+.th2-sec-title {
+  font-size: 13px; font-weight: 800; color: var(--text); margin-bottom: 12px;
+  padding-left: 9px; border-left: 3px solid var(--brand);
+}
+
+.th2-icon-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 6px; }
+.th2-icon-item {
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  background: none; border: none; cursor: pointer; padding: 4px 0;
+}
+.th2-icon-box { width: 50px; height: 50px; border-radius: 13px; display: flex; align-items: center; justify-content: center; }
+.th2-icon-label { font-size: 10px; font-weight: 700; color: var(--text); text-align: center; }
+
+.th2-shortcut-list { display: flex; flex-direction: column; gap: 7px; }
+.th2-shortcut-row {
+  background: var(--card); border-radius: var(--r-sm); padding: 10px 12px;
+  display: flex; align-items: center; gap: 9px;
+  border: 1px solid var(--border); width: 100%; cursor: pointer;
+}
+.th2-shortcut-ico { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.th2-shortcut-text { flex: 1; text-align: left; }
+.th2-shortcut-title { display: block; font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+.th2-shortcut-sub   { font-size: 12px; color: var(--text-sub); }
+.th2-chev { color: var(--border); flex-shrink: 0; }
+
+.th2-faq-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+.th2-faq-card {
+  background: var(--card); border-radius: var(--r-sm); padding: 12px 10px;
+  display: flex; flex-direction: column; gap: 7px;
+  border: 1px solid var(--border); cursor: pointer; text-align: left;
+}
+.th2-faq-ico  { width: 34px; height: 34px; border-radius: 9px; display: flex; align-items: center; justify-content: center; }
+.th2-faq-label { font-size: 13px; font-weight: 700; color: var(--text); line-height: 1.4; }
+
+/* ── 카카오맵 커스텀 마커 ── */
+.kdream-kakao-dot {
+  width: 14px; height: 14px;
+  background: var(--brand);
+  border: 2px solid #fff;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform .15s;
+  box-shadow: 0 1px 4px rgba(0,0,0,.25);
+}
+.kdream-kakao-dot.sel {
+  width: 20px; height: 20px;
+  background: #F59E0B;
+  border-color: #fff;
+  box-shadow: 0 2px 8px rgba(245,158,11,.5);
+}
+.kdream-kakao-me {
+  width: 16px; height: 16px;
+  background: #10B981;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 0 4px rgba(16,185,129,.25);
+}
+
+/* ── 위치 동의 모달 ── */
+.kdream-consent-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.45);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 999; padding: 24px;
+}
+.kdream-consent-modal {
+  background: var(--card); border-radius: 18px; padding: 28px 22px 22px;
+  width: 100%; max-width: 320px; text-align: center;
+  box-shadow: 0 8px 32px rgba(0,0,0,.18);
+}
+.kdream-consent-icon {
+  display: flex; align-items: center; justify-content: center;
+  width: 52px; height: 52px; border-radius: 50%;
+  background: #e0f2fe; color: var(--brand);
+  margin: 0 auto 14px;
+}
+.kdream-consent-title {
+  font-size: 17px; font-weight: 700; color: var(--text-main); margin-bottom: 10px;
+}
+.kdream-consent-desc {
+  font-size: 13px; color: var(--text-sub); line-height: 1.7; margin-bottom: 20px;
+}
+.kdream-consent-btns {
+  display: flex; gap: 10px;
+}
+.kdream-consent-deny {
+  flex: 1; padding: 11px; border: 1.5px solid var(--border);
+  border-radius: 10px; font-size: 14px; font-weight: 600;
+  color: var(--text-sub); background: var(--bg); cursor: pointer;
+}
+.kdream-consent-agree {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 11px; border: none; border-radius: 10px;
+  font-size: 14px; font-weight: 700;
+  background: var(--brand); color: #fff; cursor: pointer;
+}
+
+/* ── 위치 상태 배지 ── */
+.kdream-loc-badge {
+  flex-shrink: 0; font-size: 11px; font-weight: 600; padding: 5px 10px;
+  border-radius: 20px; white-space: nowrap;
+}
+.kdream-loc-badge.loading { background: #fef3c7; color: #92400e; }
+.kdream-loc-badge.granted { display: flex; align-items: center; gap: 4px; background: #d1fae5; color: #065f46; }
+
+/* ── 목록 카드 전화 버튼 (상시 노출) ── */
+.kdream-list-call-btn {
+  display: flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; border-radius: 8px;
+  background: #f0fdf4; color: #16a34a;
+  border: 1px solid #bbf7d0; text-decoration: none;
+  flex-shrink: 0; margin-left: 8px;
+}
+
+/* ── SupportScreen 공통지원 칩 바 ── */
+.spt-comm-bar {
+  padding: 10px 16px 6px;
+  border-bottom: 1px solid var(--border);
+}
+.spt-comm-bar-label {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 11px; font-weight: 700; color: var(--text-sub);
+  margin-bottom: 8px;
+}
+.spt-comm-chips {
+  display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none;
+}
+.spt-comm-chips::-webkit-scrollbar { display: none; }
+.spt-comm-chip {
+  flex-shrink: 0; display: flex; align-items: center; gap: 4px;
+  padding: 5px 11px; font-size: 12px; font-weight: 600;
+  color: var(--text-sub); background: var(--bg);
+  border: 1.5px solid var(--border); border-radius: 20px;
+  cursor: pointer; white-space: nowrap; transition: all .15s;
+}
+.spt-comm-chip.active {
+  background: var(--brand); color: #fff; border-color: var(--brand);
+}
+.spt-local-header {
+  display: flex; align-items: center; padding: 12px 16px 4px;
+}
+.spt-local-title {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 13px; font-weight: 700; color: var(--text-main);
+}
+
+/* ── 꿈드림 주소 복사 ── */
+.kdream-address-row {
+  display: flex; align-items: flex-start; gap: 8px; margin: 8px 0 4px;
+}
+.kdream-address-row .kdream-card-address { margin: 0; flex: 1; }
+.kdream-copy-btn {
+  flex-shrink: 0; display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 9px; border-radius: 7px; font-size: 11px; font-weight: 700;
+  background: var(--bg); border: 1.5px solid var(--border); color: var(--text-sub);
+  cursor: pointer; white-space: nowrap; transition: all .15s;
+}
+.kdream-copy-btn.done {
+  background: #d1fae5; border-color: #6ee7b7; color: #065f46;
+}
+
+/* ── 꿈드림 페이지네이션 ── */
+.kdream-pagination {
+  display: flex; align-items: center; justify-content: center;
+  gap: 4px; padding: 14px 20px 4px;
+}
+.kdream-page-btn {
+  display: flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; border-radius: 8px;
+  background: var(--card); border: 1.5px solid var(--border);
+  color: var(--text-sub); cursor: pointer;
+}
+.kdream-page-btn:disabled { opacity: 0.35; cursor: default; }
+.kdream-page-num {
+  min-width: 34px; height: 34px; padding: 0 6px;
+  border-radius: 8px; font-size: 13px; font-weight: 600;
+  background: var(--card); border: 1.5px solid var(--border);
+  color: var(--text-sub); cursor: pointer;
+}
+.kdream-page-num.active {
+  background: var(--brand); border-color: var(--brand); color: #fff; font-weight: 800;
+}
+.kdream-page-ellipsis {
+  color: var(--text-sub); font-size: 13px; padding: 0 2px; line-height: 34px;
 }

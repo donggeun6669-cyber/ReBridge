@@ -7,13 +7,13 @@ import { useAuthUser } from './AuthScreen.jsx';
 import { VerifiedBadge } from './CommunityBadge.jsx';
 import '../styles.community.css';
 
-export default function CommunityWriteScreen({ goTo = () => {}, goBack = () => {}, board = 'review', tag = null }) {
+export default function CommunityWriteScreen({ goTo = () => {}, goBack = () => {}, board = 'review', tag = null, initialTitle = '' }) {
   const user = useAuthUser();
   const boards = boardsFor(user);
   const initial = boards.some((x) => x.id === board) ? board : 'review';
   const [b, setB] = useState(initial);
   const [t, setT] = useState(tag || 'free');
-  const [title, setTitle] = useState('');
+  const [title, setTitle] = useState(initialTitle);
   const [body, setBody] = useState('');
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');

@@ -4,11 +4,11 @@
 //   정직성 원칙: 정리된 데이터가 없는 센터는 없는 척하지 않고 자물쇠/문의 폴백.
 //                지자체별로 다른 공통 지원은 "확인 필요"로 솔직하게 표기.
 // props: goTo(screen, params), goBack()
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   MapPin, Phone, Map as MapIcon, Gift, Lock, ChevronDown,
   Wallet, HeartHandshake, Compass, Users, GraduationCap, ChevronRight,
-  BookOpen, ShieldCheck, AlertCircle, Filter,
+  BookOpen, ShieldCheck, AlertCircle, Filter, Activity,
 } from 'lucide-react';
 import centersRaw from '../data/kkumdrim.json';
 import { COMMON_SUPPORT } from '../data/commonSupport';
@@ -18,7 +18,7 @@ import '../styles.support.css';
 // 카테고리/공통지원 icon 이름 → lucide 컴포넌트 매핑
 const ICONS = {
   Wallet, HeartHandshake, Compass, Users, GraduationCap,
-  Phone, BookOpen,
+  Phone, BookOpen, Activity,
 };
 
 // 한 번에 보여줄 센터 수 (더보기 단위)
@@ -124,13 +124,22 @@ function BenefitChips({ center, highlightId }) {
   );
 }
 
-export default function SupportScreen({ goTo = () => {}, goBack = () => {} }) {
-  const [region, setRegion] = useState('전체');
-  const [activeCat, setActiveCat] = useState(null);  // 선택된 카테고리 id (null = 전체)
-  const [knownOnly, setKnownOnly] = useState(false);  // '혜택 정리된 센터만' 토글
-  const [openId, setOpenId] = useState(null);         // 펼쳐진 센터 카드
-  const [openCommon, setOpenCommon] = useState(null); // 펼쳐진 공통지원 카드
-  const [visible, setVisible] = useState(PAGE_SIZE);  // 페이지네이션(더보기)
+export default function SupportScreen({ goTo = () => {}, goBack = () => {}, params = {} }) {
+  const [region, setRegion] = useState(() => localStorage.getItem('spt-region') || '전체');
+  const [openId, setOpenId] = useState(null);
+  const [openCommon, setOpenCommon] = useState(null);
+  const [visible, setVisible] = useState(PAGE_SIZE);
+
+  // 검색 결과에서 직접 진입 시 해당 공통지원 항목 자동 오픈
+  useEffect(() => {
+    if (params.supportId) setOpenCommon(params.supportId);
+  }, [params.supportId]);
+
+  // 지역 변경 + localStorage 저장
+  const saveRegion = (r) => {
+    localStorage.setItem('spt-region', r);
+    resetView(() => setRegion(r));
+  };
 
   // 필터/지역 바뀌면 페이지·열린 카드 초기화
   function resetView(extra) {
@@ -145,259 +154,171 @@ export default function SupportScreen({ goTo = () => {}, goBack = () => {} }) {
     [region]
   );
 
-  // 현재 지역 기준, 각 카테고리에 정리된 정보가 있는 센터 수
-  const catCountInRegion = useMemo(() => {
-    const acc = {};
-    BENEFIT_CATEGORIES.forEach((cat) => {
-      acc[cat.id] = inRegion.filter(
-        (c) => hasBenefits(c) && c.benefits.includes(cat.id)
-      ).length;
-    });
-    return acc;
-  }, [inRegion]);
-
-  // 표시할 센터 목록
-  //  - 카테고리 선택 시: 그 혜택을 주는(정리된) 센터만
-  //  - '혜택 정리된 센터만' 토글 시: 정리된 센터만
-  //  - 그 외: 지역 내 전체 (정리된 센터를 위로 정렬해 정직하게 노출)
-  const list = useMemo(() => {
-    if (activeCat) {
-      return inRegion.filter((c) => hasBenefits(c) && c.benefits.includes(activeCat));
-    }
-    if (knownOnly) {
-      return inRegion.filter(hasBenefits);
-    }
-    return [...inRegion].sort((a, b) => Number(hasBenefits(b)) - Number(hasBenefits(a)));
-  }, [inRegion, activeCat, knownOnly]);
-
-  const knownCount = useMemo(() => inRegion.filter(hasBenefits).length, [inRegion]);
+  const list = useMemo(() => inRegion, [inRegion]);
   const shown = list.slice(0, visible);
   const hasMore = visible < list.length;
 
   return (
     <div className="screen support-screen">
       <header className="topbar">
-        <span className="page-title">지원</span>
+        <span className="page-title">지원 혜택</span>
       </header>
 
-      {/* 인트로 */}
-      <div className="support-intro">
-        <h2 className="support-intro-title">내가 받을 수 있는 지원</h2>
-        <p className="support-intro-sub">
-          누구나 받을 수 있는 공통 지원부터, 내 주변 꿈드림센터의 혜택까지 한 곳에서 찾아보세요.
-        </p>
-      </div>
-
-      {/* ── 공통 지원 섹션 ── */}
-      <section className="support-section">
-        <div className="support-section-head">
-          <h3 className="support-section-title">
-            <ShieldCheck size={15} /> 공통 지원
-          </h3>
-          <span className="support-section-sub">대부분 받을 수 있어요</span>
-        </div>
-        <div className="support-common-list">
-          {COMMON_SUPPORT.map((item) => (
-            <CommonSupportCard
-              key={item.id}
-              item={item}
-              open={openCommon === item.id}
-              onToggle={() => setOpenCommon(openCommon === item.id ? null : item.id)}
-            />
-          ))}
-        </div>
-        <p className="support-common-honest">
-          <AlertCircle size={12} /> ‘확인 필요’ 표시는 지자체·센터·시기별로 달라요. 거주지 센터 확인이 가장 정확해요.
-        </p>
-      </section>
-
-      {/* ── 센터별 지원 섹션 ── */}
-      <section className="support-section">
-        <div className="support-section-head">
-          <h3 className="support-section-title">
-            <Gift size={15} /> 우리 동네 센터 지원
-          </h3>
-          <span className="support-section-sub">센터마다 달라요</span>
-        </div>
-
-        {/* 지역(시도) 선택 */}
-        <div className="support-region-scroll">
-          {REGIONS.map((r) => (
-            <button
-              key={r}
-              className={`support-region-chip${region === r ? ' active' : ''}`}
-              onClick={() => resetView(() => setRegion(r))}
-            >
-              {r}
-              {r !== '전체' && regionCount[r] && (
-                <span className="support-chip-cnt"> {regionCount[r]}</span>
-              )}
-            </button>
-          ))}
-        </div>
-
-        {/* 카테고리 브라우징 */}
-        <div className="support-cat-grid">
-          {BENEFIT_CATEGORIES.map((cat) => {
-            const Icon = ICONS[cat.icon];
-            const cnt = catCountInRegion[cat.id] ?? categoryCountAll[cat.id];
+      {/* 공통지원 칩 슬라이더 — 항상 상단 표시 */}
+      <div className="spt-comm-bar">
+        <span className="spt-comm-bar-label"><ShieldCheck size={12} /> 공통 지원</span>
+        <div className="spt-comm-chips">
+          {COMMON_SUPPORT.map((item) => {
+            const Icon = ICONS[item.icon];
             return (
               <button
-                key={cat.id}
-                className={`support-cat-card${activeCat === cat.id ? ' active' : ''}`}
-                onClick={() => resetView(() => setActiveCat(activeCat === cat.id ? null : cat.id))}
+                key={item.id}
+                className={`spt-comm-chip${openCommon === item.id ? ' active' : ''}`}
+                onClick={() => setOpenCommon(openCommon === item.id ? null : item.id)}
               >
-                <span className="support-cat-ico">{Icon && <Icon size={18} />}</span>
-                <span className="support-cat-label">{cat.label}</span>
-                <span className="support-cat-cnt">{cnt > 0 ? `${cnt}곳` : '정보 모으는 중'}</span>
+                {Icon && <Icon size={12} />} {item.title}
               </button>
             );
           })}
         </div>
+      </div>
 
-        {/* '혜택 정리된 센터만' 토글 (카테고리 선택 중이면 비활성 — 이미 정리된 센터만 나옴) */}
-        <button
-          className={`support-known-toggle${knownOnly ? ' on' : ''}${activeCat ? ' disabled' : ''}`}
-          disabled={!!activeCat}
-          onClick={() => resetView(() => setKnownOnly((v) => !v))}
-        >
-          <Filter size={13} />
-          혜택 정리된 센터만 보기
-          <span className="support-known-state">{activeCat || knownOnly ? 'ON' : 'OFF'}</span>
-        </button>
-
-        {/* 결과 헤더 */}
-        <div className="support-result-head">
-          {activeCat ? (
-            <p className="support-result-count">
-              {BENEFIT_CATEGORIES.find((c) => c.id === activeCat)?.label} 지원 ·{' '}
-              <b>{list.length}곳</b>
-            </p>
-          ) : (
-            <p className="support-result-count">
-              {region === '전체' ? '전국' : region} <b>{list.length}곳</b>
-              {!knownOnly && (
-                <span className="support-result-sub"> · 혜택 정리됨 {knownCount}곳</span>
-              )}
-            </p>
-          )}
-          <button className="support-map-link" onClick={() => goTo('dreamdrive')}>
-            <MapIcon size={14} /> 지도에서 보기
-          </button>
-        </div>
-
-        {/* 센터 목록 */}
-        <div className="support-list">
-          {list.length === 0 && (
-            <div className="support-empty">
-              <Lock size={18} />
-              <p>이 조건에 정리된 센터가 아직 없어요.</p>
-              <p className="support-empty-sub">
-                지역을 바꾸거나, 전국 공통 상담 <b>1388</b>로 문의해 보세요.
-              </p>
+      {/* 선택된 공통지원 상세 패널 */}
+      {openCommon && (() => {
+        const item = COMMON_SUPPORT.find((i) => i.id === openCommon);
+        if (!item) return null;
+        const Icon = ICONS[item.icon];
+        return (
+          <div className="spt-common-detail">
+            <div className="spt-common-detail-head">
+              {Icon && <Icon size={15} />}
+              <span>{item.title}</span>
+              <span className={`spt-common-card-badge${item.status === 'check' ? ' check' : ''}`}>
+                {item.status === 'check' ? '확인 필요' : '공통'}
+              </span>
             </div>
-          )}
+            <p className="spt-common-detail-summary">{item.summary}</p>
+            <p className="spt-common-detail-body">{item.detail}</p>
+            {item.action?.tel && (
+              <a className="support-action-btn call" href={`tel:${item.action.tel}`}>
+                <Phone size={14} /> {item.action.label}
+              </a>
+            )}
+            <p className="spt-honest-note" style={{ marginTop: 8 }}>
+              <AlertCircle size={11} /> 지자체·시기별로 달라요. 거주지 센터 확인이 가장 정확해요.
+            </p>
+          </div>
+        );
+      })()}
 
-          {shown.map((c) => {
-            const known = hasBenefits(c);
-            const open = openId === c.id;
-            return (
-              <div
-                key={c.id}
-                className={`support-card${open ? ' open' : ''}${known ? '' : ' locked'}`}
-                onClick={() => setOpenId(open ? null : c.id)}
-              >
-                <div className="support-card-head">
-                  <div className="support-card-left">
-                    <div className="support-card-name">
-                      {!known && <Lock size={13} className="support-card-lock" />}
-                      {c.name}
-                    </div>
-                    <div className="support-card-meta">
-                      <MapPin size={11} /> {c.region} {c.district}
-                    </div>
+      {/* 내 지역 센터 헤더 + 지역 칩 */}
+      <div className="spt-local-header">
+        <span className="spt-local-title"><MapPin size={13} /> 내 지역 센터</span>
+      </div>
+      <div className="support-region-scroll">
+        {REGIONS.map((r) => (
+          <button
+            key={r}
+            className={`support-region-chip${region === r ? ' active' : ''}`}
+            onClick={() => saveRegion(r)}
+          >
+            {r}
+            {r !== '전체' && regionCount[r] && (
+              <span className="support-chip-cnt"> {regionCount[r]}</span>
+            )}
+          </button>
+        ))}
+      </div>
+
+      {/* 결과 헤더 */}
+      <div className="support-result-head">
+        <p className="support-result-count">
+          {region === '전체' ? '전국' : region} <b>{list.length}곳</b>
+        </p>
+        <button className="support-map-link" onClick={() => goTo('dreamdrive')}>
+          <MapIcon size={14} /> 지도
+        </button>
+      </div>
+
+      {/* 센터 목록 */}
+      <div className="support-list">
+        {shown.map((c) => {
+          const open = openId === c.id;
+          return (
+            <div
+              key={c.id}
+              className={`support-card${open ? ' open' : ''}`}
+              onClick={() => setOpenId(open ? null : c.id)}
+            >
+              <div className="support-card-head">
+                <div className="support-card-left">
+                  <div className="support-card-name">{c.name}</div>
+                  <div className="support-card-meta">
+                    <MapPin size={11} /> {c.region} {c.district}
                   </div>
+                </div>
+                <div className="spt-card-actions">
+                  {c.phone && (
+                    <a
+                      className="spt-phone-btn"
+                      href={`tel:${c.phone}`}
+                      onClick={(e) => e.stopPropagation()}
+                      title={c.phone}
+                    >
+                      <Phone size={15} />
+                    </a>
+                  )}
                   <ChevronRight
                     size={18}
                     className="support-card-chev"
                     style={{ transform: open ? 'rotate(90deg)' : 'none' }}
                   />
                 </div>
-
-                {/* 접힌 상태에서도 혜택 칩 미리보기 (정리된 센터) */}
-                {!open && (
-                  known ? (
-                    <BenefitChips center={c} highlightId={activeCat} />
-                  ) : (
-                    <div className="support-benefit-block">
-                      <div className="support-benefit-locked">
-                        <Lock size={13} />
-                        <span>아직 정리된 정보가 없어요 · <b>센터에 직접 문의</b></span>
-                      </div>
-                    </div>
-                  )
-                )}
-
-                {/* 펼친 상세 */}
-                {open && (
-                  <div className="support-card-body">
-                    {c.address && <p className="support-card-address">{c.address}</p>}
-                    <div className="support-benefit-head">
-                      <Gift size={13} /> 이 센터가 주는 것
-                    </div>
-                    <BenefitChips center={c} highlightId={activeCat} />
-                    <div className="support-actions">
-                      {c.phone && (
-                        <a
-                          className="support-action-btn call"
-                          href={`tel:${c.phone}`}
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <Phone size={14} /> {c.phone}
-                        </a>
-                      )}
-                      <button
-                        className="support-action-btn map"
-                        onClick={(e) => { e.stopPropagation(); goTo('dreamdrive'); }}
-                      >
-                        <MapIcon size={14} /> 지도에서 보기
-                      </button>
-                    </div>
-                  </div>
-                )}
               </div>
-            );
-          })}
-        </div>
-
-        {/* 더보기 / 페이지 안내 */}
-        {list.length > 0 && (
-          <div className="support-pager">
-            {hasMore ? (
-              <button
-                className="support-more-btn"
-                onClick={() => setVisible((v) => v + PAGE_SIZE)}
-              >
-                더보기 ({shown.length}/{list.length})
-                <ChevronDown size={16} />
-              </button>
-            ) : (
-              list.length > PAGE_SIZE && (
-                <p className="support-pager-end">{list.length}곳 모두 표시했어요</p>
-              )
-            )}
-          </div>
-        )}
-      </section>
-
-      {/* Footer */}
-      <div className="support-footer-note">
-        <p>📞 전국 공통 상담 전화: <b>1388</b> (24시간)</p>
-        <p>만 9~24세 학교 밖 청소년이라면 누구나 무료로 이용할 수 있어요.</p>
-        <p className="support-source">
-          혜택 정보는 센터별로 계속 채워가고 있어요. 비어 있는 곳은 직접 문의가 가장 정확해요.
-        </p>
+              {!open && <BenefitChips center={c} highlightId={null} />}
+              {open && (
+                <div className="support-card-body">
+                  {c.address && <p className="support-card-address">{c.address}</p>}
+                  <div className="support-benefit-head"><Gift size={13} /> 이 센터가 주는 것</div>
+                  <BenefitChips center={c} highlightId={null} />
+                  <div className="support-actions">
+                    {c.phone && (
+                      <a
+                        className="support-action-btn call"
+                        href={`tel:${c.phone}`}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <Phone size={14} /> {c.phone}
+                      </a>
+                    )}
+                    <button
+                      className="support-action-btn map"
+                      onClick={(e) => { e.stopPropagation(); goTo('dreamdrive', { centerId: c.id }); }}
+                    >
+                      <MapIcon size={14} /> 지도에서 보기
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
+
+      {/* 더보기 */}
+      {hasMore && (
+        <div className="support-pager">
+          <button className="support-more-btn" onClick={() => setVisible((v) => v + PAGE_SIZE)}>
+            더보기 ({shown.length}/{list.length}) <ChevronDown size={16} />
+          </button>
+        </div>
+      )}
+
+      <div className="spt-footer-note" style={{ margin: '12px 16px 32px' }}>
+        <p>전국 공통 상담 전화: <b>1388</b> (24시간 · 무료)</p>
+        <p>만 9~24세 학교 밖 청소년이라면 누구나 이용할 수 있어요.</p>
+      </div>
+
     </div>
   );
 }

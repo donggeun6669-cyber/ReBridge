@@ -123,7 +123,7 @@ export default function App() {
         {!splash && screen === 'onboarding'  && <OnboardingScreen goTo={goTo} presetTrack={params.presetTrack} />}
 
         {!splash && screen === 'home'        && <HomeScreen goTo={goTo} goBack={goBack} />}
-        {!splash && screen === 'support'     && <SupportScreen goTo={goTo} goBack={goBack} />}
+        {!splash && screen === 'support'     && <SupportScreen goTo={goTo} goBack={goBack} params={params} />}
         {!splash && screen === 'explore'     && <CareerHubScreen goTo={goTo} persona={persona} />}
         {!splash && screen === 'univ-explore' && <ExploreScreen goTo={goTo} goBack={goBack} canGoBack={stack.length > 1} />}
         {!splash && screen === 'path'        && (
@@ -158,7 +158,7 @@ export default function App() {
         {!splash && screen === 'help'        && <HelpScreen goTo={goTo} goBack={goBack} />}
         {!splash && screen === 'checklist'   && <ChecklistScreen goTo={goTo} goBack={goBack} />}
         {!splash && screen === 'forms-guide' && <FormsGuideScreen goTo={goTo} goBack={goBack} />}
-        {!splash && screen === 'dreamdrive'  && <DreamdriveScreen goTo={goTo} goBack={goBack} />}
+        {!splash && screen === 'dreamdrive'  && <DreamdriveScreen goTo={goTo} goBack={goBack} params={params} />}
         {!splash && screen === 'ged-guide'   && <GedGuideScreen goTo={goTo} goBack={goBack} />}
         {!splash && screen === 'study-roadmap' && <StudyRoadmapScreen goTo={goTo} />}
         {!splash && screen === 'study-planner' && <StudyPlannerScreen goTo={goTo} />}
@@ -173,7 +173,7 @@ export default function App() {
         {!splash && screen === 'job-apply'     && <JobApplyScreen goBack={goBack} goTo={goTo} />}
         {!splash && screen === 'community'       && <CommunityScreen goTo={goTo} goBack={goBack} />}
         {!splash && screen === 'community-post'  && <CommunityPostScreen goTo={goTo} goBack={goBack} id={params.id} />}
-        {!splash && screen === 'community-write' && <CommunityWriteScreen goTo={goTo} goBack={goBack} board={params.board} />}
+        {!splash && screen === 'community-write' && <CommunityWriteScreen goTo={goTo} goBack={goBack} board={params.board} initialTitle={params.initialTitle || ''} />}
         {!splash && screen === 'community-auth'  && <AuthScreen goBack={goBack} />}
 
         {/* 미구현 화면 fallback */}
