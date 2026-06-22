@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Pencil, School, Briefcase, ChevronRight } from 'lucide-react';
 import LogoMark from './LogoMark.jsx';
-import TrackShell from './TrackShell.jsx';
+import TrackHome from './TrackHome.jsx';
 import { getActiveTrack, setActiveTrack } from '../lib/persona.js';
 
 // 길을 아직 안 정한 사람에게 보여줄 예시(=부드러운 트랙 선택). 필터를 앞에 강요하지 않는다.
@@ -13,7 +13,7 @@ const EXAMPLES = [
 
 // 홈 = "지금 내 상태".
 //  - 트랙 미정: 예시를 보여주고 부드럽게 고르게 유도.
-//  - 트랙 확정: 그 트랙의 로드맵/도구를 TrackShell로.
+//  - 트랙 확정: 검색(상단) + 빠른 메뉴(하단) 대시보드(TrackHome). 로드맵은 빠른 메뉴 첫 칸.
 export default function HomeScreen({ goTo = () => {}, goBack = () => {} }) {
   const [track, setTrack] = useState(getActiveTrack());
 
@@ -29,7 +29,7 @@ export default function HomeScreen({ goTo = () => {}, goBack = () => {} }) {
   }
 
   if (track) {
-    return <TrackShell trackId={track} goTo={goTo} goBack={goBack} onSwitch={switchTrack} />;
+    return <TrackHome track={track} goTo={goTo} onSwitch={switchTrack} />;
   }
 
   return (

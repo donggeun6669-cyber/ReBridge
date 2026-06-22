@@ -4325,3 +4325,56 @@ button {
   color: var(--caution);
   background: var(--caution-soft);
 }
+
+/* ===== 트랙 확정 홈 (TrackHome: 검색 + 빠른 메뉴) ===== */
+.topbar.between { display: flex; align-items: center; justify-content: space-between; }
+.th-switch {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 12.5px; color: var(--text-sub);
+  background: transparent; border: 1px solid var(--border);
+  border-radius: var(--r-pill); padding: 6px 12px; cursor: pointer;
+}
+.th-kicker { margin: 0 2px 12px; font-size: 13px; color: var(--text-sub); }
+
+.th-search { position: relative; display: flex; align-items: center; margin-bottom: 20px; }
+.th-search-ico { position: absolute; left: 14px; color: var(--text-sub); }
+.th-search-input {
+  width: 100%; box-sizing: border-box;
+  padding: 14px 40px 14px 42px;
+  border: 1px solid var(--border); border-radius: var(--r-pill);
+  background: var(--card); font-size: 15px; color: var(--text); outline: none;
+}
+.th-search-input:focus { border-color: var(--brand); }
+.th-search-clear {
+  position: absolute; right: 10px; display: inline-flex;
+  border: none; background: transparent; color: var(--text-sub); cursor: pointer; padding: 6px;
+}
+
+.th-section { font-size: 13px; font-weight: 700; color: var(--text-sub); margin: 2px 2px 12px; }
+.th-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.th-tile {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 9px;
+  padding: 18px 8px; background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--r-md); cursor: pointer; box-shadow: var(--shadow-sm);
+}
+.th-tile:active { transform: scale(0.98); }
+.th-tile-ico {
+  display: flex; align-items: center; justify-content: center;
+  width: 46px; height: 46px; border-radius: 14px;
+  background: var(--brand-tint); color: var(--brand-deep);
+}
+.th-tile-label { font-size: 13px; font-weight: 600; color: var(--text); }
+
+.th-results { display: flex; flex-direction: column; gap: 16px; }
+.th-no { color: var(--text-sub); font-size: 14px; text-align: center; padding: 24px 0; }
+.th-res-label { font-size: 12px; font-weight: 700; color: var(--text-sub); margin: 0 2px 6px; }
+.th-res-row {
+  display: flex; align-items: center; gap: 8px; width: 100%; text-align: left;
+  padding: 11px 12px; background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--r-sm); margin-bottom: 6px; cursor: pointer; color: var(--text);
+}
+.th-res-name { font-size: 14px; font-weight: 600; flex: 0 1 auto; }
+.th-res-sub {
+  margin-left: auto; font-size: 12px; color: var(--text-sub);
+  flex: 0 0 auto; max-width: 46%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
