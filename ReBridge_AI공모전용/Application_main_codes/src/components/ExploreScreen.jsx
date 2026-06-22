@@ -60,7 +60,7 @@ export default function ExploreScreen({ goTo = () => {}, goBack = () => {}, canG
 
   const isSearching = query.trim() !== '';
 
-  // 추천순(reco) 정렬일 때만 상위권 대학을 추천 후보에서 제외한다.
+  // 추천순·합격가능순 정렬일 때만 상위권 대학을 추천 후보에서 제외한다.
   // 가나다순·검색 경로에는 그대로 노출(전체 보기 유지) — 동근님 지시.
   const excludeTopTier = !isSearching && sort === 'reco';
 
@@ -95,8 +95,27 @@ export default function ExploreScreen({ goTo = () => {}, goBack = () => {}, canG
       const status = s.bestGedEligible === '가능' ? 'ok' : 'cond';
       return { ...s, chance, noChanceReason, status, fit };
     });
+    const FIT_RANK = { good: 3, ok: 2, check: 1, no: 0 };
     rows.sort((a, b) => {
       if (sort === 'name') return a.name.localeCompare(b.name);
+
+      // 합격 가능 순: 검정고시생 기준 현실적 합격 가능성 우선
+      if (sort === 'ged') {
+        const fa = FIT_RANK[a.fit?.level] ?? 2;
+        const fb = FIT_RANK[b.fit?.level] ?? 2;
+        if (fa !== fb) return fb - fa;
+        const ea = a.eligibleCount || 0;
+        const eb = b.eligibleCount || 0;
+        if (ea !== eb) return eb - ea;
+        if (hasScore) {
+          const al = a.chance ? a.chance.level : 0;
+          const bl = b.chance ? b.chance.level : 0;
+          if (al !== bl) return bl - al;
+        }
+        if (b.dataScore !== a.dataScore) return b.dataScore - a.dataScore;
+        return a.name.localeCompare(b.name);
+      }
+
       // 추천순:
       //  - 점수가 있으면 '합격 가능성(칸수)' 높은 순을 최우선 → 위에서부터 유리한 대학.
       //    칸수를 낼 자료가 없는 대학(level 0)은 아래로 내려, "더 유리한 순"이 명확해지게.
@@ -108,10 +127,8 @@ export default function ExploreScreen({ goTo = () => {}, goBack = () => {}, canG
       }
       const e = (b.status === 'ok') - (a.status === 'ok');
       if (e) return e;
-      // 칸수가 없는(또는 점수 없는) 대학끼리는 '적합도'가 좋은 순으로.
-      const FIT = { good: 3, ok: 2, check: 1, no: 0 };
-      const fa = FIT[a.fit?.level] ?? 2;
-      const fb = FIT[b.fit?.level] ?? 2;
+      const fa = FIT_RANK[a.fit?.level] ?? 2;
+      const fb = FIT_RANK[b.fit?.level] ?? 2;
       if (fa !== fb) return fb - fa;
       if (b.dataScore !== a.dataScore) return b.dataScore - a.dataScore;
       return a.name.localeCompare(b.name);
