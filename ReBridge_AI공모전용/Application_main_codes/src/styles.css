@@ -967,6 +967,50 @@ button {
   font-weight: 500;
 }
 .explore-count b { color: var(--text); font-weight: 800; }
+.explore-count-shown { color: var(--text-sub); font-weight: 500; }
+
+/* 추천순 상위권 제외 안내 */
+.explore-exclude-hint {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 10px 2px 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--text-sub);
+}
+.explore-exclude-link {
+  padding: 2px 8px;
+  border-radius: var(--r-pill);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--brand-deep);
+  background: var(--brand-tint);
+}
+
+/* '더 보기' 버튼 */
+.explore-more-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 12px;
+  padding: 13px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border);
+  background: var(--card);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+.explore-more-btn:active { background: var(--brand-tint); }
+.explore-more-count {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-sub);
+}
 .sort-group {
   display: flex;
   align-items: center;
