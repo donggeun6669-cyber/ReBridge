@@ -72,6 +72,49 @@
 .cm-empty { text-align: center; color: var(--text-sub); font-size: 14px; padding: 40px 12px; }
 .cm-empty.sm { padding: 18px 12px; }
 
+/* ── 고정 공지 카드 ── */
+.cm-notice {
+  background: var(--caution-soft, #FFF7E6);
+  border: 1px solid var(--brand, #F0B429);
+  border-radius: var(--r-md);
+  padding: 13px 15px 14px;
+  margin-bottom: 14px;
+  box-shadow: var(--shadow-sm);
+}
+.cm-notice-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.cm-notice-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: var(--brand, #F0B429); color: #5A3E04;
+  padding: 2px 9px 2px 7px; border-radius: var(--r-pill);
+  font-size: 11.5px; font-weight: 800; line-height: 1.6; white-space: nowrap;
+}
+.cm-notice-head-actions { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
+.cm-notice-toggle {
+  display: inline-flex; align-items: center; gap: 2px;
+  border: none; background: transparent; color: #9A6A12;
+  font-size: 12px; font-weight: 700; cursor: pointer; padding: 4px 6px; border-radius: var(--r-pill);
+}
+.cm-notice-close {
+  display: inline-flex; align-items: center; justify-content: center;
+  border: none; background: transparent; color: #9A6A12;
+  cursor: pointer; padding: 4px; border-radius: 50%;
+}
+.cm-notice-toggle:active, .cm-notice-close:active { opacity: .6; }
+.cm-notice-title {
+  font-size: 14.5px; font-weight: 800; color: var(--text); margin: 8px 0 0; line-height: 1.4;
+}
+.cm-notice-body { margin-top: 10px; display: flex; flex-direction: column; gap: 12px; }
+.cm-notice-section-head {
+  font-size: 13.5px; font-weight: 800; color: var(--text); margin: 0 0 4px; line-height: 1.45;
+}
+.cm-notice-line {
+  font-size: 12.8px; color: var(--text-sub); line-height: 1.62; margin: 0 0 3px;
+  word-break: keep-all;
+}
+.cm-notice-foot {
+  font-size: 12.5px; font-weight: 700; color: #9A6A12; margin: 2px 0 0; line-height: 1.5;
+}
+
 /* 글쓰기 FAB */
 .cm-fab {
   position: sticky;

@@ -14,6 +14,7 @@ import {
   getNotifications, markPostSeen, timeAgo, DEFAULT_PAGE_SIZE,
 } from '../lib/community.js';
 import { AuthorLine } from './CommunityBadge.jsx';
+import CommunityNotice from './CommunityNotice.jsx';
 import CommunityActionSheet from './CommunityActionSheet.jsx';
 import { useAuthUser, NicknameGate } from './AuthScreen.jsx';
 import '../styles.community.css';
@@ -338,6 +339,8 @@ export default function CommunityScreen({ goTo = () => {}, goBack = () => {} }) 
           <button className={`cm-sort-btn ${sort === 'popular' ? 'sel' : ''}`} onClick={() => setSort('popular')}>인기</button>
         </div>
       </div>
+
+      <CommunityNotice verified={!!user?.verified} />
 
       <div className="cm-list">
         {posts === null ? (
