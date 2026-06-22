@@ -87,7 +87,7 @@ export default function StudyRoadmapScreen({ goTo = () => {} }) {
         : `모의 평균 ${avg}점 — 합격선까지 평균 ${passLine - avg}점 남았어요.`;
     } else {
       pct = totalMin > 0 ? Math.min(60, Math.round(totalMin / 60)) : 0;
-      msg = '과목 가이드에서 모의 점수를 적으면 합격까지 진행률이 보여요.';
+      msg = '플래너에서 공부를 기록하면 합격까지 진행률이 보여요.';
     }
     return { totalMin, streak, avg, passLine, pct, msg, hasData: totalMin > 0 || avg != null };
   }, []);
@@ -99,8 +99,8 @@ export default function StudyRoadmapScreen({ goTo = () => {} }) {
         icon: BookOpen,
         title: '지금 — 검정고시 공부',
         date: null,
-        todo: '과목별 가이드로 약한 과목부터 채워요. 평균 60점이면 합격이에요.',
-        cta: { label: '학습 홈에서 과목 가이드 보기', screen: 'ged-guide' },
+        todo: '플래너에 오늘 할 일을 적고 공부 시간을 기록해요. 평균 60점이면 합격이에요.',
+        cta: { label: '플래너에서 오늘 할 일 적기', screen: 'study-planner' },
         forceCurrent: true,
       },
     ];

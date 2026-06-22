@@ -1,26 +1,23 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   CalendarClock, ChevronRight, ChevronLeft, Target, Flame, CalendarDays,
-  Plus, X, Wand2, Clock, CheckCircle2, Circle, Pencil,
+  Plus, X, Clock, CheckCircle2, Circle,
   Play, Pause, Square, RotateCcw, Timer, Hourglass, Coffee,
-  BarChart3, TrendingUp, Trophy, AlertCircle,
+  BarChart3, TrendingUp, Trophy,
 } from 'lucide-react';
 import { GED_SUBJECT_GUIDE, getNextSession, daysUntil } from '../data/gedGuide.js';
-import { loadProfile } from '../lib/persona.js';
 import '../styles.studyplanner.css';
 import '../styles.study.css';
 
 const DAYS_KEY = 'rebridge_planner_days';
 const TIMER_KEY = 'rebridge_planner_timer';
-const MOCK_KEY = 'rebridge_mock_scores';
 const GOAL_KEY = 'rebridge_study_weekgoal';
-// day = { comment, minutes, bySubject:{}, tasks:[{id, subject, text, done}], pomos, reflect:{mood,focus,note} }
+// day = { minutes, bySubject:{}, tasks:[{id, text, done}], pomos }
 // timer = { mode:'free'|'pomo', running, startTs, accumSec, subject, phase:'focus'|'break', cycles }
 
 const QUICK_MIN = [10, 30, 60];
 const SUBJECTS = [...GED_SUBJECT_GUIDE.map((s) => s.key), '기타'];
 const DOW = ['일', '월', '화', '수', '목', '금', '토'];
-const PASS_LINE = 60;
 
 const POMO_FOCUS_SEC = 25 * 60;
 const POMO_BREAK_SEC = 5 * 60;
@@ -28,51 +25,8 @@ const POMO_BREAK_SEC = 5 * 60;
 const GOAL_PRESETS = [300, 600, 900, 1200]; // 분: 5h/10h/15h/20h
 const DEFAULT_GOAL = 600;
 
-// 추천 플래너 템플릿
-const TEMPLATES = [
-  {
-    key: 'basic', title: '기초 다지기', sub: '하루 2~3시간 · 처음 시작',
-    tasks: [
-      { subject: '국어', text: '기출 지문 3개 읽고 풀기' },
-      { subject: '수학', text: '개념 1단원 정리 + 예제 풀기' },
-      { subject: '영어', text: '기초 단어 30개 외우기' },
-      { subject: '한국사', text: '시대 흐름 한 번 훑어보기' },
-    ],
-  },
-  {
-    key: 'weak', title: '약점 집중', sub: '부족한 과목 위주',
-    tasks: [
-      { subject: '수학', text: '틀린 유형만 다시 풀기' },
-      { subject: '영어', text: '독해 지문 2개 + 단어 복습' },
-      { subject: '과학', text: '헷갈리는 개념 정리' },
-    ],
-  },
-  {
-    key: 'finish', title: '마무리 점검', sub: '시험 2주 전',
-    tasks: [
-      { subject: '국어', text: '기출 1회분 풀기' },
-      { subject: '수학', text: '기출 1회분 풀기' },
-      { subject: '영어', text: '기출 1회분 풀기' },
-      { subject: '사회', text: '오답 정리' },
-      { subject: '과학', text: '오답 정리' },
-      { subject: '한국사', text: '오답 정리' },
-    ],
-  },
-];
-
-const MOODS = [
-  { key: 'great', emoji: '😄', label: '좋아요' },
-  { key: 'ok', emoji: '🙂', label: '보통' },
-  { key: 'tired', emoji: '😮‍💨', label: '지침' },
-  { key: 'hard', emoji: '😣', label: '힘듦' },
-];
-
 function load() {
   try { return JSON.parse(localStorage.getItem(DAYS_KEY)) || {}; }
-  catch { return {}; }
-}
-function loadScores() {
-  try { return JSON.parse(localStorage.getItem(MOCK_KEY)) || {}; }
   catch { return {}; }
 }
 function loadGoal() {
@@ -104,14 +58,6 @@ function loadTimer() {
   try { return JSON.parse(localStorage.getItem(TIMER_KEY)) || null; }
   catch { return null; }
 }
-function ddayMessage(d) {
-  if (d == null) return '다음 시험을 차근차근 준비해요.';
-  if (d <= 0) return '오늘이 시험날! 긴장 풀고 아는 것부터 풀어요. 💪';
-  if (d <= 14) return '곧 시험이에요. 컨디션 관리도 공부의 일부예요.';
-  if (d <= 30) return '마무리 점검 기간! 기출 위주로 약점을 메워요.';
-  if (d <= 60) return '지금이 실력 올리기 딱 좋은 때예요. 꾸준히!';
-  return '아직 시간은 충분해요. 기초부터 탄탄히 쌓아요.';
-}
 function intensity(min) {
   if (!min) return 0;
   if (min < 30) return 1;
@@ -130,20 +76,16 @@ export default function StudyPlannerScreen({ goTo = () => {} }) {
   const [view, setView] = useState({ y: today.getFullYear(), m: today.getMonth() });
   const [taskText, setTaskText] = useState('');
   const [subj, setSubj] = useState('국어');
-  const [showCal, setShowCal] = useState(false);
   const [timerMode, setTimerMode] = useState('pomo'); // 'pomo' | 'free'
 
   const session = useMemo(() => getNextSession(), []);
   const dday = session ? daysUntil(session.examDate) : null;
-  const profile = useMemo(loadProfile, []);
-  const targetAvg = profile?.scoreMode === 'target' ? profile.gedAvg : null;
-  const scores = useMemo(loadScores, []);
 
-  const day = days[selected] || { comment: '', minutes: 0, bySubject: {}, tasks: [], pomos: 0, reflect: null };
+  const day = days[selected] || { comment: '', minutes: 0, bySubject: {}, tasks: [], pomos: 0 };
 
   function updateDay(patch) {
     setDays((prev) => {
-      const cur = prev[selected] || { comment: '', minutes: 0, bySubject: {}, tasks: [], pomos: 0, reflect: null };
+      const cur = prev[selected] || { comment: '', minutes: 0, bySubject: {}, tasks: [], pomos: 0 };
       const next = { ...prev, [selected]: { ...cur, ...patch } };
       try { localStorage.setItem(DAYS_KEY, JSON.stringify(next)); } catch { /* 무시 */ }
       return next;
@@ -153,7 +95,7 @@ export default function StudyPlannerScreen({ goTo = () => {} }) {
   function addTask(text) {
     const t = text.trim();
     if (!t) return;
-    updateDay({ tasks: [...(day.tasks || []), { id: String(Date.now()), subject: subj, text: t, done: false }] });
+    updateDay({ tasks: [...(day.tasks || []), { id: String(Date.now()), text: t, done: false }] });
     setTaskText('');
   }
   function toggleTask(id) {
@@ -162,41 +104,12 @@ export default function StudyPlannerScreen({ goTo = () => {} }) {
   function removeTask(id) {
     updateDay({ tasks: (day.tasks || []).filter((t) => t.id !== id) });
   }
-  function applyTemplate(tpl) {
-    const existing = new Set((day.tasks || []).map((x) => `${x.subject}|${x.text}`));
-    const add = tpl.tasks
-      .filter((x) => !existing.has(`${x.subject}|${x.text}`))
-      .map((x, i) => ({ id: `${Date.now()}-${i}`, subject: x.subject, text: x.text, done: false }));
-    if (add.length) updateDay({ tasks: [...(day.tasks || []), ...add] });
-  }
   function addMinutesTo(subject, min) {
     const by = { ...(day.bySubject || {}) };
     by[subject] = (by[subject] || 0) + min;
     updateDay({ minutes: (day.minutes || 0) + min, bySubject: by });
   }
   function resetTime() { updateDay({ minutes: 0, bySubject: {} }); }
-
-  // ── 약점 과목 추천 (모의점수 ↔ 플래너 연결) ──
-  const weakSubject = useMemo(() => {
-    const entered = GED_SUBJECT_GUIDE
-      .map((s) => ({ key: s.key, v: scores[s.key] }))
-      .filter((x) => x.v != null && x.v !== '');
-    if (!entered.length) return null;
-    const under = entered.filter((x) => x.v < PASS_LINE).sort((a, b) => a.v - b.v);
-    const lowest = (under[0] || entered.sort((a, b) => a.v - b.v)[0]);
-    return { key: lowest.key, score: lowest.v, under: lowest.v < PASS_LINE };
-  }, [scores]);
-
-  function addWeakTask() {
-    if (!weakSubject) return;
-    const text = weakSubject.under
-      ? '약점 보완 — 기출 오답 다시 풀기'
-      : '실력 굳히기 — 기출 1회분 풀기';
-    const existing = new Set((day.tasks || []).map((x) => `${x.subject}|${x.text}`));
-    if (existing.has(`${weakSubject.key}|${text}`)) { setSubj(weakSubject.key); return; }
-    updateDay({ tasks: [...(day.tasks || []), { id: String(Date.now()), subject: weakSubject.key, text, done: false }] });
-    setSubj(weakSubject.key);
-  }
 
   // ── 공부 타이머 (자유 / 뽀모도로) ──
   const [timer, setTimer] = useState(loadTimer);
@@ -287,12 +200,6 @@ export default function StudyPlannerScreen({ goTo = () => {} }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [elapsedSec, timer?.mode, timer?.running, timer?.phase]);
 
-  // ── 일일 회고 ──
-  const reflect = day.reflect || {};
-  function setReflect(patch) {
-    updateDay({ reflect: { ...(day.reflect || {}), ...patch } });
-  }
-
   // ── 못 끝낸 할 일 이어가기 ──
   const carryover = useMemo(() => {
     if (selected !== todayStr) return null;
@@ -309,22 +216,13 @@ export default function StudyPlannerScreen({ goTo = () => {} }) {
 
   function carryOver() {
     if (!carryover) return;
-    const existing = new Set((day.tasks || []).map((x) => `${x.subject}|${x.text}`));
+    const existing = new Set((day.tasks || []).map((x) => x.text));
     const add = carryover.tasks
-      .filter((x) => !existing.has(`${x.subject}|${x.text}`))
-      .map((x, i) => ({ id: `${Date.now()}-c${i}`, subject: x.subject, text: x.text, done: false }));
+      .filter((x) => !existing.has(x.text))
+      .map((x, i) => ({ id: `${Date.now()}-c${i}`, text: x.text, done: false }));
     if (add.length) updateDay({ tasks: [...(day.tasks || []), ...add] });
   }
 
-  const cells = useMemo(() => {
-    const first = new Date(view.y, view.m, 1);
-    const startDow = first.getDay();
-    const dim = new Date(view.y, view.m + 1, 0).getDate();
-    const arr = [];
-    for (let i = 0; i < startDow; i++) arr.push(null);
-    for (let d = 1; d <= dim; d++) arr.push(d);
-    return arr;
-  }, [view]);
   const monthTotal = useMemo(() => {
     let sum = 0;
     const pre = `${view.y}-${String(view.m + 1).padStart(2, '0')}`;
@@ -338,9 +236,6 @@ export default function StudyPlannerScreen({ goTo = () => {} }) {
   const selDate = new Date(selected + 'T00:00:00');
   const selLabel = selected === todayStr ? '오늘' : `${selDate.getMonth() + 1}월 ${selDate.getDate()}일 (${DOW[selDate.getDay()]})`;
 
-  const grouped = SUBJECTS
-    .map((s) => ({ subject: s, items: (day.tasks || []).filter((t) => (t.subject || '기타') === s) }))
-    .filter((g) => g.items.length > 0);
   const taskTotal = (day.tasks || []).length;
   const taskDone = (day.tasks || []).filter((t) => t.done).length;
 
@@ -620,47 +515,53 @@ export default function StudyPlannerScreen({ goTo = () => {} }) {
 
   const TodayTab = (
     <>
-      <div className="planner-motiv">
-        <span className="planner-motiv-ico"><Flame size={18} /></span>
-        <span className="planner-motiv-text">{ddayMessage(dday)}</span>
+      {/* 할 일 — 줄글로 적고 체크리스트로 본다 */}
+      <div className="planner-section-head">
+        <CheckCircle2 size={15} /> {selLabel} 할 일
+        {taskTotal > 0 && <span className="planner-task-count">{taskDone}/{taskTotal} 완료</span>}
+      </div>
+      <p className="planner-hint">오늘 할 일을 자유롭게 적어보세요. 적은 순서대로 한눈에 모여요.</p>
+
+      {carryover && (
+        <button className="planner-carry" onClick={carryOver}>
+          <RotateCcw size={15} />
+          <span>{carryover.label}에 못 끝낸 할 일 {carryover.tasks.length}개 이어가기</span>
+        </button>
+      )}
+
+      <div className="planner-task-input">
+        <input
+          value={taskText}
+          onChange={(e) => setTaskText(e.target.value)}
+          onKeyDown={(e) => { if (e.key === 'Enter') addTask(taskText); }}
+          placeholder="할 일 적기 (예: 수학 기출 3개 풀기)"
+          aria-label="할 일 추가"
+        />
+        <button className="planner-task-add" aria-label="추가" onClick={() => addTask(taskText)}>
+          <Plus size={18} />
+        </button>
       </div>
 
-      <button className="planner-target" onClick={() => goTo('profile')}>
-        <span className="planner-target-ico"><Target size={18} /></span>
-        <span className="planner-target-body">
-          {targetAvg != null ? (
-            <>
-              <span className="planner-target-label">내 목표 점수</span>
-              <span className="planner-target-val">평균 {targetAvg}점</span>
-            </>
-          ) : (
-            <>
-              <span className="planner-target-label">목표 점수를 정하면</span>
-              <span className="planner-target-val">갈 수 있는 대학이 보여요</span>
-            </>
-          )}
-        </span>
-        <ChevronRight size={18} />
-      </button>
-
-      {/* 약점 과목 추천 (모의점수 연동) */}
-      {weakSubject && isToday && (
-        <div className="study-weak">
-          <span className="study-weak-ico"><AlertCircle size={20} /></span>
-          <span className="study-weak-body">
-            <span className="study-weak-title">
-              {weakSubject.under
-                ? `${weakSubject.key}이(가) 합격선 아래예요 (${weakSubject.score}점)`
-                : `${weakSubject.key} 점수가 가장 낮아요 (${weakSubject.score}점)`}
-            </span>
-            <span className="study-weak-sub">오늘 할 일에 {weakSubject.key} 보완을 넣어드릴까요?</span>
-          </span>
-          <button className="study-weak-cta" onClick={addWeakTask}>+ 담기</button>
+      {taskTotal === 0 ? (
+        <p className="planner-empty">아직 할 일이 없어요. 위에 오늘 할 일을 적어보세요.</p>
+      ) : (
+        <div className="planner-tasklist">
+          {(day.tasks || []).map((t) => (
+            <div key={t.id} className={`planner-task ${t.done ? 'on' : ''}`}>
+              <button className="planner-task-check" onClick={() => toggleTask(t.id)}>
+                {t.done ? <CheckCircle2 size={18} /> : <Circle size={18} />}
+                <span>{t.text}</span>
+              </button>
+              <button className="planner-task-del" aria-label="삭제" onClick={() => removeTask(t.id)}>
+                <X size={15} />
+              </button>
+            </div>
+          ))}
         </div>
       )}
 
       {/* 날짜 + 시간 카드 */}
-      <div className="planner-day-card">
+      <div className="planner-day-card" style={{ marginTop: 22 }}>
         <div className="planner-day-top">
           <span className="planner-day-label"><CalendarDays size={15} /> {selLabel}</span>
           {!isToday && (
@@ -758,145 +659,6 @@ export default function StudyPlannerScreen({ goTo = () => {} }) {
           </button>
         ))}
       </div>
-
-      {/* 할 일 */}
-      <div className="planner-section-head" style={{ marginTop: 22 }}>
-        <CheckCircle2 size={15} /> {selLabel} 할 일
-        {taskTotal > 0 && <span className="planner-task-count">{taskDone}/{taskTotal} 완료</span>}
-      </div>
-
-      {carryover && (
-        <button className="planner-carry" onClick={carryOver}>
-          <RotateCcw size={15} />
-          <span>{carryover.label}에 못 끝낸 할 일 {carryover.tasks.length}개 이어가기</span>
-        </button>
-      )}
-
-      <div className="planner-task-input">
-        <span className="planner-task-subj">{subj}</span>
-        <input
-          value={taskText}
-          onChange={(e) => setTaskText(e.target.value)}
-          onKeyDown={(e) => { if (e.key === 'Enter') addTask(taskText); }}
-          placeholder="할 일 추가 (예: 기출 3개 풀기)"
-          aria-label="할 일 추가"
-        />
-        <button className="planner-task-add" aria-label="추가" onClick={() => addTask(taskText)}>
-          <Plus size={18} />
-        </button>
-      </div>
-
-      {/* 추천 템플릿 */}
-      <div className="planner-tpl">
-        <div className="planner-tpl-head"><Wand2 size={15} /> 어떻게 짤지 모르겠다면 — 추천 플래너</div>
-        <div className="planner-tpl-list">
-          {TEMPLATES.map((t) => (
-            <button key={t.key} className="planner-tpl-card" onClick={() => applyTemplate(t)}>
-              <span className="planner-tpl-title">{t.title}</span>
-              <span className="planner-tpl-sub">{t.sub}</span>
-              <span className="planner-tpl-apply">+ 담기</span>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {grouped.length === 0 ? (
-        <p className="planner-empty">아직 할 일이 없어요. 위에서 직접 적거나 추천 플래너를 담아보세요.</p>
-      ) : (
-        <div className="planner-groups">
-          {grouped.map((g) => (
-            <div key={g.subject} className="planner-group">
-              <span className="planner-group-name">{g.subject}</span>
-              <div className="planner-group-tasks">
-                {g.items.map((t) => (
-                  <div key={t.id} className={`planner-task ${t.done ? 'on' : ''}`}>
-                    <button className="planner-task-check" onClick={() => toggleTask(t.id)}>
-                      {t.done ? <CheckCircle2 size={18} /> : <Circle size={18} />}
-                      <span>{t.text}</span>
-                    </button>
-                    <button className="planner-task-del" aria-label="삭제" onClick={() => removeTask(t.id)}>
-                      <X size={15} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* 일일 회고 */}
-      <div className="study-reflect">
-        <div className="study-reflect-head"><Pencil size={16} /> {isToday ? '오늘' : '이날'} 회고</div>
-        <p className="study-reflect-q">오늘 기분은 어땠나요?</p>
-        <div className="study-faces">
-          {MOODS.map((m) => (
-            <button
-              key={m.key}
-              className={`study-face ${reflect.mood === m.key ? 'on' : ''}`}
-              onClick={() => setReflect({ mood: reflect.mood === m.key ? null : m.key })}
-            >
-              <span>{m.emoji}</span>
-              <span className="study-face-lbl">{m.label}</span>
-            </button>
-          ))}
-        </div>
-        <p className="study-reflect-q">집중은 잘 됐나요?</p>
-        <div className="study-focusrow">
-          {[1, 2, 3, 4, 5].map((n) => (
-            <button
-              key={n}
-              className={`study-focus-pip ${reflect.focus >= n ? 'on' : ''}`}
-              onClick={() => setReflect({ focus: reflect.focus === n ? 0 : n })}
-            >
-              {n}
-            </button>
-          ))}
-        </div>
-        <textarea
-          className="study-reflect-input" rows={2}
-          value={reflect.note || ''}
-          onChange={(e) => setReflect({ note: e.target.value })}
-          placeholder="오늘 한 줄 회고 (예: 수학 함수 단원을 끝냈다!)"
-          aria-label="오늘 회고"
-        />
-        {(reflect.mood || reflect.focus || reflect.note) && (
-          <span className="study-reflect-saved"><CheckCircle2 size={13} /> 저장됐어요</span>
-        )}
-      </div>
-
-      {/* 학습 달력(숨김) */}
-      <button className="planner-cal-toggle" onClick={() => setShowCal((v) => !v)}>
-        <CalendarDays size={16} /> 학습 달력 {showCal ? '닫기' : '보기'}
-        <ChevronRight size={15} className={`planner-cal-toggle-chev ${showCal ? 'open' : ''}`} />
-      </button>
-      {showCal && (
-        <div className="planner-cal">
-          <div className="planner-cal-head">
-            <button className="planner-cal-nav" aria-label="이전 달" onClick={prevMonth}><ChevronLeft size={18} /></button>
-            <span className="planner-cal-title">{view.y}년 {view.m + 1}월 · 총 {fmtMin(monthTotal)}</span>
-            <button className="planner-cal-nav" aria-label="다음 달" onClick={nextMonth}><ChevronRight size={18} /></button>
-          </div>
-          <div className="planner-cal-grid">
-            {DOW.map((d) => <span key={d} className="planner-cal-dow">{d}</span>)}
-            {cells.map((d, i) => {
-              if (d == null) return <span key={`e${i}`} className="planner-cal-cell empty" />;
-              const ds = `${view.y}-${String(view.m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-              const mins = days[ds]?.minutes || 0;
-              return (
-                <button
-                  key={ds}
-                  className={`planner-cal-cell lvl${intensity(mins)} ${ds === todayStr ? 'today' : ''} ${ds === selected ? 'sel' : ''}`}
-                  onClick={() => setSelected(ds)}
-                >
-                  {d}
-                </button>
-              );
-            })}
-          </div>
-          <p className="planner-cal-legend">진한 칸일수록 그날 공부 시간이 많아요. 날짜를 누르면 그날 플래너로 이동해요.</p>
-        </div>
-      )}
     </>
   );
 
@@ -920,7 +682,7 @@ export default function StudyPlannerScreen({ goTo = () => {} }) {
       {tab === 'today' ? TodayTab : StatsTab}
 
       <p className="note" style={{ marginTop: 18 }}>
-        플래너·시간·회고·통계는 모두 이 기기에만 저장돼요. 매일 조금씩 채워봐요.
+        할 일·공부 시간·통계는 모두 이 기기에만 저장돼요. 매일 조금씩 채워봐요.
       </p>
     </div>
   );
