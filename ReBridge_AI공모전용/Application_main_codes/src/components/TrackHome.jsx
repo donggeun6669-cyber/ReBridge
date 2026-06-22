@@ -96,7 +96,7 @@ export default function TrackHome({ track, goTo = () => {}, onSwitch = () => {} 
             <div className="th-res-group">
               <p className="th-res-label">직업</p>
               {res.jobs.map((j) => (
-                <button key={j.name} className="th-res-row" onClick={() => goTo('job-info')}>
+                <button key={j.name} className="th-res-row" onClick={() => goTo('job-info', { q: j.name })}>
                   <Briefcase size={15} /><span className="th-res-name">{j.name}</span>
                   <span className="th-res-sub">{j.field}</span>
                 </button>

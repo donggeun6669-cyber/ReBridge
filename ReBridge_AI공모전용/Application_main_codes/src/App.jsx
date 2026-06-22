@@ -167,7 +167,7 @@ export default function App() {
         {!splash && screen === 'job-roadmap'   && <JobRoadmapScreen goTo={goTo} />}
         {!splash && screen === 'job-questions' && <JobQuestionsScreen goTo={goTo} goBack={goBack} canGoBack={stack.length > 1} />}
         {!splash && screen === 'job-detail'    && <JobDetailScreen id={params.id} goBack={goBack} />}
-        {!splash && screen === 'job-info'      && <JobInfoScreen goBack={goBack} goTo={goTo} />}
+        {!splash && screen === 'job-info'      && <JobInfoScreen goBack={goBack} goTo={goTo} initialQuery={params.q} />}
         {!splash && screen === 'job-psych'     && <JobPsychScreen goBack={goBack} />}
         {!splash && screen === 'job-training'  && <JobTrainingScreen goBack={goBack} goTo={goTo} />}
         {!splash && screen === 'job-apply'     && <JobApplyScreen goBack={goBack} goTo={goTo} />}

@@ -67,9 +67,13 @@ export const ARCHETYPE_STAGES = {
 
 export const FIELD_DEFAULT_ARCHETYPE = {
   'IT·디자인': 'portfolio',
+  '콘텐츠·미디어': 'portfolio', // 영상·웹툰·사진·크리에이터 — 작업물 중심
   '서비스·요식': 'cert',
   '제조·기술': 'cert',
   '사무·행정': 'intern',
+  '이커머스·유통': 'service',   // 쇼핑몰·매장·물류·택배 — 현장 진입형
+  '돌봄·복지': 'cert',          // 요양보호사·보육 등 자격·교육 기반
+  '반려·생활': 'service',       // 반려미용·플로리스트·카페 — 도제·실습형
 };
 
 // 자주 쓰는 공식 링크 (2024 고용24 통합 반영)

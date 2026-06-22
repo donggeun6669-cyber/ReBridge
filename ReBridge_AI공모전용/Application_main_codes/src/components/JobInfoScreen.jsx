@@ -30,13 +30,13 @@ function metaChips(item) {
   return chips;
 }
 
-export default function JobInfoScreen({ goBack = () => {}, goTo = () => {} }) {
+export default function JobInfoScreen({ goBack = () => {}, goTo = () => {}, initialQuery = '' }) {
   const jp = useMemo(() => loadProfile()?.jobProfile || null, []);
   const initialField = jp?.interest && CATALOG_FIELDS.includes(jp.interest)
     ? jp.interest : 'IT·디자인';
 
   const [field, setField] = useState(initialField);
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState(initialQuery); // 홈 통합검색에서 특정 직업으로 점프
   const [openKey, setOpenKey] = useState(null); // 열린 항목 키 ("분야::이름")
   const [enrich, setEnrich] = useState({}); // "분야::이름" -> { loading, status, data }
   const [saved, setSaved] = useState(() => loadSavedJobs());
