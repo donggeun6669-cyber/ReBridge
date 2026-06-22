@@ -5,6 +5,7 @@ import ExploreScreen from './components/ExploreScreen.jsx';
 import ProfileScreen from './components/ProfileScreen.jsx';
 import MyPageScreen from './components/MyPageScreen.jsx';
 import GuideScreen from './components/GuideScreen.jsx';
+import GlossaryScreen from './components/GlossaryScreen.jsx';
 import ResultsScreen from './components/ResultsScreen.jsx';
 import DetailScreen from './components/DetailScreen.jsx';
 import RoadmapScreen from './components/RoadmapScreen.jsx';
@@ -42,7 +43,7 @@ import { getPersona, getNav, activeTabId, loadProfile } from './lib/persona.js';
 const TAB_ROOTS = ['home', 'support', 'community', 'mypage'];
 
 const KNOWN_SCREENS = [
-  'guide', 'results', 'detail', 'documents', 'saved', 'map', 'help',
+  'guide', 'glossary', 'results', 'detail', 'documents', 'saved', 'map', 'help',
   'checklist', 'forms-guide', 'dreamdrive', 'ged-guide', 'univ-explore', 'path',
   'onboarding', 'study-roadmap', 'study-planner', 'support',
   'job-home', 'job-explore', 'job-roadmap', 'job-questions', 'job-detail', 'job-info', 'job-psych',
@@ -132,6 +133,9 @@ export default function App() {
         )}
         {!splash && screen === 'guide'       && (
           <GuideScreen topic={params.topic} goTo={goTo} goBack={goBack} />
+        )}
+        {!splash && screen === 'glossary'    && (
+          <GlossaryScreen track={params.track} goTo={goTo} goBack={goBack} />
         )}
         {!splash && screen === 'results'     && <ResultsScreen goTo={goTo} goBack={goBack} />}
         {!splash && screen === 'detail'      && (

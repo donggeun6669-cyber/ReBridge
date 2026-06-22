@@ -4256,3 +4256,72 @@ button {
 }
 /* 트랙 안에 들어온 기존 화면은 셸이 스크롤을 관리하므로 위쪽 군더더기 여백만 정리 */
 .track-body > .screen { animation: none; }
+
+/* ── 용어 풀이 사전 (GlossaryScreen) ───────────────────── */
+.gloss-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 14px;
+}
+.gloss-item {
+  width: 100%;
+  text-align: left;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: border-color .15s, box-shadow .15s;
+}
+.gloss-item.is-open {
+  border-color: var(--brand);
+  box-shadow: var(--shadow-sm);
+}
+.gloss-item-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.gloss-term {
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--text);
+  flex: 1;
+}
+.gloss-check-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--caution);
+  background: var(--caution-soft);
+  border-radius: var(--r-pill);
+  padding: 2px 8px;
+  white-space: nowrap;
+}
+.gloss-arrow {
+  color: var(--text-sub);
+  flex-shrink: 0;
+  transition: transform .15s;
+}
+.gloss-short {
+  margin: 7px 0 0;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--text-sub);
+}
+.gloss-detail {
+  margin: 9px 0 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text);
+  background: var(--bg-soft);
+  border-radius: var(--r-sm);
+  padding: 10px 12px;
+}
+.gloss-detail-warn {
+  color: var(--caution);
+  background: var(--caution-soft);
+}
