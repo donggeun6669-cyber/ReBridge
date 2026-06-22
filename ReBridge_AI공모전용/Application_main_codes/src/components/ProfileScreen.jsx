@@ -45,9 +45,10 @@ const STORAGE_KEY = 'rebridge_profile';
 
 export default function ProfileScreen({ goTo = () => {}, goBack = () => {}, onComplete }) {
   // 공부 중(아직 응시 전) 유저는 실제 점수가 없으니 '목표 점수'로 입력받는다.
+  // 목표가 대학/직업/미정 무엇이든, 검정고시를 아직 안 봤으면 성적이 없으므로 목표 점수.
   const isTarget = (() => {
     const p = getPersona();
-    return p?.stage === 'studying' && p?.goal === 'university';
+    return p?.stage === 'studying';
   })();
 
   const [answers, setAnswers] = useState(() => {
