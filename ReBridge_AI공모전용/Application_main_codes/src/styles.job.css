@@ -199,6 +199,17 @@
   flex: 0 0 auto; font-size: 13px; font-weight: 800; color: #fff;
   background: var(--brand); border-radius: var(--r-sm); padding: 8px 14px;
 }
+.ji-search-clear {
+  flex: 0 0 auto; display: flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; border-radius: 50%;
+  background: transparent; border: none; color: var(--text-sub);
+}
+.ji-search-clear:active { background: var(--brand-tint); }
+/* 검색 결과에서 분야를 표시하는 칩 — 다른 메타 칩과 구분되게 톤 다운 */
+.ji-meta-chip.ji-meta-field {
+  color: var(--text-sub); background: transparent;
+  border: 1px solid var(--border);
+}
 
 .ji-loading, .ji-detail-loading {
   display: flex; align-items: center; gap: 8px;
