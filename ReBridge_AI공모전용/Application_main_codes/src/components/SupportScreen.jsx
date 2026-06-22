@@ -5,7 +5,7 @@
 // props: goTo(screen, params), goBack()
 import { useState, useMemo } from 'react';
 import {
-  ArrowLeft, MapPin, Phone, Map as MapIcon, Gift, Lock,
+  MapPin, Phone, Map as MapIcon, Gift, Lock,
   Wallet, HeartHandshake, Compass, Users, GraduationCap, ChevronRight,
 } from 'lucide-react';
 import centersRaw from '../data/kkumdrim.json';
@@ -109,12 +109,8 @@ export default function SupportScreen({ goTo = () => {}, goBack = () => {} }) {
 
   return (
     <div className="screen support-screen">
-      <header className="topbar center">
-        <button className="icon-btn" aria-label="뒤로" onClick={goBack}>
-          <ArrowLeft size={22} />
-        </button>
+      <header className="topbar">
         <span className="page-title">지원</span>
-        <span style={{ width: 22 }} />
       </header>
 
       {/* 인트로 */}
