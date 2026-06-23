@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect, useRef } from 'react';
 import {
   ArrowLeft, Search, BookOpen, ShieldQuestion, ChevronRight, Sparkles,
 } from 'lucide-react';
@@ -7,13 +7,24 @@ import { getActiveTrack } from '../lib/persona.js';
 
 // 용어 풀이 사전 화면 — 트랙(입시/취업)에 맞는 용어를 검색하며 펼쳐 본다.
 // 입시(univ/study)는 더 깊은 FAQ(GuideScreen)로도 이어진다.
-export default function GlossaryScreen({ track: trackProp, goTo = () => {}, goBack = () => {} }) {
-  const track = trackProp || getActiveTrack() || 'univ';
+export default function GlossaryScreen({ track: trackProp, params = {}, goTo = () => {}, goBack = () => {} }) {
+  const track = trackProp || params.track || getActiveTrack() || 'univ';
   const glossary = getGlossary(track);
   const isAdmission = glossary.key === 'admission';
 
   const [query, setQuery] = useState('');
   const [openId, setOpenId] = useState(null);
+  const termRef = useRef(null);
+
+  // 검색에서 직접 진입 시 해당 용어 자동 오픈 + 스크롤
+  useEffect(() => {
+    if (params.termId) {
+      setOpenId(params.termId);
+      setTimeout(() => {
+        termRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 150);
+    }
+  }, [params.termId]);
 
   const terms = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -57,10 +68,12 @@ export default function GlossaryScreen({ track: trackProp, goTo = () => {}, goBa
         ) : (
           terms.map((t) => {
             const open = openId === t.term;
+            const isTarget = params.termId === t.term;
             return (
               <button
                 key={t.term}
-                className={`gloss-item${open ? ' is-open' : ''}`}
+                ref={isTarget ? termRef : null}
+                className={`gloss-item${open ? ' is-open' : ''}${isTarget ? ' highlight' : ''}`}
                 onClick={() => setOpenId(open ? null : t.term)}
               >
                 <div className="gloss-item-head">

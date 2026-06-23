@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import {
-  ChevronRight, ClipboardList, FileText, Scale,
+  ArrowLeft, ChevronRight, ClipboardList, FileText, Scale,
   CalendarDays, Target, MessageCircle, CheckCircle2,
   Info, Search, Bookmark, Flag,
 } from 'lucide-react';
@@ -23,7 +23,7 @@ function loadProfile() {
   }
 }
 
-export default function RoadmapScreen({ goTo = () => {} }) {
+export default function RoadmapScreen({ goTo = () => {}, goBack = () => {} }) {
   const profile = useMemo(loadProfile, []);
   const data = useMemo(() => (profile ? buildRoadmap(profile) : null), [profile]);
 
@@ -31,6 +31,7 @@ export default function RoadmapScreen({ goTo = () => {} }) {
     return (
       <div className="screen">
         <header className="topbar center">
+          <button className="icon-btn" aria-label="뒤로" onClick={goBack}><ArrowLeft size={22} /></button>
           <span className="page-title">내 로드맵</span>
         </header>
         <div className="profile-card" style={{ marginTop: 40 }}>

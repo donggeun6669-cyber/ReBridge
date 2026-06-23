@@ -1,11 +1,17 @@
 import { useState, useMemo } from 'react';
 import {
-  ArrowRight, ChevronRight, ArrowLeftRight,
+  ArrowRight, ChevronRight,
   Route, School, ClipboardList, Gift, MapPin, BookOpen, MessageCircle, ListChecks,
-  Calendar, Compass, Briefcase, GraduationCap,
+  Calendar, Compass, Briefcase, GraduationCap, Pencil,
   HelpCircle, Scale, Target, Zap,
   Search, X,
 } from 'lucide-react';
+
+const TRACK_ICONS = [
+  { id: 'study', Icon: Pencil,    label: '검정고시' },
+  { id: 'univ',  Icon: School,    label: '대입' },
+  { id: 'job',   Icon: Briefcase, label: '일·진로' },
+];
 import LogoMark from './LogoMark.jsx';
 import { searchAll } from '../lib/homeSearch.js';
 
@@ -119,9 +125,19 @@ export default function TrackHome({ track, goTo = () => {}, onSwitch = () => {} 
           <LogoMark size={24} />
           <span className="wordmark">검고담임</span>
         </span>
-        <button className="th-switch" onClick={onSwitch}>
-          <ArrowLeftRight size={13} /> 바꾸기
-        </button>
+        <div className="th-track-switcher">
+          {TRACK_ICONS.map(({ id, Icon, label }) => (
+            <button
+              key={id}
+              className={`th-track-icon-btn${track === id ? ' active' : ''}`}
+              onClick={() => onSwitch(id)}
+              title={label}
+            >
+              <Icon size={15} />
+              <span>{label}</span>
+            </button>
+          ))}
+        </div>
       </header>
 
       <section className="th2-hero">
@@ -215,7 +231,7 @@ export default function TrackHome({ track, goTo = () => {}, onSwitch = () => {} 
               <p className="th-res-label">용어</p>
               {res.terms.map((t) => (
                 <button key={t.term} className="th-res-row"
-                  onClick={() => goTo('glossary', { track: track === 'job' ? 'job' : 'univ' })}>
+                  onClick={() => goTo('glossary', { track: track === 'job' ? 'job' : 'univ', termId: t.term })}>
                   <BookOpen size={15} /><span className="th-res-name">{t.term}</span>
                   <span className="th-res-sub">{(t.short || '').slice(0, 16)}</span>
                 </button>
@@ -269,8 +285,8 @@ export default function TrackHome({ track, goTo = () => {}, onSwitch = () => {} 
         </div>
       </div>
 
+      <p className="th2-sec-title">지금 바로</p>
       <div className="th2-gray-block">
-        <p className="th2-sec-title">지금 바로</p>
         <div className="th2-shortcut-list">
           {d.shortcuts.map(({ icon: Icon, bg, color, title, sub, screen, params }) => (
             <button key={title} className="th2-shortcut-row" onClick={() => goTo(screen, params || {})}>
@@ -287,8 +303,8 @@ export default function TrackHome({ track, goTo = () => {}, onSwitch = () => {} 
         </div>
       </div>
 
+      <p className="th2-sec-title">{d.faqTitle}</p>
       <div className="th2-gray-block">
-        <p className="th2-sec-title">{d.faqTitle}</p>
         <div className="th2-faq-grid">
           {d.faqs.map(({ icon: Icon, bg, color, label, screen, params }) => (
             <button key={label} className="th2-faq-card" onClick={() => goTo(screen, params || {})}>

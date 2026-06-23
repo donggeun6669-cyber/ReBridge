@@ -8,7 +8,7 @@ import { useState, useMemo, useEffect } from 'react';
 import {
   MapPin, Phone, Map as MapIcon, Gift, Lock, ChevronDown,
   Wallet, HeartHandshake, Compass, Users, GraduationCap, ChevronRight,
-  BookOpen, ShieldCheck, AlertCircle, Filter, Activity,
+  BookOpen, ShieldCheck, AlertCircle, Filter, Activity, MessageCircle,
 } from 'lucide-react';
 import centersRaw from '../data/kkumdrim.json';
 import { COMMON_SUPPORT } from '../data/commonSupport';
@@ -235,9 +235,14 @@ export default function SupportScreen({ goTo = () => {}, goBack = () => {}, para
         <p className="support-result-count">
           {region === '전체' ? '전국' : region} <b>{list.length}곳</b>
         </p>
-        <button className="support-map-link" onClick={() => goTo('dreamdrive')}>
-          <MapIcon size={14} /> 지도
-        </button>
+        <div style={{ display: 'flex', gap: 6 }}>
+          <button className="support-map-link" onClick={() => goTo('community', { board: 'review' })}>
+            <MessageCircle size={14} /> 후기
+          </button>
+          <button className="support-map-link" onClick={() => goTo('dreamdrive')}>
+            <MapIcon size={14} /> 지도
+          </button>
+        </div>
       </div>
 
       {/* 센터 목록 */}

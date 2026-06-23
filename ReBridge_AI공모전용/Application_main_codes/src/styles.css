@@ -4555,6 +4555,27 @@ button {
   box-shadow: 0 0 0 4px rgba(16,185,129,.25);
 }
 
+/* ── 대학 지도 카카오맵 마커 ── */
+.map-kakao-dot {
+  width: 10px; height: 10px;
+  background: #C4BFCF;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform .15s;
+  box-shadow: 0 1px 3px rgba(0,0,0,.2);
+}
+.map-kakao-dot.ged {
+  background: var(--brand);
+  box-shadow: 0 1px 4px rgba(46,139,208,.35);
+}
+.map-kakao-dot.sel {
+  width: 16px; height: 16px;
+  background: #F59E0B;
+  border-color: #fff;
+  box-shadow: 0 2px 8px rgba(245,158,11,.5);
+}
+
 /* ── 위치 동의 모달 ── */
 .kdream-consent-overlay {
   position: fixed; inset: 0; background: rgba(0,0,0,.45);
@@ -4626,8 +4647,8 @@ button {
 .spt-comm-chips::-webkit-scrollbar { display: none; }
 .spt-comm-chip {
   flex-shrink: 0; display: flex; align-items: center; gap: 4px;
-  padding: 5px 11px; font-size: 12px; font-weight: 600;
-  color: var(--text-sub); background: var(--bg);
+  padding: 7px 13px; font-size: 13.5px; font-weight: 700;
+  color: var(--text); background: var(--bg);
   border: 1.5px solid var(--border); border-radius: 20px;
   cursor: pointer; white-space: nowrap; transition: all .15s;
 }
@@ -4680,4 +4701,34 @@ button {
 }
 .kdream-page-ellipsis {
   color: var(--text-sub); font-size: 13px; padding: 0 2px; line-height: 34px;
+}
+
+/* ── 트랙 전환 아이콘 3개 (TrackHome 헤더) ── */
+.th-track-switcher {
+  display: flex; gap: 4px;
+}
+.th-track-icon-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 5px 8px; border-radius: 8px;
+  border: 1.5px solid var(--border); background: var(--card);
+  color: var(--text-sub); font-size: 10px; font-weight: 600;
+  cursor: pointer; line-height: 1; transition: all .15s;
+}
+.th-track-icon-btn.active {
+  background: var(--brand-tint); border-color: var(--brand); color: var(--brand-deep);
+}
+
+/* ── 커뮤니티 별점 ── */
+.cm-star-row {
+  font-size: 14px; color: #f59e0b; letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+.cm-star-num {
+  font-size: 12px; font-weight: 700; color: #92400e; margin-left: 4px;
+}
+
+/* ── 용어 직접 진입 하이라이트 ── */
+.gloss-item.highlight {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px var(--brand-tint);
 }

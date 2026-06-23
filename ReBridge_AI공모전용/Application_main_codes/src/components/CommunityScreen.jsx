@@ -19,12 +19,12 @@ import CommunityActionSheet from './CommunityActionSheet.jsx';
 import { useAuthUser, NicknameGate } from './AuthScreen.jsx';
 import '../styles.community.css';
 
-export default function CommunityScreen({ goTo = () => {}, goBack = () => {} }) {
+export default function CommunityScreen({ goTo = () => {}, goBack = () => {}, params = {} }) {
   const user = useAuthUser();
   const boards = boardsFor(user);
 
   const [view, setView] = useState('list');      // 'list' | 'saved' | 'noti'
-  const [board, setBoard] = useState('review');
+  const [board, setBoard] = useState(params.board || 'review');
   const [tag, setTag] = useState(null);          // 이야기 보드 주제 필터
   const [sort, setSort] = useState('latest');    // 'latest' | 'popular'
   const [searchOpen, setSearchOpen] = useState(false);
@@ -172,6 +172,12 @@ export default function CommunityScreen({ goTo = () => {}, goBack = () => {} }) 
           <MoreHorizontal size={18} />
         </button>
       </div>
+      {p.rating != null && (
+        <div className="cm-star-row">
+          {'★'.repeat(p.rating)}{'☆'.repeat(5 - p.rating)}
+          <span className="cm-star-num">{p.rating}.0</span>
+        </div>
+      )}
       <h3 className="cm-card-title">{p.title}</h3>
       <p className="cm-card-body">{p.body}</p>
       <div className="cm-card-foot">

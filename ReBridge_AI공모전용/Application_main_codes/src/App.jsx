@@ -47,7 +47,7 @@ const TAB_ROOTS = ['home', 'support', 'community', 'mypage'];
 const KNOWN_SCREENS = [
   'guide', 'glossary', 'results', 'detail', 'documents', 'saved', 'map', 'help',
   'checklist', 'forms-guide', 'dreamdrive', 'ged-guide', 'univ-explore', 'path',
-  'onboarding', 'study-roadmap', 'study-planner', 'support',
+  'onboarding', 'study-roadmap', 'study-planner', 'support', 'roadmap',
   'job-home', 'job-explore', 'job-roadmap', 'job-questions', 'job-detail', 'job-info', 'job-psych',
   'job-training', 'job-apply',
   'community', 'community-post', 'community-write', 'community-auth',
@@ -130,7 +130,7 @@ export default function App() {
           <PathGuideScreen pathKey={params.key} goBack={goBack} />
         )}
         {!splash && screen === 'mypage'      && <MyPageScreen goTo={goTo} goBack={goBack} />}
-        {!splash && screen === 'roadmap'     && <RoadmapScreen goTo={goTo} />}
+        {!splash && screen === 'roadmap'     && <RoadmapScreen goTo={goTo} goBack={goBack} />}
         {!splash && screen === 'profile'     && (
           <ProfileScreen goTo={goTo} goBack={goBack} onComplete={handleProfileComplete} />
         )}
@@ -138,7 +138,7 @@ export default function App() {
           <GuideScreen topic={params.topic} goTo={goTo} goBack={goBack} />
         )}
         {!splash && screen === 'glossary'    && (
-          <GlossaryScreen track={params.track} goTo={goTo} goBack={goBack} />
+          <GlossaryScreen track={params.track} params={params} goTo={goTo} goBack={goBack} />
         )}
         {!splash && screen === 'results'     && <ResultsScreen goTo={goTo} goBack={goBack} />}
         {!splash && screen === 'detail'      && (
@@ -171,7 +171,7 @@ export default function App() {
         {!splash && screen === 'job-psych'     && <JobPsychScreen goBack={goBack} />}
         {!splash && screen === 'job-training'  && <JobTrainingScreen goBack={goBack} goTo={goTo} />}
         {!splash && screen === 'job-apply'     && <JobApplyScreen goBack={goBack} goTo={goTo} />}
-        {!splash && screen === 'community'       && <CommunityScreen goTo={goTo} goBack={goBack} />}
+        {!splash && screen === 'community'       && <CommunityScreen goTo={goTo} goBack={goBack} params={params} />}
         {!splash && screen === 'community-post'  && <CommunityPostScreen goTo={goTo} goBack={goBack} id={params.id} />}
         {!splash && screen === 'community-write' && <CommunityWriteScreen goTo={goTo} goBack={goBack} board={params.board} initialTitle={params.initialTitle || ''} />}
         {!splash && screen === 'community-auth'  && <AuthScreen goBack={goBack} />}

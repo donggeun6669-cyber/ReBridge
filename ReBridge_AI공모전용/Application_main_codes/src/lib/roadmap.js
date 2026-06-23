@@ -46,8 +46,8 @@ function admissionYear(today, gedReadyDate) {
  * profile: { gedScore, csatPlan, region, field }
  */
 export function buildRoadmap(profile, today = new Date()) {
-  const hasScore = profile?.gedScore && profile.gedScore !== '아직 몰라요';
-  const takesCsat = profile?.csatPlan && profile.csatPlan !== '안 볼 거예요';
+  const hasScore = profile?.gedAvg != null;
+  const takesCsat = profile?.csatPlan === '볼 거예요';
 
   const session = nextGedSession(today);
   const gedReady = hasScore ? today : session?.resultDate ?? today;

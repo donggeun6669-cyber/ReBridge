@@ -8,7 +8,7 @@ import { Pin, ChevronDown, ChevronUp, X } from 'lucide-react';
 import { PINNED_NOTICE } from '../lib/community.js';
 
 export default function CommunityNotice({ verified = false }) {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   const [closed, setClosed] = useState(false);
   if (closed) return null;
 

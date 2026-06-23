@@ -30,33 +30,39 @@ const MENUS = [
   { label: '도움말',            keywords: '도움말 질문 담임 문의 막힘',                  screen: 'help' },
 ];
 
+// 다중 토큰 매칭: 띄어쓰기로 분리된 각 단어가 모두 포함될 때 매칭
+function matchTokens(haystack, qLower) {
+  const tokens = qLower.split(/\s+/).filter(Boolean);
+  return tokens.every((tok) => haystack.includes(tok));
+}
+
 // 반환: { empty, univs[], jobs[], terms[], menus[], centers[], supports[] }
 export function searchAll(qRaw, limit = 5) {
   const q = (qRaw || '').trim().toLowerCase();
   if (!q) return { empty: true, univs: [], jobs: [], terms: [], menus: [], centers: [], supports: [] };
 
   const univs = universities
-    .filter((u) => (u.name || '').toLowerCase().includes(q))
+    .filter((u) => matchTokens((u.name || '').toLowerCase(), q))
     .slice(0, limit);
 
   const jobs = JOBS
-    .filter((j) => `${j.name} ${j.q}`.toLowerCase().includes(q))
+    .filter((j) => matchTokens(`${j.name} ${j.q}`.toLowerCase(), q))
     .slice(0, limit);
 
   const terms = TERMS
-    .filter((t) => `${t.term} ${t.short || ''}`.toLowerCase().includes(q))
+    .filter((t) => matchTokens(`${t.term} ${t.short || ''}`.toLowerCase(), q))
     .slice(0, limit);
 
   const menus = MENUS
-    .filter((m) => `${m.label} ${m.keywords}`.toLowerCase().includes(q))
+    .filter((m) => matchTokens(`${m.label} ${m.keywords}`.toLowerCase(), q))
     .slice(0, limit);
 
   const centers = kkumdrim
-    .filter((c) => `${c.name} ${c.region || ''} ${c.district || ''} ${c.address || ''}`.toLowerCase().includes(q))
+    .filter((c) => matchTokens(`${c.name} ${c.region || ''} ${c.district || ''} ${c.address || ''}`.toLowerCase(), q))
     .slice(0, limit);
 
   const supports = COMMON_SUPPORT
-    .filter((s) => `${s.title} ${s.summary} ${s.detail || ''}`.toLowerCase().includes(q))
+    .filter((s) => matchTokens(`${s.title} ${s.summary} ${s.detail || ''}`.toLowerCase(), q))
     .slice(0, limit);
 
   return { empty: false, univs, jobs, terms, menus, centers, supports };

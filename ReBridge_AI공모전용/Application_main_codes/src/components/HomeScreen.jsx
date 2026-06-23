@@ -12,23 +12,32 @@ const EXAMPLES = [
 ];
 
 // 홈 = "지금 내 상태".
-//  - 트랙 미정: 예시를 보여주고 부드럽게 고르게 유도.
-//  - 트랙 확정: 검색(상단) + 빠른 메뉴(하단) 대시보드(TrackHome). 로드맵은 빠른 메뉴 첫 칸.
+//  - 앱 첫 진입(세션당 1회): 트랙 선택 화면을 항상 보여줌 — 기능 소개 목적.
+//  - 트랙 선택 후: 검색(상단) + 빠른 메뉴(하단) 대시보드(TrackHome).
 export default function HomeScreen({ goTo = () => {}, goBack = () => {} }) {
   const [track, setTrack] = useState(getActiveTrack());
+  // 세션에서 이미 트랙을 선택했으면 true (sessionStorage — 탭/앱 닫으면 리셋)
+  const [picked, setPicked] = useState(() => !!sessionStorage.getItem('rb_track_picked'));
 
   function choose(t) {
     setActiveTrack(t);
     setTrack(t);
+    sessionStorage.setItem('rb_track_picked', '1');
+    setPicked(true);
     window.scrollTo(0, 0);
   }
-  function switchTrack() {
-    setActiveTrack(null);
-    setTrack(null);
+  function switchTrack(newTrackId) {
+    if (newTrackId) {
+      setActiveTrack(newTrackId);
+      setTrack(newTrackId);
+    } else {
+      setActiveTrack(null);
+      setTrack(null);
+    }
     window.scrollTo(0, 0);
   }
 
-  if (track) {
+  if (track && picked) {
     return <TrackHome track={track} goTo={goTo} onSwitch={switchTrack} />;
   }
 

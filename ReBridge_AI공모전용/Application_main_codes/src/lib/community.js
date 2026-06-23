@@ -567,6 +567,7 @@ function normalizeMock(p, reactions, comments, me, bookmarks) {
   const rs = reactions.filter((r) => r.post_id === p.id);
   return {
     id: p.id, board: p.board, tag: p.tag || null, title: p.title, body: p.body, createdAt: p.created_at,
+    rating: p.rating ?? null,
     author: { id: p.author_id, nickname: p.author_nickname, verified: !!p.author_verified, center: p.author_center },
     likeCount: rs.length,
     commentCount: comments.filter((c) => c.post_id === p.id).length,
