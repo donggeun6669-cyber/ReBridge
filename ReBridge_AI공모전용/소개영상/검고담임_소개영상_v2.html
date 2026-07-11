@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>검고담임 — 앱 소개 영상 (v2)</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" />
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css"
+/>
+<style>
+  :root {
+    --blue: #2e8bd0;
+    --green: #36b85a;
+    --navy: #2d4a8a;
+    --ink: #1f2733;
+    --muted: #6b7686;
+    --bg: #f4f8fd;        /* 폰 화면 배경 */
+    --card: #ffffff;
+    --line: #e6edf6;
+    --grad: linear-gradient(120deg, #2e8bd0 0%, #36b85a 100%);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    height: 100%;
+    background: #eef4fb;
+    font-family: "Pretendard", -apple-system, "Noto Sans KR", sans-serif;
+    overflow: hidden;
+    color: var(--ink);
+  }
+
+  /* ====== 무대: 16:9 고정 ====== */
+  #stage {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 100vw;
+    height: 56.25vw;       /* 16:9 */
+    max-height: 100vh;
+    max-width: 177.78vh;
+    /* 밝은 배경 */
+    background:
+      radial-gradient(120% 120% at 82% 4%, #ffffff 0%, #eaf3ff 42%, #eafaf1 100%);
+    overflow: hidden;
+    box-shadow: 0 0 0 100vmax #eef4fb;  /* 레터박스 */
+  }
+
+  /* 파스텔 색감 블롭 */
+  .blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(70px);
+    opacity: 0.5;
+    pointer-events: none;
+  }
+  .blob.b1 { width: 42%; height: 70%; left: -10%; top: -22%; background: #bfe0fb; }
+  .blob.b2 { width: 46%; height: 76%; right: -12%; bottom: -28%; background: #c7f0d4; }
+  .blob.b3 { width: 26%; height: 40%; left: 40%; top: 55%; background: #e6e1ff; opacity:.4; }
+
+  /* ====== 공통 씬 ====== */
+  .scene {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.55s ease, transform 0.55s ease;
+    transform: translateY(14px) scale(0.99);
+    padding: 6%;
+  }
+  .scene.active {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+  }
+
+  .scene .anim { opacity: 0; }
+  .scene.active .anim {
+    animation: rise 0.7s cubic-bezier(.2,.7,.2,1) forwards;
+  }
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(26px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pop {
+    0%   { opacity: 0; transform: scale(0.6); }
+    70%  { opacity: 1; transform: scale(1.06); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+
+  /* ====== 타이포 (밝은 배경용) ====== */
+  .kicker {
+    color: var(--blue);
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    font-size: 1.5vw;
+    margin-bottom: 1.4vw;
+  }
+  .head {
+    color: var(--ink);
+    font-weight: 800;
+    line-height: 1.25;
+    font-size: 4.4vw;
+    letter-spacing: -0.02em;
+  }
+  .head .g {
+    background: var(--grad);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .sub {
+    color: #56627a;
+    font-weight: 500;
+    font-size: 1.9vw;
+    line-height: 1.6;
+    margin-top: 1.6vw;
+  }
+  .sub b { color: var(--ink); }
+  .center { text-align: center; }
+
+  /* ====== 씬: 훅 ====== */
+  #s_hook .head { font-size: 5vw; }
+  #s_hook .dim { color: #9aa6b8; }
+
+  /* ====== 씬: 브랜드 ====== */
+  .brandlogo {
+    width: 15vw; height: 15vw;
+    border-radius: 28%;
+    background: #fff;
+    box-shadow: 0 1.4vw 3.4vw rgba(46,99,160,.20);
+    object-fit: contain;
+    padding: 1.4vw;
+  }
+  .scene.active .brandlogo { animation: pop 0.8s cubic-bezier(.2,.8,.2,1) forwards; }
+  .wordmark {
+    font-size: 7vw; font-weight: 900; letter-spacing: -0.03em;
+    background: var(--grad);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+
+  /* ====== 5가지 기능 한눈에 ====== */
+  .five {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 1.6vw;
+    width: 100%; max-width: 82vw;
+    margin-top: 3vw;
+  }
+  .fcard {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 1.6vw;
+    padding: 2vw 1.2vw;
+    text-align: center;
+    box-shadow: 0 1vw 2.4vw rgba(46,99,160,.08);
+  }
+  .fcard .fi {
+    width: 4.6vw; height: 4.6vw; margin: 0 auto 1.1vw;
+    border-radius: 1.2vw; display: grid; place-items: center;
+    font-size: 2.4vw; background: #eef5fc;
+  }
+  .fcard .fn {
+    font-weight: 800; color: var(--ink); font-size: 1.55vw;
+  }
+  .fcard .fd {
+    color: var(--muted); font-size: 1.05vw; margin-top: 0.4vw; line-height: 1.4;
+  }
+  .fcard .fnum {
+    display: inline-block; font-weight: 900; font-size: 1vw;
+    color: #fff; background: var(--grad);
+    width: 1.9vw; height: 1.9vw; line-height: 1.9vw; border-radius: 50%;
+    margin-bottom: 0.8vw;
+  }
+
+  /* ====== 좌우 레이아웃 (기능 씬) ====== */
+  .split {
+    display: flex; align-items: center; gap: 5vw;
+    width: 100%; max-width: 86vw; justify-content: center;
+  }
+  .copy { flex: 1; max-width: 38vw; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 0.6vw;
+    background: #eef5fc;
+    border: 1px solid #d8e7f6;
+    color: var(--navy); font-weight: 800;
+    padding: 0.7vw 1.3vw; border-radius: 999px;
+    font-size: 1.4vw; margin-bottom: 1.6vw;
+  }
+  .badge .num {
+    background: var(--grad); color: #fff;
+    width: 2.2vw; height: 2.2vw; border-radius: 50%;
+    display: grid; place-items: center; font-size: 1.2vw;
+  }
+
+  /* ====== 폰 목업 (밝은 프레임) ====== */
+  .phone {
+    flex: 0 0 auto;
+    width: 22vw; height: 45vw;
+    background: #ffffff;
+    border-radius: 4vw;
+    padding: 0.9vw;
+    box-shadow: 0 2vw 5vw rgba(46,99,160,.22), inset 0 0 0 0.3vw #e3ebf5;
+    position: relative;
+  }
+  .phone .notch {
+    position: absolute; top: 1.4vw; left: 50%; transform: translateX(-50%);
+    width: 7vw; height: 1.1vw; background: #e9eef6; border-radius: 999px; z-index: 5;
+  }
+  .screen {
+    width: 100%; height: 100%;
+    background: var(--bg);
+    border-radius: 3.2vw;
+    overflow: hidden;
+    position: relative;
+    display: flex; flex-direction: column;
+  }
+  .appbar {
+    background: var(--grad);
+    color: #fff; font-weight: 800;
+    padding: 2.5vw 2vw 1.4vw;
+    font-size: 1.5vw;
+    display: flex; flex-direction: column; align-items: flex-start; gap: 0.2vw;
+    white-space: nowrap;
+  }
+  .appbar small { font-weight: 500; opacity: .92; font-size: 1vw; display:block; }
+  .scr-body { padding: 1.4vw; display: flex; flex-direction: column; gap: 0.82vw; overflow: hidden; }
+
+  .ucard {
+    background: var(--card); border-radius: 1.5vw;
+    padding: 0.95vw 1.3vw;
+    box-shadow: 0 0.6vw 1.6vw rgba(31,39,51,.06);
+    border: 1px solid var(--line);
+  }
+  .ucard .uni { font-weight: 800; color: var(--ink); font-size: 1.38vw; }
+  .ucard .dept { color: var(--muted); font-size: 1.02vw; margin-top: 0.15vw; }
+
+  /* 게이지 */
+  .gauge { height: 0.85vw; background: #e7edf4; border-radius: 999px; margin-top: 0.6vw; overflow: hidden; }
+  .gauge i { display: block; height: 100%; border-radius: 999px; width: 0; }
+  .scene.active .gauge i { animation: fill 1s ease forwards; animation-delay: .5s; }
+  @keyframes fill { to { width: var(--w); } }
+  .tag {
+    display: inline-block; font-weight: 800; font-size: 0.98vw;
+    padding: 0.28vw 0.75vw; border-radius: 999px; margin-top: 0.5vw;
+  }
+  .tag.safe { background: #e3f6ea; color: #1f8c44; }
+  .tag.fit  { background: #e4f0fb; color: #1f6fb0; }
+  .tag.try  { background: #fdf0e3; color: #b87a23; }
+
+  /* 점수 칩 */
+  .scorerow { display: flex; gap: 0.7vw; flex-wrap: wrap; }
+  .chip {
+    background: #fff; border: 1px solid var(--line); border-radius: 1vw;
+    padding: 0.55vw 0.9vw; text-align: center; flex: 1; min-width: 4vw;
+  }
+  .chip b { display: block; font-size: 1.5vw; color: var(--blue); }
+  .chip span { font-size: 0.85vw; color: var(--muted); }
+
+  /* 과목 진행 (학습) */
+  .subj {
+    background:#fff; border:1px solid var(--line); border-radius:1.3vw;
+    padding:1vw 1.2vw; display:flex; align-items:center; gap:0.9vw;
+  }
+  .subj .ico { font-size:1.6vw; }
+  .subj .nm { font-weight:800; color:var(--ink); font-size:1.25vw; flex:1; }
+  .subj .st { font-weight:800; font-size:0.98vw; padding:0.28vw 0.8vw; border-radius:999px; }
+  .st.done { background:#e3f6ea; color:#1f8c44; }
+  .st.doing{ background:#e4f0fb; color:#1f6fb0; }
+  .st.todo { background:#eef1f6; color:#8a93a3; }
+
+  /* 진로 카드 */
+  .path {
+    background:#fff; border:1px solid var(--line); border-radius:1.4vw;
+    padding:1.15vw 1.2vw; display:flex; align-items:center; gap:1vw;
+    box-shadow: 0 0.5vw 1.4vw rgba(31,39,51,.05);
+  }
+  .path .pi {
+    width:3.2vw; height:3.2vw; border-radius:1vw; display:grid; place-items:center;
+    font-size:1.7vw; background:#eef5fc; flex:0 0 auto;
+  }
+  .path .pt { font-weight:800; color:var(--ink); font-size:1.25vw; }
+  .path .ps { color:var(--muted); font-size:1vw; margin-top:0.15vw; }
+  .path .go { margin-left:auto; color:var(--blue); font-weight:900; font-size:1.4vw; }
+
+  /* 지원/센터 */
+  .center-card {
+    background:#fff; border:1px solid var(--line); border-radius:1.5vw;
+    padding:1.2vw 1.3vw; box-shadow:0 0.6vw 1.6vw rgba(31,39,51,.06);
+  }
+  .center-card .cn { font-weight:800; color:var(--ink); font-size:1.35vw; display:flex; align-items:center; gap:0.5vw; }
+  .center-card .cd { color:var(--muted); font-size:1.02vw; margin-top:0.25vw; }
+  .benefit-chips { display:flex; flex-wrap:wrap; gap:0.5vw; margin-top:0.9vw; }
+  .bchip {
+    background:#eef5fc; color:#2a6aa0; font-weight:700; font-size:0.92vw;
+    padding:0.32vw 0.7vw; border-radius:999px; border:1px solid #dbeafc;
+  }
+  .center-card .actions { display:flex; gap:0.7vw; margin-top:1vw; }
+  .cbtn {
+    flex:1; text-align:center; font-weight:800; font-size:1.02vw;
+    padding:0.7vw; border-radius:1vw; border:1px solid var(--line); color:var(--ink);
+  }
+  .cbtn.call { background:#eafaf0; color:#1f8c44; border-color:#cdeed8; }
+  .cbtn.map  { background:#eef5fc; color:#1f6fb0; border-color:#d8e7f6; }
+  .common-card {
+    background: var(--grad); color:#fff; border-radius:1.5vw;
+    padding:1.2vw 1.4vw; box-shadow:0 0.8vw 2vw rgba(46,139,208,.30);
+  }
+  .common-card .t { font-weight:900; font-size:1.35vw; }
+  .common-card small { display:block; font-weight:500; opacity:.95; font-size:0.98vw; margin-top:0.3vw; }
+
+  /* 커뮤니티 */
+  .boards { display:flex; gap:0.6vw; }
+  .bpill {
+    font-weight:800; font-size:1.02vw; padding:0.5vw 1vw; border-radius:999px;
+    background:#eef1f6; color:#8a93a3; border:1px solid var(--line);
+  }
+  .bpill.on { background:var(--grad); color:#fff; border-color:transparent; }
+  .post {
+    background:#fff; border:1px solid var(--line); border-radius:1.4vw;
+    padding:1.1vw 1.2vw; box-shadow:0 0.5vw 1.4vw rgba(31,39,51,.05);
+  }
+  .post .pt { font-weight:800; color:var(--ink); font-size:1.22vw; line-height:1.4; }
+  .post .pm { color:var(--muted); font-size:0.98vw; margin-top:0.5vw; display:flex; align-items:center; gap:1vw; }
+  .post .pm .who { color:#7b8698; }
+  .mbadge {
+    display:inline-flex; align-items:center; gap:0.35vw;
+    background:#eafaf0; color:#1f8c44; font-weight:800; font-size:0.86vw;
+    padding:0.22vw 0.6vw; border-radius:999px; margin-left:auto;
+  }
+  .write {
+    background: var(--grad); color:#fff; border-radius:1.4vw;
+    padding:1.1vw; text-align:center; font-weight:800; font-size:1.2vw;
+    box-shadow:0 0.8vw 2vw rgba(54,184,90,.28);
+  }
+
+  /* 로드맵 타임라인 */
+  .tl { position: relative; padding-left: 2.4vw; display: flex; flex-direction: column; gap: 1.2vw; }
+  .tl::before {
+    content: ""; position: absolute; left: 0.85vw; top: 0.5vw; bottom: 0.5vw;
+    width: 0.25vw; background: #d7dfea;
+  }
+  .step { position: relative; }
+  .step .dot {
+    position: absolute; left: -2.05vw; top: 0.1vw;
+    width: 1.5vw; height: 1.5vw; border-radius: 50%;
+    background: #cbd5e1; border: 0.3vw solid var(--bg);
+  }
+  .step.done .dot { background: var(--green); }
+  .step.now .dot { background: var(--blue); box-shadow: 0 0 0 0.5vw rgba(46,139,208,.22); }
+  .step .t { font-weight: 700; font-size: 1.2vw; color: var(--ink); }
+  .step.muted .t { color: #aab4c2; }
+  .nowcard {
+    background: var(--grad); color: #fff; border-radius: 1.5vw; padding: 1.25vw 1.5vw;
+    margin-bottom: 0.4vw; box-shadow: 0 0.8vw 2vw rgba(54,184,90,.28);
+  }
+  .nowcard .dday { font-size: 1.1vw; font-weight: 700; opacity: .95; }
+  .nowcard .todo { font-size: 1.5vw; font-weight: 900; margin-top: 0.3vw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* ====== 마무리 ====== */
+  #s_out .slogan { font-size: 4.4vw; font-weight: 900; color: var(--ink); line-height: 1.3; }
+  #s_out .url {
+    margin-top: 2.4vw; display: inline-block;
+    background: #fff; border: 1px solid #d8e7f6;
+    color: var(--blue); padding: 1vw 2vw; border-radius: 999px; font-size: 1.6vw; font-weight: 800;
+    box-shadow: 0 1vw 2.4vw rgba(46,99,160,.10);
+  }
+
+  /* ====== 진행바 / 컨트롤 ====== */
+  #progress {
+    position: absolute; left: 0; bottom: 0; height: 0.5vh;
+    background: var(--grad); width: 0; z-index: 30;
+  }
+  #controls {
+    position: fixed; right: 18px; bottom: 14px; z-index: 50;
+    display: flex; gap: 8px; align-items: center;
+    font-family: "Pretendard", sans-serif;
+  }
+  #controls button {
+    background: rgba(255,255,255,.85); color: var(--navy); border: 1px solid #d8e7f6;
+    border-radius: 999px; padding: 8px 16px; font-size: 13px; font-weight: 800;
+    cursor: pointer; backdrop-filter: blur(6px); box-shadow: 0 4px 12px rgba(46,99,160,.10);
+  }
+  #controls button:hover { background: #fff; }
+  #hint {
+    position: fixed; left: 50%; top: 14px; transform: translateX(-50%);
+    z-index: 50; color: #5b6678; font-size: 12px; background: rgba(255,255,255,.82);
+    padding: 6px 14px; border-radius: 999px; font-family: "Pretendard", sans-serif;
+    transition: opacity .4s; border: 1px solid #dbe5f1; box-shadow: 0 4px 12px rgba(46,99,160,.08);
+  }
+  .hide { opacity: 0 !important; pointer-events: none; }
+</style>
+</head>
+<body>
+  <div id="hint">스페이스바 = 음악과 함께 처음부터 · 녹화는 "시스템 소리 포함"으로</div>
+
+  <div id="stage">
+    <div class="blob b1"></div>
+    <div class="blob b2"></div>
+    <div class="blob b3"></div>
+
+    <!-- 훅 -->
+    <section class="scene center" id="s_hook">
+      <div>
+        <div class="head anim" style="animation-delay:.1s">학교 밖에서도,</div>
+        <div class="head anim" style="animation-delay:.9s">길을 잃지 않게 <span class="g">담임처럼</span></div>
+        <div class="sub anim" style="animation-delay:1.9s">학습도, 대입도, 진로도 — 흩어진 정보를 한 곳에서.</div>
+      </div>
+    </section>
+
+    <!-- 브랜드 -->
+    <section class="scene center" id="s_brand">
+      <div>
+        <img class="brandlogo anim" src="logo.png" alt="검고담임" style="animation-delay:.1s" />
+        <div class="kicker anim" style="margin-top:2vw;animation-delay:.7s">검정고시 담임선생님</div>
+        <div class="wordmark anim" style="animation-delay:.95s">검고담임</div>
+        <div class="sub anim" style="animation-delay:1.3s">학교 밖 청소년의 <b>학습 · 대입 · 진로</b>를 끝까지 함께하는 AI 동행 앱</div>
+      </div>
+    </section>
+
+    <!-- 5가지 기능 한눈에 -->
+    <section class="scene center" id="s_five">
+      <div style="width:100%">
+        <div class="kicker anim" style="animation-delay:.1s">한 앱 안에, 이만큼</div>
+        <div class="head anim" style="font-size:3.8vw;animation-delay:.25s">필요한 건 <span class="g">전부</span> 담았어요</div>
+        <div class="five">
+          <div class="fcard anim" style="animation-delay:.5s">
+            <div class="fnum">1</div><div class="fi">📚</div>
+            <div class="fn">학습 로드맵</div><div class="fd">검정고시 합격까지<br/>과목별 플래너</div>
+          </div>
+          <div class="fcard anim" style="animation-delay:.65s">
+            <div class="fnum">2</div><div class="fi">🎓</div>
+            <div class="fn">대입 로드맵</div><div class="fd">점수로 보는<br/>내 위치·전형</div>
+          </div>
+          <div class="fcard anim" style="animation-delay:.8s">
+            <div class="fnum">3</div><div class="fi">🧭</div>
+            <div class="fn">진로 로드맵</div><div class="fd">직업·자격증·<br/>훈련 길찾기</div>
+          </div>
+          <div class="fcard anim" style="animation-delay:.95s">
+            <div class="fnum">4</div><div class="fi">🤝</div>
+            <div class="fn">지원·꿈드림</div><div class="fd">받을 수 있는 지원<br/>가까운 센터 연결</div>
+          </div>
+          <div class="fcard anim" style="animation-delay:1.1s">
+            <div class="fnum">5</div><div class="fi">💬</div>
+            <div class="fn">커뮤니티</div><div class="fd">같은 길 걷는<br/>친구·선배와</div>
+          </div>
+        </div>
+        <div class="sub anim center" style="font-size:1.5vw;animation-delay:1.3s">목표가 무엇이든, <b>나에게 맞는 길만</b> 골라서 보여줘요.</div>
+      </div>
+    </section>
+
+    <!-- 기능1: 학습 로드맵 -->
+    <section class="scene" id="s_learn">
+      <div class="split">
+        <div class="copy">
+          <span class="badge anim" style="animation-delay:.1s"><span class="num">1</span> 학습 로드맵</span>
+          <div class="head anim" style="font-size:3.6vw;animation-delay:.25s">합격까지,<br /><span class="g">과목별로</span> 챙겨줘요</div>
+          <div class="sub anim" style="animation-delay:.6s">검정고시 공부를 <b>과목별 플래너</b>로 쪼개고,<br />오늘 뭘 해야 할지 한눈에. 혼자여도 막막하지 않게.</div>
+        </div>
+        <div class="phone anim" style="animation-delay:.35s">
+          <div class="notch"></div>
+          <div class="screen">
+            <div class="appbar">📚 학습 로드맵 <small>검정고시 합격까지</small></div>
+            <div class="scr-body">
+              <div class="nowcard">
+                <div class="dday">📍 이번 주 목표</div>
+                <div class="todo">수학 · 이차방정식</div>
+              </div>
+              <div class="subj"><span class="ico">📖</span><span class="nm">국어</span><span class="st done">완료</span></div>
+              <div class="subj"><span class="ico">➗</span><span class="nm">수학</span><span class="st doing">진행 중</span></div>
+              <div class="subj"><span class="ico">🔤</span><span class="nm">영어</span><span class="st todo">예정</span></div>
+              <div class="subj"><span class="ico">🔬</span><span class="nm">과학</span><span class="st todo">예정</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 기능2: 대입 로드맵 -->
+    <section class="scene" id="s_univ">
+      <div class="split">
+        <div class="phone anim" style="animation-delay:.35s">
+          <div class="notch"></div>
+          <div class="screen">
+            <div class="appbar">🎓 대입 로드맵 <small>가능성 높은 순</small></div>
+            <div class="scr-body">
+              <div class="scorerow">
+                <div class="chip"><b>92</b><span>국어</span></div>
+                <div class="chip"><b>88</b><span>수학</span></div>
+                <div class="chip"><b>95</b><span>영어</span></div>
+              </div>
+              <div class="ucard">
+                <div class="uni">○○대학교</div>
+                <div class="dept">논술전형 · 인문계열</div>
+                <div class="gauge"><i style="--w:88%;background:var(--green)"></i></div>
+                <span class="tag safe">안정 · 여유 있어요</span>
+              </div>
+              <div class="ucard">
+                <div class="uni">△△대학교</div>
+                <div class="dept">학생부교과 · 사회계열</div>
+                <div class="gauge"><i style="--w:62%;background:var(--blue)"></i></div>
+                <span class="tag fit">적정 · 비슷한 수준</span>
+              </div>
+              <div class="ucard">
+                <div class="uni">□□대학교</div>
+                <div class="dept">논술전형 · 자연계열</div>
+                <div class="gauge"><i style="--w:38%;background:#e0a23c"></i></div>
+                <span class="tag try">소신 · 노려볼 만해요</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="copy">
+          <span class="badge anim" style="animation-delay:.1s"><span class="num">2</span> 대입 로드맵</span>
+          <div class="head anim" style="font-size:3.6vw;animation-delay:.25s">점수만 넣으면<br /><span class="g">내 위치</span>가 보여요</div>
+          <div class="sub anim" style="animation-delay:.6s">합격 가능성을 <b>칸수 게이지</b>로 한눈에.<br />검정고시 비교내신·전형까지 자동으로 정리해줘요.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 기능3: 진로 로드맵 -->
+    <section class="scene" id="s_career">
+      <div class="split">
+        <div class="copy">
+          <span class="badge anim" style="animation-delay:.1s"><span class="num">3</span> 진로 로드맵</span>
+          <div class="head anim" style="font-size:3.6vw;animation-delay:.25s">대학만이<br /><span class="g">길은 아니니까</span></div>
+          <div class="sub anim" style="animation-delay:.6s">직업훈련 · 자격증 · 취업까지,<br />관심사에 맞는 길을 <b>공식 기관</b>으로 바로 연결해요.</div>
+        </div>
+        <div class="phone anim" style="animation-delay:.35s">
+          <div class="notch"></div>
+          <div class="screen">
+            <div class="appbar">🧭 진로 로드맵 <small>나에게 맞는 길</small></div>
+            <div class="scr-body">
+              <div class="path"><span class="pi">🏫</span><div><div class="pt">직업훈련 (폴리텍)</div><div class="ps">기술 배우며 취업 준비</div></div><span class="go">›</span></div>
+              <div class="path"><span class="pi">📜</span><div><div class="pt">국가자격증 (큐넷)</div><div class="ps">관심 분야 자격 도전</div></div><span class="go">›</span></div>
+              <div class="path"><span class="pi">💼</span><div><div class="pt">청년 일자리 (고용24)</div><div class="ps">조건에 맞는 채용·지원금</div></div><span class="go">›</span></div>
+              <div class="path"><span class="pi">🔎</span><div><div class="pt">직업 적성 탐색</div><div class="ps">나에게 맞는 직업 찾기</div></div><span class="go">›</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 기능4: 지원 · 꿈드림센터 연결 -->
+    <section class="scene" id="s_support">
+      <div class="split">
+        <div class="phone anim" style="animation-delay:.35s">
+          <div class="notch"></div>
+          <div class="screen">
+            <div class="appbar">🤝 지원 · 꿈드림센터 <small>내가 받을 수 있는 것</small></div>
+            <div class="scr-body">
+              <div class="common-card">
+                <div class="t">받을 수 있는 지원이 있어요</div>
+                <small>교통비 · 검정고시 응시료 · 학습 지원까지</small>
+              </div>
+              <div class="center-card">
+                <div class="cn">📍 가까운 꿈드림센터 · 1.2km</div>
+                <div class="cd">○○시 학교밖청소년지원센터</div>
+                <div class="benefit-chips">
+                  <span class="bchip">💸 교통비</span>
+                  <span class="bchip">🧑‍🏫 상담</span>
+                  <span class="bchip">🧭 진로</span>
+                  <span class="bchip">🎓 장학</span>
+                </div>
+                <div class="actions">
+                  <div class="cbtn call">📞 전화</div>
+                  <div class="cbtn map">🗺️ 길찾기</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="copy">
+          <span class="badge anim" style="animation-delay:.1s"><span class="num">4</span> 지원 · 꿈드림센터 연결</span>
+          <div class="head anim" style="font-size:3.6vw;animation-delay:.25s">혼자 두지<br /><span class="g">않아요</span></div>
+          <div class="sub anim" style="animation-delay:.6s">받을 수 있는 지원을 찾아주고,<br /><b>가장 가까운 꿈드림센터</b>로 전화·길찾기까지.<br />없는 혜택은 없는 척하지 않아요.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 기능5: 커뮤니티 연계 -->
+    <section class="scene" id="s_comm">
+      <div class="split">
+        <div class="copy">
+          <span class="badge anim" style="animation-delay:.1s"><span class="num">5</span> 커뮤니티 연계</span>
+          <div class="head anim" style="font-size:3.6vw;animation-delay:.25s">같은 길 걷는<br /><span class="g">사람들과</span></div>
+          <div class="sub anim" style="animation-delay:.6s">합격 후기 · 고민 · 정보를 나누고,<br />먼저 걸어간 <b>멘토·선배</b>가 진짜 사람으로 답해줘요.</div>
+        </div>
+        <div class="phone anim" style="animation-delay:.35s">
+          <div class="notch"></div>
+          <div class="screen">
+            <div class="appbar">💬 커뮤니티 <small>같이 가면 멀리 가요</small></div>
+            <div class="scr-body">
+              <div class="boards">
+                <span class="bpill on">후기</span>
+                <span class="bpill">이야기</span>
+                <span class="bpill">우리 센터</span>
+              </div>
+              <div class="post">
+                <div class="pt">검정고시로 대학 합격했어요! 후기 남겨요 🎉</div>
+                <div class="pm"><span class="who">합격생 ·</span> ❤️ 124 <span>💬 38</span></div>
+              </div>
+              <div class="post">
+                <div class="pt">비교내신 이거 맞나요? 도와주세요…</div>
+                <div class="pm"><span class="who">공부중 ·</span> ❤️ 12 <span>💬 5</span><span class="mbadge">✔ 멘토 답변</span></div>
+              </div>
+              <div class="write">✏️ 나도 이야기 나누기</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 신뢰 / 정직성 -->
+    <section class="scene center" id="s_trust">
+      <div>
+        <div class="kicker anim" style="animation-delay:.1s">검고담임이 지키는 약속</div>
+        <div class="head anim" style="font-size:4vw;animation-delay:.3s">모르면 <span class="g">지어내지 않아요</span></div>
+        <div class="sub anim" style="animation-delay:.9s">정리된 정보만 정직하게, 확인이 필요한 건 솔직하게.<br />공식 기관으로 바로 연결해 <b>믿고 따라갈 수 있게.</b></div>
+      </div>
+    </section>
+
+    <!-- 마무리 -->
+    <section class="scene center" id="s_out">
+      <div>
+        <img class="brandlogo anim" src="logo.png" alt="검고담임" style="width:11vw;height:11vw;animation-delay:.1s" />
+        <div class="slogan anim" style="margin-top:2vw;animation-delay:.6s">학교 밖 청소년의 담임선생님,<br /><span class="g" style="background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent">검고담임</span></div>
+        <a class="url anim" style="animation-delay:1.3s">gumgomentor-beta.vercel.app</a>
+      </div>
+    </section>
+
+    <div id="progress"></div>
+  </div>
+
+  <div id="controls">
+    <button id="mute">🔊 음악</button>
+    <button id="replay">↻ 처음부터</button>
+  </div>
+
+<script>
+  // ===== 씬 타이밍 (총 ~48초) =====
+  const scenes = [
+    { id: "s_hook",    dur: 3800 },
+    { id: "s_brand",   dur: 3800 },
+    { id: "s_five",    dur: 5200 },
+    { id: "s_learn",   dur: 5200 },
+    { id: "s_univ",    dur: 5600 },
+    { id: "s_career",  dur: 5200 },
+    { id: "s_support", dur: 5400 },
+    { id: "s_comm",    dur: 5400 },
+    { id: "s_trust",   dur: 4000 },
+    { id: "s_out",     dur: 5200 },
+  ];
+  const total = scenes.reduce((a, s) => a + s.dur, 0);
+
+  const els = scenes.map((s) => document.getElementById(s.id));
+  const bar = document.getElementById("progress");
+  let timers = [];
+  let rafId = null;
+
+  function clearAll() {
+    timers.forEach(clearTimeout);
+    timers = [];
+    if (rafId) cancelAnimationFrame(rafId);
+    els.forEach((e) => e.classList.remove("active"));
+  }
+
+  function play() {
+    clearAll();
+    let acc = 0;
+    scenes.forEach((s, i) => {
+      timers.push(setTimeout(() => {
+        els.forEach((e) => e.classList.remove("active"));
+        els[i].classList.add("active");
+      }, acc));
+      acc += s.dur;
+    });
+    const start = performance.now();
+    (function tick(now) {
+      const p = Math.min((now - start) / total, 1);
+      bar.style.width = (p * 100) + "%";
+      if (p < 1) rafId = requestAnimationFrame(tick);
+    })(start);
+  }
+
+  // ===== 배경음악 (Web Audio · 파일 없이 생성 · 버전1과 동일한 로파이 그루브) =====
+  let actx=null,master=null,busLP=null,musicOn=true,started=false,barIndex=0,nextBar=0;
+  const MV=0.4;                                  // 마스터 볼륨
+  const BPM=104, BEAT=60/BPM, BAR=BEAT*4;
+  const PROG=[
+    {bass:130.81,notes:[261.63,329.63,392.00]}, // C
+    {bass:98.00, notes:[246.94,293.66,392.00]}, // G
+    {bass:110.00,notes:[220.00,261.63,329.63]}, // Am
+    {bass:87.31, notes:[220.00,261.63,349.23]}, // F
+  ];
+  function pluck(freq,t,dur,peak,type){
+    const o=actx.createOscillator(),g=actx.createGain();
+    o.type=type||'triangle';o.frequency.value=freq;o.connect(g);g.connect(busLP);
+    g.gain.setValueAtTime(0.0001,t);
+    g.gain.linearRampToValueAtTime(peak,t+0.008);
+    g.gain.exponentialRampToValueAtTime(0.0006,t+dur);
+    o.start(t);o.stop(t+dur+0.05);
+  }
+  function pad(freq,t,dur,peak){
+    const o=actx.createOscillator(),g=actx.createGain();
+    o.type='sawtooth';o.frequency.value=freq;o.connect(g);g.connect(busLP);
+    g.gain.setValueAtTime(0.0001,t);
+    g.gain.linearRampToValueAtTime(peak,t+0.18);
+    g.gain.setValueAtTime(peak,t+dur-0.25);
+    g.gain.exponentialRampToValueAtTime(0.0006,t+dur);
+    o.start(t);o.stop(t+dur+0.05);
+  }
+  function kick(t){
+    const o=actx.createOscillator(),g=actx.createGain();
+    o.type='sine';o.connect(g);g.connect(master);
+    o.frequency.setValueAtTime(150,t);o.frequency.exponentialRampToValueAtTime(45,t+0.12);
+    g.gain.setValueAtTime(0.0001,t);g.gain.linearRampToValueAtTime(0.34,t+0.005);
+    g.gain.exponentialRampToValueAtTime(0.0006,t+0.18);
+    o.start(t);o.stop(t+0.22);
+  }
+  function noise(t,dur,peak,hp){
+    const n=Math.floor(actx.sampleRate*dur),b=actx.createBuffer(1,n,actx.sampleRate),d=b.getChannelData(0);
+    for(let i=0;i<n;i++)d[i]=Math.random()*2-1;
+    const s=actx.createBufferSource();s.buffer=b;
+    const f=actx.createBiquadFilter();f.type='highpass';f.frequency.value=hp;
+    const g=actx.createGain();s.connect(f);f.connect(g);g.connect(master);
+    g.gain.setValueAtTime(peak,t);g.gain.exponentialRampToValueAtTime(0.0005,t+dur);
+    s.start(t);s.stop(t+dur+0.02);
+  }
+  function scheduleBar(t,c){
+    const e=BEAT/2;
+    c.notes.forEach(f=>pad(f,t,BAR*0.98,0.045));                 // 따뜻한 패드
+    pluck(c.bass,t,BEAT*1.3,0.17,'sine');                        // 베이스(1·3박)
+    pluck(c.bass,t+2*BEAT,BEAT*1.3,0.15,'sine');
+    [0,1,2,1,0,1,2,1].forEach((idx,i)=>pluck(c.notes[idx]*2,t+i*e,e*0.85,0.04)); // 통통 아르페지오
+    kick(t);kick(t+2*BEAT);                                      // 킥 1·3박
+    noise(t+BEAT,0.12,0.11,1700);noise(t+3*BEAT,0.12,0.11,1700); // 백비트 스네어
+    for(let i=0;i<8;i++)noise(t+i*e,0.035,0.045,7500);           // 하이햇
+  }
+  function pump(){
+    if(!actx)return;
+    while(nextBar<actx.currentTime+0.7){scheduleBar(nextBar,PROG[barIndex%PROG.length]);barIndex++;nextBar+=BAR;}
+  }
+  function startMusic(){
+    if(!musicOn)return;
+    if(started){if(actx&&actx.state==='suspended')actx.resume();return;}
+    started=true;
+    actx=new (window.AudioContext||window.webkitAudioContext)();
+    master=actx.createGain();master.gain.value=0;master.connect(actx.destination);
+    busLP=actx.createBiquadFilter();busLP.type='lowpass';busLP.frequency.value=3200;busLP.connect(master);
+    actx.resume();
+    barIndex=0;nextBar=actx.currentTime+0.12;
+    master.gain.linearRampToValueAtTime(MV,actx.currentTime+1.2);
+    pump();setInterval(pump,130);
+  }
+  function syncMusic(){if(actx&&started){barIndex=0;nextBar=actx.currentTime+0.05;}}
+  document.getElementById("mute").addEventListener("click",()=>{
+    musicOn=!musicOn;
+    const b=document.getElementById("mute");
+    if(master)master.gain.setTargetAtTime(musicOn?MV:0.0001,actx.currentTime,0.05);
+    b.textContent=musicOn?"🔊 음악":"🔇 음소거";
+    if(musicOn&&!started)startMusic();
+  });
+  window.addEventListener("pointerdown",()=>startMusic());
+
+  document.getElementById("replay").addEventListener("click",()=>{startMusic();syncMusic();play();});
+  window.addEventListener("keydown",(e)=>{
+    if(e.code==="Space"){e.preventDefault();startMusic();syncMusic();play();}
+  });
+
+  // 5초 뒤 상단 힌트 숨김(녹화 깔끔하게)
+  setTimeout(() => document.getElementById("hint").classList.add("hide"), 5000);
+
+  // 폰트/이미지 로드 후 시작
+  window.addEventListener("load", () => setTimeout(play, 600));
+</script>
+</body>
+</html>
