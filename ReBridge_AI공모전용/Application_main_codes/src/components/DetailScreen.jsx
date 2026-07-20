@@ -12,16 +12,7 @@ import {
 } from '../lib/scoreEngine.js';
 import DocumentsChecklist from './DocumentsChecklist.jsx';
 import ChanceGauge from './ChanceGauge.jsx';
-
-const STORAGE_KEY = 'rebridge_profile';
-
-function loadProfile() {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || null;
-  } catch {
-    return null;
-  }
-}
+import { loadProfile } from '../lib/persona.js';
 
 function cleanCsat(raw) {
   if (!raw) return '모집요강 확인';

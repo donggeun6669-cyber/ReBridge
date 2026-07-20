@@ -37,7 +37,10 @@ const SEED_CODES = [
   { code: 'DREAM-DEMO', centerId: 'demo', issuedBy: '데모센터', used_by: null, used_at: null, created_at: 0 },
 ];
 
+// 시드 확인은 세션(모듈 수명)당 1회면 충분 — get* 호출마다 localStorage를 읽지 않도록 가드.
+let seeded = false;
 function ensureSeed() {
+  if (seeded) return;
   const ver = localStorage.getItem('rb_seed_ver');
   if (ver !== SEED_VERSION) {
     write(KEYS.codes, SEED_CODES);
@@ -45,6 +48,7 @@ function ensureSeed() {
     write(KEYS.comments, SEED_COMMENTS);
     localStorage.setItem('rb_seed_ver', SEED_VERSION);
   }
+  seeded = true;
 }
 
 const NOW = Date.now();

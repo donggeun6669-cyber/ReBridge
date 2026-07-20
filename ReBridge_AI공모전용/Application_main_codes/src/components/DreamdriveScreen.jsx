@@ -6,8 +6,7 @@ import {
 } from 'lucide-react';
 import centersRaw from '../data/kkumdrim.json';
 import { getCenterBenefits } from '../lib/benefits';
-
-const KAKAO_KEY = '1be261c8c8703e28f0be58b4c193468e';
+import { useKakaoMap } from '../lib/kakaoMap.js';
 
 const BENEFIT_ICONS = { Wallet, HeartHandshake, Compass, Users, GraduationCap, Activity };
 
@@ -70,57 +69,9 @@ const regionCount = centersRaw.reduce((acc, c) => {
 
 // ── 카카오맵 컴포넌트 ──────────────────────────────────────────────────
 function KakaoMapView({ centers, userPos, onSelectCenter, selectedId }) {
-  const containerRef = useRef(null);
-  const mapRef = useRef(null);
+  const { containerRef, mapRef, runWhenReady } = useKakaoMap({ lat: 36.5, lng: 127.8, level: 12 });
   const overlaysRef = useRef([]);
   const meOverlayRef = useRef(null);
-  const readyRef = useRef(false);
-  const pendingRef = useRef(null);
-
-  const runWhenReady = useCallback((fn) => {
-    if (readyRef.current) fn();
-    else pendingRef.current = fn;
-  }, []);
-
-  useEffect(() => {
-    let cancelled = false;
-    const initMap = () => {
-      if (cancelled || !containerRef.current) return;
-      window.kakao.maps.load(() => {
-        if (cancelled || !containerRef.current) return;
-        mapRef.current = new window.kakao.maps.Map(containerRef.current, {
-          center: new window.kakao.maps.LatLng(36.5, 127.8),
-          level: 12,
-        });
-        readyRef.current = true;
-        if (pendingRef.current) { pendingRef.current(); pendingRef.current = null; }
-      });
-    };
-
-    if (window.kakao?.maps) {
-      initMap();
-    } else {
-      const existing = document.getElementById('kakao-map-sdk');
-      if (existing) {
-        existing.addEventListener('load', initMap);
-      } else {
-        const script = document.createElement('script');
-        script.id = 'kakao-map-sdk';
-        script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_KEY}&autoload=false`;
-        script.onload = initMap;
-        document.head.appendChild(script);
-      }
-    }
-
-    return () => {
-      cancelled = true;
-      overlaysRef.current.forEach((o) => o.setMap(null));
-      overlaysRef.current = [];
-      if (meOverlayRef.current) { meOverlayRef.current.setMap(null); meOverlayRef.current = null; }
-      mapRef.current = null;
-      readyRef.current = false;
-    };
-  }, []);
 
   // 센터 마커 업데이트
   useEffect(() => {
@@ -154,7 +105,11 @@ function KakaoMapView({ centers, userPos, onSelectCenter, selectedId }) {
       }
     };
     runWhenReady(update);
-  }, [centers, selectedId, userPos, onSelectCenter, runWhenReady]);
+    return () => {
+      overlaysRef.current.forEach((o) => o.setMap(null));
+      overlaysRef.current = [];
+    };
+  }, [centers, selectedId, userPos, onSelectCenter, runWhenReady, mapRef]);
 
   // 내 위치 마커 + 지도 이동
   useEffect(() => {
@@ -173,7 +128,10 @@ function KakaoMapView({ centers, userPos, onSelectCenter, selectedId }) {
       mapRef.current.setLevel(9);
     };
     runWhenReady(update);
-  }, [userPos, runWhenReady]);
+    return () => {
+      if (meOverlayRef.current) { meOverlayRef.current.setMap(null); meOverlayRef.current = null; }
+    };
+  }, [userPos, runWhenReady, mapRef]);
 
   return <div ref={containerRef} className="kdream-map" />;
 }

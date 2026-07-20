@@ -6,10 +6,10 @@ import {
   BarChart3, TrendingUp, Trophy,
 } from 'lucide-react';
 import { GED_SUBJECT_GUIDE, getNextSession, daysUntil } from '../data/gedGuide.js';
+import { DAYS_KEY, loadDays, ymd, fmtMin } from '../lib/studyUtils.js';
 import '../styles.studyplanner.css';
 import '../styles.study.css';
 
-const DAYS_KEY = 'rebridge_planner_days';
 const TIMER_KEY = 'rebridge_planner_timer';
 const GOAL_KEY = 'rebridge_study_weekgoal';
 // day = { minutes, bySubject:{}, tasks:[{id, text, done}], pomos }
@@ -25,23 +25,11 @@ const POMO_BREAK_SEC = 5 * 60;
 const GOAL_PRESETS = [300, 600, 900, 1200]; // 분: 5h/10h/15h/20h
 const DEFAULT_GOAL = 600;
 
-function load() {
-  try { return JSON.parse(localStorage.getItem(DAYS_KEY)) || {}; }
-  catch { return {}; }
-}
 function loadGoal() {
   try {
     const v = JSON.parse(localStorage.getItem(GOAL_KEY));
     return v && typeof v.goalMin === 'number' ? v.goalMin : DEFAULT_GOAL;
   } catch { return DEFAULT_GOAL; }
-}
-function ymd(d) {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-}
-function fmtMin(m) {
-  if (!m) return '0분';
-  const h = Math.floor(m / 60), mm = m % 60;
-  return h > 0 ? `${h}시간 ${mm ? `${mm}분` : ''}`.trim() : `${mm}분`;
 }
 function fmtHourShort(m) {
   if (!m) return '0분';
@@ -71,7 +59,7 @@ export default function StudyPlannerScreen({ goTo = () => {} }) {
   const todayStr = ymd(today);
 
   const [tab, setTab] = useState('today'); // 'today' | 'stats'
-  const [days, setDays] = useState(load);
+  const [days, setDays] = useState(loadDays);
   const [selected, setSelected] = useState(todayStr);
   const [view, setView] = useState({ y: today.getFullYear(), m: today.getMonth() });
   const [taskText, setTaskText] = useState('');

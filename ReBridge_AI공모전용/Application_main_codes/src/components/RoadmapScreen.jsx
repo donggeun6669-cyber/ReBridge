@@ -8,20 +8,11 @@ import { buildRoadmap } from '../lib/roadmap.js';
 import { getUniversityDetail } from '../lib/analysis.js';
 import { evaluateAdmission, admissionChance } from '../lib/scoreEngine.js';
 import { getBookmarks } from '../lib/bookmarks.js';
-
-const STORAGE_KEY = 'rebridge_profile';
+import { loadProfile } from '../lib/persona.js';
 
 const ICONS = {
   ClipboardList, FileText, Scale, CalendarDays, Target, MessageCircle, CheckCircle2,
 };
-
-function loadProfile() {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || null;
-  } catch {
-    return null;
-  }
-}
 
 export default function RoadmapScreen({ goTo = () => {}, goBack = () => {} }) {
   const profile = useMemo(loadProfile, []);

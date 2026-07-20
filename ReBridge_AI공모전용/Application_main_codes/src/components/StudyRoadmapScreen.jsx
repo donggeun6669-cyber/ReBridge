@@ -5,28 +5,9 @@ import {
 } from 'lucide-react';
 import { getNextSession, daysUntil, formatKDate, PASS_RULE, GED_SUBJECT_GUIDE } from '../data/gedGuide.js';
 import { getPersona } from '../lib/persona.js';
+import { loadDays, loadScores, ymd, fmtMin } from '../lib/studyUtils.js';
 import '../styles.studyroadmap.css';
 import '../styles.study.css';
-
-const DAYS_KEY = 'rebridge_planner_days';
-const MOCK_KEY = 'rebridge_mock_scores';
-
-function loadDays() {
-  try { return JSON.parse(localStorage.getItem(DAYS_KEY)) || {}; }
-  catch { return {}; }
-}
-function loadScores() {
-  try { return JSON.parse(localStorage.getItem(MOCK_KEY)) || {}; }
-  catch { return {}; }
-}
-function ymd(d) {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-}
-function fmtMin(m) {
-  if (!m) return '0분';
-  const h = Math.floor(m / 60), mm = m % 60;
-  return h > 0 ? `${h}시간 ${mm ? `${mm}분` : ''}`.trim() : `${mm}분`;
-}
 
 // 목표별 마지막 단계(검정고시 합격 이후)
 const GOAL_FINAL = {

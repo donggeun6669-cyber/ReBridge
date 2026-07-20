@@ -1,15 +1,13 @@
 // 센터의 benefits(카테고리 id 배열)를 카테고리 객체로 매핑/그룹핑하는 헬퍼.
-import { BENEFIT_CATEGORIES, BENEFIT_CATEGORY_MAP } from '../data/benefitCategories';
-
-export { BENEFIT_CATEGORIES, BENEFIT_CATEGORY_MAP };
+import { BENEFIT_CATEGORY_MAP } from '../data/benefitCategories';
 
 // 센터가 혜택 정보를 가지고 있는지 (정직성 원칙: 비어있으면 false → 폴백 표시)
-export function hasBenefits(center) {
+function hasBenefits(center) {
   return Array.isArray(center?.benefits) && center.benefits.length > 0;
 }
 
 // 센터의 benefits id 배열 → 카테고리 객체 배열로 매핑 (정의에 없는 id는 제외)
-export function getBenefitCategories(center) {
+function getBenefitCategories(center) {
   if (!hasBenefits(center)) return [];
   return center.benefits
     .map((id) => BENEFIT_CATEGORY_MAP[id])

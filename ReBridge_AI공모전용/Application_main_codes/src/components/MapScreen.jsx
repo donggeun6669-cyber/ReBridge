@@ -1,62 +1,15 @@
-import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowLeft, ChevronRight, MapPin, X } from 'lucide-react';
 import universities from '../data/universities.json';
 import { getExploreList } from '../lib/analysis.js';
+import { useKakaoMap } from '../lib/kakaoMap.js';
 
-const KAKAO_KEY = '1be261c8c8703e28f0be58b4c193468e';
 const FILTERS = ['전체', '검정고시 전형', '4년제', '전문대'];
 
 // ── 카카오맵 뷰 ──────────────────────────────────────────────────────────
 function KakaoMapView({ points, onSelect, selectedId }) {
-  const containerRef = useRef(null);
-  const mapRef = useRef(null);
+  const { containerRef, mapRef, runWhenReady } = useKakaoMap({ lat: 36.3, lng: 127.8, level: 13 });
   const overlaysRef = useRef([]);
-  const readyRef = useRef(false);
-  const pendingRef = useRef(null);
-
-  const runWhenReady = useCallback((fn) => {
-    if (readyRef.current) fn();
-    else pendingRef.current = fn;
-  }, []);
-
-  useEffect(() => {
-    let cancelled = false;
-    const initMap = () => {
-      if (cancelled || !containerRef.current) return;
-      window.kakao.maps.load(() => {
-        if (cancelled || !containerRef.current) return;
-        mapRef.current = new window.kakao.maps.Map(containerRef.current, {
-          center: new window.kakao.maps.LatLng(36.3, 127.8),
-          level: 13,
-        });
-        readyRef.current = true;
-        if (pendingRef.current) { pendingRef.current(); pendingRef.current = null; }
-      });
-    };
-
-    if (window.kakao?.maps) {
-      initMap();
-    } else {
-      const existing = document.getElementById('kakao-map-sdk');
-      if (existing) {
-        existing.addEventListener('load', initMap);
-      } else {
-        const script = document.createElement('script');
-        script.id = 'kakao-map-sdk';
-        script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_KEY}&autoload=false`;
-        script.onload = initMap;
-        document.head.appendChild(script);
-      }
-    }
-
-    return () => {
-      cancelled = true;
-      overlaysRef.current.forEach((o) => o.setMap(null));
-      overlaysRef.current = [];
-      mapRef.current = null;
-      readyRef.current = false;
-    };
-  }, []);
 
   useEffect(() => {
     const update = () => {
@@ -83,7 +36,11 @@ function KakaoMapView({ points, onSelect, selectedId }) {
       });
     };
     runWhenReady(update);
-  }, [points, selectedId, onSelect, runWhenReady]);
+    return () => {
+      overlaysRef.current.forEach((o) => o.setMap(null));
+      overlaysRef.current = [];
+    };
+  }, [points, selectedId, onSelect, runWhenReady, mapRef]);
 
   return <div ref={containerRef} className="map-canvas" />;
 }

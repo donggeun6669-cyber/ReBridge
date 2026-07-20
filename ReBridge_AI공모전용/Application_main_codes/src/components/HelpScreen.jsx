@@ -4,20 +4,11 @@ import {
 } from 'lucide-react';
 import { searchFaq, FAQ_TOPICS } from '../lib/faq.js';
 import { buildRoadmap } from '../lib/roadmap.js';
-
-const STORAGE_KEY = 'rebridge_profile';
+import { loadProfile } from '../lib/persona.js';
 
 // 멘토 Q&A 접수용 구글폼 URL. 폼을 만들면 여기에 주소를 넣으면 바로 활성화돼요.
 // (비어 있으면 "준비 중" 안내가 뜨고, 검색형 FAQ는 그대로 동작합니다.)
 const MENTOR_FORM_URL = '';
-
-function loadProfile() {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || null;
-  } catch {
-    return null;
-  }
-}
 
 export default function HelpScreen({ goTo = () => {}, goBack = () => {} }) {
   const [query, setQuery] = useState('');

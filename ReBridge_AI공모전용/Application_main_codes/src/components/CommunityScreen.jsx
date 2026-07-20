@@ -44,11 +44,12 @@ export default function CommunityScreen({ goTo = () => {}, goBack = () => {}, pa
 
   const flashToast = (m) => { setToast(m); setTimeout(() => setToast(''), 1800); };
 
-  // 알림 뱃지(로컬 계산) — 로그인/글 변경 시 갱신.
+  // 알림 뱃지(로컬 계산) — 로그인·화면 전환 시에만 갱신.
+  // (posts를 의존성에 넣으면 공감 토글·더보기마다 재계산돼 낭비)
   const refreshNoti = useCallback(async () => {
     setNoti(await getNotifications());
   }, []);
-  useEffect(() => { refreshNoti(); }, [refreshNoti, user?.id, posts]);
+  useEffect(() => { refreshNoti(); }, [refreshNoti, user?.id, view]);
 
   // 목록 로드(첫 페이지). 검색어/보드/태그/정렬/스코프 의존.
   const reload = useCallback(async () => {

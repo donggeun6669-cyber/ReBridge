@@ -101,25 +101,3 @@ export function isVerified(user) {
 export function getBadge(user) {
   return isVerified(user) ? { ...BADGE } : null;
 }
-
-// 실무자 화면용 — 발급 내역(센터 필터 가능). 목/supabase 공통 형태로 정규화.
-export async function listIssuedCodes(centerId) {
-  if (isSupabase) {
-    let q = supabase.from('verification_codes')
-      .select('code, center_id, issued_by, used_by, used_at, created_at')
-      .order('created_at', { ascending: false });
-    if (centerId) q = q.eq('center_id', centerId);
-    const { data, error } = await q;
-    if (error) return [];
-    return (data || []).map((r) => ({
-      code: r.code, centerId: r.center_id, issuedBy: r.issued_by,
-      used: Boolean(r.used_by), usedAt: r.used_at, createdAt: r.created_at,
-    }));
-  }
-  let list = mockStore.getCodes();
-  if (centerId) list = list.filter((c) => c.centerId === centerId);
-  return [...list].reverse().map((r) => ({
-    code: r.code, centerId: r.centerId, issuedBy: r.issuedBy,
-    used: Boolean(r.used_by), usedAt: r.used_at, createdAt: r.created_at,
-  }));
-}

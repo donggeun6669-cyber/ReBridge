@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import {
   User, Pencil, Bookmark, BookOpen, ChevronRight,
   MapPin, GraduationCap, ClipboardCheck, Heart,
@@ -7,11 +8,19 @@ import {
 import { getPersona, loadProfile, getActiveTrack } from '../lib/persona';
 import '../styles.mypage.css';
 
-// 테스트/초기화용 — 저장된 모든 정보 지우고 첫 화면(스플래시→온보딩)부터 다시
+// 테스트/초기화용 — 저장된 모든 정보 지우고 첫 화면(스플래시→온보딩)부터 다시.
+// 프로필·플래너·북마크·모의점수 등 rebridge_* 키 전부 + 지역 선택 + 트랙 선택 세션까지 지운다.
+// (커뮤니티 로그인/게시글은 별개 계정 데이터라 유지)
 function resetEverything() {
   try {
-    localStorage.removeItem('rebridge_profile');
-    localStorage.removeItem('rebridge_study_progress');
+    const keys = [];
+    for (let i = 0; i < localStorage.length; i += 1) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith('rebridge_')) keys.push(k);
+    }
+    keys.forEach((k) => localStorage.removeItem(k));
+    localStorage.removeItem('spt-region');
+    sessionStorage.removeItem('rb_track_picked');
   } catch { /* 무시 */ }
   window.location.reload();
 }
@@ -88,12 +97,13 @@ function MenuRow({ ico, icoClass, title, sub, onClick }) {
 }
 
 export default function MyPageScreen({ goTo = () => {}, goBack = () => {} }) {
-  const profile = loadProfile();
+  // localStorage 읽기+파싱은 렌더마다 반복할 필요 없음 — 마운트 시 1회.
+  const profile = useMemo(loadProfile, []);
   const persona = getPersona(profile);
   const chips = toChips(profile);
 
   // 사용자 유형 = 활성 트랙. (홈에서 고른 길) — 없으면 persona.goal로 보조 추론.
-  let track = getActiveTrack();
+  let track = useMemo(getActiveTrack, []);
   if (!track && persona) {
     if (persona.goal === 'job') track = 'job';
     else if (persona.stage === 'studying' && persona.goal !== 'university') track = 'study';

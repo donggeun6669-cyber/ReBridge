@@ -9,6 +9,26 @@ import { TOP_TIER_EXCLUDE } from '../data/topTierExclude.js';
 
 const METRO = new Set(['서울', '경기', '인천']);
 
+// admissions는 불변 정적 데이터 — univId별 인덱스는 모듈 로드 시 한 번만 만든다.
+const ADMISSIONS_BY_UNIV = new Map();
+for (const r of admissions) {
+  if (!ADMISSIONS_BY_UNIV.has(r.univId)) ADMISSIONS_BY_UNIV.set(r.univId, []);
+  ADMISSIONS_BY_UNIV.get(r.univId).push(r);
+}
+
+// 비교내신 자료 유형 — 환산표 있음(numeric) / 서술만(prose) / 없음(none)
+function comparativeTypeOf(comp) {
+  if (!comp) return 'none';
+  return comp.comparativeGradeType === 'numeric_table' ? 'numeric' : 'prose';
+}
+
+// 공통 정렬: 검정고시 '가능' 우선 → 유리한 전형 유형 순
+function byGedThenType(a, b) {
+  const e = (b.gedEligible === '가능') - (a.gedEligible === '가능');
+  if (e) return e;
+  return (TYPE_RANK[b.admissionType] || 0) - (TYPE_RANK[a.admissionType] || 0);
+}
+
 // 검정고시생에게 유리한 순서 (높을수록 우선 추천)
 const TYPE_RANK = {
   학생부종합: 4,
@@ -69,7 +89,7 @@ function isConfirmedStatus(status) {
 export function getUniversityDetail(univId) {
   const u = universities.find((x) => x.univId === univId);
   if (!u) return null;
-  const rows = admissions.filter((r) => r.univId === univId);
+  const rows = [...(ADMISSIONS_BY_UNIV.get(univId) || [])]; // 정렬하므로 복사본
 
   // 검정고시 가능 → 조건부 → 불가 순, 같은 등급이면 유리한 전형 순
   const ELIG_RANK = { 가능: 0, 조건부: 1, 불가: 2 };
@@ -103,31 +123,16 @@ export function getUniversityDetailByName(name) {
 // 탐색(둘러보기)용 전체 대학 목록 — 유웨이식 입시정보 요약 카드.
 // 프로필 없이도 동작하며, 각 대학의 검정고시 관점 데이터 충실도를 함께 반환.
 export function getExploreList() {
-  const rowsById = new Map();
-  for (const r of admissions) {
-    if (!rowsById.has(r.univId)) rowsById.set(r.univId, []);
-    rowsById.get(r.univId).push(r);
-  }
-
   const out = [];
   for (const u of universities) {
-    const rows = rowsById.get(u.univId) || [];
+    const rows = ADMISSIONS_BY_UNIV.get(u.univId) || [];
     const eligible = rows.filter((r) => r.gedEligible === '가능' || r.gedEligible === '조건부');
     // 가장 유리한 전형 1개 (가능 우선 > 유형 우선)
-    const sorted = [...eligible].sort((a, b) => {
-      const e = (b.gedEligible === '가능') - (a.gedEligible === '가능');
-      if (e) return e;
-      return (TYPE_RANK[b.admissionType] || 0) - (TYPE_RANK[a.admissionType] || 0);
-    });
+    const sorted = [...eligible].sort(byGedThenType);
     const best = sorted[0] || null;
 
     const comp = comparative[u.univId] || null;
-    const comparativeType =
-      comp?.comparativeGradeType === 'numeric_table'
-        ? 'numeric'
-        : comp
-          ? 'prose'
-          : 'none';
+    const comparativeType = comparativeTypeOf(comp);
     const cut = cutlines[u.univId] || null;
 
     out.push({
@@ -169,7 +174,7 @@ function makeResultItem(u, best, rows, profile, comp) {
   });
   const chance = ev.applicable ? admissionChance(ev) : null;
   const dataGap = !ev.applicable ? (ev.dataGap || null) : null;
-  const comparativeType = comp?.comparativeGradeType === 'numeric_table' ? 'numeric' : comp ? 'prose' : 'none';
+  const comparativeType = comparativeTypeOf(comp);
 
   return {
     univId: u.univId,
@@ -200,19 +205,13 @@ function makeResultItem(u, best, rows, profile, comp) {
 export function analyzeProfile(profile = {}) {
   const { region, csatPlan } = profile;
 
-  const rowsById = new Map();
-  for (const r of admissions) {
-    if (!rowsById.has(r.univId)) rowsById.set(r.univId, []);
-    rowsById.get(r.univId).push(r);
-  }
-
   const susiResults = [];
   const jeongsiResults = [];
 
   for (const u of universities) {
     if (!regionMatches(u.region, region)) continue;
 
-    const allRows = (rowsById.get(u.univId) || []).filter(
+    const allRows = (ADMISSIONS_BY_UNIV.get(u.univId) || []).filter(
       (r) => r.gedEligible === '가능' || r.gedEligible === '조건부'
     );
     if (allRows.length === 0) continue;
@@ -225,11 +224,7 @@ export function analyzeProfile(profile = {}) {
         (r) => r.phase !== '정시' && r.admissionType !== '수능위주'
       );
       if (susiRows.length > 0) {
-        susiRows.sort((a, b) => {
-          const elig = (b.gedEligible === '가능') - (a.gedEligible === '가능');
-          if (elig) return elig;
-          return (TYPE_RANK[b.admissionType] || 0) - (TYPE_RANK[a.admissionType] || 0);
-        });
+        susiRows.sort(byGedThenType);
         susiResults.push(makeResultItem(u, susiRows[0], susiRows, profile, comp));
       }
     }
@@ -347,16 +342,11 @@ function checkCsatMinimum(csatMinimum, csatGrades) {
 
 export function getEssayList(profile = {}) {
   const { region, csatGrades } = profile;
-  const rowsById = new Map();
-  for (const r of admissions) {
-    if (!rowsById.has(r.univId)) rowsById.set(r.univId, []);
-    rowsById.get(r.univId).push(r);
-  }
 
   const results = [];
   for (const u of universities) {
     if (!regionMatches(u.region, region)) continue;
-    const rows = (rowsById.get(u.univId) || []).filter(
+    const rows = (ADMISSIONS_BY_UNIV.get(u.univId) || []).filter(
       (r) => r.admissionType === '논술' && (r.gedEligible === '가능' || r.gedEligible === '조건부')
     );
     if (rows.length === 0) continue;

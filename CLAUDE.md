@@ -36,13 +36,13 @@ npm run verify         # 배포 캐시 우회 검증 (node verify-deploy.mjs)
 - `src/components/` — `*Screen.jsx` 화면들 + `BottomNav`, `SplashScreen`, `TrackShell`
 - `src/lib/` — 로직 (persona, scoreEngine, careernet, community, auth, youthVerify …)
 - `src/data/` — 정적 데이터셋 (universities.json, admissions.json, jobData.js, glossary.js …)
-- `api/` — Vercel 서버리스 함수 (`gemini.js`, `careernet.js`) — API 키 프록시
+- `api/` — Vercel 서버리스 함수 (`careernet.js`) — API 키 프록시
 - `supabase/schema.sql` — 커뮤니티 테이블 + RLS + `redeem_code` RPC
 - `data-pipeline/` — 별도 Python 툴체인. 대학 PDF에서 admissions JSON 추출 (앱과 무관, 오프라인)
 
 ## 보안 주의
 
-- **비밀 키는 서버리스 함수에서만.** `GEMINI_API_KEY`, `CAREERNET_API_KEY`는 `VITE_` 접두사 붙이지 말 것 (붙이면 클라이언트 번들에 노출됨). 과거 이 문제가 있었고 서버리스 프록시로 수정함 — 되돌리지 말 것.
+- **비밀 키는 서버리스 함수에서만.** `CAREERNET_API_KEY` 등 비밀 키는 `VITE_` 접두사 붙이지 말 것 (붙이면 클라이언트 번들에 노출됨). 과거 이 문제가 있었고 서버리스 프록시로 수정함 — 되돌리지 말 것.
 - `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY`는 공개용(RLS 보호)이라 노출 정상. `service_role` 키는 클라이언트에서 절대 사용 금지.
 - `.env`는 gitignore됨. `.env.example`만 커밋.
 

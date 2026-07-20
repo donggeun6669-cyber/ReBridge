@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import {
-  ArrowLeft, GraduationCap, BadgeCheck, FileText, MapPin, ExternalLink,
+  ArrowLeft, BadgeCheck, FileText, MapPin, ExternalLink,
   ArrowUpRight, Sparkles, Lightbulb, ListOrdered,
 } from 'lucide-react';
 import { loadPrimaryJob } from '../lib/persona.js';

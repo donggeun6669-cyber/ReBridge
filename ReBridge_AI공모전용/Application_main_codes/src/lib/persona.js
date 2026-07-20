@@ -81,13 +81,6 @@ export function loadPrimaryJob() {
 }
 
 // ── 하위호환: 기존 화면들이 쓰는 단일 target API ──
-export function setJobTarget(target) {
-  if (!target) return persistJobProfile({ target: undefined });
-  const jobs = loadSavedJobs();
-  const exists = jobs.some((j) => j.name === target.name && j.field === target.field);
-  const nextJobs = exists ? jobs : [...jobs, target].slice(0, MAX_SAVED_JOBS);
-  return persistJobProfile({ savedJobs: nextJobs, primaryJob: target, target });
-}
 export function loadJobTarget() {
   return loadPrimaryJob();
 }
@@ -123,7 +116,7 @@ export function setActiveTrack(track) {
 }
 
 // 하단 탭은 트랙과 무관하게 항상 고정 4개(홈·지원·커뮤니티·MY).
-// 트랙별 화면(학습/대입/직업)은 홈 안의 상단 서브탭(TrackShell)으로 들어간다.
+// 트랙별 화면(학습/대입/직업)은 홈 안의 상단 서브탭(TrackHome)으로 들어간다.
 export function getNav() {
   return {
     tabs: [

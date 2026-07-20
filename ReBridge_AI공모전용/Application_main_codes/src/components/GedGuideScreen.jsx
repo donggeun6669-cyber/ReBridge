@@ -11,17 +11,12 @@ import {
   getNextSession, daysUntil, formatKDate,
 } from '../data/gedGuide.js';
 import { loadProfile } from '../lib/persona.js';
+import { MOCK_KEY, loadScores } from '../lib/studyUtils.js';
 import '../styles.gedguide.css';
 
 const ICONS = {
   BookOpen, Calculator, Languages, Globe2, FlaskConical, Landmark,
 };
-
-const MOCK_KEY = 'rebridge_mock_scores';
-function loadScores() {
-  try { return JSON.parse(localStorage.getItem(MOCK_KEY)) || {}; }
-  catch { return {}; }
-}
 
 export default function GedGuideScreen({ goTo = () => {} }) {
   const [openSubject, setOpenSubject] = useState(null);

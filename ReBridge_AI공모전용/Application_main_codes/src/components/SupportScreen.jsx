@@ -8,11 +8,11 @@ import { useState, useMemo, useEffect } from 'react';
 import {
   MapPin, Phone, Map as MapIcon, Gift, Lock, ChevronDown,
   Wallet, HeartHandshake, Compass, Users, GraduationCap, ChevronRight,
-  BookOpen, ShieldCheck, AlertCircle, Filter, Activity, MessageCircle,
+  BookOpen, ShieldCheck, AlertCircle, Activity, MessageCircle,
 } from 'lucide-react';
 import centersRaw from '../data/kkumdrim.json';
 import { COMMON_SUPPORT } from '../data/commonSupport';
-import { BENEFIT_CATEGORIES, getCenterBenefits, hasBenefits } from '../lib/benefits';
+import { getCenterBenefits } from '../lib/benefits';
 import '../styles.support.css';
 
 // 카테고리/공통지원 icon 이름 → lucide 컴포넌트 매핑
@@ -32,14 +32,6 @@ const REGIONS = [
 
 const regionCount = centersRaw.reduce((acc, c) => {
   acc[c.region] = (acc[c.region] || 0) + 1;
-  return acc;
-}, {});
-
-// 카테고리별로 "정리된 정보가 있는" 센터 수 (전체 기준)
-const categoryCountAll = BENEFIT_CATEGORIES.reduce((acc, cat) => {
-  acc[cat.id] = centersRaw.filter(
-    (c) => hasBenefits(c) && c.benefits.includes(cat.id)
-  ).length;
   return acc;
 }, {});
 

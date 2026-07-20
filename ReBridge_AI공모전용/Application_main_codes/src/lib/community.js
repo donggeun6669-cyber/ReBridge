@@ -121,14 +121,14 @@ export async function listPosts(opts = {}) {
     query = query.order('created_at', { ascending: false }).range(offset, offset + limit - 1);
     const { data, error } = await query;
     if (error) return { items: [], hasMore: false, total: 0 };
-    let items = (data || []).map((p) => normalize(p, me));
+    const bm = bookmarkedIdSet(me?.id);
+    let items = (data || []).map((p) => normalize(p, me, bm));
     items = applyClientFilters(items, me, sort);
     return { items, hasMore: (data || []).length === limit, total: items.length + offset };
   }
 
   // 목
-  const reactions = mockStore.getReactions();
-  const comments = mockStore.getComments();
+  const idx = mockIndexes(mockStore.getReactions(), mockStore.getComments(), me);
   const blocked = blockedIdSet(me?.id);
   const bookmarks = bookmarkedIdSet(me?.id);
   const term = (q || '').trim().toLowerCase();
@@ -144,7 +144,7 @@ export async function listPosts(opts = {}) {
       if (blocked.has(p.author_id) && p.author_id !== me?.id) return false;
       return true;
     })
-    .map((p) => normalizeMock(p, reactions, comments, me, bookmarks));
+    .map((p) => normalizeMock(p, idx, me, bookmarks));
 
   all = sortItems(all, sort);
   const total = all.length;
@@ -181,11 +181,12 @@ export async function getPost(id) {
       .eq('id', id)
       .maybeSingle();
     if (error || !data) return null;
-    return normalize(data, me);
+    return normalize(data, me, bookmarkedIdSet(me?.id));
   }
   const p = mockStore.getPosts().find((x) => x.id === id);
   if (!p) return null;
-  return normalizeMock(p, mockStore.getReactions(), mockStore.getComments(), me, bookmarkedIdSet(me?.id));
+  const idx = mockIndexes(mockStore.getReactions(), mockStore.getComments(), me);
+  return normalizeMock(p, idx, me, bookmarkedIdSet(me?.id));
 }
 
 // 댓글 목록 — 1단 답글(parent_id) 트리로 반환.
@@ -424,20 +425,20 @@ export async function listBookmarks() {
       .eq('user_id', me.id)
       .order('created_at', { ascending: false });
     if (error) return [];
-    return (data || []).filter((r) => r.posts).map((r) => normalize(r.posts, me));
+    const bm = bookmarkedIdSet(me.id);
+    return (data || []).filter((r) => r.posts).map((r) => normalize(r.posts, me, bm));
   }
   const ids = mockStore.getBookmarks()
     .filter((b) => b.user_id === me.id)
     .sort((a, b) => b.created_at - a.created_at)
     .map((b) => b.post_id);
   const posts = mockStore.getPosts();
-  const reactions = mockStore.getReactions();
-  const comments = mockStore.getComments();
+  const idx = mockIndexes(mockStore.getReactions(), mockStore.getComments(), me);
   const bm = bookmarkedIdSet(me.id);
   return ids
     .map((id) => posts.find((p) => p.id === id))
     .filter(Boolean)
-    .map((p) => normalizeMock(p, reactions, comments, me, bm));
+    .map((p) => normalizeMock(p, idx, me, bm));
 }
 
 // ── P1: 신고(로그인 필요). target: 'post'|'comment' ──────────────────────────
@@ -484,39 +485,28 @@ export async function blockUser(targetUserId) {
   return { ok: true };
 }
 
-export async function unblockUser(targetUserId) {
-  const me = getCachedUser();
-  if (!me) return { ok: false, error: '로그인이 필요해요.' };
-  if (isSupabase) {
-    await supabase.from('blocks').delete().eq('blocker', me.id).eq('blocked', targetUserId);
-    return { ok: true };
-  }
-  mockStore.setBlocks(mockStore.getBlocks()
-    .filter((b) => !(b.blocker_id === me.id && b.blocked_id === targetUserId)));
-  return { ok: true };
-}
-
-export function isBlocked(targetUserId) {
-  const me = getCachedUser();
-  if (!me || !targetUserId) return false;
-  return blockedIdSet(me.id).has(targetUserId);
-}
-
 // ── P1: 가벼운 알림 — 내 글에 새로 달린 댓글/공감 수(로컬 계산) ──────────────────
 // 반환: { total, items: [{ postId, title, newComments, newLikes }] }
 export async function getNotifications() {
   const me = getCachedUser();
   if (!me) return { total: 0, items: [] };
-  const myPosts = mockStore.getPosts().filter((p) => p.author_id === me.id || p.author === me.id);
+  const myPosts = mockStore.getPosts().filter((p) => p.author_id === me.id);
   if (myPosts.length === 0) return { total: 0, items: [] };
-  const comments = mockStore.getComments();
-  const reactions = mockStore.getReactions();
+  // 글마다 전체 배열을 다시 훑지 않도록 post_id별 카운트를 한 번만 만든다.
+  const cCount = new Map();
+  for (const x of mockStore.getComments()) {
+    if (x.author_id !== me.id) cCount.set(x.post_id, (cCount.get(x.post_id) || 0) + 1);
+  }
+  const rCount = new Map();
+  for (const x of mockStore.getReactions()) {
+    if (x.user_id !== me.id) rCount.set(x.post_id, (rCount.get(x.post_id) || 0) + 1);
+  }
   const seen = mockStore.getSeen();
   let total = 0;
   const items = [];
   for (const p of myPosts) {
-    const c = comments.filter((x) => x.post_id === p.id && x.author_id !== me.id).length;
-    const r = reactions.filter((x) => x.post_id === p.id && x.user_id !== me.id).length;
+    const c = cCount.get(p.id) || 0;
+    const r = rCount.get(p.id) || 0;
     const prev = seen[p.id] || { c: 0, r: 0 };
     const newC = Math.max(0, c - prev.c);
     const newR = Math.max(0, r - prev.r);
@@ -549,9 +539,8 @@ function authorOf(prof) {
     center: prof?.verified_center || null,
   };
 }
-function normalize(p, me) {
+function normalize(p, me, bm = new Set()) {
   const reactions = p.reactions || [];
-  const bm = me ? bookmarkedIdSet(me.id) : new Set();
   return {
     id: p.id, board: p.board, tag: p.tag || null, title: p.title, body: p.body,
     createdAt: new Date(p.created_at).getTime(),
@@ -563,15 +552,28 @@ function normalize(p, me) {
     mine: me?.id === p.author,
   };
 }
-function normalizeMock(p, reactions, comments, me, bookmarks) {
-  const rs = reactions.filter((r) => r.post_id === p.id);
+// 목 데이터 정규화 — 글마다 전체 배열을 스캔하지 않도록 post_id별 인덱스를 먼저 만든다.
+function mockIndexes(reactions, comments, me) {
+  const likeCount = new Map();
+  const likedByMe = new Set();
+  for (const r of reactions) {
+    likeCount.set(r.post_id, (likeCount.get(r.post_id) || 0) + 1);
+    if (me && r.user_id === me.id) likedByMe.add(r.post_id);
+  }
+  const commentCount = new Map();
+  for (const c of comments) {
+    commentCount.set(c.post_id, (commentCount.get(c.post_id) || 0) + 1);
+  }
+  return { likeCount, commentCount, likedByMe };
+}
+function normalizeMock(p, idx, me, bookmarks) {
   return {
     id: p.id, board: p.board, tag: p.tag || null, title: p.title, body: p.body, createdAt: p.created_at,
     rating: p.rating ?? null,
     author: { id: p.author_id, nickname: p.author_nickname, verified: !!p.author_verified, center: p.author_center },
-    likeCount: rs.length,
-    commentCount: comments.filter((c) => c.post_id === p.id).length,
-    likedByMe: me ? rs.some((r) => r.user_id === me.id) : false,
+    likeCount: idx.likeCount.get(p.id) || 0,
+    commentCount: idx.commentCount.get(p.id) || 0,
+    likedByMe: idx.likedByMe.has(p.id),
     bookmarkedByMe: me && bookmarks ? bookmarks.has(p.id) : false,
     mine: me?.id === p.author_id,
   };

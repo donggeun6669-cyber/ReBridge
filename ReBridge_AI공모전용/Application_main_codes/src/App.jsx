@@ -1,47 +1,50 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, lazy, Suspense } from 'react';
 import { ArrowLeft } from 'lucide-react';
-import HomeScreen from './components/HomeScreen.jsx';
-import ExploreScreen from './components/ExploreScreen.jsx';
-import ProfileScreen from './components/ProfileScreen.jsx';
-import MyPageScreen from './components/MyPageScreen.jsx';
-import GuideScreen from './components/GuideScreen.jsx';
-import GlossaryScreen from './components/GlossaryScreen.jsx';
-import ResultsScreen from './components/ResultsScreen.jsx';
-import DetailScreen from './components/DetailScreen.jsx';
-import RoadmapScreen from './components/RoadmapScreen.jsx';
-import DocumentsScreen from './components/DocumentsScreen.jsx';
-import SavedScreen from './components/SavedScreen.jsx';
-import MapScreen from './components/MapScreen.jsx';
-import HelpScreen from './components/HelpScreen.jsx';
-import ChecklistScreen from './components/ChecklistScreen.jsx';
-import FormsGuideScreen from './components/FormsGuideScreen.jsx';
-import DreamdriveScreen from './components/DreamdriveScreen.jsx';
-import GedGuideScreen from './components/GedGuideScreen.jsx';
-import StudyRoadmapScreen from './components/StudyRoadmapScreen.jsx';
-import StudyPlannerScreen from './components/StudyPlannerScreen.jsx';
-import CareerHubScreen from './components/CareerHubScreen.jsx';
-import PathGuideScreen from './components/PathGuideScreen.jsx';
-import JobHomeScreen from './components/JobHomeScreen.jsx';
-import JobExploreScreen from './components/JobExploreScreen.jsx';
-import JobRoadmapScreen from './components/JobRoadmapScreen.jsx';
-import JobQuestionsScreen from './components/JobQuestionsScreen.jsx';
-import JobDetailScreen from './components/JobDetailScreen.jsx';
-import JobInfoScreen from './components/JobInfoScreen.jsx';
-import JobPsychScreen from './components/JobPsychScreen.jsx';
-import JobTrainingScreen from './components/JobTrainingScreen.jsx';
-import JobApplyScreen from './components/JobApplyScreen.jsx';
-import OnboardingScreen from './components/OnboardingScreen.jsx';
-import CommunityScreen from './components/CommunityScreen.jsx';
-import CommunityPostScreen from './components/CommunityPostScreen.jsx';
-import CommunityWriteScreen from './components/CommunityWriteScreen.jsx';
-import AuthScreen from './components/AuthScreen.jsx';
-import SupportScreen from './components/SupportScreen.jsx';
+// 스플래시·하단탭만 즉시 로드하고, 화면들은 lazy로 쪼개 첫 로딩 번들을 가볍게 한다.
+// (대형 JSON을 물고 있는 대입 관련 화면들이 초기 번들에서 빠지는 효과)
 import BottomNav from './components/BottomNav.jsx';
 import SplashScreen from './components/SplashScreen.jsx';
 import { getPersona, getNav, activeTabId, loadProfile } from './lib/persona.js';
 
+const HomeScreen = lazy(() => import('./components/HomeScreen.jsx'));
+const ExploreScreen = lazy(() => import('./components/ExploreScreen.jsx'));
+const ProfileScreen = lazy(() => import('./components/ProfileScreen.jsx'));
+const MyPageScreen = lazy(() => import('./components/MyPageScreen.jsx'));
+const GuideScreen = lazy(() => import('./components/GuideScreen.jsx'));
+const GlossaryScreen = lazy(() => import('./components/GlossaryScreen.jsx'));
+const ResultsScreen = lazy(() => import('./components/ResultsScreen.jsx'));
+const DetailScreen = lazy(() => import('./components/DetailScreen.jsx'));
+const RoadmapScreen = lazy(() => import('./components/RoadmapScreen.jsx'));
+const DocumentsScreen = lazy(() => import('./components/DocumentsScreen.jsx'));
+const SavedScreen = lazy(() => import('./components/SavedScreen.jsx'));
+const MapScreen = lazy(() => import('./components/MapScreen.jsx'));
+const HelpScreen = lazy(() => import('./components/HelpScreen.jsx'));
+const ChecklistScreen = lazy(() => import('./components/ChecklistScreen.jsx'));
+const FormsGuideScreen = lazy(() => import('./components/FormsGuideScreen.jsx'));
+const DreamdriveScreen = lazy(() => import('./components/DreamdriveScreen.jsx'));
+const GedGuideScreen = lazy(() => import('./components/GedGuideScreen.jsx'));
+const StudyRoadmapScreen = lazy(() => import('./components/StudyRoadmapScreen.jsx'));
+const StudyPlannerScreen = lazy(() => import('./components/StudyPlannerScreen.jsx'));
+const CareerHubScreen = lazy(() => import('./components/CareerHubScreen.jsx'));
+const PathGuideScreen = lazy(() => import('./components/PathGuideScreen.jsx'));
+const JobHomeScreen = lazy(() => import('./components/JobHomeScreen.jsx'));
+const JobExploreScreen = lazy(() => import('./components/JobExploreScreen.jsx'));
+const JobRoadmapScreen = lazy(() => import('./components/JobRoadmapScreen.jsx'));
+const JobQuestionsScreen = lazy(() => import('./components/JobQuestionsScreen.jsx'));
+const JobDetailScreen = lazy(() => import('./components/JobDetailScreen.jsx'));
+const JobInfoScreen = lazy(() => import('./components/JobInfoScreen.jsx'));
+const JobPsychScreen = lazy(() => import('./components/JobPsychScreen.jsx'));
+const JobTrainingScreen = lazy(() => import('./components/JobTrainingScreen.jsx'));
+const JobApplyScreen = lazy(() => import('./components/JobApplyScreen.jsx'));
+const OnboardingScreen = lazy(() => import('./components/OnboardingScreen.jsx'));
+const CommunityScreen = lazy(() => import('./components/CommunityScreen.jsx'));
+const CommunityPostScreen = lazy(() => import('./components/CommunityPostScreen.jsx'));
+const CommunityWriteScreen = lazy(() => import('./components/CommunityWriteScreen.jsx'));
+const AuthScreen = lazy(() => import('./components/AuthScreen.jsx'));
+const SupportScreen = lazy(() => import('./components/SupportScreen.jsx'));
+
 // 하단 글로벌 탭의 루트 화면들(여기로 가면 스택 리셋). 항상 고정 4개.
-// 트랙 화면(학습/대입/직업)은 홈 안의 TrackShell이 그리므로 여기 없음.
+// 트랙 화면(학습/대입/직업)은 홈 안의 TrackHome이 그리므로 여기 없음.
 const TAB_ROOTS = ['home', 'support', 'community', 'mypage'];
 
 const KNOWN_SCREENS = [
@@ -120,6 +123,9 @@ export default function App() {
       <div className="app-frame">
         {splash && <SplashScreen onDone={handleSplashDone} />}
 
+        <Suspense fallback={<div className="screen" aria-busy="true" />}>
+
+
         {!splash && screen === 'onboarding'  && <OnboardingScreen goTo={goTo} presetTrack={params.presetTrack} />}
 
         {!splash && screen === 'home'        && <HomeScreen goTo={goTo} goBack={goBack} />}
@@ -195,6 +201,7 @@ export default function App() {
             </div>
           </div>
         )}
+        </Suspense>
 
         {showNav && (
           <BottomNav tabs={nav.tabs} active={activeTabId(screen)} goTo={goToTab} />

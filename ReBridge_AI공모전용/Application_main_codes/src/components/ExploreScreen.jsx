@@ -1,14 +1,13 @@
 import { useMemo, useState, useEffect } from 'react';
 import { Search, X, ChevronRight, SlidersHorizontal, Sparkles, Map as MapIcon, ArrowLeft, Target } from 'lucide-react';
 import { getExploreList } from '../lib/analysis.js';
+import { loadProfile } from '../lib/persona.js';
 import { evaluateAdmission, admissionChance, gedFit } from '../lib/scoreEngine.js';
 import { TOP_TIER_EXCLUDE } from '../data/topTierExclude.js';
 import ChanceGauge from './ChanceGauge.jsx';
 
 // 한 번에 보여줄 대학 수 ('더 보기'로 증가)
 const PAGE_SIZE = 20;
-
-const STORAGE_KEY = 'rebridge_profile';
 
 const GEOJEOM = new Set([
   '부산대학교', '경북대학교', '전남대학교', '충남대학교', '전북대학교',
@@ -37,14 +36,6 @@ function matchFilter(s, filter) {
   if (filter === '수도권') return ['경기', '인천'].includes(s.region) && s.kind === '대학교';
   if (filter === '지방거점') return GEOJEOM.has(s.name) && s.kind === '대학교';
   return true;
-}
-
-function loadProfile() {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || null;
-  } catch {
-    return null;
-  }
 }
 
 export default function ExploreScreen({ goTo = () => {}, goBack = () => {}, canGoBack = false }) {
@@ -98,23 +89,6 @@ export default function ExploreScreen({ goTo = () => {}, goBack = () => {}, canG
     const FIT_RANK = { good: 3, ok: 2, check: 1, no: 0 };
     rows.sort((a, b) => {
       if (sort === 'name') return a.name.localeCompare(b.name);
-
-      // 합격 가능 순: 검정고시생 기준 현실적 합격 가능성 우선
-      if (sort === 'ged') {
-        const fa = FIT_RANK[a.fit?.level] ?? 2;
-        const fb = FIT_RANK[b.fit?.level] ?? 2;
-        if (fa !== fb) return fb - fa;
-        const ea = a.eligibleCount || 0;
-        const eb = b.eligibleCount || 0;
-        if (ea !== eb) return eb - ea;
-        if (hasScore) {
-          const al = a.chance ? a.chance.level : 0;
-          const bl = b.chance ? b.chance.level : 0;
-          if (al !== bl) return bl - al;
-        }
-        if (b.dataScore !== a.dataScore) return b.dataScore - a.dataScore;
-        return a.name.localeCompare(b.name);
-      }
 
       // 추천순:
       //  - 점수가 있으면 '합격 가능성(칸수)' 높은 순을 최우선 → 위에서부터 유리한 대학.

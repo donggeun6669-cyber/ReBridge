@@ -6,17 +6,9 @@ import {
 import { analyzeProfile, getEssayList } from '../lib/analysis.js';
 import { gedFit } from '../lib/scoreEngine.js';
 import ChanceGauge from './ChanceGauge.jsx';
+import { loadProfile } from '../lib/persona.js';
 
-const STORAGE_KEY = 'rebridge_profile';
 const METRO = new Set(['서울', '경기', '인천']);
-
-function loadProfile() {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || null;
-  } catch {
-    return null;
-  }
-}
 
 // 프로필 1줄 요약
 function profileOneLiner(p) {

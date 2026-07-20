@@ -458,32 +458,6 @@ export default function GuideScreen({ topic = 'types', goTo = () => {}, goBack =
   const HeroIcon = guide.icon;
   const color = TOPIC_COLOR[topic] || 'brand';
 
-  if (guide.pending) {
-    return (
-      <div className={`screen guide-screen guide-theme-${color}`}>
-        <header className="topbar center">
-          <button className="icon-btn" aria-label="뒤로" onClick={goBack}>
-            <ArrowLeft size={22} />
-          </button>
-          <span className="page-title">자주 하는 질문</span>
-        </header>
-
-        <section className="guide-hero">
-          <span className={`guide-hero-icon ico-${color}`}>
-            <HeroIcon size={28} />
-          </span>
-          <h1>{guide.title}</h1>
-          <p>{guide.subtitle}</p>
-        </section>
-
-        <section className="explain-box">
-          <span className="mini-label">잠깐만요</span>
-          <p>이 질문의 자세한 답변은 곧 준비할게요. 조금만 기다려 주세요.</p>
-        </section>
-      </div>
-    );
-  }
-
   return (
     <div className={`screen guide-screen guide-theme-${color}`}>
       <header className="topbar center">

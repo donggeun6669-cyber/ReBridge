@@ -15,6 +15,17 @@ export default defineConfig(({ mode }) => {
     define: {
       __BUILD_TIME__: JSON.stringify(buildStamp),
     },
+    build: {
+      rollupOptions: {
+        output: {
+          // 자주 안 바뀌는 라이브러리를 별도 청크로 → 재배포해도 브라우저 캐시 유지
+          manualChunks: {
+            vendor: ['react', 'react-dom'],
+            supabase: ['@supabase/supabase-js'],
+          },
+        },
+      },
+    },
     server: {
       allowedHosts: ['dingy-blade-backup.ngrok-free.dev'],
       proxy: {
