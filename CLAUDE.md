@@ -48,6 +48,8 @@ npm run verify         # 배포 캐시 우회 검증 (node verify-deploy.mjs)
 - `.env`는 gitignore됨. `.env.example`만 커밋.
 - **커뮤니티 권한은 클라이언트 검사에 의존하지 말 것.** '우리 센터' 보드 읽기/쓰기와 인증코드 사용 제한은 `supabase/schema.sql`의 RLS·RPC에서 서버가 강제한다 — 클라이언트 조건문만 고치면 우회된다.
 - `api/careernet.js`는 파라미터 화이트리스트 + same-origin 검사 + 레이트리밋으로 잠겨 있다. 새 파라미터가 필요하면 `ALLOWED_PARAMS`에 추가할 것(전체 통과로 되돌리지 말 것).
+- 카카오맵 JS 앱키(`src/lib/kakaoMap.js`)가 소스에 하드코딩된 건 **정상**이다(브라우저 SDK라 숨길 수 없음). 보호는 카카오 콘솔의 허용 도메인 등록으로 한다 — 키를 숨기려는 리팩터링은 무의미하니 하지 말 것.
+- 외부 API는 커리어넷·Supabase·카카오맵 3개뿐. 나머지 정부 사이트 도메인은 전부 단순 링크다. 상세는 `Planning/PRD.md` §7.
 
 ## 배포 구조 (2026-07 정리)
 
