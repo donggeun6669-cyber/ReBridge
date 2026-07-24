@@ -54,7 +54,8 @@ npm run verify         # 배포 캐시 우회 검증 (node verify-deploy.mjs)
 
 ## 배포 구조 (2026-07 정리)
 
-- **GitHub `main` 푸시 → Vercel 자동 배포.** 레포가 Vercel 프로젝트 **`gumgomentor`**(프로덕션, https://rebridge-rho.vercel.app)에 Git 연동돼 있다. push 권한 있는 협업자는 누구나 push만으로 배포된다.
+- **GitHub `main` 푸시 → Vercel 자동 배포.** 레포가 Vercel 프로젝트 **`gumgomentor`**(프로덕션, https://rebridge-rho.vercel.app)에 Git 연동돼 있다.
+- ⚠️ **협업자 배포 제약(Hobby 플랜 + 비공개 저장소):** HEAD 커밋 **작성자가 Vercel 계정 소유자가 아니면 배포가 거부된다**(`Hobby Plan does not support collaboration for private repositories`). 2026-06-23에 실제로 겪은 문제. 팀원이 push하면 자동배포가 막힐 수 있다. 해결책 택1 — (a) 배포 직전 동근님 명의 커밋을 HEAD로, (b) 저장소 public 전환, (c) Vercel Pro(월 $20). **팀원 push 후에는 배포 성공 여부를 반드시 확인할 것.**
 - `gumgomentor-beta` 프로젝트는 옛 수동 배포용 잔재 — 사용하지 않는다.
 - 서버 비밀 키(`CAREERNET_API_KEY`)와 Supabase 공개 키(`VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY`)는 Vercel 프로젝트 환경변수에 등록되어 있음(`npx vercel env ls`로 확인).
 - `dist/`, `.vercel/`, `.env*`는 전부 gitignore됨(추적 안 됨).

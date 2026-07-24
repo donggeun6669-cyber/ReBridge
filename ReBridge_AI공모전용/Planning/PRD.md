@@ -174,6 +174,12 @@ persona = {
 
 ## 8. 남은 과제 (2026-07-25 기준)
 
+> ### ▶ 다음 작업은 여기서 시작한다
+> **Supabase 익명 로그인 활성화(아직 안 켬)** → 켠 뒤 커뮤니티 가입·글쓰기가 실제로 도는지 검증.
+> 대시보드 → Authentication → Sign In / Providers → **Anonymous Sign-Ins** 켜기.
+> 현재 Vercel에 Supabase 키가 등록돼 있으므로, **토글을 켜는 순간 실백엔드로 붙는다.**
+> 켜기 전까지는 커뮤니티 가입이 `anonymous_provider_disabled`로 실패한다(실측 확인됨).
+
 ### 동근님 몫 — 데이터
 
 우선순위 순. 1번이 압도적으로 중요하다.
@@ -189,8 +195,11 @@ persona = {
 
 ### 동근님 몫 — 설정 (앱 밖에서만 가능)
 
-1. **Supabase 익명 로그인 활성화** — Authentication → Sign In/Providers → Anonymous Sign-Ins.
+1. **Supabase 익명 로그인 활성화** ← **다음 작업 시작점.** Authentication → Sign In/Providers → Anonymous Sign-Ins.
    현재 꺼져 있어 커뮤니티 가입이 실패한다. 켜야 커뮤니티가 실백엔드로 동작.
+1-1. **협업자 배포 제약 결정** — 저장소가 비공개 + Vercel Hobby라, HEAD 커밋 작성자가 동근님이 아니면
+   자동배포가 거부된다(2026-06-23 실제 발생). 팀원이 직접 배포하게 하려면 저장소 public 전환이나
+   Pro(월 $20) 중 하나를 골라야 한다. 그 전까지는 **팀원 push 후 배포 성공 여부를 확인**해야 한다.
 2. **카카오맵 허용 도메인 확인** — 확인되면 `MAP_ENABLED = true`로 지도를 다시 켠다. 위 §7 참고.
 3. 정식 출시 시 Supabase Pro(월 $25) — 무료 플랜은 1주 미사용 시 자동 정지.
 
