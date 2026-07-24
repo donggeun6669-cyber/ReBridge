@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowLeft, ChevronRight, MapPin, X } from 'lucide-react';
 import universities from '../data/universities.json';
 import { getExploreList } from '../lib/analysis.js';
-import { useKakaoMap } from '../lib/kakaoMap.js';
+import { useKakaoMap, MAP_ENABLED } from '../lib/kakaoMap.js';
 
 const FILTERS = ['전체', '검정고시 전형', '4년제', '전문대'];
 
@@ -98,11 +98,25 @@ export default function MapScreen({ goTo = () => {}, goBack = () => {} }) {
       </div>
 
       <div className="map-wrap">
-        <KakaoMapView
-          points={filtered}
-          onSelect={setSelected}
-          selectedId={selected?.univId}
-        />
+        {MAP_ENABLED ? (
+          <KakaoMapView
+            points={filtered}
+            onSelect={setSelected}
+            selectedId={selected?.univId}
+          />
+        ) : (
+          <div className="map-off">
+            <MapPin size={22} />
+            <p className="map-off-title">지도는 잠시 쉬어 가요</p>
+            <p className="map-off-desc">
+              지도 기능을 점검하는 동안 잠시 꺼 두었어요.<br />
+              대학은 목록에서 그대로 찾아볼 수 있어요.
+            </p>
+            <button className="map-off-btn" onClick={goBack}>
+              목록으로 돌아가기
+            </button>
+          </div>
+        )}
 
         {selected && (
           <div className="map-bottom-sheet">
@@ -143,7 +157,7 @@ export default function MapScreen({ goTo = () => {}, goBack = () => {} }) {
         )}
       </div>
 
-      {!selected && (
+      {MAP_ENABLED && !selected && (
         <p className="map-legend">
           <span className="dot dot-ged" /> 검정고시 전형 있음
           <span className="dot dot-none" /> 정보 준비 중

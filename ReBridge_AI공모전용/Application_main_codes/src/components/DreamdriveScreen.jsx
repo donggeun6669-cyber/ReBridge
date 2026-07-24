@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import centersRaw from '../data/kkumdrim.json';
 import { getCenterBenefits } from '../lib/benefits';
-import { useKakaoMap } from '../lib/kakaoMap.js';
+import { useKakaoMap, MAP_ENABLED } from '../lib/kakaoMap.js';
 
 const BENEFIT_ICONS = { Wallet, HeartHandshake, Compass, Users, GraduationCap, Activity };
 
@@ -299,7 +299,8 @@ export default function DreamdriveScreen({ goBack = () => {}, params = {} }) {
         )}
       </div>
 
-      {/* ── 카카오맵 (항상 표시) ── */}
+      {/* ── 카카오맵 (점검 중엔 안내로 대체 — lib/kakaoMap.js 의 MAP_ENABLED) ── */}
+      {MAP_ENABLED && (
       <div className="kdream-map-wrap">
         <KakaoMapView
           centers={mapCenters}
@@ -328,6 +329,7 @@ export default function DreamdriveScreen({ goBack = () => {}, params = {} }) {
           </div>
         )}
       </div>
+      )}
 
       {/* ── 지역 필터 ── */}
       <div className="kdream-region-scroll">
