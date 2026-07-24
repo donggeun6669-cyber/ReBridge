@@ -29,7 +29,8 @@ npm run verify         # 배포 캐시 우회 검증 (node verify-deploy.mjs)
 - **커스텀 라우터** — react-router 아님. `src/App.jsx`가 `{screen, params}` 스택을 들고 `goTo()`/`goBack()`을 모든 화면에 prop으로 넘긴다. 새 화면은 `KNOWN_SCREENS`(+ 탭 루트면 `TAB_ROOTS`)에 등록해야 함. 안 하면 "준비 중" placeholder.
 - **페르소나 기반 UI** (`src/lib/persona.js`) — `{stage, goal}`에 따라 노출 기능/탭이 달라짐. 상태는 localStorage `rebridge_profile`. 모든 사용자에게 모든 기능을 보여주지 않는 게 원칙.
 - **점수 엔진은 규칙 기반, AI 아님** (`src/lib/scoreEngine.js`). 2025 입결(9등급)과 2028 전형(5등급)은 직접 비교 불가 — UI는 "참고용"임을 명시하고 합격 보장 표현 금지.
-- **커뮤니티 백엔드는 Supabase, 없으면 자동으로 localStorage mock으로 폴백** (`src/lib/supabaseClient.js`). 데모 인증코드 `DREAM-TEST` / `DREAM-DEMO` 시드됨.
+- **커뮤니티 백엔드는 Supabase, 없으면 자동으로 localStorage mock으로 폴백** (`src/lib/supabaseClient.js`). 데모 인증코드 `DREAM-TEST` / `DREAM-DEMO`는 mock 모드에서만 시드·노출된다.
+- 기획·기능·데이터 현황은 `ReBridge_AI공모전용/Planning/PRD.md` 한 장에 통합돼 있다.
 
 ## 디렉터리 (`Application_main_codes/`)
 
@@ -38,13 +39,15 @@ npm run verify         # 배포 캐시 우회 검증 (node verify-deploy.mjs)
 - `src/data/` — 정적 데이터셋 (universities.json, admissions.json, jobData.js, glossary.js …)
 - `api/` — Vercel 서버리스 함수 (`careernet.js`) — API 키 프록시
 - `supabase/schema.sql` — 커뮤니티 테이블 + RLS + `redeem_code` RPC
-- `data-pipeline/` — 별도 Python 툴체인. 대학 PDF에서 admissions JSON 추출 (앱과 무관, 오프라인)
+- `data-pipeline/` — 별도 Python 툴체인. 대학 PDF에서 admissions JSON 추출 (앱과 무관, 오프라인). `sources/`에 공공데이터 원본 보존 — 삭제 금지
 
 ## 보안 주의
 
 - **비밀 키는 서버리스 함수에서만.** `CAREERNET_API_KEY` 등 비밀 키는 `VITE_` 접두사 붙이지 말 것 (붙이면 클라이언트 번들에 노출됨). 과거 이 문제가 있었고 서버리스 프록시로 수정함 — 되돌리지 말 것.
 - `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY`는 공개용(RLS 보호)이라 노출 정상. `service_role` 키는 클라이언트에서 절대 사용 금지.
 - `.env`는 gitignore됨. `.env.example`만 커밋.
+- **커뮤니티 권한은 클라이언트 검사에 의존하지 말 것.** '우리 센터' 보드 읽기/쓰기와 인증코드 사용 제한은 `supabase/schema.sql`의 RLS·RPC에서 서버가 강제한다 — 클라이언트 조건문만 고치면 우회된다.
+- `api/careernet.js`는 파라미터 화이트리스트 + same-origin 검사 + 레이트리밋으로 잠겨 있다. 새 파라미터가 필요하면 `ALLOWED_PARAMS`에 추가할 것(전체 통과로 되돌리지 말 것).
 
 ## 배포 구조 (2026-07 정리)
 
