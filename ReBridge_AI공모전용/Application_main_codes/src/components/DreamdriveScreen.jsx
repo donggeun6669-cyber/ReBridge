@@ -261,7 +261,7 @@ export default function DreamdriveScreen({ goBack = () => {}, params = {} }) {
             <h3 className="kdream-consent-title">내 위치를 사용할까요?</h3>
             <p className="kdream-consent-desc">
               내 위치를 기반으로 가까운 꿈드림센터를<br />
-              지도에 표시하고 거리 순으로 안내해 드려요.<br />
+              {MAP_ENABLED ? '지도에 표시하고 거리 순으로 안내해 드려요.' : '거리 순으로 안내해 드려요.'}<br />
               위치 정보는 이 앱 외부로 전송되지 않아요.
             </p>
             <div className="kdream-consent-btns">
