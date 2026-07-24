@@ -29,3 +29,4 @@ __pycache__/
 # Data pipeline 대용량 원본 (로컬 보관 — 깃에 올리지 않음)
 ReBridge_AI공모전용/data-pipeline/pdf_sources/
 ReBridge_AI공모전용/data-pipeline/text/
+.env*

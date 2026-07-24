@@ -205,9 +205,79 @@ do $$ begin
 exception when duplicate_object then null; end $$;
 
 -- ============================================================================
+-- P2(보안 강화) — 센터 보드 접근을 RLS로 서버 강제.
+--   기존엔 '우리 센터' 보드의 읽기/쓰기 제한이 클라이언트 코드에만 있어서
+--   supabase-js 직접 호출로 우회 가능했다. 아래 정책이 서버에서 막는다.
+--   (재실행 안전: drop if exists 후 재생성)
+-- ============================================================================
+
+-- 게시글: center 보드는 같은 센터의 인증 사용자만 읽는다.
+drop policy if exists "posts read" on posts;
+create policy "posts read" on posts for select using (
+  board <> 'center'
+  or exists (
+    select 1 from profiles p
+     where p.id = auth.uid() and p.verified and p.verified_center = posts.center_id)
+);
+
+-- 게시글 작성: center 보드는 인증 사용자가 자기 센터(center_id)로만 쓴다.
+drop policy if exists "posts insert" on posts;
+create policy "posts insert" on posts for insert with check (
+  auth.uid() = author
+  and (
+    board <> 'center'
+    or (center_id is not null and exists (
+      select 1 from profiles p
+       where p.id = auth.uid() and p.verified and p.verified_center = posts.center_id))
+  )
+);
+
+-- 댓글/공감: 부모 글이 보이는 사람만 읽고 쓴다(posts RLS가 center 글을 걸러줌).
+drop policy if exists "comments read" on comments;
+create policy "comments read" on comments for select using (
+  exists (select 1 from posts po where po.id = comments.post_id)
+);
+drop policy if exists "comments insert" on comments;
+create policy "comments insert" on comments for insert with check (
+  auth.uid() = author
+  and exists (select 1 from posts po where po.id = comments.post_id)
+);
+drop policy if exists "reactions read" on reactions;
+create policy "reactions read" on reactions for select using (
+  exists (select 1 from posts po where po.id = reactions.post_id)
+);
+drop policy if exists "reactions insert" on reactions;
+create policy "reactions insert" on reactions for insert with check (
+  auth.uid() = user_id
+  and exists (select 1 from posts po where po.id = reactions.post_id)
+);
+
+-- ============================================================================
+-- P2(보안 강화) — redeem_code 브루트포스 방지.
+--   인증코드가 'PREFIX-XXXX' 형태라 무제한 시도가 가능하면 조합 대입으로
+--   인증 배지를 위조할 수 있다. 대응:
+--     1) 시도 기록 테이블 + 사용자당 1시간 10회 제한
+--     2) 코드 유효기간(expires_at, 기본 30일)
+--     3) 신규 코드 접미 4→6자리(youthVerify.makeCode) — 기존 코드는 계속 유효
+-- ============================================================================
+
+-- 시도 기록: 클라이언트 접근 전면 차단(정책 없음). SECURITY DEFINER RPC만 기록/조회.
+create table if not exists redeem_attempts (
+  user_id      uuid not null,
+  attempted_at timestamptz not null default now()
+);
+create index if not exists redeem_attempts_user_idx on redeem_attempts (user_id, attempted_at desc);
+alter table redeem_attempts enable row level security;
+
+-- 코드 유효기간(기존 행은 ALTER 시점 + 30일로 채워짐).
+alter table verification_codes
+  add column if not exists expires_at timestamptz not null default (now() + interval '30 days');
+
+-- ============================================================================
 -- RPC — 인증코드 사용(원자적). 학생은 코드 테이블을 직접 못 보지만 이 함수로 redeem.
---   · 미사용 코드면 used_by/used_at 기록 + 호출자 프로필을 verified 로 갱신.
---   · 이미 쓰였거나 없는 코드면 예외.
+--   · 미사용·미만료 코드면 used_by/used_at 기록 + 호출자 프로필을 verified 로 갱신.
+--   · 실패는 예외 대신 json {ok:false, reason}으로 반환한다 — 예외를 던지면
+--     트랜잭션 롤백으로 시도 기록(redeem_attempts)까지 사라져 레이트리밋이 무력화됨.
 -- youthVerify.redeemCode() 가 supabase.rpc('redeem_code', { p_code }) 로 호출.
 -- ============================================================================
 create or replace function redeem_code(p_code text)
@@ -219,24 +289,34 @@ as $$
 declare
   v_center text;
   v_rows   int;
+  v_recent int;
 begin
   if auth.uid() is null then
     raise exception 'login required';
   end if;
 
   -- 프로필이 먼저 있어야 인증 배지를 붙일 수 있다(닉네임 가입 선행).
-  -- 프로필이 없으면 코드를 소모하지 않고 즉시 예외(트랜잭션 롤백).
   if not exists (select 1 from profiles where id = auth.uid()) then
     raise exception 'profile required';
   end if;
 
+  -- 레이트리밋: 사용자당 1시간 10회. 초과 시 시도 자체를 받지 않는다.
+  select count(*) into v_recent
+    from redeem_attempts
+   where user_id = auth.uid() and attempted_at > now() - interval '1 hour';
+  if v_recent >= 10 then
+    return json_build_object('ok', false, 'reason', 'rate_limited');
+  end if;
+  insert into redeem_attempts (user_id) values (auth.uid());
+
   update verification_codes
      set used_by = auth.uid(), used_at = now()
-   where code = p_code and used_by is null
+   where code = p_code and used_by is null and expires_at > now()
    returning center_id into v_center;
 
   if v_center is null then
-    raise exception 'invalid or used code';
+    -- 잘못된/사용된/만료 코드 — 정상 반환해야 위 시도 기록이 커밋된다.
+    return json_build_object('ok', false, 'reason', 'invalid_code');
   end if;
 
   update profiles

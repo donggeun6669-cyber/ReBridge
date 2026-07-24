@@ -17,7 +17,7 @@ npm install
 cp .env.example .env   # 값은 팀에서 받아 채움
 npm run dev            # http://localhost:5173
 npm run build          # dist/ 산출 (node node_modules/vite/bin/vite.js build)
-npm run deploy         # vercel --prod
+npm run deploy         # npx vercel --prod (수동 배포 — 보통은 push 자동배포로 충분)
 npm run verify         # 배포 캐시 우회 검증 (node verify-deploy.mjs)
 ```
 
@@ -33,7 +33,7 @@ npm run verify         # 배포 캐시 우회 검증 (node verify-deploy.mjs)
 
 ## 디렉터리 (`Application_main_codes/`)
 
-- `src/components/` — `*Screen.jsx` 화면들 + `BottomNav`, `SplashScreen`, `TrackShell`
+- `src/components/` — `*Screen.jsx` 화면들 + `BottomNav`, `SplashScreen`, `TrackHome`
 - `src/lib/` — 로직 (persona, scoreEngine, careernet, community, auth, youthVerify …)
 - `src/data/` — 정적 데이터셋 (universities.json, admissions.json, jobData.js, glossary.js …)
 - `api/` — Vercel 서버리스 함수 (`careernet.js`) — API 키 프록시
@@ -46,7 +46,13 @@ npm run verify         # 배포 캐시 우회 검증 (node verify-deploy.mjs)
 - `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY`는 공개용(RLS 보호)이라 노출 정상. `service_role` 키는 클라이언트에서 절대 사용 금지.
 - `.env`는 gitignore됨. `.env.example`만 커밋.
 
+## 배포 구조 (2026-07 정리)
+
+- **GitHub `main` 푸시 → Vercel 자동 배포.** 레포가 Vercel 프로젝트 **`gumgomentor`**(프로덕션, https://rebridge-rho.vercel.app)에 Git 연동돼 있다. push 권한 있는 협업자는 누구나 push만으로 배포된다.
+- `gumgomentor-beta` 프로젝트는 옛 수동 배포용 잔재 — 사용하지 않는다.
+- 서버 비밀 키(`CAREERNET_API_KEY`)와 Supabase 공개 키(`VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY`)는 Vercel 프로젝트 환경변수에 등록되어 있음(`npx vercel env ls`로 확인).
+- `dist/`, `.vercel/`, `.env*`는 전부 gitignore됨(추적 안 됨).
+
 ## 알아둘 것
 
-- `dist/`, `.vercel/`가 git에 추적됨(의도적, 배포 방식 때문).
 - 배포 후 Vercel 엣지/브라우저 캐시로 옛 UI가 보일 수 있음 → 하드리프레시 / `npm run verify`. 프로필 화면에 빌드 스탬프 표시됨.

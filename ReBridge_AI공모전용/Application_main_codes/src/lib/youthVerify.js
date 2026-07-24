@@ -17,7 +17,6 @@
 //
 //   isVerified(user) : boolean              인증 배지 보유 여부
 //   getBadge(user)   : { emoji, label } | null   배지 표시용(미인증은 null)
-//   listIssuedCodes(centerId?) : Promise<Array>   실무자 화면용 — 발급 내역 조회
 //
 // 백엔드 2중화: VITE_SUPABASE_URL 있으면 Supabase, 없으면 localStorage 목.
 //   - 목 모드엔 데모용 코드 DREAM-TEST / DREAM-DEMO 가 미리 들어있다.
@@ -27,9 +26,10 @@ import { mockStore } from './communityStore.js';
 
 const BADGE = { emoji: '🎖️', label: '학교밖 인증' };
 
-// 사람이 부르기 쉬운 코드 생성: 센터접두 + 혼동없는 4자리.
+// 사람이 부르기 쉬운 코드 생성: 센터접두 + 혼동없는 6자리.
+// (4자리는 조합이 32⁴≈100만뿐이라 대입 공격에 약함 — 6자리 32⁶≈10억 + RPC 레이트리밋으로 방어)
 const SAFE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // 0,O,1,I 제외
-function randSuffix(n = 4) {
+function randSuffix(n = 6) {
   let s = '';
   for (let i = 0; i < n; i++) {
     let idx;
@@ -45,7 +45,7 @@ function randSuffix(n = 4) {
 function makeCode(centerId) {
   const prefix = String(centerId || 'DREAM')
     .toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6) || 'DREAM';
-  return `${prefix}-${randSuffix(4)}`;
+  return `${prefix}-${randSuffix()}`;
 }
 
 // ── 발급 ────────────────────────────────────────────────────────────────
@@ -75,6 +75,15 @@ export async function redeemCode(code, user) {
   if (isSupabase) {
     const { data, error } = await supabase.rpc('redeem_code', { p_code: clean });
     if (error) return { ok: false, error: '코드가 올바르지 않거나 이미 사용됐어요.' };
+    // RPC는 실패를 예외 대신 { ok:false, reason }으로 돌려준다(레이트리밋 기록 보존용).
+    if (!data?.ok) {
+      return {
+        ok: false,
+        error: data?.reason === 'rate_limited'
+          ? '시도가 너무 많아요. 1시간 뒤에 다시 해 주세요.'
+          : '코드가 올바르지 않거나 이미 사용됐어요.',
+      };
+    }
     const next = { ...(user || {}), verified: true,
       verifiedCenter: data?.center || null, verifiedAt: new Date().toISOString() };
     return { ok: true, user: next };
