@@ -15,7 +15,9 @@
 ```bash
 npm install
 npm run dev            # http://localhost:5173 — .env 없이도 실행됨(커뮤니티는 mock 모드)
-npm run build          # dist/ 산출
+npm run build          # dist/ 산출 — ⚠️ build 명령의 node node_modules/... 경로와
+                       #   vite의 dependencies 위치는 Vercel 배포가 깨져서 되돌린 것.
+                       #   "단순화"하지 말 것 (2026-07-30 실제 배포 실패)
 npm run deploy         # npx vercel --prod (수동 배포 — 보통은 push 자동배포로 충분)
 npm run verify         # 배포 캐시 우회 검증 (node verify-deploy.mjs)
 ```
