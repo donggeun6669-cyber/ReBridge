@@ -1,7 +1,7 @@
 # ReBridge (검고담임)
 
 검정고시생·학교 밖 청소년을 위한 입시·진로 정보 웹앱. AI 공모전 출품작.
-배포: https://rebridge-rho.vercel.app
+배포: https://gumgomentor.vercel.app
 
 ## ⚠️ 가장 중요한 규칙
 
@@ -57,11 +57,15 @@ npm run verify         # 배포 캐시 우회 검증 (node verify-deploy.mjs)
 
 ## 배포 구조 (2026-07 정리)
 
-- **GitHub `main` 푸시 → Vercel 자동 배포.** 레포가 Vercel 프로젝트 **`gumgomentor`**(프로덕션, https://rebridge-rho.vercel.app)에 Git 연동돼 있다.
+- **GitHub `main` 푸시 → Vercel 자동 배포.** 레포가 Vercel 프로젝트 **`gumgomentor`**(프로덕션, https://gumgomentor.vercel.app)에 Git 연동돼 있다.
 - 저장소는 **2026-07-30 공개(public)로 전환**했다. 과거 비공개 시절에는 Hobby 플랜 제약으로
   팀원 커밋이 HEAD면 자동배포가 거부됐는데(2026-06-23 실제 발생), 공개 전환으로 해소됐다.
   팀원 push 후 배포 성공 여부는 여전히 한 번 확인하는 게 안전하다.
-- `gumgomentor-beta` 프로젝트는 옛 수동 배포용 잔재 — 사용하지 않는다.
+- **주소 정리 (2026-07-30).** 운영 주소는 `gumgomentor.vercel.app` 하나다.
+  - 🏆 `gumgomentor-award.vercel.app` — 공모전 수상본(2026-06-04 배포) 동결. 자동배포가 닿지 않는
+    고정 별칭이므로 **여기에 `vercel alias`를 다시 걸지 말 것.** 소스는 git 태그 `award-v1`.
+  - 옛 주소 `rebridge-rho.vercel.app`(1차)와 `gumgomentor-beta.vercel.app`(3차)는 제거했다.
+    프로젝트가 `rebridge` → `gumgomentor`로 이름만 바뀐 탓에 옛 주소가 남아 혼란을 준 것이 정리 이유다.
 - 서버 비밀 키(`CAREERNET_API_KEY`)와 Supabase 공개 키(`VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY`)는 Vercel 프로젝트 환경변수에 등록되어 있음(`npx vercel env ls`로 확인).
 - `dist/`, `.vercel/`, `.env*`는 전부 gitignore됨(추적 안 됨).
 

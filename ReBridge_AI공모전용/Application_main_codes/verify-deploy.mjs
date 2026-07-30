@@ -2,7 +2,7 @@
 // 사용법:  npm run verify
 // 배포 후 이걸 돌려서 build 시각이 방금 빌드와 같으면 끝. 다르면 캐시/배포 문제.
 
-const SITE = 'https://rebridge-rho.vercel.app'; // 항상 이 고정 도메인만 본다 (해시 URL 금지)
+const SITE = 'https://gumgomentor.vercel.app'; // 항상 이 고정 도메인만 본다 (해시 URL 금지)
 const cb = () => `?cb=${Date.now()}`; // 엣지/브라우저 캐시 우회 — 진짜 최신 상태를 본다
 
 const html = await (await fetch(SITE + '/' + cb(), { cache: 'no-store' })).text();

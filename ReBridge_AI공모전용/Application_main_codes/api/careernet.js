@@ -18,8 +18,8 @@ function isAllowedHost(value) {
   try {
     const host = new URL(value).hostname;
     return (
-      host === 'rebridge-rho.vercel.app' ||
       host === 'localhost' || host === '127.0.0.1' ||
+      // gumgomentor.vercel.app(운영) + gumgomentor-* 프리뷰·수상본 배포까지 한 번에 커버.
       (host.endsWith('.vercel.app') && host.startsWith('gumgomentor'))
     );
   } catch {

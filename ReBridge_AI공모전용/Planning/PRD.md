@@ -1,7 +1,7 @@
 # ReBridge(검고담임) PRD
 
 > 검정고시생·학교 밖 청소년을 위한 입시·진로 안내 웹앱
-> 라이브: https://rebridge-rho.vercel.app · 정본 레포: https://github.com/donggeun6669-cyber/ReBridge
+> 라이브: https://gumgomentor.vercel.app · 정본 레포: https://github.com/donggeun6669-cyber/ReBridge
 > 최종 갱신: 2026-07-25 (기획서 v1/v2·기능개요·데이터현황·TODO를 이 한 장으로 통합)
 
 ---
@@ -157,7 +157,7 @@ persona = {
 대신 카카오는 **허용 도메인 등록**으로 보호한다 — 등록된 도메인에서만 키가 동작한다.
 
 > 확인할 것: 카카오 개발자 콘솔 → 내 애플리케이션 → 플랫폼 → Web →
-> 사이트 도메인에 `https://rebridge-rho.vercel.app`(+ 개발용 `http://localhost:5173`)**만** 등록돼 있는지.
+> 사이트 도메인에 `https://gumgomentor.vercel.app`(+ 개발용 `http://localhost:5173`)**만** 등록돼 있는지.
 > 비어 있거나 와일드카드면 제3자가 이 키를 자기 사이트에 붙여 쿼터를 소진시킬 수 있다.
 
 **2026-07-25 현재 지도는 꺼져 있다.** 도메인 등록이 확인될 때까지 SDK를 아예 부르지 않도록
