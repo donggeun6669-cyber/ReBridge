@@ -61,11 +61,21 @@ npm run verify         # 배포 캐시 우회 검증 (node verify-deploy.mjs)
 - 저장소는 **2026-07-30 공개(public)로 전환**했다. 과거 비공개 시절에는 Hobby 플랜 제약으로
   팀원 커밋이 HEAD면 자동배포가 거부됐는데(2026-06-23 실제 발생), 공개 전환으로 해소됐다.
   팀원 push 후 배포 성공 여부는 여전히 한 번 확인하는 게 안전하다.
-- **주소 정리 (2026-07-30).** 운영 주소는 `gumgomentor.vercel.app` 하나다.
+- **주소 정리 (2026-07-30).** 대외 안내 주소는 `gumgomentor.vercel.app` 하나로 통일했다.
   - 🏆 `gumgomentor-award.vercel.app` — 공모전 수상본(2026-06-04 배포) 동결. 자동배포가 닿지 않는
     고정 별칭이므로 **여기에 `vercel alias`를 다시 걸지 말 것.** 소스는 git 태그 `award-v1`.
-  - 옛 주소 `rebridge-rho.vercel.app`(1차)와 `gumgomentor-beta.vercel.app`(3차)는 제거했다.
-    프로젝트가 `rebridge` → `gumgomentor`로 이름만 바뀐 탓에 옛 주소가 남아 혼란을 준 것이 정리 이유다.
+  - `gumgomentor-beta.vercel.app`(3차 수정배포)는 프로젝트째 삭제했다.
+  - ⚠️ **`gumgomentor.vercel.app`은 아직 수동 별칭이라 자동배포를 따라가지 않는다.**
+    프로젝트가 `rebridge` → `gumgomentor`로 이름만 바뀐 탓에, Vercel이 자동 생성한
+    프로덕션 주소는 여전히 `rebridge-rho.vercel.app`이고 배포마다 그쪽만 갱신된다.
+    푸시 후에는 아래를 실행해 운영 주소를 최신 배포로 다시 물려야 한다.
+    ```bash
+    npx vercel inspect rebridge-rho.vercel.app   # 최신 배포 URL 확인
+    npx vercel alias set <그 URL> gumgomentor.vercel.app
+    ```
+    **영구 해결:** Vercel 대시보드 → `gumgomentor` 프로젝트 → Settings → Domains 에서
+    `gumgomentor.vercel.app`을 `main` 브랜치의 프로덕션 도메인으로 지정하고
+    `rebridge-rho.vercel.app`을 제거하면 이 수동 작업이 없어진다. (CLI로는 불가)
 - 서버 비밀 키(`CAREERNET_API_KEY`)와 Supabase 공개 키(`VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY`)는 Vercel 프로젝트 환경변수에 등록되어 있음(`npx vercel env ls`로 확인).
 - `dist/`, `.vercel/`, `.env*`는 전부 gitignore됨(추적 안 됨).
 
