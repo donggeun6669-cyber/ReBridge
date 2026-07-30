@@ -27,7 +27,6 @@ export default defineConfig(({ mode }) => {
       },
     },
     server: {
-      allowedHosts: ['dingy-blade-backup.ngrok-free.dev'],
       proxy: {
         '/api/careernet': {
           target: 'https://www.career.go.kr',

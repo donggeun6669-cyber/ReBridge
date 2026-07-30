@@ -14,12 +14,13 @@
 
 ```bash
 npm install
-cp .env.example .env   # 값은 팀에서 받아 채움
-npm run dev            # http://localhost:5173
-npm run build          # dist/ 산출 (node node_modules/vite/bin/vite.js build)
+npm run dev            # http://localhost:5173 — .env 없이도 실행됨(커뮤니티는 mock 모드)
+npm run build          # dist/ 산출
 npm run deploy         # npx vercel --prod (수동 배포 — 보통은 push 자동배포로 충분)
 npm run verify         # 배포 캐시 우회 검증 (node verify-deploy.mjs)
 ```
+
+전체 기능이 필요하면 `cp .env.example .env` 후 키를 채운다(키 목록은 `.env.example` 참고).
 
 테스트/린트/CI 없음.
 
@@ -55,7 +56,9 @@ npm run verify         # 배포 캐시 우회 검증 (node verify-deploy.mjs)
 ## 배포 구조 (2026-07 정리)
 
 - **GitHub `main` 푸시 → Vercel 자동 배포.** 레포가 Vercel 프로젝트 **`gumgomentor`**(프로덕션, https://rebridge-rho.vercel.app)에 Git 연동돼 있다.
-- ⚠️ **협업자 배포 제약(Hobby 플랜 + 비공개 저장소):** HEAD 커밋 **작성자가 Vercel 계정 소유자가 아니면 배포가 거부된다**(`Hobby Plan does not support collaboration for private repositories`). 2026-06-23에 실제로 겪은 문제. 팀원이 push하면 자동배포가 막힐 수 있다. 해결책 택1 — (a) 배포 직전 동근님 명의 커밋을 HEAD로, (b) 저장소 public 전환, (c) Vercel Pro(월 $20). **팀원 push 후에는 배포 성공 여부를 반드시 확인할 것.**
+- 저장소는 **2026-07-30 공개(public)로 전환**했다. 과거 비공개 시절에는 Hobby 플랜 제약으로
+  팀원 커밋이 HEAD면 자동배포가 거부됐는데(2026-06-23 실제 발생), 공개 전환으로 해소됐다.
+  팀원 push 후 배포 성공 여부는 여전히 한 번 확인하는 게 안전하다.
 - `gumgomentor-beta` 프로젝트는 옛 수동 배포용 잔재 — 사용하지 않는다.
 - 서버 비밀 키(`CAREERNET_API_KEY`)와 Supabase 공개 키(`VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY`)는 Vercel 프로젝트 환경변수에 등록되어 있음(`npx vercel env ls`로 확인).
 - `dist/`, `.vercel/`, `.env*`는 전부 gitignore됨(추적 안 됨).

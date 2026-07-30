@@ -30,3 +30,8 @@ __pycache__/
 ReBridge_AI공모전용/data-pipeline/pdf_sources/
 ReBridge_AI공모전용/data-pipeline/text/
 .env*
+
+# 발표 대본·소개 영상 (로컬 보관 — 공개 저장소에 올리지 않음)
+/검고담임_발표대본*
+/검고담임_소개영상*
+*.mp4
