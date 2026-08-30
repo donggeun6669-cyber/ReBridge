@@ -42,6 +42,7 @@ const CommunityPostScreen = lazy(() => import('./components/CommunityPostScreen.
 const CommunityWriteScreen = lazy(() => import('./components/CommunityWriteScreen.jsx'));
 const AuthScreen = lazy(() => import('./components/AuthScreen.jsx'));
 const SupportScreen = lazy(() => import('./components/SupportScreen.jsx'));
+const PolicyScreen = lazy(() => import('./components/PolicyScreen.jsx'));
 
 // 하단 글로벌 탭의 루트 화면들(여기로 가면 스택 리셋). 항상 고정 4개.
 // 트랙 화면(학습/대입/직업)은 홈 안의 TrackHome이 그리므로 여기 없음.
@@ -54,6 +55,7 @@ const KNOWN_SCREENS = [
   'job-home', 'job-explore', 'job-roadmap', 'job-questions', 'job-detail', 'job-info', 'job-psych',
   'job-training', 'job-apply',
   'community', 'community-post', 'community-write', 'community-auth',
+  'privacy', 'terms',
 ];
 
 // 직업 트랙은 답변(jobProfile)이 있어야 맞춤 안내가 되므로, 없으면 질문부터.
@@ -180,7 +182,11 @@ export default function App() {
         {!splash && screen === 'community'       && <CommunityScreen goTo={goTo} goBack={goBack} params={params} />}
         {!splash && screen === 'community-post'  && <CommunityPostScreen goTo={goTo} goBack={goBack} id={params.id} />}
         {!splash && screen === 'community-write' && <CommunityWriteScreen goTo={goTo} goBack={goBack} board={params.board} initialTitle={params.initialTitle || ''} />}
-        {!splash && screen === 'community-auth'  && <AuthScreen goBack={goBack} />}
+        {!splash && screen === 'community-auth'  && <AuthScreen goTo={goTo} goBack={goBack} />}
+
+        {/* 법적 고지 — 청소년 대상 서비스 필수 + 스토어 심사 요건 */}
+        {!splash && screen === 'privacy'         && <PolicyScreen doc="privacy" goBack={goBack} />}
+        {!splash && screen === 'terms'           && <PolicyScreen doc="terms"   goBack={goBack} />}
 
         {/* 미구현 화면 fallback */}
         {!splash && !isMainScreen && !KNOWN_SCREENS.includes(screen) && (

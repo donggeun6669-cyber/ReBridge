@@ -3,7 +3,7 @@ import {
   User, Pencil, Bookmark, BookOpen, ChevronRight,
   MapPin, GraduationCap, ClipboardCheck, Heart,
   RefreshCw, Target, Briefcase, HelpCircle, RotateCcw, Route,
-  Award, FileText,
+  Award, FileText, ShieldCheck, ScrollText,
 } from 'lucide-react';
 import { getPersona, loadProfile, getActiveTrack } from '../lib/persona';
 import '../styles.mypage.css';
@@ -335,6 +335,16 @@ export default function MyPageScreen({ goTo = () => {}, goBack = () => {} }) {
         <div className="mp-row-divider" />
         <MenuRow ico={Heart} icoClass="ico-coral" title="꿈드림센터 찾기"
           sub="검정고시·자립 무료 지원 기관" onClick={() => goTo('dreamdrive')} />
+      </div>
+
+      {/* 약관·정책 — 청소년 대상 서비스 필수 고지 */}
+      <p className="mp-section-label">약관·정책</p>
+      <div className="mp-menu-group">
+        <MenuRow ico={ShieldCheck} icoClass="ico-brand" title="개인정보처리방침"
+          sub="어떤 정보를 다루는지" onClick={() => goTo('privacy')} />
+        <div className="mp-row-divider" />
+        <MenuRow ico={ScrollText} icoClass="ico-gold" title="이용약관"
+          sub="서비스 이용 약속과 한계" onClick={() => goTo('terms')} />
       </div>
 
       <p className="note" style={{ marginTop: 28 }}>

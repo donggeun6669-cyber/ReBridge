@@ -75,7 +75,7 @@ export function NicknameGate({ open, onClose = () => {}, onDone = () => {} }) {
   );
 }
 
-export default function AuthScreen({ goBack = () => {} }) {
+export default function AuthScreen({ goTo = () => {}, goBack = () => {} }) {
   const user = useAuthUser();
   const [nickname, setNickname] = useState('');
   const [code, setCode] = useState('');
@@ -141,6 +141,17 @@ export default function AuthScreen({ goBack = () => {} }) {
             <Sparkles size={13} style={{ verticalAlign: '-2px', marginRight: 5 }} />
             가입은 익명이에요. 이메일·비밀번호를 받지 않아요.
             {BACKEND === 'mock' && ' (지금은 데모 모드 — 이 기기에만 저장돼요.)'}
+          </p>
+
+          {/* 가입이 곧 동의 시점 — 무엇에 동의하는지 여기서 볼 수 있어야 한다. */}
+          <p className="cm-consent">
+            시작하면{' '}
+            <button type="button" className="cm-link" onClick={() => goTo('terms')}>이용약관</button>
+            {' '}및{' '}
+            <button type="button" className="cm-link" onClick={() => goTo('privacy')}>개인정보처리방침</button>
+            에 동의하는 것으로 봐요.
+            <br />
+            만 14세 미만이면 보호자 동의가 필요해요.
           </p>
         </>
       ) : (

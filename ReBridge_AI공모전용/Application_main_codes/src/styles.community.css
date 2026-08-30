@@ -401,3 +401,22 @@
 /* 댓글 헤더 + 더보기 */
 .cm-comment-head { display: flex; align-items: center; justify-content: space-between; }
 .cm-comment .cm-more-btn { color: var(--text-sub); }
+
+/* 가입 시 약관 고지 — 동의 시점에 무엇에 동의하는지 바로 열어볼 수 있게. */
+.cm-consent {
+  margin: 10px 2px 0;
+  font-size: 11.5px;
+  line-height: 1.7;
+  color: var(--text-sub);
+  text-align: center;
+}
+.cm-link {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: var(--brand);
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}

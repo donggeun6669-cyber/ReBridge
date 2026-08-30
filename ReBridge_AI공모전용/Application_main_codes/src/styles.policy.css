@@ -1,0 +1,116 @@
+/* 개인정보처리방침 · 이용약관 — 법 문서지만 읽히게. 본문 폭·행간을 넉넉히 둔다. */
+
+.pol-hero {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin: 6px 0 4px;
+  padding: 14px;
+  border-radius: 14px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+.pol-hero-ico {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: var(--brand-tint);
+  color: var(--brand);
+}
+.pol-hero-lead {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+.pol-section { margin-top: 22px; }
+
+.pol-h {
+  margin: 0 0 8px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -.2px;
+}
+
+.pol-p {
+  margin: 0 0 8px;
+  font-size: 13.5px;
+  line-height: 1.75;
+  color: var(--text-sub);
+}
+.pol-p strong { color: var(--text); font-weight: 700; }
+
+.pol-ul {
+  margin: 0 0 8px;
+  padding-left: 18px;
+}
+.pol-ul li {
+  font-size: 13.5px;
+  line-height: 1.75;
+  color: var(--text-sub);
+  margin-bottom: 4px;
+}
+
+.pol-after {
+  margin: 8px 0 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--bg-soft);
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: var(--text-sub);
+}
+
+.pol-table {
+  margin: 4px 0 8px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--card);
+}
+.pol-table-row {
+  display: grid;
+  grid-template-columns: 84px 1fr auto;
+  gap: 8px;
+  align-items: center;
+  padding: 10px 12px;
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+.pol-table-row + .pol-table-row { border-top: 1px solid var(--border); }
+.pol-table-name { font-weight: 700; color: var(--text); }
+.pol-table-role { color: var(--text-sub); }
+.pol-table-place { color: var(--brand-deep); font-weight: 600; white-space: nowrap; }
+
+.pol-contact { display: flex; flex-direction: column; gap: 2px; }
+.pol-mail {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--brand);
+  text-decoration: none;
+}
+.pol-muted b { color: var(--text); }
+
+.pol-effective {
+  margin: 26px 0 8px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--text-sub);
+  text-align: center;
+}
+
+@media (max-width: 360px) {
+  .pol-table-row { grid-template-columns: 1fr; gap: 2px; }
+  .pol-table-place { white-space: normal; }
+}
