@@ -287,3 +287,60 @@
 .ms-explore .mode-switch-title { color: var(--brand-deep); }
 .mode-switch-sub { font-size: 12.5px; color: var(--text-sub); margin-top: 2px; }
 .mode-switch-arrow { color: var(--text-sub); flex: 0 0 auto; }
+
+/* ── 공고 전 상태 — 날짜를 지어내지 않고 '예년엔 이맘때'만 알린다 ── */
+.gedh-hero--pending { background: var(--bg-soft); color: var(--text); }
+.gedh-hero-pending {
+  font-size: 17px; font-weight: 700; line-height: 1.5; margin: 6px 0 2px;
+}
+.gedh-hero-pending b { color: var(--brand-deep); }
+.gedh-hero-link {
+  display: inline-block; margin-top: 10px; font-size: 13px; font-weight: 600;
+  color: var(--brand); text-decoration: underline;
+}
+
+/* ── 결시 경고 ── */
+.gedh-pass-warn {
+  display: flex; gap: 7px; align-items: flex-start;
+  margin: 10px 0 0; padding: 10px 12px; border-radius: 10px;
+  background: var(--caution-soft); color: var(--text);
+  font-size: 12.5px; line-height: 1.6;
+}
+.gedh-pass-warn svg { flex: none; margin-top: 2px; color: var(--caution); }
+
+/* ── 과목합격제 ── */
+.gedh-partial {
+  padding: 14px; border-radius: 14px;
+  background: var(--card); border: 1px solid var(--border); box-shadow: var(--shadow-sm);
+}
+.gedh-partial-list { margin: 0; padding-left: 18px; }
+.gedh-partial-list li {
+  font-size: 13.5px; line-height: 1.75; color: var(--text-sub); margin-bottom: 5px;
+}
+.gedh-partial-caution {
+  margin: 10px 0 0; padding: 9px 11px; border-radius: 9px;
+  background: var(--bg-soft); font-size: 12px; line-height: 1.6; color: var(--text-sub);
+}
+
+/* ── 응시 자격 ── */
+.gedh-elig {
+  padding: 14px; border-radius: 14px;
+  background: var(--card); border: 1px solid var(--border); box-shadow: var(--shadow-sm);
+}
+.gedh-elig-head {
+  margin: 0 0 6px; font-size: 13px; font-weight: 700; color: var(--green-dark);
+}
+.gedh-elig-head--no { margin-top: 14px; color: var(--danger); }
+.gedh-elig-list { margin: 0; padding-left: 18px; }
+.gedh-elig-list li {
+  font-size: 13px; line-height: 1.7; color: var(--text-sub); margin-bottom: 3px;
+}
+.gedh-elig-rule {
+  display: flex; gap: 7px; align-items: flex-start;
+  margin: 12px 0 0; padding: 10px 12px; border-radius: 10px;
+  background: var(--caution-soft); font-size: 12.5px; line-height: 1.6; color: var(--text);
+}
+.gedh-elig-rule svg { flex: none; margin-top: 2px; color: var(--caution); }
+.gedh-elig-note {
+  margin: 8px 0 0; font-size: 11.5px; line-height: 1.6; color: var(--text-sub);
+}

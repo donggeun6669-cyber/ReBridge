@@ -2,12 +2,13 @@ import { useMemo, useState } from 'react';
 import {
   ChevronDown, ExternalLink, CalendarClock, FileText,
   ClipboardList, Award, CheckCircle2, BookOpen, Calculator, Languages,
-  Globe2, FlaskConical, Landmark, Info, Target, ListChecks,
+  Globe2, FlaskConical, Landmark, Info, Target, ListChecks, AlertTriangle,
 } from 'lucide-react';
 import LogoMark from './LogoMark.jsx';
 import '../styles.study.css';
 import {
   GED_LINKS, PASS_RULE, GED_SUBJECT_GUIDE, GED_ELECTIVE_NOTE,
+  SUBJECT_PASS_RULE, ELIGIBILITY,
   getNextSession, daysUntil, formatKDate,
 } from '../data/gedGuide.js';
 import { loadProfile } from '../lib/persona.js';
@@ -53,14 +54,15 @@ export default function GedGuideScreen({ goTo = () => {} }) {
   const dday = session ? daysUntil(session.examDate) : null;
   const applyDday = session ? daysUntil(session.applyDate) : null;
   // 원서접수 임박/진행 중(D-14 ~ 접수일+5일)일 때 적극 안내
-  const applyOpen = applyDday != null && applyDday <= 14 && applyDday >= -5;
+  // 공고된 회차에만 띄운다. 추정 날짜로 "접수 N일 남았어요"라고 재촉하면 안 된다.
+  const applyOpen = session?.confirmed && applyDday != null && applyDday <= 14 && applyDday >= -5;
 
   // 다음 회차의 3단계 (원서접수 → 시험 → 합격발표)
   const milestones = session
     ? [
-        { id: 'apply',  icon: ClipboardList, label: '원서접수', date: session.applyDate },
-        { id: 'exam',   icon: FileText,      label: '시험일',   date: session.examDate },
-        { id: 'result', icon: Award,         label: '합격발표', date: session.resultDate },
+        { id: 'apply',  icon: ClipboardList, label: '원서접수', date: session.applyDate,  hintText: session.hint?.apply },
+        { id: 'exam',   icon: FileText,      label: '시험일',   date: session.examDate,   hintText: session.hint?.exam },
+        { id: 'result', icon: Award,         label: '합격발표', date: session.resultDate, hintText: session.hint?.result },
       ].map((m) => {
         const d = daysUntil(m.date);
         return { ...m, dday: d, done: d < 0 };
@@ -85,7 +87,8 @@ export default function GedGuideScreen({ goTo = () => {} }) {
       </section>
 
       {/* ── D-day 히어로 ── */}
-      {session && (
+      {/* 공고된 회차만 D-day를 띄운다. 공고 전이면 날짜를 지어내지 않는다. */}
+      {session && session.confirmed && (
         <div className="gedh-hero">
           <div className="gedh-hero-top">
             <CalendarClock size={16} />
@@ -97,6 +100,30 @@ export default function GedGuideScreen({ goTo = () => {} }) {
           <div className="gedh-hero-date">
             {session.year}년 {session.label} · 시험 {formatKDate(session.examDate)}
           </div>
+        </div>
+      )}
+
+      {/* 아직 공고 전 — 예년 패턴만 알려주고 공식 공고로 보낸다 */}
+      {session && !session.confirmed && (
+        <div className="gedh-hero gedh-hero--pending">
+          <div className="gedh-hero-top">
+            <CalendarClock size={16} />
+            <span>{session.year}년 일정은 아직 공고 전이에요</span>
+          </div>
+          <div className="gedh-hero-pending">
+            예년엔 {session.label} 시험을 <b>{session.hint?.exam}</b>에 봤어요
+          </div>
+          <div className="gedh-hero-date">
+            접수는 보통 {session.hint?.apply} · 발표는 {session.hint?.result}
+          </div>
+          <a
+            className="gedh-hero-link"
+            href={GED_LINKS.examSchedule.url}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            공고 확인하러 가기
+          </a>
         </div>
       )}
 
@@ -135,16 +162,24 @@ export default function GedGuideScreen({ goTo = () => {} }) {
                 </span>
                 <span className="gedh-tl-body">
                   <span className="gedh-tl-label">{m.label}</span>
-                  <span className="gedh-tl-date">{formatKDate(m.date)}</span>
+                  <span className="gedh-tl-date">
+                    {session.confirmed ? formatKDate(m.date) : m.hintText}
+                  </span>
                 </span>
-                <span className="gedh-tl-dday">
-                  {m.done ? '지남' : m.dday === 0 ? '오늘' : `D-${m.dday}`}
-                </span>
+                {/* 공고 전에는 D-day를 계산하지 않는다 — 기준 날짜가 없으니 숫자가 거짓이 된다 */}
+                {session.confirmed && (
+                  <span className="gedh-tl-dday">
+                    {m.done ? '지남' : m.dday === 0 ? '오늘' : `D-${m.dday}`}
+                  </span>
+                )}
               </div>
             );
           })}
           <p className="gedh-tl-note">
-            <Info size={12} /> 접수·시험일은 예년 패턴 기준이에요. 정확한 날짜는 공고로 확인하세요.
+            <Info size={12} />{' '}
+            {session.confirmed
+              ? `${session.year}년 공고 기준이에요. 접수처는 거주지 시·도교육청이에요.`
+              : '아직 공고 전이라 예년에 언제였는지만 알려드려요. 날짜가 정해지면 공고로 확인하세요.'}
           </p>
         </div>
       )}
@@ -155,6 +190,46 @@ export default function GedGuideScreen({ goTo = () => {} }) {
           평균 <b>{PASS_RULE.passAverage}점</b>이면 합격
         </div>
         <p className="gedh-pass-sub">{PASS_RULE.note}</p>
+        {/* 학생이 가장 자주 오해하는 지점 — 결시는 0점이 아니라 불합격이다 */}
+        <p className="gedh-pass-warn">
+          <AlertTriangle size={14} />
+          <span>{PASS_RULE.absentWarning}</span>
+        </p>
+      </div>
+
+      {/* ── 과목합격제(부분합격) ── */}
+      <div className="home-section">
+        <p className="home-section-label">{SUBJECT_PASS_RULE.title}</p>
+        <div className="gedh-partial">
+          <ul className="gedh-partial-list">
+            {SUBJECT_PASS_RULE.points.map((t) => (
+              <li key={t}>{t}</li>
+            ))}
+          </ul>
+          <p className="gedh-partial-caution">{SUBJECT_PASS_RULE.caution}</p>
+        </div>
+      </div>
+
+      {/* ── 응시 자격 ── */}
+      <div className="home-section">
+        <p className="home-section-label">나는 볼 수 있을까?</p>
+        <div className="gedh-elig">
+          <p className="gedh-elig-head">볼 수 있어요</p>
+          <ul className="gedh-elig-list">
+            {ELIGIBILITY.can.map((t) => <li key={t}>{t}</li>)}
+          </ul>
+          <p className="gedh-elig-head gedh-elig-head--no">볼 수 없어요</p>
+          <ul className="gedh-elig-list">
+            {ELIGIBILITY.cannot.map((t) => (
+              <li key={t}>{t.replace(/\*\*/g, '')}</li>
+            ))}
+          </ul>
+          <p className="gedh-elig-rule">
+            <AlertTriangle size={14} />
+            <span>{ELIGIBILITY.sixMonthRule}</span>
+          </p>
+          <p className="gedh-elig-note">{ELIGIBILITY.note}</p>
+        </div>
       </div>
 
       {/* ── 내 점수 체크 (모의/기출 점수 → 합격선 비교) ── */}

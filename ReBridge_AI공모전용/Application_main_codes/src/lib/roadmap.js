@@ -1,4 +1,4 @@
-import { GED_SESSIONS, ADMISSION } from '../data/schedule.js';
+import { GED_SESSIONS, ADMISSION, isGedYearConfirmed, GED_TYPICAL_HINT } from '../data/schedule.js';
 
 // [월, 일] → 해당 연도의 Date (자정)
 function md(year, [m, d]) {
@@ -24,7 +24,13 @@ function nextGedSession(today) {
     for (const s of GED_SESSIONS) {
       const examDate = md(yr, s.exam);
       if (examDate >= startOfDay(today)) {
-        return { ...s, year: yr, examDate, resultDate: md(yr, s.result), applyDate: md(yr, s.apply) };
+        // confirmed=false면 날짜는 예년 패턴 추정이다. 단계 문구에서 확정처럼 쓰지 않는다.
+        return {
+          ...s, year: yr, examDate,
+          resultDate: md(yr, s.result), applyDate: md(yr, s.apply),
+          confirmed: isGedYearConfirmed(yr),
+          hint: GED_TYPICAL_HINT[s.round] || null,
+        };
       }
     }
   }
@@ -62,7 +68,11 @@ export function buildRoadmap(profile, today = new Date()) {
       icon: 'ClipboardList',
       title: `검정고시 응시 (${session.label})`,
       when: session.examDate,
-      todo: '먼저 시도교육청에서 접수해요. 접수 기간을 놓치지 않는 게 가장 중요해요.',
+      // 공고 전이면 날짜가 추정이라는 걸 할 일 문구에서 밝힌다.
+      approx: !session.confirmed,
+      todo: session.confirmed
+        ? '먼저 시도교육청에서 접수해요. 접수 기간을 놓치지 않는 게 가장 중요해요.'
+        : `${session.year}년 일정은 아직 공고 전이에요. 예년엔 ${session.hint?.exam}에 봤어요 — 공고가 뜨면 거주지 시·도교육청에서 접수해요.`,
       guideTopic: null,
     });
     stages.push({
@@ -70,6 +80,7 @@ export function buildRoadmap(profile, today = new Date()) {
       icon: 'FileText',
       title: '합격증명서 받기',
       when: session.resultDate,
+      approx: !session.confirmed,
       todo: '합격하면 합격증명서를 발급받아 둬요. 원서 낼 때 제출해야 해요.',
       guideTopic: 'guideline',
     });
@@ -172,7 +183,8 @@ export function buildRoadmap(profile, today = new Date()) {
     } else {
       s.status = 'upcoming';
     }
-    s.dateLabel = dateLabel(s.when);
+    // 공고 전인 검정고시 단계는 '예상'을 붙여 확정 일정과 구분한다.
+    s.dateLabel = s.approx ? `${dateLabel(s.when)} 예상` : dateLabel(s.when);
     s.dday = diff > 0 ? `D-${diff}` : diff === 0 ? 'D-DAY' : null;
   }
 
