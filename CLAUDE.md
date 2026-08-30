@@ -33,6 +33,11 @@ npm run verify         # 배포 캐시 우회 검증 (node verify-deploy.mjs)
 - **페르소나 기반 UI** (`src/lib/persona.js`) — `{stage, goal}`에 따라 노출 기능/탭이 달라짐. 상태는 localStorage `rebridge_profile`. 모든 사용자에게 모든 기능을 보여주지 않는 게 원칙.
 - **점수 엔진은 규칙 기반, AI 아님** (`src/lib/scoreEngine.js`). 2025 입결(9등급)과 2028 전형(5등급)은 직접 비교 불가 — UI는 "참고용"임을 명시하고 합격 보장 표현 금지.
 - **커뮤니티 백엔드는 Supabase, 없으면 자동으로 localStorage mock으로 폴백** (`src/lib/supabaseClient.js`). 데모 인증코드 `DREAM-TEST` / `DREAM-DEMO`는 mock 모드에서만 시드·노출된다.
+  - **Supabase 프로젝트는 `Rebridge(Gumgomentor)`(ref `oeghpijufjgekngzpasd`, 도쿄) 전용이다.**
+    2026-08-30에 학원관리 앱과 같이 쓰던 프로젝트에서 분리했다. 학원 쪽(`donggeun6669-cyber's Project`)을
+    다시 물리지 말 것 — 공개 저장소라 anon 키가 번들에 노출되는데, 그쪽엔 실명 학생 정보가 있다.
+  - ⚠️ **폴백은 키가 '없을 때'만 동작한다.** 키가 있는데 프로젝트가 정지되면 mock으로 안 떨어지고
+    커뮤니티가 조용히 먹통이 된다(2026-07~08 한 달간 실제로 그랬다). 무료 플랜은 1주 미사용 시 자동 정지.
 - 기획·기능·데이터 현황은 `ReBridge_AI공모전용/Planning/PRD.md` 한 장에 통합돼 있다.
 
 ## 디렉터리 (`Application_main_codes/`)
@@ -70,9 +75,12 @@ npm run verify         # 배포 캐시 우회 검증 (node verify-deploy.mjs)
     프로덕션 주소는 여전히 `rebridge-rho.vercel.app`이고 배포마다 그쪽만 갱신된다.
     푸시 후에는 아래를 실행해 운영 주소를 최신 배포로 다시 물려야 한다.
     ```bash
-    npx vercel inspect rebridge-rho.vercel.app   # 최신 배포 URL 확인
-    npx vercel alias set <그 URL> gumgomentor.vercel.app
+    npx vercel --prod                            # ⚠️ 레포 루트에서 실행 (아래 참고)
+    npx vercel alias set <출력된 배포 URL> gumgomentor.vercel.app
     ```
+    ⚠️ **수동 배포는 레포 루트에서 한다.** Vercel 프로젝트의 Root Directory가
+    `ReBridge_AI공모전용/Application_main_codes`로 잡혀 있어서, 앱 폴더에서 `vercel --prod`를 돌리면
+    "Root Directory does not exist"로 실패한다. (npm 명령은 앱 폴더에서 하는 규칙과 다르니 주의)
     **영구 해결:** Vercel 대시보드 → `gumgomentor` 프로젝트 → Settings → Domains 에서
     `gumgomentor.vercel.app`을 `main` 브랜치의 프로덕션 도메인으로 지정하고
     `rebridge-rho.vercel.app`을 제거하면 이 수동 작업이 없어진다. (CLI로는 불가)
