@@ -1,0 +1,20 @@
+{
+  "name": "검고담임 — 검정고시 맞춤 입시·진로",
+  "short_name": "검고담임",
+  "description": "검정고시생·학교 밖 청소년을 위한 입시·진로 안내. 검정고시 점수로 지원 가능한 대학을 확인하고, 진로 준비를 시작하세요.",
+  "lang": "ko",
+  "dir": "ltr",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F1F5F9",
+  "theme_color": "#2E8BD0",
+  "categories": ["education"],
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

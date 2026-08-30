@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>연결이 끊겼어요 — 검고담임</title>
+<style>
+:root{--bg:#F1F5F9;--card:#fff;--text:#1F2733;--sub:#6B7686;--line:#E5EBF1;--brand:#2E8BD0}
+@media (prefers-color-scheme:dark){:root{--bg:#12161c;--card:#1a1f27;--text:#e8ecf2;--sub:#a3adbb;--line:#2a323d}}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;background:var(--bg);color:var(--text);
+ font-family:Pretendard,-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif}
+main{max-width:360px;text-align:center;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:32px 24px}
+img{width:72px;height:72px;margin-bottom:14px}
+h1{font-size:19px;margin:0 0 8px}
+p{font-size:14px;line-height:1.7;color:var(--sub);margin:0 0 18px}
+button{border:0;border-radius:10px;padding:11px 20px;font-size:14px;font-weight:700;color:#fff;background:var(--brand);cursor:pointer}
+</style>
+</head>
+<body>
+<main>
+  <img src="/icon-192.png" alt="">
+  <h1>연결이 끊겼어요</h1>
+  <p>인터넷이 연결되면 다시 이어서 볼 수 있어요.<br>잠시 뒤에 다시 시도해 주세요.</p>
+  <button onclick="location.reload()">다시 시도</button>
+</main>
+</body>
+</html>
