@@ -1,4 +1,5 @@
 import { useMemo, useState, useCallback, useRef, useEffect } from 'react';
+import { CUTLINE_YEAR } from '../data/meta.js';
 import {
   ArrowLeft, MapPin, Sparkles, Info,
   ChevronRight, ChevronLeft, SlidersHorizontal, X,
@@ -29,21 +30,42 @@ function profileOneLiner(p) {
 }
 
 // 수시 뱃지
-function SusiBadge({ r }) {
-  const fit = (r.chance || r.dataGap)
-    ? null
-    : gedFit(
-        { admissionType: r.bestType, gedEligible: r.bestGedEligible || (r.status === 'ok' ? '가능' : '조건부') },
-        r.comparativeType
-      );
-  if (r.chance) return <ChanceGauge chance={r.chance} compact />;
-  if (r.dataGap === 'cutline') return <span className="fit-tag fit-unknown">예측 불가</span>;
+// hasScore=false(점수 미입력)면 합격 가능성 대신 '지원 가부'만 보여준다.
+function SusiBadge({ r, hasScore }) {
+  // 대교협 기본사항 템플릿 행 — 이 대학이 실제로 그렇게 뽑는지 확인되지 않았다
+  if (r.baseline) {
+    return <span className="fit-tag fit-unknown" title="대교협 2028 기본사항 기준 일반 안내예요. 대학 시행계획으로 확인이 필요해요.">확인 필요</span>;
+  }
+  if (r.chance) {
+    return <ChanceGauge chance={r.chance} compact estimated={r.conversionEstimated ?? r.conversionMethod === 'standard'} />;
+  }
+  // 점수를 넣었는데도 합격선 자료가 없는 경우 — '예측 불가'가 아니라 '자료 없음'
+  if (hasScore && r.dataGap === 'cutline') {
+    return <span className="fit-tag fit-unknown" title={`이 대학·전형의 ${CUTLINE_YEAR}학년도 합격선이 공개 자료에 없어요.`}>자료 없음</span>;
+  }
+  const fit = gedFit(
+    { admissionType: r.bestType, gedEligible: r.bestGedEligible || (r.status === 'ok' ? '가능' : '조건부') },
+    r.comparativeType
+  );
   return (
     <span className={`fit-tag fit-${fit?.level || 'ok'}`}>
       <Sparkles size={11} /> {fit?.label || '지원 가능'}
     </span>
   );
 }
+
+// 행 안에 붙는 작은 경고 배지 (CSS 추가 없이 인라인)
+const ROW_TAG_STYLE = {
+  fontSize: 10.5,
+  fontWeight: 700,
+  color: '#8a6d1f',
+  background: '#FEF6E0',
+  border: '1px solid #F0DCA8',
+  borderRadius: 6,
+  padding: '1px 5px',
+  marginLeft: 6,
+  whiteSpace: 'nowrap',
+};
 
 // 결과 행
 function ResultRow({ r, onClick, badge }) {
@@ -56,6 +78,11 @@ function ResultRow({ r, onClick, badge }) {
           {r.region}
           {r.kind === '전문대학' ? ' · 전문대학' : ''}
           <span className="result-row-type">{r.bestType} · {r.bestName}</span>
+          {r.baseline && (
+            <span style={ROW_TAG_STYLE} title="대교협 2028 기본사항의 일반 안내예요. 대학이 발표한 전형이 아니에요.">
+              대학 미확인 · 일반 안내
+            </span>
+          )}
         </div>
       </div>
       <div className="result-row-right">
@@ -121,7 +148,7 @@ function useFilteredPaged(results) {
     if (typeF !== '전체') out = out.filter((r) => r.bestType === typeMap[typeF]);
 
     if (chanceF === '예측 가능') out = out.filter((r) => r.chance != null);
-    else if (chanceF === '예측 불가') out = out.filter((r) => r.chance == null);
+    else if (chanceF === '자료 없음') out = out.filter((r) => r.chance == null);
     else if (chanceF === '안정') out = out.filter((r) => r.chance?.level === 5);
     else if (chanceF === '적정') out = out.filter((r) => r.chance?.level === 4);
     else if (chanceF === '소신') out = out.filter((r) => r.chance?.level === 3);
@@ -187,9 +214,12 @@ function Pagination({ page, totalPages, setPage }) {
 function ResultSection({ state, goTo, badgeFn, showChance = true }) {
   const [filterOpen, setFilterOpen] = useState(false);
   const topRef = useRef(null);
+  const mountedRef = useRef(false);
 
-  // 페이지 변경 시 목록 상단으로 스크롤
+  // 페이지를 '바꿨을 때만' 목록 상단으로 스크롤.
+  // 첫 렌더에도 실행돼서 화면에 들어오자마자 스크롤이 튀던 문제를 막는다.
   useEffect(() => {
+    if (!mountedRef.current) { mountedRef.current = true; return; }
     topRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }, [state.page]);
 
@@ -235,7 +265,7 @@ function ResultSection({ state, goTo, badgeFn, showChance = true }) {
           {showChance && (
             <FilterRow
               label="안정도"
-              options={['전체', '예측 가능', '안정', '적정', '소신', '도전', '예측 불가']}
+              options={['전체', '예측 가능', '안정', '적정', '소신', '도전', '자료 없음']}
               value={state.chanceF}
               onChange={state.setChanceF}
             />
@@ -376,6 +406,7 @@ export default function ResultsScreen({ goTo = () => {}, goBack = () => {} }) {
   }
 
   const { susi, jeongsi } = data;
+  const hasScore = !!data.hasScore;
   const summary = profileOneLiner(profile);
 
   return (
@@ -414,14 +445,30 @@ export default function ResultsScreen({ goTo = () => {}, goBack = () => {} }) {
       {/* ── 수시 탭 ── */}
       {tab === '수시' && (
         <>
+          {/* 점수를 아직 안 넣었으면 '예측 불가' 목록 대신 입력을 크게 안내한다 */}
+          {!hasScore && (
+            <div className="profile-card" style={{ marginTop: 12, marginBottom: 4 }}>
+              <span className="profile-name">점수를 넣으면 가능성을 보여드려요</span>
+              <span className="profile-summary">
+                검정고시 과목 점수를 넣으면 {CUTLINE_YEAR}학년도 합격선과 비교해 칸수를 보여드려요.
+                <br />지금은 <b>지원할 수 있는지</b>만 표시하고 있어요.
+              </span>
+              <button className="btn-outline" onClick={() => goTo('profile')}>내 점수 입력</button>
+            </div>
+          )}
           <div className="result-count">
             지원 가능한 대학 <b>{susi.total}곳</b>
-            <span className="result-exclude-hint">· 상위권 {susi.excludedCount}곳 제외</span>
           </div>
-          <ResultSection state={susiState} goTo={goTo} badgeFn={(r) => <SusiBadge r={r} />} showChance />
+          <ResultSection
+            state={susiState}
+            goTo={goTo}
+            badgeFn={(r) => <SusiBadge r={r} hasScore={hasScore} />}
+            showChance={hasScore}
+          />
           <p className="note" style={{ marginTop: 16 }}>
             합격 가능성 예측은 일반학생 입결 기반 참고값이에요.
-            <br />실제 검정고시 비교내신 입결 데이터 반영 예정.
+            <br />'추정' 표시는 대학이 검정고시 환산표를 공개하지 않아, 공개된 다른 대학 표의 중앙값으로 계산한 경우예요.
+            <br />'대학 미확인 · 일반 안내'는 대교협 기본사항 기준 안내라 대학 시행계획 확인이 필요해요.
           </p>
         </>
       )}

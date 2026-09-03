@@ -1,4 +1,5 @@
 import { ArrowLeft, AlertTriangle, Info, ExternalLink, ChevronRight } from 'lucide-react';
+import { FORMS_BASIS_LABEL } from '../data/meta.js';
 
 const UNIV_FORMS = [
   {
@@ -125,7 +126,7 @@ export default function FormsGuideScreen({ goTo = () => {}, goBack = () => {} })
       </div>
 
       {/* 대학별 규격 표 */}
-      <div className="fg-section-label">대학별 대체서식 규격 (2025학년도 기준)</div>
+      <div className="fg-section-label">{FORMS_BASIS_LABEL}</div>
       <div className="fg-note">매년 달라지므로 해당 연도 모집요강 필수 확인</div>
 
       <div className="fg-table-wrap">

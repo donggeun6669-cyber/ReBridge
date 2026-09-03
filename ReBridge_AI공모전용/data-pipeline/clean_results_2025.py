@@ -7,15 +7,46 @@ results_2025.json 2차 정제 스크립트
 → 산출물: results_2025_clean.json + reports/results_2025_clean_report.md
 """
 
-import json, re, collections, pathlib, sys
+import argparse, json, re, collections, pathlib, sys
 
+# ⚠️ 2026-09-03 — 연도·경로를 매개변수로 뺐다(이전엔 전부 2025 고정).
 BASE   = pathlib.Path(__file__).parent
-PDF_DIR = BASE / "pdf_sources" / "2025"
-DATA   = BASE / "results_2025.json"
-UNIV   = BASE / "universities.json"
-ADM    = BASE / "admissions.json"
-OUT    = BASE / "results_2025_clean.json"
-REPORT = BASE / "reports" / "results_2025_clean_report.md"
+APP_DATA = BASE.parent / "Application_main_codes" / "src" / "data"
+
+_ap = argparse.ArgumentParser(description="전형결과 JSON 2차 정제. 연도·경로는 매개변수다.")
+_ap.add_argument("--year", type=int, default=2025)
+_ap.add_argument("--src", help="1차 추출 JSON. 기본값: results_{year}.json")
+_ap.add_argument("--pdf-dir", help="원본 PDF 폴더(작업 B 복구용)")
+_ap.add_argument("--out", help="정제 결과 JSON. 기본값: results_{year}_clean.json")
+_args = _ap.parse_args()
+
+YEAR   = _args.year
+
+
+def _first_dir(*cands):
+    for c in cands:
+        if c.is_dir():
+            return c
+    return cands[0]
+
+
+def _first_file(*cands):
+    for c in cands:
+        if c.exists():
+            return c
+    return cands[0]
+
+
+PDF_DIR = (pathlib.Path(_args.pdf_dir).expanduser() if _args.pdf_dir
+           else _first_dir(APP_DATA / "pdf_sources" / f"results_{YEAR}",
+                           APP_DATA / "pdf_sources" / str(YEAR),
+                           BASE / "pdf_sources" / str(YEAR)))
+DATA   = pathlib.Path(_args.src).expanduser() if _args.src else BASE / f"results_{YEAR}.json"
+UNIV   = _first_file(APP_DATA / "universities.json", BASE / "universities.json")
+ADM    = _first_file(APP_DATA / "admissions.json", BASE / "admissions.json")
+OUT    = pathlib.Path(_args.out).expanduser() if _args.out else BASE / f"results_{YEAR}_clean.json"
+REPORT = BASE / "reports" / f"results_{YEAR}_clean_report.md"
+print(f"학년도 {YEAR} | 입력 {DATA.name} | PDF {PDF_DIR}")
 
 # ── 로드 ──────────────────────────────────────────────────────────────────────
 print("▶ 로드 중...")
@@ -168,7 +199,8 @@ else:
 
     if _has_pdf:
         # 재처리 대상 PDF (누락 대학이 속할 가능성 높은 것)
-        TARGET_PDFS = [
+        # ⚠️ 이 목록은 2025 전용 수기 목록이다. 다른 학년도에서는 폴더 전체를 훑는다.
+        TARGET_PDFS = [p.name for p in sorted(PDF_DIR.glob("*.pdf"))] if YEAR != 2025 else [
             "2025학년도 대입 전형결과(서울_1).pdf",
             "2025학년도 대입 전형결과(서울_2).pdf",
             "2025학년도 대입 전형결과(서울_3).pdf",
@@ -314,7 +346,7 @@ else:
                         "admissionType": current_adm_type,
                         "admissionName": "",
                         "unit":          unit,
-                        "year":          2025,
+                        "year":          YEAR,
                         "cutType":       cut_type,
                         "cutGrade":      cut_grade,
                         "cutScore":      cut_score,
@@ -336,6 +368,23 @@ else:
         for name, uid in still_missing.items():
             cnt = sum(1 for r in rows if r.get("univId") == uid)
             print(f"    {name}({uid}): {cnt}행")
+
+# ── 보충분 병합 ───────────────────────────────────────────────────────────────
+# ⚠️ 2026-09-03 추가.
+# 이미지 PDF라 표 추출이 안 되는 대학(중앙대·인하대·한양대·충남대·전북대)은
+# scrape_missing_univs.py / scrape_cnu_jbnu.py 가 따로 뽑아 clean 파일에 **덧붙여** 놨었다.
+# 그래서 1차 추출을 다시 돌리면 그 1,244행이 조용히 사라졌다(대학 119개 → 114개).
+# 보충분을 별도 파일로 떼어 두고 여기서 다시 합친다. 없으면 그냥 넘어간다.
+SUPP = BASE / f"results_{YEAR}_scraped_supplement.json"
+if SUPP.exists():
+    supp = json.loads(SUPP.read_text())
+    have = {r.get("univId") for r in rows}
+    added = [r for r in supp if r.get("univId") not in have]
+    rows.extend(added)
+    print(f"▶ 보충분 병합: {SUPP.name} {len(supp)}행 중 {len(added)}행 추가 "
+          f"(이미 뽑힌 대학은 건너뜀)")
+else:
+    print(f"▶ 보충분 없음 ({SUPP.name})")
 
 # ── 저장 ──────────────────────────────────────────────────────────────────────
 print("▶ 저장 중...")
@@ -369,7 +418,7 @@ def univ_coverage(uid):
 conf_total = collections.Counter(r["confidence"] for r in rows)
 
 lines = [
-    "# results_2025 2차 정제 리포트",
+    f"# results_{YEAR} 2차 정제 리포트",
     "",
     "## 요약",
     "",

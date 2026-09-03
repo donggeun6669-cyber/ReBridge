@@ -4,8 +4,11 @@ import universities from '../data/universities.json';
 import admissions from '../data/admissions.json';
 import cutlines from '../data/cutlines_2025.json';
 import comparative from '../data/comparative_2028.json';
-import { evaluateAdmission, admissionChance } from './scoreEngine.js';
-import { TOP_TIER_EXCLUDE } from '../data/topTierExclude.js';
+import { evaluateAdmission, admissionChance, gedSubjectCount } from './scoreEngine.js';
+// 상위권 제외 목록(src/data/topTierExclude.js)은 남겨두되 여기서는 쓰지 않는다.
+// 목록에서 통째로 빼면 "왜 이 대학이 안 보이지?"가 되기 때문에, 목록에는 넣고
+// 합격선 자료가 없으면 행에서 '자료 없음'으로 정직하게 표시한다.
+// (ExploreScreen의 추천순 정렬은 여전히 그 파일을 직접 쓴다)
 
 const METRO = new Set(['서울', '경기', '인천']);
 
@@ -14,6 +17,17 @@ const ADMISSIONS_BY_UNIV = new Map();
 for (const r of admissions) {
   if (!ADMISSIONS_BY_UNIV.has(r.univId)) ADMISSIONS_BY_UNIV.set(r.univId, []);
   ADMISSIONS_BY_UNIV.get(r.univId).push(r);
+}
+
+// 수시 합격선이 실제로 있는지. cutlines_2025.json은 전형유형별 객체라
+// 정시(수능위주) 블록만 있어도 !!cut 이 참이 됐다 — 수시 화면에선 거짓말이 된다.
+function hasSusiCutline(cut) {
+  if (!cut) return false;
+  return Object.entries(cut).some(([type, v]) => {
+    if (type === '수능위주') return false;
+    if (!v || typeof v !== 'object') return false;
+    return (v.cutGradeAvg ?? v.cutGrade70 ?? v.cutScoreAvg ?? v.cutScore70) != null;
+  });
 }
 
 // 비교내신 자료 유형 — 환산표 있음(numeric) / 서술만(prose) / 없음(none)
@@ -85,6 +99,13 @@ function isConfirmedStatus(status) {
   return status === 'confirmed' || status === 'confirmed_detail' || status === 'confirmed_summary';
 }
 
+// 'baseline' = 대교협 2028 기본사항에서 만든 템플릿 행(현재 359행).
+// 그 대학이 실제로 그렇게 뽑는다는 확인이 아니라 "검정고시생 수시 지원은 보장된다"는
+// 일반 안내다. 합격 가능성 계산에 넣으면 근거 없는 숫자가 되므로 게이지에서 뺀다.
+function isBaselineStatus(status) {
+  return status === 'baseline';
+}
+
 // 대학 상세: univId로 대학 정보 + 전형 목록(검정고시 관점 정렬) 반환
 export function getUniversityDetail(univId) {
   const u = universities.find((x) => x.univId === univId);
@@ -144,10 +165,10 @@ export function getExploreList() {
       eligibleCount: eligible.length,
       hasAny: rows.length > 0,
       comparativeType,
-      hasCutline: !!cut,
+      hasCutline: hasSusiCutline(cut),
       // 데이터 충실도 점수(둘러보기 정렬용): 합격선·환산표·전형수
       dataScore:
-        (cut ? 3 : 0) +
+        (hasSusiCutline(cut) ? 3 : 0) +
         (comparativeType === 'numeric' ? 3 : comparativeType === 'prose' ? 1 : 0) +
         Math.min(eligible.length, 5),
       // 프로필 점수 비교용(best 전형)
@@ -159,11 +180,6 @@ export function getExploreList() {
   return out;
 }
 
-// ─── 추천에서 제외할 상위권 대학 ─────────────────────────────────────────
-// 제외 리스트는 src/data/topTierExclude.js 에서 단일 관리(SKY·서성한 + 최상위 인서울).
-// 추천(수시·정시) 경로에만 적용하고, 전체 목록/검색에는 그대로 노출한다.
-const SUSI_HARD_EXCLUDE = TOP_TIER_EXCLUDE;
-
 // 공통: 카드 항목 생성
 function makeResultItem(u, best, rows, profile, comp) {
   const ev = evaluateAdmission(profile, {
@@ -172,8 +188,10 @@ function makeResultItem(u, best, rows, profile, comp) {
     admissionName: best.admissionName,
     gedEligible: best.gedEligible,
   });
-  const chance = ev.applicable ? admissionChance(ev) : null;
-  const dataGap = !ev.applicable ? (ev.dataGap || null) : null;
+  const baseline = isBaselineStatus(best.status);
+  // 템플릿 행은 게이지 계산 대상에서 제외한다 ('예측 불가'가 아니라 '확인 필요')
+  const chance = !baseline && ev.applicable ? admissionChance(ev) : null;
+  const dataGap = baseline ? 'baseline' : (!ev.applicable ? (ev.dataGap || null) : null);
   const comparativeType = comparativeTypeOf(comp);
 
   return {
@@ -192,6 +210,11 @@ function makeResultItem(u, best, rows, profile, comp) {
     next: nextAction(best.admissionType, best.interview),
     eligibleCount: rows.length,
     confirmed: isConfirmedStatus(best.status),
+    baseline,                            // 대교협 기본사항 템플릿 행인지
+    hasCutline: hasSusiCutline(cutlines[u.univId] || null),
+    hasScore: ev.hasScore,               // 검정고시 점수를 입력했는지
+    conversionMethod: ev.conversionMethod, // 'standard'면 추정표(공식 환산표 아님)
+    conversionEstimated: ev.conversionEstimated, // 추정표이거나 등급 구간이 추정이면 true
     chance,
     dataGap,
     _score:
@@ -219,7 +242,8 @@ export function analyzeProfile(profile = {}) {
     const comp = comparative[u.univId] || null;
 
     // ── 수시 ──────────────────────────────────────────────────────────────
-    if (!SUSI_HARD_EXCLUDE.has(u.univId)) {
+    // 상위권 대학도 빼지 않는다(자료가 없으면 행에서 '자료 없음'으로 표시).
+    {
       const susiRows = allRows.filter(
         (r) => r.phase !== '정시' && r.admissionType !== '수능위주'
       );
@@ -251,6 +275,8 @@ export function analyzeProfile(profile = {}) {
           bestGedEligible: best.gedEligible,
           csat: csatHint(best.csatMinimum),
           eligibleCount: jeongsiRows.length,
+          confirmed: isConfirmedStatus(best.status),
+          baseline: isBaselineStatus(best.status),
           // 정시는 합격 예측 없이 지원 자격만 표시
           chance: null,
           dataGap: 'csat',
@@ -273,10 +299,11 @@ export function analyzeProfile(profile = {}) {
   // 페이지네이션이 ResultsScreen에서 처리되므로 전체 결과 반환
   return {
     note: guideNote(csatPlan),
+    hasScore: gedSubjectCount(profile.gedScores) > 0,
     susi: {
       total: susiResults.length,
       shown: susiResults.length,
-      excludedCount: SUSI_HARD_EXCLUDE.size,
+      excludedCount: 0, // 상위권 제외 중단 — 필드는 호환 위해 남김
       results: susiResults,
     },
     jeongsi: {

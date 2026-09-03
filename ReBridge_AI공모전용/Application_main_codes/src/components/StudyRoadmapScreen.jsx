@@ -4,7 +4,7 @@ import {
   ChevronRight, Flame, ListChecks,
 } from 'lucide-react';
 import { getNextSession, daysUntil, formatKDate, PASS_RULE, GED_SUBJECT_GUIDE } from '../data/gedGuide.js';
-import { getPersona } from '../lib/persona.js';
+import { getPersona, isHiddenScreen } from '../lib/persona.js';
 import { loadDays, loadScores, ymd, fmtMin } from '../lib/studyUtils.js';
 import '../styles.studyroadmap.css';
 import '../styles.study.css';
@@ -178,7 +178,8 @@ export default function StudyRoadmapScreen({ goTo = () => {} }) {
                 </div>
                 {s.date && <div className="srm-date">{formatKDate(s.date)}</div>}
                 <p className="srm-todo">{s.todo}</p>
-                {s.cta && (
+                {/* 숨긴 화면(진로 허브 등)으로 가는 CTA는 걸지 않는다 */}
+                {s.cta && !isHiddenScreen(s.cta.screen) && (
                   <button className="srm-cta" onClick={() => goTo(s.cta.screen)}>
                     {s.cta.label} <ChevronRight size={15} />
                   </button>

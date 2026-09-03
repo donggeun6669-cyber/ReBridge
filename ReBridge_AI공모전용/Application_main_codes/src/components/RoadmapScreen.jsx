@@ -9,6 +9,7 @@ import { getUniversityDetail } from '../lib/analysis.js';
 import { evaluateAdmission, admissionChance } from '../lib/scoreEngine.js';
 import { getBookmarks } from '../lib/bookmarks.js';
 import { loadProfile } from '../lib/persona.js';
+import { CUTLINE_GAP_NOTE, CUTLINE_NO_DATA_SHORT } from '../data/meta.js';
 
 const ICONS = {
   ClipboardList, FileText, Scale, CalendarDays, Target, MessageCircle, CheckCircle2,
@@ -85,7 +86,7 @@ export default function RoadmapScreen({ goTo = () => {}, goBack = () => {} }) {
       return { tone: 'good', text: `지금 점수로 ${t.chance.label}권이에요` };
     }
     if (t.ev?.dataGap === 'csat') return { tone: 'mute', text: '수능 기준 전형 — 점수 비교 어려움' };
-    return { tone: 'mute', text: '작년 합격선 자료 없음' };
+    return { tone: 'mute', text: CUTLINE_NO_DATA_SHORT };
   }
 
   return (
@@ -212,7 +213,7 @@ export default function RoadmapScreen({ goTo = () => {}, goBack = () => {} }) {
           )}
           {hasScore && targets.length > 0 && (
             <p className="rm-targets-note">
-              <Info size={11} /> 부족 점수는 작년(2025) 합격선 기준 추정이에요 · 참고용.
+              <Info size={11} /> {CUTLINE_GAP_NOTE}
             </p>
           )}
         </div>

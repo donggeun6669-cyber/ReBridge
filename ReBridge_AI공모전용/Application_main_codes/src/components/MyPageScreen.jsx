@@ -5,7 +5,8 @@ import {
   RefreshCw, Target, Briefcase, HelpCircle, RotateCcw, Route,
   Award, FileText, ShieldCheck, ScrollText,
 } from 'lucide-react';
-import { getPersona, loadProfile, getActiveTrack } from '../lib/persona';
+import { getPersona, loadProfile, getActiveTrack, V1_UNIV_ONLY } from '../lib/persona';
+import { MAP_ENABLED } from '../lib/kakaoMap.js';
 import '../styles.mypage.css';
 
 // 테스트/초기화용 — 저장된 모든 정보 지우고 첫 화면(스플래시→온보딩)부터 다시.
@@ -103,8 +104,11 @@ export default function MyPageScreen({ goTo = () => {}, goBack = () => {} }) {
   const chips = toChips(profile);
 
   // 사용자 유형 = 활성 트랙. (홈에서 고른 길) — 없으면 persona.goal로 보조 추론.
+  // v1(V1_UNIV_ONLY)은 대입 트랙 하나뿐이라 무조건 'univ'로 고정한다.
+  //   → 아래 취업/검정고시 전용 메뉴 블록이 자동으로 전부 빠진다.
   let track = useMemo(getActiveTrack, []);
-  if (!track && persona) {
+  if (V1_UNIV_ONLY) track = 'univ';
+  else if (!track && persona) {
     if (persona.goal === 'job') track = 'job';
     else if (persona.stage === 'studying' && persona.goal !== 'university') track = 'study';
     else track = 'univ';
@@ -315,9 +319,14 @@ export default function MyPageScreen({ goTo = () => {}, goBack = () => {} }) {
             <div className="mp-row-divider" />
             <MenuRow ico={ClipboardCheck} icoClass="ico-coral" title="서류 체크리스트"
               sub="제출 서류 빠짐없이 확인" onClick={() => goTo('checklist')} />
-            <div className="mp-row-divider" />
-            <MenuRow ico={MapPin} icoClass="ico-green" title="대학 지도"
-              sub="내 주변 검정고시 지원 대학" onClick={() => goTo('map')} />
+            {/* 대학 지도 — 카카오맵 스위치가 꺼져 있으면 메뉴도 숨긴다(빈 지도로 보내지 않기) */}
+            {MAP_ENABLED && (
+              <>
+                <div className="mp-row-divider" />
+                <MenuRow ico={MapPin} icoClass="ico-green" title="대학 지도"
+                  sub="내 주변 검정고시 지원 대학" onClick={() => goTo('map')} />
+              </>
+            )}
           </>
         ) : null}
       </div>

@@ -20,6 +20,44 @@ def bar(n, total, width=28):
     return "█" * f + "·" * (width - f)
 
 
+def year_coverage(con, total):
+    """학년도별 대학 커버리지 — '351개 중 몇 개를 채웠나'를 항목마다 숫자로.
+
+    2026-09-03 추가. "처리했다"가 아니라 **처리/미처리 수**로 말하기 위한 표다.
+    비어 있는 칸은 0으로 찍는다. 안 보이면 안 한 것과 구분이 안 된다.
+    """
+    years = sorted({r["y"] for r in con.execute("""
+        SELECT year y FROM cutline UNION
+        SELECT year y FROM ged_conversion UNION
+        SELECT year y FROM admission UNION
+        SELECT year y FROM ged_eligibility_univ""") if r["y"]})
+    if not years:
+        return
+    print()
+    print(f"  ── 학년도 × 대학 커버리지 (전체 {total}개 대학 기준) ──")
+    print(f"    {'학년도':<8}{'전형':>12}{'검정고시가부':>14}{'환산표':>12}{'합격선':>12}")
+    Q = {
+        "adm":  "SELECT COUNT(DISTINCT univ_id) c FROM admission "
+                "WHERE year=? AND status='confirmed'",
+        "ged":  "SELECT COUNT(DISTINCT univ_id) c FROM ged_eligibility_univ "
+                "WHERE year=? AND verdict <> '판정불가'",
+        "conv": "SELECT COUNT(DISTINCT univ_id) c FROM ged_conversion "
+                "WHERE year=? AND table_json IS NOT NULL",
+        "cut":  "SELECT COUNT(DISTINCT univ_id) c FROM cutline WHERE year=?",
+    }
+    for y in years:
+        n = {k: con.execute(q, (y,)).fetchone()["c"] for k, q in Q.items()}
+        print(f"    {y:<8}" + "".join(
+            f"{n[k]:>7}/{total:<5}" for k in ("adm", "ged", "conv", "cut")))
+        print(f"    {'':8}" + "".join(
+            f"{'미처리 ' + str(total - n[k]):>12}" for k in ("adm", "ged", "conv", "cut")))
+    # 판정불가는 '처리했지만 사람이 봐야 하는' 몫이라 따로 센다
+    for r in con.execute("""SELECT year, COUNT(DISTINCT univ_id) c
+                            FROM ged_eligibility_univ WHERE verdict='판정불가'
+                            GROUP BY year"""):
+        print(f"    ※ {r['year']}학년도 검정고시 가부 '판정불가'(사람 검토 대기): {r['c']}개 대학")
+
+
 def summary(con):
     U = con.execute("SELECT COUNT(*) c FROM university").fetchone()["c"]
     print("═" * 68)
@@ -28,8 +66,15 @@ def summary(con):
 
     rows = [
         ("전형 정보(실측)", "SELECT COUNT(DISTINCT univ_id) c FROM admission WHERE status='confirmed'"),
-        ("검정고시 지원가부", """SELECT COUNT(DISTINCT a.univ_id) c FROM ged_eligibility g
-                                 JOIN admission a ON a.admission_id=g.admission_id"""),
+        # ⚠️ status='baseline'(KCUE 기본사항에서 온 일반론)을 빼야 한다.
+        #    안 빼면 351/351 = 100% 로 보이는데, 실제 대학별 확인은 그만큼 안 돼 있다.
+        ("검정고시 가부(대학별 실측)",
+         """SELECT COUNT(DISTINCT a.univ_id) c FROM ged_eligibility g
+            JOIN admission a ON a.admission_id=g.admission_id
+            WHERE a.status='confirmed'"""),
+        ("검정고시 가부(시행계획 규칙판정)",
+         "SELECT COUNT(DISTINCT univ_id) c FROM ged_eligibility_univ "
+         "WHERE verdict <> '판정불가'"),
         ("비교내신 원문", "SELECT COUNT(DISTINCT univ_id) c FROM ged_conversion WHERE raw_text IS NOT NULL"),
         ("비교내신 환산표(계산가능)", "SELECT COUNT(DISTINCT univ_id) c FROM ged_conversion WHERE table_json IS NOT NULL"),
         ("합격선", "SELECT COUNT(DISTINCT univ_id) c FROM cutline"),
@@ -59,6 +104,8 @@ def summary(con):
                                    SUM(table_json IS NOT NULL) t
                             FROM ged_conversion GROUP BY year ORDER BY year"""):
         print(f"    환산표 {r['year']}학년도: 원문 {r['n']:>3}  구조화 {r['t']:>3}")
+
+    year_coverage(con, U)
 
     print()
     print("  ── 출처 ──")

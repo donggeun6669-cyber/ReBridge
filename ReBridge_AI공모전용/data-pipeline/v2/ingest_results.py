@@ -91,10 +91,15 @@ def run(year, json_path, to_db=False, pdf_dir=None, dry_run=False):
 
     # 같은 연도를 다시 넣기 전에 이전 적재분을 지운다(중복 방지).
     # 원본은 그대로 있으므로 언제든 다시 만들 수 있다.
-    old = con.execute("SELECT COUNT(*) c FROM cutline WHERE year=?", (y,)).fetchone()["c"]
-    if old:
-        con.execute("DELETE FROM cutline WHERE year=?", (y,))
-        print(f"  기존 {y}학년도 {old:,}행 삭제 후 재적재")
+    # ⚠️ 2026-09-03 — 이전에는 루프 변수 y(마지막 행의 연도)를 그대로 썼다.
+    #    행이 하나도 없으면 NameError, 여러 연도가 섞이면 한 연도만 지워졌다.
+    years = sorted({p[2] for p in pending}) or [year]
+    for yy in years:
+        old = con.execute("SELECT COUNT(*) c FROM cutline WHERE year=?", (yy,)).fetchone()["c"]
+        if old:
+            con.execute("DELETE FROM cutline WHERE year=?", (yy,))
+            print(f"  기존 {yy}학년도 {old:,}행 삭제 후 재적재")
+    y = years[-1]
 
     for uid, r, y, fname, ct in pending:
         key = ("result", fname)
@@ -163,9 +168,12 @@ def run(year, json_path, to_db=False, pdf_dir=None, dry_run=False):
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--year", type=int, required=True)
-    ap.add_argument("--json", required=True, help="추출기가 만든 결과 JSON/JSONL")
+    ap.add_argument("--src", help="추출기가 만든 결과 JSON/JSONL. "
+                                  "기본값: ../results_{year}_clean.json")
+    ap.add_argument("--json", help="--src 의 옛 이름(호환용)")
     ap.add_argument("--pdf-dir", help="원본 PDF 폴더 (sha256 기록용)")
     ap.add_argument("--to-db", action="store_true")
     ap.add_argument("--dry-run", action="store_true")
     a = ap.parse_args()
-    run(a.year, a.json, a.to_db, a.pdf_dir, a.dry_run)
+    src = a.src or a.json or (C.PIPELINE / f"results_{a.year}_clean.json")
+    run(a.year, src, a.to_db, a.pdf_dir, a.dry_run)

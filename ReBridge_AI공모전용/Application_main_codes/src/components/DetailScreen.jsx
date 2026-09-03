@@ -13,6 +13,10 @@ import {
 import DocumentsChecklist from './DocumentsChecklist.jsx';
 import ChanceGauge from './ChanceGauge.jsx';
 import { loadProfile } from '../lib/persona.js';
+import {
+  CUTLINE_LABEL, CUTLINE_NO_DATA_LABEL, CUTLINE_NO_DATA_SHORT,
+  CUTLINE_SCALE_NOTICE, PLAN_BASIS_NOTICE, STANDARD_CONVERSION_NOTICE,
+} from '../data/meta.js';
 
 function cleanCsat(raw) {
   if (!raw) return '모집요강 확인';
@@ -37,9 +41,12 @@ function conversionBasis(profile, comp) {
     case 'grade_table': {
       const row = conv?.gradeTable?.find((r) => avg >= (r.minAvg ?? -Infinity) && avg <= (r.maxAvg ?? Infinity));
       if (row) {
-        lines.push(`대학 공개 환산표 적용: ${row.minAvg ?? 0}~${row.maxAvg ?? 100}점 → ${grade}등급`);
-        if (score != null) lines.push(`환산 점수: ${score}점`);
-        lines.push('이 수치는 대학이 공식 발표한 비교내신 환산표 기반이에요.');
+        const bandEstimated = conv?.gradeBandSource === 'app_standard_estimate';
+        lines.push(`${bandEstimated ? '표준 추정 구간' : '대학 공개 환산표'} 적용: ${row.minAvg ?? 0}~${row.maxAvg ?? 100}점 → ${grade}등급`);
+        if (score != null) lines.push(`환산 점수: ${score}점 (대학 공식 등급별 환산점수)`);
+        lines.push(bandEstimated
+          ? '등급 구간은 앱 표준 추정이고, 등급별 환산점수만 대학이 공식 발표한 값이에요.'
+          : '이 수치는 대학이 공식 발표한 비교내신 환산표 기반이에요.');
       }
       break;
     }
@@ -146,7 +153,7 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
     const safe = levels.filter((l) => l >= 4).length;
     const reach = levels.filter((l) => l === 3).length;
     if (levels.length === 0) {
-      coachSummary = `검정고시로 지원 가능한 전형이 ${eligibleCount}개 있어요. 다만 작년 합격선 자료가 없어 점수 비교는 어려워요.`;
+      coachSummary = `검정고시로 지원 가능한 전형이 ${eligibleCount}개 있어요. 다만 ${CUTLINE_NO_DATA_SHORT}이라 점수 비교는 어려워요.`;
     } else if (safe > 0) {
       coachSummary = `${isTarget ? '목표' : '지금'} 점수(평균 ${profile.gedAvg}점)면 ${safe}개 전형이 적정~안정권이에요. 충분히 노려볼 만해요!`;
     } else if (reach > 0) {
@@ -250,7 +257,7 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
                     )}
                     {ev && !ev.applicable && (
                       <div className="adm-oneline muted">
-                        <Info size={12} /> {ev.dataGap === 'csat' ? '수능 기준 전형 — 검정고시 평균으로 비교 어려움' : '작년 합격선 자료 없음'}
+                        <Info size={12} /> {ev.dataGap === 'csat' ? '수능 기준 전형 — 검정고시 평균으로 비교 어려움' : CUTLINE_NO_DATA_SHORT}
                       </div>
                     )}
                     <ChevronDown size={18} className="adm-chevron" />
@@ -280,41 +287,70 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
                       {/* 합격선 블록 */}
                       {ev && ev.applicable && ev.cutGrade != null ? (
                         <div className="adm-block">
-                          <div className="adm-block-title">작년 합격선</div>
+                          <div className="adm-block-title">{CUTLINE_LABEL}</div>
                           <div className="adm-cut">
                             약 <b>{ev.cutGrade}등급</b>
-                            <span className="adm-cut-meta">
-                              {' '}({ev.cutType}{ev.cutN ? ` · 표본 ${ev.cutN}명` : ''})
-                            </span>
+                            {/* 컷 종류·집계 근거·신뢰도. 하나도 없으면 괄호 자체를 생략한다. */}
+                            {(() => {
+                              const cutType = ev.cutGradeType ?? ev.cutScoreType ?? null;
+                              const parts = [];
+                              if (cutType) parts.push(cutType);
+                              // cutN은 '학생 수'가 아니라 집계에 쓴 모집단위 행 수다.
+                              if (ev.cutN) parts.push(`모집단위 ${ev.cutN}개 기준(전체 중앙값)`);
+                              if (ev.cutConfidence === 'high') parts.push('신뢰도 높음');
+                              else if (ev.cutConfidence === 'mid') parts.push('신뢰도 보통');
+                              if (parts.length === 0) return null;
+                              return (
+                                <span className="adm-cut-meta"> ({parts.join(' · ')})</span>
+                              );
+                            })()}
                           </div>
-                          {/* 몇 점 맞아야 하는지 글로 풀어주기 */}
+                          {/* 몇 점 맞아야 하는지 글로 풀어주기 —
+                              판정 문구는 반드시 ev.verdict와 같은 기준으로만 말한다.
+                              (예전엔 평균만 비교해서 verdict가 '도전'인데 "충분해요"라고 하는 모순이 있었다) */}
                           {(() => {
-                            const need = gradeToMinAvg(ev.cutGrade);
+                            if (ev.scaleMismatch) return null; // 등급 체계가 달라 점수 비교 불가
+                            const need = ev.neededAvg ?? gradeToMinAvg(ev.cutGrade);
                             if (need == null || need <= 0) return null;
+                            const key = ev.verdict?.key ?? null;
+                            const enough = key === 'safe' || key === 'fit';
+                            const who = isTarget ? '목표' : '내';
+                            let tail = null;
+                            if (key && myAvg != null) {
+                              if (enough) {
+                                tail = ` ${who} 평균 ${myAvg}점이면 ${ev.verdict.label}권이에요 👍`;
+                              } else if (ev.shortPoints > 0) {
+                                tail = ` ${who} 평균 ${myAvg}점에서 약 ${ev.shortPoints}점 더 필요해요.`;
+                              } else {
+                                tail = ` ${who} 평균 ${myAvg}점은 ${ev.verdict.label} 지원권이에요.`;
+                              }
+                            }
                             return (
                               <div className="adm-need">
                                 <Target size={13} />
                                 <span>
                                   검정고시 <b>평균 약 {need}점</b> 이상이면 이 합격선에 닿아요.
-                                  {myAvg != null && (
-                                    myAvg >= need
-                                      ? ` ${isTarget ? '목표' : '내'} 평균 ${myAvg}점이면 충분해요 👍`
-                                      : ` ${isTarget ? '목표' : '내'} 평균 ${myAvg}점에서 약 ${Math.round((need - myAvg) * 10) / 10}점 더 필요해요.`
-                                  )}
+                                  {tail}
                                 </span>
                               </div>
                             );
                           })()}
-                          <div className="adm-disclaimer">
-                            작년(2025) 9등급제 입결로 추정한 <b>참고용 예상</b>이에요. 2028학년도는 5등급제로 바뀌어 제도가 달라, 실제와 차이가 있을 수 있어요.
-                          </div>
+                          {ev.conversionMethod === 'standard' && (
+                            <div className="adm-disclaimer">{STANDARD_CONVERSION_NOTICE}</div>
+                          )}
+                          {ev.gradeBandEstimated && (
+                            <div className="adm-disclaimer">
+                              이 대학은 등급별 환산점수만 공개했어요. 검정고시 평균을 등급으로 바꾸는 구간은 표준 추정이라, 등급 판정은 참고값이에요.
+                            </div>
+                          )}
+                          <div className="adm-disclaimer">{CUTLINE_SCALE_NOTICE}</div>
                         </div>
                       ) : (
                         <div className="adm-block adm-block-empty">
                           <div className="adm-empty-row">
                             <Lock size={14} />
                             <div>
-                              <b>{ev?.dataGap === 'csat' ? '수능 기준 전형이에요' : '작년 합격선 자료가 없어요'}</b>
+                              <b>{ev?.dataGap === 'csat' ? '수능 기준 전형이에요' : CUTLINE_NO_DATA_LABEL}</b>
                               <p>{ev?.reason || '점수를 입력하면 비교해드릴게요.'}</p>
                             </div>
                           </div>
@@ -422,9 +458,9 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
       )}
 
       <p className="note">
-        2028학년도 시행계획 기준이에요.
+        {PLAN_BASIS_NOTICE}
         <br />
-        합격선·비교내신은 <b>작년 자료 참고용</b>이고, 정확한 내용은 입학처 모집요강에서 확인해 주세요.
+        합격선·비교내신은 <b>{CUTLINE_LABEL} 자료 참고용</b>이에요.
       </p>
     </div>
   );

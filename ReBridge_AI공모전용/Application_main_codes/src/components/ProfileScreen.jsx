@@ -2,11 +2,16 @@ import { useState } from 'react';
 import { AlertTriangle, ExternalLink } from 'lucide-react';
 import { GED_SUBJECTS, gedAverage, estimateGrade } from '../lib/scoreEngine';
 import { getPersona } from '../lib/persona';
+import { currentYear, examYearOptions } from '../data/meta.js';
 
 const CSAT_SUBJECTS = ['국어', '수학', '영어', '탐구1', '탐구2'];
 
-const CURRENT_YEAR = 2026;
-const EXAM_YEARS = ['2026', '2025', '2024', '2023', '2022 이전'];
+// 고졸 검정고시 선택과목 — 도덕·기술가정·체육·음악·미술 중 1과목.
+// (필수 6과목은 scoreEngine의 GED_SUBJECTS)
+const GED_ELECTIVE_LABEL = '선택과목(도덕·기술가정·체육·음악·미술 중 1)';
+
+const CURRENT_YEAR = currentYear();
+const EXAM_YEARS = examYearOptions();
 
 const QUESTIONS = [
   {
@@ -68,6 +73,12 @@ export default function ProfileScreen({ goTo = () => {}, goBack = () => {}, onCo
     return init;
   });
 
+  // 선택과목 1칸 — 저장 키는 gedScores.elective
+  const [elective, setElective] = useState(() => {
+    const v = answers.gedScores?.elective;
+    return v != null && v !== '' ? String(v) : '';
+  });
+
   const [examYear,  setExamYear]  = useState(answers.examYear  || '');
   const [examRound, setExamRound] = useState(answers.examRound || '');
 
@@ -100,6 +111,9 @@ export default function ProfileScreen({ goTo = () => {}, goBack = () => {}, onCo
   const numericScores = Object.fromEntries(
     GED_SUBJECTS.map((s) => [s, gedScores[s] === '' ? '' : Number(gedScores[s])])
   );
+  // 선택과목은 점수 엔진(gedAverage)이 필수 6과목만 평균하므로 평균에는 아직 반영되지 않는다.
+  // 값 자체는 저장해 둔다(서류·회차 안내에 쓰임).
+  const savedScores = { ...numericScores, elective: elective === '' ? '' : Number(elective) };
   const avg        = gedAverage(numericScores);
   const myGrade    = estimateGrade(avg);
   const filledCount = GED_SUBJECTS.filter((s) => gedScores[s] !== '').length;
@@ -110,7 +124,7 @@ export default function ProfileScreen({ goTo = () => {}, goBack = () => {}, onCo
     );
     const next = {
       ...answers,
-      gedScores: numericScores,
+      gedScores: savedScores,
       gedAvg: avg,
       gedGrade: myGrade,
       examYear,
@@ -118,6 +132,10 @@ export default function ProfileScreen({ goTo = () => {}, goBack = () => {}, onCo
       csatGrades: numericCsat,
       scoreMode: isTarget ? 'target' : 'actual', // 공부 중 = 목표 점수
     };
+    // 합격 회차(연도+회차)를 넣었다면 이미 응시한 사람이다.
+    // persona.stage가 'studying'으로 남아 MY 화면이 계속 "준비 중"으로 뜨던 문제를 여기서 바로잡는다.
+    const tookExam = !!examYear && !!examRound && examRound !== '아직 안 봤어요';
+    if (tookExam) next.stage = 'tested';
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(next)); } catch { /* 무시 */ }
     if (onComplete) onComplete();
     else goTo('results', { profile: next });
@@ -160,7 +178,9 @@ export default function ProfileScreen({ goTo = () => {}, goBack = () => {}, onCo
             aria-label="합격 연도"
           >
             <option value="">연도 선택</option>
-            {EXAM_YEARS.map((y) => <option key={y} value={y}>{y}년</option>)}
+            {EXAM_YEARS.map((y) => (
+              <option key={y.value} value={y.value}>{y.label}</option>
+            ))}
           </select>
           <div className="opt-grid" style={{ flex: 1, marginTop: 0 }}>
             {['1회차', '2회차', '아직 안 봤어요'].map((opt) => (
@@ -236,6 +256,29 @@ export default function ProfileScreen({ goTo = () => {}, goBack = () => {}, onCo
             </label>
           ))}
         </div>
+
+        {/* 선택과목 1과목 — 고졸은 필수 6 + 선택 1 = 7과목 */}
+        <label className="ged-cell ged-elective" style={{ marginTop: 10 }}>
+          <span className="ged-label">{GED_ELECTIVE_LABEL}</span>
+          <input
+            className="ged-input"
+            type="number"
+            inputMode="numeric"
+            min="0"
+            max="100"
+            placeholder="–"
+            value={elective}
+            onChange={(e) => {
+              let v = e.target.value.replace(/[^0-9]/g, '');
+              if (v !== '') v = String(Math.min(100, parseInt(v, 10)));
+              setElective(v);
+            }}
+          />
+        </label>
+        <p className="hint">
+          아래 평균은 필수 6과목 기준이에요. 선택과목 점수는 저장만 되고 아직 평균에 반영되지 않아요.
+        </p>
+
         {avg != null ? (
           <div className="ged-summary">
             {isTarget ? '목표 ' : '입력 '}{filledCount}과목 · {isTarget ? '목표 평균' : '평균'} <b>{avg}점</b>

@@ -1,7 +1,9 @@
 import { useMemo, useState, useEffect } from 'react';
+import { CUTLINE_YEAR } from '../data/meta.js';
 import { Search, X, ChevronRight, SlidersHorizontal, Sparkles, Map as MapIcon, ArrowLeft, Target } from 'lucide-react';
 import { getExploreList } from '../lib/analysis.js';
 import { loadProfile } from '../lib/persona.js';
+import { MAP_ENABLED } from '../lib/kakaoMap.js';
 import { evaluateAdmission, admissionChance, gedFit } from '../lib/scoreEngine.js';
 import { TOP_TIER_EXCLUDE } from '../data/topTierExclude.js';
 import ChanceGauge from './ChanceGauge.jsx';
@@ -129,9 +131,12 @@ export default function ExploreScreen({ goTo = () => {}, goBack = () => {}, canG
           )}
           <span className="page-title">대학 탐색</span>
         </span>
-        <button className="topbar-textbtn" onClick={() => goTo('map')}>
-          <MapIcon size={16} /> 지도
-        </button>
+        {/* 지도 — 카카오맵 스위치가 꺼져 있으면 버튼도 숨긴다(빈 지도로 보내지 않기) */}
+        {MAP_ENABLED && (
+          <button className="topbar-textbtn" onClick={() => goTo('map')}>
+            <MapIcon size={16} /> 지도
+          </button>
+        )}
       </header>
 
       {/* 검색 (토스풍 큰 입력) */}
@@ -265,7 +270,7 @@ export default function ExploreScreen({ goTo = () => {}, goBack = () => {}, canG
         <b>지원 수월/지원 가능</b>은 합격선 자료가 없을 때, <b>검정고시생이 지원하기 좋은 정도</b>(전형 성격·환산표·수능최저)를 알려주는 거예요 —
         <b> 합격 확률이 아니에요.</b> 카드를 누르면 그 이유를 자세히 볼 수 있어요.
         <br />
-        합격선·비교내신은 <b>작년 자료 참고용</b>이고, 실제는 모집요강을 확인해요.
+        합격선·비교내신은 <b>{CUTLINE_YEAR}학년도 자료 참고용</b>이고, 실제는 모집요강을 확인해요.
       </p>
     </div>
   );

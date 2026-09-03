@@ -117,6 +117,35 @@ CREATE TABLE IF NOT EXISTS ged_eligibility (
   confidence    TEXT NOT NULL DEFAULT 'mid'
 );
 
+-- 대학 단위 검정고시 지원 가부 (2026-09-03 신설)
+--
+-- 왜 따로 두나
+--   ged_eligibility 는 admission_id 가 PK라서 **전형이 파싱된 대학만** 담을 수 있다.
+--   그런데 시행계획 규칙 판정(ingest_plans.judge_ged)은 전형 파싱과 무관하게
+--   대학 단위로 나온다. 이 결과가 갈 곳이 없어서 131건이 통째로 DB 밖에 있었다.
+--   → 전형 축과 분리해 대학 단위로 받는다.
+--
+-- '판정불가'도 행으로 남긴다. 비워 두면 "안 봤다"와 "봐도 모르겠다"가 구분되지 않는다.
+-- verdict='판정불가' 는 사람이 검토해야 할 목록이다(DECISIONS 2026-09-02).
+CREATE TABLE IF NOT EXISTS ged_eligibility_univ (
+  univ_id       TEXT NOT NULL REFERENCES university(univ_id),
+  year          INTEGER NOT NULL,
+  verdict       TEXT NOT NULL,      -- 가능 | 불가 | 조건부 | 확인필요 | 판정불가
+  quote         TEXT,               -- 근거 원문 발췌. 사람이 검증할 때 이게 전부다
+  page          INTEGER,            -- 근거 페이지
+  evidence_pages TEXT,              -- 판정불가일 때도 볼 곳은 알려준다 (예: '7,8,12')
+  rule          TEXT,               -- 어떤 규칙에 걸렸는지
+  hits          INTEGER,            -- 같은 대학에서 잡힌 근거 문구 수
+  source_id     INTEGER NOT NULL REFERENCES source_file(source_id),
+  confidence    TEXT NOT NULL DEFAULT 'mid',
+  judged_by     TEXT NOT NULL DEFAULT 'rule',   -- rule | human
+  reviewed_at   TEXT,               -- 사람이 검토한 날. NULL = 아직 아무도 안 봤다
+  PRIMARY KEY (univ_id, year)
+);
+
+CREATE INDEX IF NOT EXISTS ix_gedu_verdict ON ged_eligibility_univ(year, verdict);
+
+
 -- 비교내신 환산표 — 앱의 심장.
 -- v1은 188개 대학의 원문 텍스트(평균 1,170자)만 갖고 있고
 -- 실제로 계산에 쓸 수 있는 구조화된 표는 10개뿐이었다.
@@ -131,6 +160,13 @@ CREATE TABLE IF NOT EXISTS ged_conversion (
   table_json    TEXT,               -- 구조화된 표. 이게 있어야 계산이 된다
   table_type    TEXT,               -- grade_table | score_table | score_formula
                                     -- | formula_complex | subject_weighted
+  -- ⚠️ 2026-09-03 추가. 한 대학 시행계획 안에 5등급표와 9등급표가 나란히 실려 있다.
+  --    (2028학년도부터 5등급. '2027년 이전 졸업자'용 9등급 표를 따로 싣는다)
+  --    구분하지 않고 섞으면 검정고시생에게 완전히 틀린 환산점수가 나간다.
+  --    원문에 단서가 없으면 NULL로 둔다 — 추정하지 않는다(규칙 3).
+  grade_scale   TEXT,               -- '5' | '9' | NULL(원문에 단서 없음)
+  applies_to    TEXT,               -- 검정고시 | 재학생 | 불명
+  phase         TEXT,               -- 수시 | 정시 | NULL(구분 없음 또는 둘 다)
   max_score     REAL,
   min_score     REAL,
   source_id     INTEGER NOT NULL REFERENCES source_file(source_id),

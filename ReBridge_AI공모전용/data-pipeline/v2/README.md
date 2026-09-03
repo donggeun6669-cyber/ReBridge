@@ -31,18 +31,34 @@ L2  배포용        앱이 읽는 JSON                          작게 쪼갠�
 
 ## 📥 원본 자료를 어디에 놓으면 되나
 
-**폴더에 넣고 스크립트만 돌리면 됩니다. 파일 이름을 바꾸실 필요 없습니다.**
+**폴더에 넣고 아래 명령만 그대로 복사해서 붙여넣으시면 됩니다.
+파일 이름은 바꾸실 필요 없습니다.**
+
+기준 폴더는 여기 하나입니다.
 
 ```
-Application_main_codes/src/data/pdf_sources/
-  2027/     ← 2027학년도 시행계획 PDF를 여기에
-  2028/     ← 2028학년도 시행계획 PDF (이미 213개 있음)
-  2029/     ← 2029학년도 (※ 아직 세상에 없습니다. 아래 참고)
-  results_2026/   ← 2026학년도 대입 전형결과 PDF
-  results_2025/   ← 2025학년도 (현재 `2025/` 폴더에 34개 있음)
+ReBridge_AI공모전용/Application_main_codes/src/data/pdf_sources/
 ```
 
-이 폴더는 `.gitignore` 대상이라 GitHub에 올라가지 않습니다(용량 234MB).
+| 넣을 폴더 | 무엇을 넣나 | 예상 개수 |
+|---|---|---|
+| `plans_2028_full/` | **2028학년도 시행계획 전문** (지금 있는 213개는 발췌본) | 213± |
+| `plans_2027/` | 2027학년도 시행계획 | 200± |
+| `results_2026/` | 2026학년도 대입 전형결과 (지역별 PDF) | 30± |
+| `ged_eligible_2027/` | 2027 검정고시 지원가능 전형 PDF (5권역) | 5 |
+| `guides_2027/{univ}/susi.pdf`<br>`guides_2027/{univ}/jeongsi.pdf` | 2027 모집요강 (대학별 폴더) | 대학당 1~2 |
+
+`{univ}` 는 대학 이름 그대로 쓰시면 됩니다 — `guides_2027/중앙대학교/susi.pdf` 처럼요.
+(`univId` 를 외우실 필요 없습니다. 이름으로 매칭합니다.)
+
+이 폴더는 `.gitignore` 대상이라 GitHub에 올라가지 않습니다(현재 234MB).
+
+### 폴더를 미리 만들어 두려면
+
+```bash
+cd ReBridge_AI공모전용/Application_main_codes/src/data/pdf_sources
+mkdir -p plans_2028_full plans_2027 results_2026 ged_eligible_2027 guides_2027
+```
 
 ### 파일 이름 규칙
 
@@ -58,31 +74,157 @@ Application_main_codes/src/data/pdf_sources/
 - ⚠️ **맥에서 만든 파일명은 한글이 자모 분리(NFD)로 저장됩니다.** 정규화 없이 비교하면
   눈에는 같아 보여도 전부 불일치합니다(실측: 213개 중 일치 0건 → 정규화 후 213건).
   `common.nfc()`가 처리하므로 신경 쓰지 않으셔도 됩니다.
+- ⚠️ **한 대학의 캠퍼스별 PDF는 지금 한 칸에 덮어쓰기 됩니다.**
+  `universities.json` 에 캠퍼스가 따로 없어서, 213개 PDF가 대학 **192개**로 접힙니다
+  (가톨릭대 3개, 강원대 4개 …). 캠퍼스를 갈라야 하면 대학 마스터부터 고쳐야 합니다.
 
 ---
 
 ## 🚀 자료가 도착하면 실행할 순서
 
+아래 명령은 전부 `ReBridge_AI공모전용/data-pipeline` 안에서 돌립니다.
+
 ```bash
-cd ReBridge_AI공모전용/data-pipeline
-
-# 1) PDF → 페이지별 텍스트  (213개에 6초, LLM 안 씀, 비용 0)
-python3 v2/extract_text.py --year 2027
-
-# 2) 검정고시 지원자격 + 비교내신 환산표 추출 → L1 적재
-python3 v2/ingest_plans.py --year 2027 --to-db
-
-# 3) 전형결과(합격선) 적재
-python3 v2/ingest_results.py --year 2026 --to-db
-
-# 4) 지금 어디까지 찼는지 확인
-python3 v2/check.py --gaps
-
-# 5) 앱이 읽을 JSON으로 내보내기
-python3 v2/rebuild_cutlines.py --write
+cd ~/dev/GitHub/ReBridge/ReBridge_AI공모전용/data-pipeline
 ```
 
-폴더 이름이 다르면 `--pdf-dir ~/Desktop/받은폴더` 로 지정하면 됩니다.
+**모든 스크립트는 끝에 처리/미처리 수를 숫자로 찍습니다.
+숫자가 안 나오면 실패한 것으로 보십시오.**
+
+---
+
+### ① 2028학년도 시행계획 **전문** → `plans_2028_full/`
+
+```bash
+# 1. PDF → 페이지별 텍스트 (213개에 약 6초. LLM 안 씀, 비용 0)
+python3 v2/extract_text.py --year 2028 --force \
+        --pdf-dir ../Application_main_codes/src/data/pdf_sources/plans_2028_full
+
+# 2. 검정고시 지원자격 + 비교내신 환산표 추출 → L1 적재 (약 70초)
+python3 v2/ingest_plans.py --year 2028 --to-db
+
+# 3. 앱 "원문 보기"용 원문 뽑기
+python3 v2/extract_ged_text.py --year 2028
+
+# 4. 앱 JSON 갱신 (먼저 --dry-run 으로 무엇이 바뀌는지 보고)
+python3 v2/export_app.py --year 2028 --dry-run
+python3 v2/export_app.py --year 2028 --write
+```
+
+`--force` 는 기존 발췌본 텍스트 캐시를 버리고 전문으로 다시 만들라는 뜻입니다.
+
+**기대 산출물**
+
+| 파일 | 내용 |
+|---|---|
+| `v2/out/text/2028/{univId}.jsonl` | 페이지별 원문 |
+| `v2/out/plans_2028/ged.jsonl` | 검정고시 가부 판정 + 근거 발췌 |
+| `v2/out/plans_2028/conversion.jsonl` | 비교내신 환산표 |
+| `v2/out/plans_2028/ged_text/{univId}.json` | 원문 보기 재료 |
+| `v2/out/export_report.md` | 앱에 못 넣은 표와 그 이유 |
+| `src/data/comparative_2028.json` | 앱이 읽는 환산표 (백업 `.json.bak` 자동 생성) |
+
+**보고 형식** — 각 단계가 이런 줄을 찍습니다.
+
+```
+PDF 213개 → 텍스트화 213개 / 대학 매칭 실패 0개 / 스캔본(OCR 필요) 1개
+대학 213 · ged:가능 87 · ged:불가 34 · ged:조건부 8 · ged:확인필요 2 · ged:판정불가 82
+등급체계 분류: 5등급 10 / 9등급 72 / 분류불가(NULL) 2
+원문 뽑힘 186/192개 · 검정고시 관련 페이지 0인 대학 6개
+검증 통과 51개 / 검증 탈락 20개 / 기존 값과 다름 5개
+```
+
+---
+
+### ② 2027학년도 시행계획 → `plans_2027/`
+
+```bash
+python3 v2/extract_text.py --year 2027 \
+        --pdf-dir ../Application_main_codes/src/data/pdf_sources/plans_2027
+python3 v2/ingest_plans.py --year 2027 --to-db
+python3 v2/extract_ged_text.py --year 2027
+```
+
+2027은 **9등급 체계**입니다(2028부터 5등급). `grade_scale` 이 자동으로 갈립니다.
+`comparative_2027.json` 은 아직 없으므로 `export_app.py --year 2027` 은
+앱 쪽에 그 파일을 만든 뒤에 돌리십시오.
+
+---
+
+### ③ 2026학년도 전형결과 → `results_2026/`
+
+```bash
+# 1. PDF → 1차 JSON  (34개 PDF에 약 60초)
+python3 extract_results_2025.py --year 2026 \
+        --src ../Application_main_codes/src/data/pdf_sources/results_2026
+
+# 2. 2차 정제 (학과명 정리, 등급/점수 분리행 병합, 이상치 플래그)
+python3 clean_results_2026.py 2>/dev/null || python3 clean_results_2025.py --year 2026
+
+# 3. L1 적재
+python3 v2/ingest_results.py --year 2026 --src results_2026_clean.json --to-db
+```
+
+> 스크립트 이름이 `..._2025` 인 것은 v1 시절 이름이 남은 것뿐입니다.
+> `--year` 로 연도를 받으므로 **2026 자료에 그대로 쓰시면 됩니다.**
+
+**기대 산출물**: `results_2026.json` → `results_2026_clean.json` →
+`reports/results_2026_report.md`, `reports/results_2026_clean_report.md`
+
+**보고 형식**
+
+```
+PDFs: 34 / Pages: 1879 / Rows: 38,108
+cutType 분포: 70%컷 18,138, 50%컷 17,027, 최종등록 1,506, 평균 888, 80%컷 430, 최저 119
+confidence 분포: high 32,399, mid 4,587, low 1,122
+OCR 필요 추정 페이지: 637      ← 이미지 페이지. 이 숫자만큼은 못 읽은 것입니다
+```
+
+⚠️ **이미지 PDF는 표가 안 읽힙니다.** 2025에서는 중앙대·인하대·한양대·충남대·전북대가
+그래서 통째로 비었고, 따로 뽑아 `results_2025_scraped_supplement.json` 에 보관해 뒀습니다.
+같은 연도에 `results_{year}_scraped_supplement.json` 이 있으면 정제 단계가 자동으로 합칩니다.
+OCR이 필요하면 v1 `ocr_recover_b.py` 를 참고하십시오.
+
+---
+
+### ④ 2027 검정고시 지원가능 전형 (5권역) → `ged_eligible_2027/`
+
+이 5개 PDF는 **형식이 시행계획과 다릅니다.** 전용 파서가 아직 없습니다.
+파일을 넣으신 뒤 알려 주시면 형식을 보고 파서를 만듭니다.
+그 전까지는 텍스트만 떠서 눈으로 확인할 수 있습니다.
+
+```bash
+python3 v2/extract_text.py --year 2027 \
+        --pdf-dir ../Application_main_codes/src/data/pdf_sources/ged_eligible_2027
+```
+
+---
+
+### ⑤ 2027 모집요강 → `guides_2027/{univ}/susi|jeongsi.pdf`
+
+모집요강은 시행계획보다 상세하지만 대학마다 구조가 훨씬 다릅니다.
+**전용 파서가 아직 없습니다.** 먼저 텍스트만 떠 두고, 어떤 항목이 필요한지
+정한 다음에 뽑는 것이 맞습니다(틀린 전형 정보는 없는 것보다 나쁩니다).
+
+---
+
+### ⑥ 어디까지 찼는지 확인 — 항상 마지막에
+
+```bash
+python3 v2/check.py          # 학년도 × 대학 커버리지 (351개 중 몇 개)
+python3 v2/check.py --gaps   # 비어 있는 곳 목록
+```
+
+`check.py` 는 항목마다 **처리 / 미처리**를 둘 다 찍습니다.
+"완료"라는 말 대신 이 숫자를 보십시오.
+
+```
+  ── 학년도 × 대학 커버리지 (전체 351개 대학 기준) ──
+    학년도               전형        검정고시가부         환산표         합격선
+    2028        186/351      120/351       77/351        0/351
+                 미처리 165     미처리 231     미처리 274     미처리 351
+    ※ 2028학년도 검정고시 가부 '판정불가'(사람 검토 대기): 72개 대학
+```
 
 ---
 
@@ -159,16 +301,51 @@ python3 v2/rebuild_cutlines.py --write
 | `extract_text.py` | Phase A — PDF → 페이지별 텍스트 (캐시됨) |
 | `ingest_plans.py` | Phase B+C — 검정고시 지원자격 + 환산표 추출 |
 | `ingest_results.py` | 전형결과(합격선) 적재 |
+| `extract_ged_text.py` | 앱 "원문 보기"용 검정고시 관련 페이지 원문 추출 |
+| `export_app.py` | 검증 통과한 환산표만 앱 JSON으로 내보냄 |
 | `rebuild_cutlines.py` | 합격선 재집계 → 앱용 JSON |
-| `check.py` | 어디가 비었는지 한 화면으로 |
+| `check.py` | 어디가 비었는지 한 화면으로 (학년도 × 대학 커버리지) |
+
+v1 쪽에서 계속 쓰는 것:
+
+| 파일 | 하는 일 |
+|---|---|
+| `../extract_results_2025.py` | 전형결과 PDF → 1차 JSON. `--year --src` 로 연도 지정 |
+| `../clean_results_2025.py` | 1차 JSON 2차 정제. `--year --src` 로 연도 지정 |
+| `../results_{year}_scraped_supplement.json` | 이미지 PDF라 못 읽은 대학의 보충분. 정제 단계가 자동 병합 |
 
 산출물은 전부 `v2/out/` 아래에 생기고 git에 올라가지 않습니다.
 
 ## 사람이 봐야 하는 것
 
-`ingest_plans.py`는 **검정고시 지원 가부를 자동으로 확정하지 않습니다.**
-표로 지원 가부가 갈리는 대학(행: 출신고교 유형, 열: 전형)은 `확인필요`로 빼서
-`out/plans_{year}/ged.jsonl`에 근거 페이지·원문 발췌와 함께 쌓입니다.
+### 1. 검정고시 지원 가부 — 자동으로 확정하지 않습니다
+
+표로 지원 가부가 갈리는 대학(행: 출신고교 유형, 열: 전형)은 `확인필요`로,
+규칙에 아무것도 안 걸린 대학은 `판정불가`로 뺍니다.
+전부 `ged_eligibility_univ` 테이블과 `out/plans_{year}/ged.jsonl` 에
+**근거 페이지·원문 발췌와 함께** 쌓입니다.
+
+```bash
+# 사람이 볼 목록
+python3 v2/check.py --sql "SELECT univ_id, verdict, page, evidence_pages
+                           FROM ged_eligibility_univ
+                           WHERE year=2028 AND verdict IN ('판정불가','확인필요')"
+```
+
+사람이 판정하면 `verdict` 를 고치고 `judged_by='human'`, `reviewed_at` 에 날짜를 넣습니다.
+`reviewed_at IS NULL` 이면 **아직 아무도 안 본 것**입니다.
 
 지원 가부는 틀리면 학생이 헛되이 지원하게 되는 항목이라 **추측하지 않습니다.**
-근거 발췌를 보고 사람이 판정하는 것이 맞습니다.
+
+### 2. 환산표 — 검증에 떨어진 것
+
+`export_app.py` 는 검증을 통과한 표만 앱에 넣습니다.
+떨어진 표는 지우지 않고 `out/export_report.md` 에 **대학과 이유**가 적힙니다.
+
+### 3. 환산표 — 기존 값과 달라진 것
+
+이미 `conversion` 이 들어 있는 대학은 **기본적으로 덮어쓰지 않습니다.**
+기존 항목에는 대학이 직접 실은 '백점만점성적' 구간이 들어 있는데,
+자동 추출표에는 그 구간이 없어 앱 표준 추정 구간을 쓰기 때문입니다.
+차이는 리포트에 적히고, 원문을 보고 사람이 정하면 됩니다
+(덮어쓸 때만 `--overwrite-existing`).

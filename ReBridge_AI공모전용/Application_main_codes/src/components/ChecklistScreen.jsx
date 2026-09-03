@@ -5,10 +5,11 @@ import {
 } from 'lucide-react';
 import { getActiveTrack } from '../lib/persona.js';
 import { buildChecklist, CHECKLIST_META } from '../data/checklists.js';
+import { currentYear } from '../data/meta.js';
 
 const STORAGE_KEY   = 'rebridge_profile';
 const CHECK_KEY     = 'rebridge_checklist';
-const CURRENT_YEAR  = 2026;
+const CURRENT_YEAR  = currentYear();
 
 /* ─────────────────────────────────────────────
    화면 컴포넌트 — 트랙(학습/입시/취업)별로 다른 목록

@@ -11,7 +11,7 @@ import {
   SUBJECT_PASS_RULE, ELIGIBILITY,
   getNextSession, daysUntil, formatKDate,
 } from '../data/gedGuide.js';
-import { loadProfile } from '../lib/persona.js';
+import { loadProfile, V1_UNIV_ONLY } from '../lib/persona.js';
 import { MOCK_KEY, loadScores } from '../lib/studyUtils.js';
 import '../styles.gedguide.css';
 
@@ -285,7 +285,8 @@ export default function GedGuideScreen({ goTo = () => {} }) {
           )}
           <p className="gedh-mock-note">점수는 이 기기에만 저장돼요. 선택 과목은 빼고 필수 6과목으로만 가늠해요.</p>
 
-          {weakSubject && (
+          {/* 약한 과목 → 공부 플래너 — v1에서는 학습(스터디) 트랙을 숨기므로 함께 감춘다 */}
+          {!V1_UNIV_ONLY && weakSubject && (
             <button className="study-ged-weakcta" onClick={() => goTo('study-planner')}>
               <span className="study-ged-weakcta-ico"><ListChecks size={18} /></span>
               <span className="study-ged-weakcta-body">

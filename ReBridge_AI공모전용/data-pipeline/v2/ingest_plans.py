@@ -122,13 +122,72 @@ def conversion_pages(pages):
 # PDF에서 뽑은 텍스트는 줄이 뭉개지므로, 표 추출기보다 이 패턴이 훨씬 잘 맞는다.
 RE_GRADE_SEQ = re.compile(
     r"(석차\s*등급|교과\s*등급|등급)\s*((?:[1-9]\s*(?:등급)?[\s,]+){2,8}[1-9]\s*(?:등급)?)")
+
+# ⚠️ 2026-09-03 수정 — 천 단위 쉼표.
+# 시행계획 환산표의 만점은 '1,000' 으로 적혀 있다(실측: "환산점수 1,000 962 925 …").
+# 이전 패턴은 숫자를 \d{1,4} 로만 봤고 구분자가 [\s,]+ 였다.
+#   → '1,000' 이 1 과 000 두 개로 쪼개져 표가 한 칸씩 밀렸다.
+#     가톨릭관동대 실측: [1, 0, 962, 925, 887, 850, 812, 775, 737]  (정답은 1000부터)
+# 이제 '1,000' 형태를 한 덩어리로 먼저 인식한다(교체 순서가 중요하다).
+_NUM = r"\d{1,3}(?:,\d{3})+(?:\.\d{1,2})?|\d{1,4}(?:\.\d{1,2})?"
 RE_SCORE_SEQ = re.compile(
     r"(반영\s*점수|환산\s*점수|환산\s*반영\s*점수|배점|점수)\s*"
-    r"((?:\d{1,4}(?:\.\d{1,2})?[\s,]+){2,8}\d{1,4}(?:\.\d{1,2})?)")
+    r"((?:(?:" + _NUM + r")[\s,]+){2,8}(?:" + _NUM + r"))")
+_RE_NUM_TOKEN = re.compile(_NUM)
 
 
 def _nums(s):
-    return [float(x) for x in re.findall(r"\d{1,4}(?:\.\d{1,2})?", s)]
+    """숫자 나열 → float 리스트. '1,000' 은 1000 하나로 센다."""
+    return [float(x.replace(",", "")) for x in _RE_NUM_TOKEN.findall(s)]
+
+
+# ── 표의 성격 분류 (2026-09-03 추가) ────────────────────────────────
+#
+# 왜 필요한가: 한 시행계획 안에 5등급표와 9등급표가 나란히 실려 있다.
+#   "9등급 환산점수(2027년 이전 졸업자) 등급 1 2 … 9 환산점수 1,000 962 …"
+#   "5등급 Zone별 환산점수 …"
+# 둘을 섞으면 검정고시생에게 완전히 틀린 점수가 나간다.
+# 단서가 없으면 NULL로 둔다 — 추정하지 않는다(규칙 3).
+RE_SCALE_9 = re.compile(r"9\s*등급|2027\s*년?\s*이전\s*졸업|구\s*9등급|9등급제")
+RE_SCALE_5 = re.compile(r"5\s*등급|5등급제|Zone")
+RE_FOR_GED = re.compile(r"검정고시|비교\s*내신")
+RE_FOR_STUDENT = re.compile(r"학교생활기록부|학생부|재학생|석차\s*백분율|이수\s*단위")
+
+
+def classify_table(context, grades):
+    """표 주변 원문에서 grade_scale / applies_to / phase 를 읽어낸다.
+
+    grade_scale
+      ① 원문 단서('9등급', '2027년 이전 졸업자', '5등급')가 있으면 그대로 따른다.
+      ② 단서가 없어도 표에 6등급 이상이 실제로 있으면 9등급이다
+         (5등급 체계에 6등급이 존재할 수 없다 — 이건 추정이 아니라 표 자체의 사실).
+      ③ 5칸짜리 표는 '9등급표의 1~5행'일 수도 있으므로 단서 없이는 확정하지 않는다 → NULL
+    """
+    c = C.squash(context)
+    has9, has5 = bool(RE_SCALE_9.search(c)), bool(RE_SCALE_5.search(c))
+    scale, by = None, None
+    if has9 and not has5:
+        scale, by = "9", "원문:9등급"
+    elif has5 and not has9:
+        scale, by = "5", "원문:5등급"
+    elif has9 and has5:
+        # 둘 다 언급되면 표 모양으로만 가른다. 6등급 이상이 있으면 9등급표다.
+        if grades and max(grades) >= 6:
+            scale, by = "9", "표모양:6등급이상"
+    if scale is None and grades and max(grades) >= 6:
+        scale, by = "9", "표모양:6등급이상"
+
+    if RE_FOR_GED.search(c):
+        applies = "검정고시"
+    elif RE_FOR_STUDENT.search(c):
+        applies = "재학생"
+    else:
+        applies = "불명"
+
+    su, jo = "수시" in c, "정시" in c
+    phase = "수시" if su and not jo else "정시" if jo and not su else None
+    return {"gradeScale": scale, "gradeScaleBy": by,
+            "appliesTo": applies, "phase": phase}
 
 
 def parse_inline_grade_table(text):
@@ -151,6 +210,8 @@ def parse_inline_grade_table(text):
                 continue
             table = [{"grade": g, "score": s} for g, s in zip(grades, scores)]
             mono = all(a >= b for a, b in zip(scores, scores[1:]))
+            # 표 앞뒤 원문을 함께 본다 — 5등급표/9등급표를 가르는 단서가 여기 있다
+            ctx = t[max(0, gm.start() - 500):gm.end() + len(sm.group(0)) + 300]
             cand = {
                 "type": "grade_table",
                 "gradeTable": table,
@@ -159,6 +220,7 @@ def parse_inline_grade_table(text):
                 "monotonic": mono,
                 "label": C.squash(sm.group(1)),
                 "gradeScaleSeen": int(max(grades)),
+                **classify_table(ctx, grades),
             }
             if best is None or len(table) > len(best["gradeTable"]) or (
                     mono and not best["monotonic"]):
@@ -237,6 +299,13 @@ def extract_conversion(pdf_path, cand_pages, pages_by_no):
                              len(cand["gradeTable"]) > len(best["gradeTable"])):
                     cand["page"] = pno
                     cand["how"] = "table"
+                    # 표 추출 경로는 셀만 보므로 문맥 단서가 없다.
+                    # 같은 페이지 텍스트 전체를 문맥으로 준다.
+                    cand["gradeScaleSeen"] = int(max(
+                        r["grade"] for r in cand["gradeTable"]))
+                    cand.update(classify_table(
+                        pages_by_no.get(pno, ""),
+                        [r["grade"] for r in cand["gradeTable"]]))
                     best = cand
     return best
 
@@ -283,7 +352,15 @@ def run(year, to_db=False, limit=None):
             ged_rows.append({"univId": uid, "univ": it.get("univ"), "year": year,
                              "file": it.get("file"), **g})
         else:
+            # 판정불가도 행으로 남긴다. 비워 두면 "안 봤다"와 "봐도 모르겠다"가 섞인다.
+            # 근거 페이지는 넘겨줘서 사람이 바로 그 쪽을 펼칠 수 있게 한다.
             stat["ged:판정불가"] += 1
+            ged_rows.append({"univId": uid, "univ": it.get("univ"), "year": year,
+                             "file": it.get("file"), "eligible": "판정불가",
+                             "page": (ev["ged"][0] if ev["ged"] else None),
+                             "evidencePages": ev["ged"][:12],
+                             "quote": None, "rule": None,
+                             "allHits": 0, "confidence": "low"})
 
         # Phase C ② 환산표
         cp = [p["page"] for p in conversion_pages(pages)]
@@ -315,28 +392,63 @@ def run(year, to_db=False, limit=None):
     print("═" * 62)
     print(f"  → {out_dir}")
 
+    # 등급체계 분류 결과도 숫자로 보여준다(분류 못 한 표가 몇 개인지가 중요하다)
+    print(f"  등급체계 분류: 5등급 {sum(1 for r in conv_rows if r.get('gradeScale')=='5')}"
+          f" / 9등급 {sum(1 for r in conv_rows if r.get('gradeScale')=='9')}"
+          f" / 분류불가(NULL) {sum(1 for r in conv_rows if not r.get('gradeScale'))}")
+    print(f"  적용대상: " + " / ".join(
+        f"{k} {sum(1 for r in conv_rows if r.get('appliesTo') == k)}"
+        for k in ("검정고시", "재학생", "불명")))
+
     if to_db:
         n = promote(year, ged_rows, conv_rows, matcher)
-        print(f"  L1 적재: 환산표 {n} 건")
+        print(f"  L1 적재: 환산표 {n['conversion']}건 / "
+              f"검정고시 지원가부 {n['ged']}건 (대학 미매칭 {n['ged_skipped']})")
     return ged_rows, conv_rows, stat
+
+
+def _source_id(con, year, fname):
+    """시행계획 파일명 → source_id. 없으면 등록한다(출처 없는 행은 못 넣는다)."""
+    row = con.execute(
+        "SELECT source_id FROM source_file WHERE kind='plan' AND title=?",
+        (C.nfc(fname),)).fetchone()
+    if row:
+        return row["source_id"]
+    return con.execute(
+        """INSERT INTO source_file (kind,year,title,publisher,retrieved_at)
+           VALUES ('plan',?,?,?,?)""",
+        (year, C.nfc(fname), "개별 대학 입학처", date.today().isoformat())).lastrowid
 
 
 def promote(year, ged_rows, conv_rows, matcher):
     """추출 결과를 L1에 넣는다. 환산표는 대학 단위로(전형별 구분은 다음 단계)."""
     con = C.connect()
+    known = {r["univ_id"] for r in con.execute("SELECT univ_id FROM university")}
+
+    # ── 검정고시 지원 가부 (2026-09-03 추가) ─────────────────────────
+    # 이전에는 judge_ged 결과 131건이 JSONL에만 있고 DB에 한 건도 안 들어갔다.
+    # ged_eligibility 는 admission_id 가 PK라 전형이 파싱된 대학만 담을 수 있어서다.
+    # → 대학 단위 테이블에 넣는다. '판정불가'도 근거 페이지와 함께 남긴다.
+    n_ged = n_ged_skip = 0
+    for r in ged_rows:
+        if r["univId"] not in known:
+            n_ged_skip += 1
+            continue
+        sid = _source_id(con, year, r["file"])
+        ev = r.get("evidencePages") or ([r["page"]] if r.get("page") else [])
+        con.execute(
+            """INSERT OR REPLACE INTO ged_eligibility_univ
+               (univ_id,year,verdict,quote,page,evidence_pages,rule,hits,
+                source_id,confidence,judged_by,reviewed_at)
+               VALUES (?,?,?,?,?,?,?,?,?,?,'rule',NULL)""",
+            (r["univId"], year, r["eligible"], r.get("quote"), r.get("page"),
+             ",".join(str(p) for p in ev) or None,
+             r.get("rule"), r.get("allHits"), sid, r.get("confidence") or "low"))
+        n_ged += 1
+
     n = 0
     for r in conv_rows:
-        sid = con.execute(
-            "SELECT source_id FROM source_file WHERE kind='plan' AND title=?",
-            (C.nfc(r["file"]),)).fetchone()
-        if sid is None:
-            sid = con.execute(
-                """INSERT INTO source_file (kind,year,title,publisher,retrieved_at)
-                   VALUES ('plan',?,?,?,?)""",
-                (year, C.nfc(r["file"]), "개별 대학 입학처",
-                 date.today().isoformat())).lastrowid
-        else:
-            sid = sid["source_id"]
+        sid = _source_id(con, year, r["file"])
         table_json = json.dumps(
             {"type": r["type"], "gradeTable": r["gradeTable"],
              "maxScore": r["maxScore"], "minScore": r["minScore"]},
@@ -353,25 +465,29 @@ def promote(year, ged_rows, conv_rows, matcher):
             con.execute(
                 """UPDATE ged_conversion
                    SET table_json=?, table_type=?, max_score=?, min_score=?,
+                       grade_scale=?, applies_to=?, phase=?,
                        source_id=?, page=?, confidence=?
                    WHERE conversion_id=?""",
                 (table_json, r["type"], r["maxScore"], r["minScore"],
+                 r.get("gradeScale"), r.get("appliesTo"), r.get("phase"),
                  sid, r.get("page"), conf, exist["conversion_id"]))
         else:
             con.execute(
                 """INSERT INTO ged_conversion
                    (univ_id,year,admission_id,raw_text,raw_type,table_json,table_type,
+                    grade_scale,applies_to,phase,
                     max_score,min_score,source_id,page,confidence)
-                   VALUES (?,?,NULL,NULL,'numeric_table',?,?,?,?,?,?,?)""",
+                   VALUES (?,?,NULL,NULL,'numeric_table',?,?,?,?,?,?,?,?,?,?)""",
                 (r["univId"], year, table_json, r["type"],
+                 r.get("gradeScale"), r.get("appliesTo"), r.get("phase"),
                  r["maxScore"], r["minScore"], sid, r.get("page"), conf))
         n += 1
     con.execute(
         "INSERT INTO ingest_log (ran_at,script,target,rows_out,note) VALUES (?,?,?,?,?)",
         (date.today().isoformat(), "ingest_plans.py", f"{year} 시행계획", n,
-         f"ged {len(ged_rows)} / conversion {len(conv_rows)}"))
+         f"ged {n_ged} / conversion {n} (대학마스터에 없어 건너뜀 {n_ged_skip})"))
     con.commit()
-    return n
+    return {"conversion": n, "ged": n_ged, "ged_skipped": n_ged_skip}
 
 
 if __name__ == "__main__":

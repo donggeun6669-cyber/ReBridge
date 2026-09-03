@@ -16,6 +16,7 @@ import {
   Sparkles,
   Target,
 } from 'lucide-react';
+import { currentYear } from '../data/meta.js';
 
 const GUIDES = {
   types: {
@@ -368,7 +369,7 @@ const GUIDES = {
       {
         icon: HelpCircle,
         title: '2회차 합격자 주의!',
-        body: '당해 연도 2회차 합격자(예: 2026년 2회차)는 수시 시즌에 나이스 온라인 연동이 차단돼요. 실물 우편 제출이 필수예요.',
+        body: `당해 연도 2회차 합격자(예: ${currentYear()}년 2회차)는 수시 시즌에 나이스 온라인 연동이 차단돼요. 실물 우편 제출이 필수예요.`,
       },
       {
         icon: ClipboardList,

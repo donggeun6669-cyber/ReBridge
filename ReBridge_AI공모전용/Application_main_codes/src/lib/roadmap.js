@@ -1,4 +1,6 @@
-import { GED_SESSIONS, ADMISSION, isGedYearConfirmed, GED_TYPICAL_HINT } from '../data/schedule.js';
+import {
+  GED_SESSIONS, ADMISSION, isGedYearConfirmed, GED_TYPICAL_HINT, admissionEvent,
+} from '../data/schedule.js';
 
 // [월, 일] → 해당 연도의 Date (자정)
 function md(year, [m, d]) {
@@ -47,6 +49,13 @@ function admissionYear(today, gedReadyDate) {
   return today.getFullYear() + 1;
 }
 
+// 대입 일정 한 건 → 단계에 붙일 { when, approx, hint }
+// 확정 학년도면 approx=false라 D-day가 붙고, 아니면 '예년 9월 초' 식으로만 보여준다.
+function evStage(susiYear, key) {
+  const e = admissionEvent(susiYear, key);
+  return { when: e.date, approx: !e.confirmed, hint: e.confirmed ? null : e.hint };
+}
+
 /**
  * 프로필 + 오늘 날짜 → 로드맵 단계 목록
  * profile: { gedScore, csatPlan, region, field }
@@ -70,6 +79,7 @@ export function buildRoadmap(profile, today = new Date()) {
       when: session.examDate,
       // 공고 전이면 날짜가 추정이라는 걸 할 일 문구에서 밝힌다.
       approx: !session.confirmed,
+      hint: session.confirmed ? null : (session.hint?.exam ? `예년 ${session.hint.exam}` : null),
       todo: session.confirmed
         ? '먼저 시도교육청에서 접수해요. 접수 기간을 놓치지 않는 게 가장 중요해요.'
         : `${session.year}년 일정은 아직 공고 전이에요. 예년엔 ${session.hint?.exam}에 봤어요 — 공고가 뜨면 거주지 시·도교육청에서 접수해요.`,
@@ -81,6 +91,7 @@ export function buildRoadmap(profile, today = new Date()) {
       title: '합격증명서 받기',
       when: session.resultDate,
       approx: !session.confirmed,
+      hint: session.confirmed ? null : (session.hint?.result ? `예년 ${session.hint.result}` : null),
       todo: '합격하면 합격증명서를 발급받아 둬요. 원서 낼 때 제출해야 해요.',
       guideTopic: 'guideline',
     });
@@ -99,13 +110,20 @@ export function buildRoadmap(profile, today = new Date()) {
   // 3. 목표 좁히기 (비교내신) — 점수를 받은 뒤라야 의미가 있어서, 검정고시 합격 이후로 배치
   const readyPlus = new Date(gedReady);
   readyPlus.setDate(readyPlus.getDate() + 3);
-  let targetDate = md(aYear, ADMISSION.target);
-  if (targetDate < readyPlus) targetDate = readyPlus;
+  const targetEv = admissionEvent(aYear, 'target');
+  let targetDate = targetEv.date;
+  let targetApprox = !targetEv.confirmed;
+  if (targetDate < readyPlus) {
+    targetDate = readyPlus;      // 검정고시 결과가 늦으면 그 뒤로 밀린다 → 더 이상 예년 패턴이 아님
+    targetApprox = false;
+  }
   stages.push({
     id: 'target',
     icon: 'Scale',
     title: '비교내신 확인 & 목표 대학 좁히기',
     when: targetDate,
+    approx: targetApprox,
+    hint: targetApprox ? targetEv.hint : null,
     todo: '내 점수가 대학마다 몇 등급으로 환산되는지 보고 목표를 정해요.',
     term: '비교내신: 검정고시 점수를 대학이 "내신 등급"으로 바꿔 계산하는 방식이에요.',
     guideTopic: 'compare',
@@ -116,7 +134,7 @@ export function buildRoadmap(profile, today = new Date()) {
     id: 'susi',
     icon: 'CalendarDays',
     title: '수시 원서 접수',
-    when: md(aYear, ADMISSION.susiApply),
+    ...evStage(aYear, 'susiApply'),
     todo: '수시는 최대 6장. 유웨이·진학사나 대학 입학처에서 접수해요.',
     term: '수시 6장: 수시는 최대 6개 대학까지 원서를 낼 수 있어요. 안정·적정·소신을 섞어 배분하면 좋아요.',
     guideTopic: 'apply',
@@ -128,7 +146,7 @@ export function buildRoadmap(profile, today = new Date()) {
       id: 'csat',
       icon: 'Target',
       title: '수능 응시',
-      when: md(aYear, ADMISSION.csat),
+      ...evStage(aYear, 'csat'),
       todo: '수능 최저가 있는 전형이면 꼭 챙겨요. 정시 길도 같이 열려요.',
       term: '수능최저: 합격하려면 수능에서 정해진 등급 이상을 받아야 하는 조건이에요. 없는 전형도 많아요.',
       guideTopic: 'csat',
@@ -140,7 +158,7 @@ export function buildRoadmap(profile, today = new Date()) {
     id: 'interview',
     icon: 'MessageCircle',
     title: '면접·논술',
-    when: md(aYear, ADMISSION.interview),
+    ...evStage(aYear, 'interview'),
     todo: '제출 서류와 지원 동기를 내 말로 한 번 정리해 둬요.',
     guideTopic: 'interview',
   });
@@ -150,7 +168,7 @@ export function buildRoadmap(profile, today = new Date()) {
     id: 'result',
     icon: 'CheckCircle2',
     title: '합격 발표 & 등록',
-    when: md(aYear, ADMISSION.susiResult),
+    ...evStage(aYear, 'susiResult'),
     todo: '합격하면 등록 기간을 지켜요. 수시에 붙으면 정시는 못 써요.',
     term: '수시에 최종 합격하면(=수시 납치) 그 해 정시 지원은 못 해요. 그래서 6장 배분이 중요해요.',
     guideTopic: 'count',
@@ -162,7 +180,7 @@ export function buildRoadmap(profile, today = new Date()) {
       id: 'jeongsi',
       icon: 'Target',
       title: '정시 지원 (수시 모두 불합격 시)',
-      when: md(aYear, ADMISSION.jeongsiApply),
+      ...evStage(aYear, 'jeongsiApply'),
       todo: '수시에서 다 떨어졌다면 정시 가·나·다 군에 3번 기회가 있어요.',
       term: '가·나·다군: 정시는 군별로 한 곳씩, 최대 세 곳까지 지원할 수 있어요.',
       guideTopic: 'susiJeongsi',
@@ -183,9 +201,17 @@ export function buildRoadmap(profile, today = new Date()) {
     } else {
       s.status = 'upcoming';
     }
-    // 공고 전인 검정고시 단계는 '예상'을 붙여 확정 일정과 구분한다.
-    s.dateLabel = s.approx ? `${dateLabel(s.when)} 예상` : dateLabel(s.when);
-    s.dday = diff > 0 ? `D-${diff}` : diff === 0 ? 'D-DAY' : null;
+    // 확정 전(공고 전) 단계는 날짜를 확정처럼 보여주지 않는다.
+    // 근사 문구('예년 9월 초')로 바꾸고 D-day도 붙이지 않는다.
+    if (s.approx) {
+      s.dateLabel = s.hint
+        ? `${s.when.getFullYear()}년 · ${s.hint}`
+        : `${dateLabel(s.when)} 예상`;
+      s.dday = null;
+    } else {
+      s.dateLabel = dateLabel(s.when);
+      s.dday = diff > 0 ? `D-${diff}` : diff === 0 ? 'D-DAY' : null;
+    }
   }
 
   const nextStage = stages.find((s) => s.status === 'current') || null;

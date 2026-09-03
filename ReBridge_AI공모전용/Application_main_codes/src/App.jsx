@@ -4,7 +4,7 @@ import { ArrowLeft } from 'lucide-react';
 // (대형 JSON을 물고 있는 대입 관련 화면들이 초기 번들에서 빠지는 효과)
 import BottomNav from './components/BottomNav.jsx';
 import SplashScreen from './components/SplashScreen.jsx';
-import { getPersona, getNav, activeTabId, loadProfile } from './lib/persona.js';
+import { getPersona, getNav, activeTabId, loadProfile, V1_UNIV_ONLY, isHiddenScreen } from './lib/persona.js';
 
 const HomeScreen = lazy(() => import('./components/HomeScreen.jsx'));
 const ExploreScreen = lazy(() => import('./components/ExploreScreen.jsx'));
@@ -23,31 +23,34 @@ const ChecklistScreen = lazy(() => import('./components/ChecklistScreen.jsx'));
 const FormsGuideScreen = lazy(() => import('./components/FormsGuideScreen.jsx'));
 const DreamdriveScreen = lazy(() => import('./components/DreamdriveScreen.jsx'));
 const GedGuideScreen = lazy(() => import('./components/GedGuideScreen.jsx'));
-const StudyRoadmapScreen = lazy(() => import('./components/StudyRoadmapScreen.jsx'));
-const StudyPlannerScreen = lazy(() => import('./components/StudyPlannerScreen.jsx'));
-const CareerHubScreen = lazy(() => import('./components/CareerHubScreen.jsx'));
+const StudyRoadmapScreen = /* #__PURE__ */ lazy(() => import('./components/StudyRoadmapScreen.jsx'));
+const StudyPlannerScreen = /* #__PURE__ */ lazy(() => import('./components/StudyPlannerScreen.jsx'));
+const CareerHubScreen = /* #__PURE__ */ lazy(() => import('./components/CareerHubScreen.jsx'));
 const PathGuideScreen = lazy(() => import('./components/PathGuideScreen.jsx'));
-const JobHomeScreen = lazy(() => import('./components/JobHomeScreen.jsx'));
-const JobExploreScreen = lazy(() => import('./components/JobExploreScreen.jsx'));
-const JobRoadmapScreen = lazy(() => import('./components/JobRoadmapScreen.jsx'));
-const JobQuestionsScreen = lazy(() => import('./components/JobQuestionsScreen.jsx'));
-const JobDetailScreen = lazy(() => import('./components/JobDetailScreen.jsx'));
-const JobInfoScreen = lazy(() => import('./components/JobInfoScreen.jsx'));
-const JobPsychScreen = lazy(() => import('./components/JobPsychScreen.jsx'));
-const JobTrainingScreen = lazy(() => import('./components/JobTrainingScreen.jsx'));
-const JobApplyScreen = lazy(() => import('./components/JobApplyScreen.jsx'));
+const JobHomeScreen = /* #__PURE__ */ lazy(() => import('./components/JobHomeScreen.jsx'));
+const JobExploreScreen = /* #__PURE__ */ lazy(() => import('./components/JobExploreScreen.jsx'));
+const JobRoadmapScreen = /* #__PURE__ */ lazy(() => import('./components/JobRoadmapScreen.jsx'));
+const JobQuestionsScreen = /* #__PURE__ */ lazy(() => import('./components/JobQuestionsScreen.jsx'));
+const JobDetailScreen = /* #__PURE__ */ lazy(() => import('./components/JobDetailScreen.jsx'));
+const JobInfoScreen = /* #__PURE__ */ lazy(() => import('./components/JobInfoScreen.jsx'));
+const JobPsychScreen = /* #__PURE__ */ lazy(() => import('./components/JobPsychScreen.jsx'));
+const JobTrainingScreen = /* #__PURE__ */ lazy(() => import('./components/JobTrainingScreen.jsx'));
+const JobApplyScreen = /* #__PURE__ */ lazy(() => import('./components/JobApplyScreen.jsx'));
 const OnboardingScreen = lazy(() => import('./components/OnboardingScreen.jsx'));
-const CommunityScreen = lazy(() => import('./components/CommunityScreen.jsx'));
-const CommunityPostScreen = lazy(() => import('./components/CommunityPostScreen.jsx'));
-const CommunityWriteScreen = lazy(() => import('./components/CommunityWriteScreen.jsx'));
-const AuthScreen = lazy(() => import('./components/AuthScreen.jsx'));
+const CommunityScreen = /* #__PURE__ */ lazy(() => import('./components/CommunityScreen.jsx'));
+const CommunityPostScreen = /* #__PURE__ */ lazy(() => import('./components/CommunityPostScreen.jsx'));
+const CommunityWriteScreen = /* #__PURE__ */ lazy(() => import('./components/CommunityWriteScreen.jsx'));
+const AuthScreen = /* #__PURE__ */ lazy(() => import('./components/AuthScreen.jsx'));
 const SupportScreen = lazy(() => import('./components/SupportScreen.jsx'));
 const PolicyScreen = lazy(() => import('./components/PolicyScreen.jsx'));
 
-// 하단 글로벌 탭의 루트 화면들(여기로 가면 스택 리셋). 항상 고정 4개.
+// 하단 글로벌 탭의 루트 화면들(여기로 가면 스택 리셋).
+// v1(V1_UNIV_ONLY)에서는 커뮤니티가 빠져 3개가 된다.
 // 트랙 화면(학습/대입/직업)은 홈 안의 TrackHome이 그리므로 여기 없음.
-const TAB_ROOTS = ['home', 'support', 'community', 'mypage'];
+const TAB_ROOTS = ['home', 'support', 'community', 'mypage'].filter((s) => !isHiddenScreen(s));
 
+// v1에서 숨긴 화면(커뮤니티/인증·직업·학습)은 이 목록에서도 빠진다.
+// → 어딘가에 링크가 남아 있어도 아래 "준비 중" 폴백으로 떨어진다.
 const KNOWN_SCREENS = [
   'guide', 'glossary', 'results', 'detail', 'documents', 'saved', 'map', 'help',
   'checklist', 'forms-guide', 'dreamdrive', 'ged-guide', 'univ-explore', 'path',
@@ -56,7 +59,7 @@ const KNOWN_SCREENS = [
   'job-training', 'job-apply',
   'community', 'community-post', 'community-write', 'community-auth',
   'privacy', 'terms',
-];
+].filter((s) => !isHiddenScreen(s));
 
 // 직업 트랙은 답변(jobProfile)이 있어야 맞춤 안내가 되므로, 없으면 질문부터.
 function jobLandingFor(landing) {
@@ -132,7 +135,9 @@ export default function App() {
 
         {!splash && screen === 'home'        && <HomeScreen goTo={goTo} goBack={goBack} />}
         {!splash && screen === 'support'     && <SupportScreen goTo={goTo} goBack={goBack} params={params} />}
-        {!splash && screen === 'explore'     && <CareerHubScreen goTo={goTo} persona={persona} />}
+        {/* 진로 허브 — v1에서 숨김. (숨기면 'explore'가 KNOWN_SCREENS에 없어
+            CareerHub와 '준비 중'이 같이 그려지던 이중 렌더도 함께 사라진다) */}
+        {!splash && !V1_UNIV_ONLY && screen === 'explore'     && <CareerHubScreen goTo={goTo} persona={persona} />}
         {!splash && screen === 'univ-explore' && <ExploreScreen goTo={goTo} goBack={goBack} canGoBack={stack.length > 1} />}
         {!splash && screen === 'path'        && (
           <PathGuideScreen pathKey={params.key} goBack={goBack} />
@@ -168,21 +173,23 @@ export default function App() {
         {!splash && screen === 'forms-guide' && <FormsGuideScreen goTo={goTo} goBack={goBack} />}
         {!splash && screen === 'dreamdrive'  && <DreamdriveScreen goTo={goTo} goBack={goBack} params={params} />}
         {!splash && screen === 'ged-guide'   && <GedGuideScreen goTo={goTo} goBack={goBack} />}
-        {!splash && screen === 'study-roadmap' && <StudyRoadmapScreen goTo={goTo} />}
-        {!splash && screen === 'study-planner' && <StudyPlannerScreen goTo={goTo} />}
-        {!splash && screen === 'job-home'      && <JobHomeScreen goTo={goTo} />}
-        {!splash && screen === 'job-explore'   && <JobExploreScreen goTo={goTo} />}
-        {!splash && screen === 'job-roadmap'   && <JobRoadmapScreen goTo={goTo} />}
-        {!splash && screen === 'job-questions' && <JobQuestionsScreen goTo={goTo} goBack={goBack} canGoBack={stack.length > 1} />}
-        {!splash && screen === 'job-detail'    && <JobDetailScreen id={params.id} goBack={goBack} />}
-        {!splash && screen === 'job-info'      && <JobInfoScreen goBack={goBack} goTo={goTo} initialQuery={params.q} />}
-        {!splash && screen === 'job-psych'     && <JobPsychScreen goBack={goBack} />}
-        {!splash && screen === 'job-training'  && <JobTrainingScreen goBack={goBack} goTo={goTo} />}
-        {!splash && screen === 'job-apply'     && <JobApplyScreen goBack={goBack} goTo={goTo} />}
-        {!splash && screen === 'community'       && <CommunityScreen goTo={goTo} goBack={goBack} params={params} />}
-        {!splash && screen === 'community-post'  && <CommunityPostScreen goTo={goTo} goBack={goBack} id={params.id} />}
-        {!splash && screen === 'community-write' && <CommunityWriteScreen goTo={goTo} goBack={goBack} board={params.board} initialTitle={params.initialTitle || ''} />}
-        {!splash && screen === 'community-auth'  && <AuthScreen goTo={goTo} goBack={goBack} />}
+        {/* ▼ v1(V1_UNIV_ONLY)에서 숨기는 화면들 — 학습·직업 트랙, 커뮤니티·인증.
+            남은 링크로 들어와도 KNOWN_SCREENS에서 빠져 '준비 중'으로 떨어진다. */}
+        {!splash && !V1_UNIV_ONLY && screen === 'study-roadmap' && <StudyRoadmapScreen goTo={goTo} />}
+        {!splash && !V1_UNIV_ONLY && screen === 'study-planner' && <StudyPlannerScreen goTo={goTo} />}
+        {!splash && !V1_UNIV_ONLY && screen === 'job-home'      && <JobHomeScreen goTo={goTo} />}
+        {!splash && !V1_UNIV_ONLY && screen === 'job-explore'   && <JobExploreScreen goTo={goTo} />}
+        {!splash && !V1_UNIV_ONLY && screen === 'job-roadmap'   && <JobRoadmapScreen goTo={goTo} />}
+        {!splash && !V1_UNIV_ONLY && screen === 'job-questions' && <JobQuestionsScreen goTo={goTo} goBack={goBack} canGoBack={stack.length > 1} />}
+        {!splash && !V1_UNIV_ONLY && screen === 'job-detail'    && <JobDetailScreen id={params.id} goBack={goBack} />}
+        {!splash && !V1_UNIV_ONLY && screen === 'job-info'      && <JobInfoScreen goBack={goBack} goTo={goTo} initialQuery={params.q} />}
+        {!splash && !V1_UNIV_ONLY && screen === 'job-psych'     && <JobPsychScreen goBack={goBack} />}
+        {!splash && !V1_UNIV_ONLY && screen === 'job-training'  && <JobTrainingScreen goBack={goBack} goTo={goTo} />}
+        {!splash && !V1_UNIV_ONLY && screen === 'job-apply'     && <JobApplyScreen goBack={goBack} goTo={goTo} />}
+        {!splash && !V1_UNIV_ONLY && screen === 'community'       && <CommunityScreen goTo={goTo} goBack={goBack} params={params} />}
+        {!splash && !V1_UNIV_ONLY && screen === 'community-post'  && <CommunityPostScreen goTo={goTo} goBack={goBack} id={params.id} />}
+        {!splash && !V1_UNIV_ONLY && screen === 'community-write' && <CommunityWriteScreen goTo={goTo} goBack={goBack} board={params.board} initialTitle={params.initialTitle || ''} />}
+        {!splash && !V1_UNIV_ONLY && screen === 'community-auth'  && <AuthScreen goTo={goTo} goBack={goBack} />}
 
         {/* 법적 고지 — 청소년 대상 서비스 필수 + 스토어 심사 요건 */}
         {!splash && screen === 'privacy'         && <PolicyScreen doc="privacy" goBack={goBack} />}

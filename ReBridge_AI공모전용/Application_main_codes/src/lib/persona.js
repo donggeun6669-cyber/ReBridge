@@ -6,6 +6,23 @@
 //   goal:  'university' | 'job' | 'undecided',
 // }
 
+// ⚙️ v1 출시 범위 스위치.
+//   true  → 대입(univ) 트랙 + 검정고시 안내 + 지원(꿈드림) 탭만 노출.
+//           커뮤니티·인증, 학습(study) 트랙, 직업(job) 트랙을 전부 숨긴다.
+//   false → 원래대로 전부 노출 (v1.1에서 되돌릴 때 이 값만 false로).
+//   ※ 기능을 지운 게 아니라 가린 것이다. 화면·데이터·로직은 그대로 남아 있다.
+export const V1_UNIV_ONLY = true;
+
+// v1에서 가려야 하는 화면인지 판단. (커뮤니티/인증 · 직업 · 학습 · 진로허브)
+export function isHiddenScreen(screen) {
+  if (!V1_UNIV_ONLY) return false;
+  const s = String(screen || '');
+  return s === 'community' || s.startsWith('community-')
+    || s === 'explore'                      // CareerHubScreen(진로 허브)
+    || s.startsWith('job-')
+    || s.startsWith('study-');
+}
+
 const STORAGE_KEY = 'rebridge_profile';
 
 export function loadProfile() {
@@ -115,16 +132,18 @@ export function setActiveTrack(track) {
   return next;
 }
 
-// 하단 탭은 트랙과 무관하게 항상 고정 4개(홈·지원·커뮤니티·MY).
+// 하단 탭은 트랙과 무관하게 항상 고정(홈·지원·커뮤니티·MY).
+// v1(V1_UNIV_ONLY)에서는 커뮤니티를 빼서 3탭이 된다.
 // 트랙별 화면(학습/대입/직업)은 홈 안의 상단 서브탭(TrackHome)으로 들어간다.
 export function getNav() {
+  const tabs = [
+    { id: 'home',      label: '홈',      icon: 'Home',          screen: 'home' },
+    { id: 'support',   label: '지원',    icon: 'Gift',          screen: 'support' },
+    { id: 'community', label: '커뮤니티', icon: 'MessageCircle', screen: 'community' },
+    { id: 'mypage',    label: 'MY',      icon: 'User',          screen: 'mypage' },
+  ];
   return {
-    tabs: [
-      { id: 'home',      label: '홈',      icon: 'Home',          screen: 'home' },
-      { id: 'support',   label: '지원',    icon: 'Gift',          screen: 'support' },
-      { id: 'community', label: '커뮤니티', icon: 'MessageCircle', screen: 'community' },
-      { id: 'mypage',    label: 'MY',      icon: 'User',          screen: 'mypage' },
-    ],
+    tabs: tabs.filter((t) => !isHiddenScreen(t.screen)),
     landing: 'home',
   };
 }
@@ -132,7 +151,10 @@ export function getNav() {
 // 현재 화면이 어느 글로벌 탭(홈·지원·커뮤니티·MY)에 속하는지 → 활성 탭 id.
 // 트랙 서브화면(학습/대입/직업 관련)은 모두 '홈'에 속한다.
 export function activeTabId(screen) {
-  if (['community', 'community-post', 'community-write', 'community-auth'].includes(screen)) return 'community';
+  // v1에서는 커뮤니티 탭 자체가 없으므로 '홈'으로 떨어뜨린다(활성 탭 없음 방지).
+  if (['community', 'community-post', 'community-write', 'community-auth'].includes(screen)) {
+    return V1_UNIV_ONLY ? 'home' : 'community';
+  }
   if (['support', 'dreamdrive', 'map'].includes(screen)) return 'support';
   if (['mypage', 'saved', 'help', 'profile'].includes(screen)) return 'mypage';
   return 'home'; // home + 모든 트랙 화면·서브화면

@@ -2,21 +2,69 @@
 // 규칙 기반(AI 없음). 대학별 conversion 데이터가 없으면 표준 추정표로 폴백.
 // 입결(results)은 2025학년도(9등급제) 기준, 입시제도는 2028(5등급제)이므로 직접비교는 '참고용'.
 import cutlines from '../data/cutlines_2025.json';
+import { CUTLINE_YEAR } from '../data/meta.js';
 import comparative from '../data/comparative_2028.json';
 
 // 검정고시(고졸) 핵심 과목
 export const GED_SUBJECTS = ['국어', '수학', '영어', '사회', '과학', '한국사'];
 
+// 선택 1과목(도덕·기술가정·체육·음악·미술 중 1)의 저장 키.
+// ProfileScreen이 gedScores.elective 로 저장한다. 과목명이 사람마다 달라 키는 고정.
+export const GED_ELECTIVE_KEY = 'elective';
+
 // 검정고시 채점: 과목당 25문항, 1문항 = 4점 (100점 만점)
 export const POINTS_PER_QUESTION = 4;
 
-// 표준 추정 환산표: 검정고시 평균 → 9등급제 추정등급 (대학별 상이, 참고용)
-// 각 등급을 받기 위한 '최소 평균점수'
+// ============================================================
+// 표준 추정 환산표: 검정고시 평균 → 9등급제 추정등급
+// (대학별 공식 환산표가 없을 때만 쓰는 폴백. 화면에서 '추정'으로 표시된다)
+//
+// 【산출 근거 — 2026-09-03】
+// 옛 표([1,98] [2,94] [3,90] [4,86] …)는 출처 없는 임의값이었고,
+// 실제로 공개된 대학 환산표보다 1~2등급 낙관적이었다(만점자에게 1등급).
+// 아래 값은 "실제 공개된 표"에서만 계산한 중앙값이다.
+//
+// 표본: 9등급 스케일로 '검정고시 평균 → 등급'을 확정할 수 있는 대학 6곳
+//   ① 직접 표(comparative_2028.json의 conversion.gradeTable, minAvg→grade)
+//      - uA0000079 강서대   : 100→2, 95→3, 90→4, 85→5, 80→6, 75→7, 65→8
+//      - uA0000209 호남신학대: 96→1, 92→2, 88→3, 84→4, 80→5, 76→6, 72→7, 66→8
+//   ② 합성 표(comparative의 '평균→환산점수' × data-pipeline
+//      out/plans_2028/conversion.jsonl 의 '등급→환산점수' 9등급 표를 역산)
+//      - uA0000153 영남신학대: 96.01→1, 91.51→2, 87.01→3, 82.51→4, 78.01→5,
+//                              73.51→6, 69.01→7, 64.51→8
+//      - uA0000084 대구대    : 98→3, 88→5, 78→7   (만점도 3등급)
+//      - uA0000181 추계예대  : 100→3, 90→5, 80→7.33
+//      - uA0000010 금오공대  : 90→5, 75→6.3, 60→7.67
+//   제외: uA0000132·uA0002660·uA0000021 등 5등급 스케일 표(2028 제도)는
+//         9등급제 입결과 직접 비교할 수 없어 뺐다.
+//         강원대는 등급↔점수 대응표가 없어 합성 불가.
+//         conversion.jsonl 84개 표는 '등급→환산점수'뿐이라 평균→등급을 못 만든다
+//         (오염 필터: minScore<10 · 비단조 제외). 그래서 위 6곳만 남았다.
+//
+// 계산: 등급 g마다 "g 이하를 받기 위한 최소 평균"을 대학별로 구하고 중앙값.
+//   해당 등급을 아예 안 주는 대학은 '도달 불가(∞)'로 포함(빼면 표본이 편향돼
+//   1·2등급이 실제보다 쉬워 보인다).
+//   → 1등급 [∞ 96 ∞ ∞ ∞ 96.01] → 도달 불가
+//     2등급 [100 92 ∞ ∞ ∞ 91.51] → 도달 불가
+//     3등급 [95 88 100 ∞ 98 87.01] → 96.5
+//     4등급 [90 84 100 ∞ 98 82.51] → 94
+//     5등급 [85 80 90 90 88 78.01] → 86.5
+//     6등급 [80 76 90 90 88 73.51] → 84
+//     7등급 [75 72 90 75 78 69.01] → 75
+//     8등급 [65 66 80 60 78 64.51] → 65.5
+//
+// ⚠ 표본 6곳뿐이다. 공개 표가 늘면 다시 계산할 것.
+//    "추정표로는 1·2등급이 안 나온다"는 건 중앙값의 결론이지, 어떤 대학도
+//    1등급을 안 준다는 뜻이 아니다(호남신학대·영남신학대는 준다).
+// ============================================================
 const GRADE_MIN_AVG = [
-  [1, 98], [2, 94], [3, 90], [4, 86], [5, 82], [6, 78], [7, 74], [8, 70],
+  [3, 96.5], [4, 94], [5, 86.5], [6, 84], [7, 75], [8, 65.5],
 ];
 
-// 평균점수 → 추정 등급(1~9, 낮을수록 우수)
+// 폴백표에서 가장 좋은(숫자가 작은) 등급 — 이보다 좋은 등급은 추정표로 못 준다
+const BEST_FALLBACK_GRADE = GRADE_MIN_AVG[0][0];
+
+// 평균점수 → 추정 등급(정수, 낮을수록 우수). 표시용.
 export function estimateGrade(avg) {
   if (avg == null || Number.isNaN(avg)) return null;
   for (const [g, min] of GRADE_MIN_AVG) {
@@ -25,33 +73,73 @@ export function estimateGrade(avg) {
   return 9;
 }
 
-// 목표 등급을 받기 위한 최소 평균점수
+// 평균점수 → 추정 등급(소수). 같은 등급 구간 안에서도 위/아래를 구분하려고
+// 구간 안을 선형 보간한다. 정수 myGrade와 소수 cutGrade를 비교할 때 쓴다.
+export function estimateGradeExact(avg) {
+  return _interpolateGrade(avg, _fallbackBands());
+}
+
+// 폴백표 → 보간용 구간 목록 [{lo, hi, grade, gradeAbove}]
+function _fallbackBands() {
+  const bands = [];
+  for (let i = 0; i < GRADE_MIN_AVG.length; i++) {
+    const [g, lo] = GRADE_MIN_AVG[i];
+    const hi = i === 0 ? 100 : GRADE_MIN_AVG[i - 1][1];
+    bands.push({ lo, hi, grade: g, gradeAbove: i === 0 ? null : GRADE_MIN_AVG[i - 1][0] });
+  }
+  const last = GRADE_MIN_AVG[GRADE_MIN_AVG.length - 1];
+  bands.push({ lo: 0, hi: last[1], grade: 9, gradeAbove: last[0] });
+  return bands;
+}
+
+// 구간표 안에서 소수 등급으로 보간.
+// 구간 [lo, hi]의 등급이 g이고 바로 위 구간 등급이 gAbove면,
+// avg가 lo→hi로 갈수록 g→gAbove로 선형 이동한다. 맨 위 구간은 g 고정.
+function _interpolateGrade(avg, bands) {
+  if (avg == null || Number.isNaN(avg) || !bands?.length) return null;
+  const b = bands.find((x) => avg >= x.lo && avg <= x.hi) ||
+    (avg > bands[0].hi ? bands[0] : bands[bands.length - 1]);
+  if (!b || b.grade == null) return null;
+  if (b.gradeAbove == null || b.hi <= b.lo) return b.grade;
+  const f = Math.min(1, Math.max(0, (avg - b.lo) / (b.hi - b.lo)));
+  const g = b.grade - f * (b.grade - b.gradeAbove);
+  return Math.round(g * 100) / 100;
+}
+
+// 목표 등급을 받기 위한 최소 평균점수.
+// cutGrade가 7.43이면 7등급 경계가 필요하다(8등급은 7.43보다 나쁘니 미달).
+// → Math.floor. 옛 코드의 Math.ceil은 한 등급 아래 경계를 돌려줘 낙관적이었다.
 export function gradeToMinAvg(grade) {
   if (grade == null) return null;
-  const g = Math.ceil(grade); // cutGrade가 7.43이면 7등급 경계 필요
+  const g = Math.floor(grade);
   const found = GRADE_MIN_AVG.find(([gg]) => gg === g);
   if (found) return found[1];
-  if (g <= 1) return 98;
-  return 0; // 9등급 이하면 사실상 제한 없음
+  if (g < BEST_FALLBACK_GRADE) return null; // 추정표로는 도달 불가
+  return 0; // 표의 최하 등급보다 아래면 사실상 제한 없음
+}
+
+// 점수가 실제로 들어온 과목 키 목록 (필수 6과목 + 선택 1과목)
+function _filledSubjectKeys(gedScores) {
+  if (!gedScores || typeof gedScores !== 'object') return [];
+  return [...GED_SUBJECTS, GED_ELECTIVE_KEY].filter((k) => {
+    const v = gedScores[k];
+    return v != null && v !== '' && !Number.isNaN(Number(v));
+  });
 }
 
 // 프로필의 과목별 점수 → 평균(입력된 과목만)
+// 고졸 검정고시 합격 기준은 '필수 6 + 선택 1 = 7과목 평균'이라, 선택과목 점수가
+// 입력돼 있으면 평균에 포함한다. 없으면 필수 6과목 평균 그대로.
 export function gedAverage(gedScores) {
-  if (!gedScores || typeof gedScores !== 'object') return null;
-  const vals = GED_SUBJECTS
-    .map((s) => gedScores[s])
-    .filter((v) => v != null && v !== '' && !Number.isNaN(Number(v)))
-    .map(Number);
-  if (vals.length === 0) return null;
+  const keys = _filledSubjectKeys(gedScores);
+  if (keys.length === 0) return null;
+  const vals = keys.map((k) => Number(gedScores[k]));
   return Math.round((vals.reduce((a, b) => a + b, 0) / vals.length) * 100) / 100;
 }
 
-// 입력된 과목 수
+// 입력된 과목 수 (선택과목 포함)
 export function gedSubjectCount(gedScores) {
-  if (!gedScores) return 0;
-  return GED_SUBJECTS.filter(
-    (s) => gedScores[s] != null && gedScores[s] !== '' && !Number.isNaN(Number(gedScores[s]))
-  ).length;
+  return _filledSubjectKeys(gedScores).length;
 }
 
 // (univId, admissionType) 합격선 조회
@@ -123,15 +211,22 @@ export const CONV_TYPES = {
  * @param {number|null} avg 전과목 평균
  * @param {object} gedScores 과목별 점수 { 국어, 수학, ... }
  * @param {object|null} comp comparative_2028.json 대학 항목
- * @returns {{ grade: number|null, score: number|null, method: string }}
+ * @returns {{ grade: number|null, gradeExact: number|null, score: number|null, method: string }}
+ *   grade      = 표시용 등급(대학 표의 값 그대로 / 폴백표의 정수 등급)
+ *   gradeExact = 구간 안을 선형 보간한 소수 등급(비교 계산용). 없으면 grade와 같다.
  */
 export function applyComparativeConversion(avg, gedScores, comp) {
-  if (avg == null) return { grade: null, score: null, method: 'no_score' };
+  if (avg == null) return { grade: null, gradeExact: null, score: null, method: 'no_score' };
 
   const conv = comp?.conversion;
   if (!conv?.type) {
     // 데이터 없음 → 표준 추정표
-    return { grade: estimateGrade(avg), score: null, method: 'standard' };
+    return {
+      grade: estimateGrade(avg),
+      gradeExact: estimateGradeExact(avg),
+      score: null,
+      method: 'standard',
+    };
   }
 
   switch (conv.type) {
@@ -142,7 +237,16 @@ export function applyComparativeConversion(avg, gedScores, comp) {
       const row = conv.gradeTable.find(
         (r) => avg >= (r.minAvg ?? -Infinity) && avg <= (r.maxAvg ?? Infinity)
       );
-      if (row) return { grade: row.grade ?? null, score: row.score ?? null, method: 'grade_table' };
+      if (row) {
+        return {
+          grade: row.grade ?? null,
+          // 합격선 cutGrade는 소수(예 5.042)인데 등급표 값은 정수라 그대로 빼면
+          // 한 구간 통째로 같은 등급이 된다. 구간 안에서 보간해 gap을 정밀하게.
+          gradeExact: _interpolateGrade(avg, _bandsFromGradeTable(conv.gradeTable)) ?? row.grade ?? null,
+          score: row.score ?? null,
+          method: 'grade_table',
+        };
+      }
       break;
     }
 
@@ -156,7 +260,7 @@ export function applyComparativeConversion(avg, gedScores, comp) {
         const grade = conv.gradeFromScore
           ? _gradeFromInverseFormula(row.score, conv.gradeFromScore)
           : estimateGrade(avg);
-        return { grade, score: row.score, method: 'score_table' };
+        return { grade, gradeExact: grade, score: row.score, method: 'score_table' };
       }
       break;
     }
@@ -170,7 +274,12 @@ export function applyComparativeConversion(avg, gedScores, comp) {
         - (grade - 1) * (f.gradeCoeff ?? 0)
         - (f.offset ?? 0)
         + (f.bonus ?? 0);
-      return { grade, score: Math.round(score * 10) / 10, method: 'score_formula' };
+      return {
+        grade,
+        gradeExact: estimateGradeExact(avg),
+        score: Math.round(score * 10) / 10,
+        method: 'score_formula',
+      };
     }
 
     // Case 4: 복잡 산출식 — grade = Min(1+((max-score)/(max-base))×8, 9) 역산
@@ -181,7 +290,12 @@ export function applyComparativeConversion(avg, gedScores, comp) {
         const grade = estimateGrade(avg);
         // 역산: score = max - (grade-1)/8*(max-base)
         const score = maxScore - ((grade - 1) / 8) * (maxScore - baseScore);
-        return { grade, score: Math.round(score * 10) / 10, method: 'formula_complex' };
+        return {
+          grade,
+          gradeExact: estimateGradeExact(avg),
+          score: Math.round(score * 10) / 10,
+          method: 'formula_complex',
+        };
       }
       break;
     }
@@ -209,6 +323,7 @@ export function applyComparativeConversion(avg, gedScores, comp) {
         }
         return {
           grade: estimateGrade(avg),
+          gradeExact: estimateGradeExact(avg),
           score: Math.round(score * 10) / 10,
           method: 'subject_weighted',
         };
@@ -220,7 +335,22 @@ export function applyComparativeConversion(avg, gedScores, comp) {
   }
 
   // 모든 케이스 실패 → 표준 추정
-  return { grade: estimateGrade(avg), score: null, method: 'standard' };
+  return {
+    grade: estimateGrade(avg),
+    gradeExact: estimateGradeExact(avg),
+    score: null,
+    method: 'standard',
+  };
+}
+
+// 대학 등급표(minAvg~maxAvg → grade) → 보간용 구간 목록.
+// 위 구간(더 좋은 등급)이 무엇인지 알아야 보간 폭을 정할 수 있어 minAvg 내림차순 정렬.
+function _bandsFromGradeTable(gradeTable) {
+  const rows = gradeTable
+    .filter((r) => r.grade != null && r.minAvg != null)
+    .map((r) => ({ lo: r.minAvg, hi: r.maxAvg ?? 100, grade: r.grade }))
+    .sort((a, b) => b.lo - a.lo);
+  return rows.map((r, i) => ({ ...r, gradeAbove: i === 0 ? null : rows[i - 1].grade }));
 }
 
 // 점수 → 등급 역산 (score_table 케이스용)
@@ -343,15 +473,24 @@ export function evaluateAdmission(profile, adm) {
 
   // ── 비교내신 환산 (대학별 공식 적용, 없으면 표준 추정) ──
   const conversion = applyComparativeConversion(avg, gedScores, comp);
-  const myGrade = conversion.grade;   // 등급 (1~9, 소수점 가능)
+  const myGrade = conversion.grade;   // 표시용 등급 (기존 필드명 유지)
+  const myGradeExact = conversion.gradeExact ?? conversion.grade; // 비교 계산용 소수 등급
   const myScore = conversion.score;   // 환산점수 (대학별 공식 있을 때만)
   const conversionMethod = conversion.method; // 'grade_table'|'score_table'|...|'standard'
+  // 파이프라인이 내보낸 표 중 '등급→환산점수'만 공식이고 '평균→등급' 구간은 앱 표준 추정을 붙인 것
+  // (gradeBandSource === 'app_standard_estimate'). 등급 판정 자체는 추정이므로 화면에 '추정'으로 표시한다.
+  const gradeBandEstimated = comp?.conversion?.gradeBandSource === 'app_standard_estimate';
+  const conversionEstimated = conversionMethod === 'standard' || gradeBandEstimated;
 
   const base = {
     avg,
     myGrade,
+    myGradeExact,
     myScore,
     conversionMethod,
+    gradeBandEstimated,
+    conversionEstimated,
+    scaleMismatch: false,
     affinity,
     comparative: comp,
     hasScore: avg != null,
@@ -378,7 +517,7 @@ export function evaluateAdmission(profile, adm) {
       ...base,
       applicable: false,
       dataGap: 'cutline',
-      reason: '이 전형의 작년 합격선은 공개된 자료에 없어요. 검정고시 입결을 따로 공개하지 않는 대학이 많아, 지금은 구하기 어려운 정보예요.',
+      reason: `이 전형의 ${CUTLINE_YEAR}학년도 합격선은 공개된 자료에 없어요. 검정고시 입결을 따로 공개하지 않는 대학이 많아, 지금은 구하기 어려운 정보예요.`,
     };
   }
 
@@ -395,48 +534,60 @@ export function evaluateAdmission(profile, adm) {
       cutGrade, cutScore, cutGradeType, cutScoreType,
       cutN: cut.n,
       cutConfidence: cut.confidence,
-      reason: '검정고시 과목 점수를 입력하면 작년 합격선과 비교해드릴게요.',
+      reason: `검정고시 과목 점수를 입력하면 ${CUTLINE_YEAR}학년도 합격선과 비교해드릴게요.`,
     };
   }
 
   // ── 비교 기준 선택 ──
-  // 점수 비교: myScore(환산)와 cutScore(입결) 둘 다 있을 때 우선 사용.
-  // 정규화: 환산점수 격차를 등급-등가 gap으로 변환해 verdictFromGap에 통일 입력.
-  // 정규화 공식: gap = -(myScore - cutScore) / pointsPerGrade
-  //   pointsPerGrade = (conv.maxScore - conv.minScore) / 8   (없으면 fallback=20)
-  let gap, comparisonBasis, cutScoreUsed, cutGradeUsed;
+  // 점수 비교: myScore(환산)와 cutScore(입결) 둘 다 있고, 두 값의 '자'가 같을 때만.
+  //   대학 환산점수는 만점이 92점짜리도 있고 970점짜리도 있는데 입결 cutScore는
+  //   대학·전형마다 스케일이 제각각이라, 그냥 빼면 말이 안 되는 숫자가 나온다.
+  //   (실제 예: 금오공대 uA0000010 환산 만점 92 vs 학생부교과 cutScore70 870.17,
+  //             대구대 uA0000084 환산 만점 92.5 vs cutScore70 899.62)
+  //   → cutScore가 conversion의 [minScore, maxScore] 안일 때만 점수 비교를 쓰고,
+  //     아니면 등급 비교로 폴백하고 scaleMismatch:true로 알린다. 데이터는 안 고친다.
+  // 정규화: gap = -(myScore - cutScore) / pointsPerGrade
+  //   pointsPerGrade = (conv.maxScore - conv.minScore) / 8
+  let gap, comparisonBasis, ptsPerGrade = null, scaleMismatch = false;
 
-  if (myScore != null && cutScore != null) {
-    const maxS  = comp?.conversion?.maxScore ?? null;
-    const minS  = comp?.conversion?.minScore ?? 0;
-    const range = maxS != null ? (maxS - minS) : null;
-    const ptsPerGrade = range ? range / 8 : 20; // 1등급당 점수차 추정
+  const maxS = comp?.conversion?.maxScore ?? null;
+  const minS = comp?.conversion?.minScore ?? null;
+  const scaleOk =
+    maxS != null && minS != null && maxS > minS &&
+    cutScore != null && cutScore >= minS && cutScore <= maxS;
+
+  if (myScore != null && cutScore != null && scaleOk) {
+    ptsPerGrade = (maxS - minS) / 8; // 1등급당 점수차 추정
     gap = Math.round((-(myScore - cutScore) / ptsPerGrade) * 100) / 100;
     comparisonBasis = 'score';
-    cutScoreUsed = cutScore;
-    cutGradeUsed = cutGrade;
-  } else if (myGrade != null && cutGrade != null) {
-    gap = Math.round((myGrade - cutGrade) * 100) / 100;
+  } else if (myGradeExact != null && cutGrade != null) {
+    if (myScore != null && cutScore != null) scaleMismatch = true; // 점수 비교를 포기한 경우
+    gap = Math.round((myGradeExact - cutGrade) * 100) / 100;
     comparisonBasis = 'grade';
-    cutScoreUsed = null;
-    cutGradeUsed = cutGrade;
   } else {
     return {
       ...base,
       applicable: false,
       dataGap: 'cutline',
+      scaleMismatch: myScore != null && cutScore != null,
       reason: '합격선 자료와 내 점수를 비교할 수 없어요.',
     };
   }
 
   const verdict = verdictFromGap(gap);
 
-  // 부족 점수/문항수 (등급 기반, 참고용)
-  const neededAvg = gradeToMinAvg(cutGradeUsed ?? cutGrade);
-  const shortPoints =
-    neededAvg != null && avg < neededAvg
-      ? Math.round((neededAvg - avg) * 100) / 100
-      : 0;
+  // ── 부족 점수 / 문항수 ──
+  // verdict와 같은 기준(gap)에서 뽑는다. gap이 0 이하가 되는 최소 평균을 역산하므로
+  // "gap ≤ 0" 과 "shortPoints === 0" 이 항상 같은 뜻이 된다.
+  // (옛 코드는 gap은 점수 기준인데 부족분은 등급 기준이라, 판정이 '소신'인데
+  //  문구는 '충분해요'가 되는 모순이 생겼다. 문항수도 이제 비교 기준을 따라간다.)
+  const neededAvg = _minAvgToCloseGap({
+    gedScores, avg, comp, comparisonBasis, cutScore, cutGrade, ptsPerGrade,
+  });
+  const reachable = neededAvg != null;
+  const shortPoints = reachable
+    ? Math.max(0, Math.round((neededAvg - avg) * 100) / 100)
+    : null;
   const perSubjectQuestions = shortPoints > 0 ? Math.ceil(shortPoints / POINTS_PER_QUESTION) : 0;
   const totalQuestions =
     shortPoints > 0 && nSub > 0
@@ -452,35 +603,87 @@ export function evaluateAdmission(profile, adm) {
     cutConfidence: cut.confidence,
     gap,
     comparisonBasis,         // 'score' | 'grade' — 어떤 기준으로 비교했는지
+    scaleMismatch,           // 점수 스케일이 안 맞아 등급으로 폴백했는지
     verdict,
-    neededAvg,
-    shortPoints,
+    neededAvg,               // gap이 0이 되는 최소 검정고시 평균 (도달 불가면 null)
+    reachable,               // 만점을 다 맞아도 합격선에 못 닿으면 false
+    shortPoints,             // 0 = 합격선 안쪽 / null = 도달 불가
     perSubjectQuestions,
     totalQuestions,
     nSub,
   };
 }
 
-// 짧은 안내 문구(담임 톤) — 환산점수 기반/등급 기반 구분 표시
+// 모든 과목을 똑같이 delta점씩 올렸다고 가정한 가상 점수표 (0~100 클램프)
+function _shiftScores(gedScores, delta) {
+  if (!gedScores) return gedScores;
+  const out = {};
+  for (const k of _filledSubjectKeys(gedScores)) {
+    out[k] = Math.min(100, Math.max(0, Number(gedScores[k]) + delta));
+  }
+  return out;
+}
+
+// 평균이 candidate였다면 gap이 얼마였을지 (verdict와 완전히 같은 계산식)
+function _gapAtAvg(candidate, ctx) {
+  const { gedScores, avg, comp, comparisonBasis, cutScore, cutGrade, ptsPerGrade } = ctx;
+  const cv = applyComparativeConversion(candidate, _shiftScores(gedScores, candidate - avg), comp);
+  if (comparisonBasis === 'score') {
+    if (cv.score == null || !ptsPerGrade) return Infinity;
+    return -(cv.score - cutScore) / ptsPerGrade;
+  }
+  const g = cv.gradeExact ?? cv.grade;
+  if (g == null) return Infinity;
+  return g - cutGrade;
+}
+
+// gap ≤ 0 이 되는 최소 평균을 이분탐색으로 역산. 100점 만점으로도 안 되면 null.
+// gap은 평균에 대해 단조 비증가라서 이분탐색이 성립한다.
+function _minAvgToCloseGap(ctx) {
+  if (_gapAtAvg(100, ctx) > 0) return null;   // 만점으로도 합격선 미달
+  if (_gapAtAvg(0, ctx) <= 0) return 0;       // 사실상 제한 없음
+  let lo = 0, hi = 100;
+  for (let i = 0; i < 30; i++) {
+    const mid = (lo + hi) / 2;
+    if (_gapAtAvg(mid, ctx) <= 0) hi = mid; else lo = mid;
+  }
+  return Math.ceil(hi * 100) / 100;
+}
+
+// 짧은 안내 문구(담임 톤).
+// ⚠ verdict와 문구는 반드시 같은 기준(gap)에서 나와야 한다.
+//   shortPoints는 evaluateAdmission에서 gap을 역산해 만들었으므로
+//   shortPoints === 0 ⟺ gap ≤ 0 이 보장된다. 판정이 '소신/도전'인데
+//   문구가 '충분해요'가 되는 일은 이제 구조적으로 생기지 않는다.
 export function coachLine(ev) {
   if (!ev) return '';
   if (!ev.applicable) return ev.reason || '';
   if (ev.avg == null) return ev.reason || '';
 
-  // 환산점수 기반 비교인 경우
-  if (ev.comparisonBasis === 'score' && ev.myScore != null && ev.cutScore != null) {
-    const diff = Math.round((ev.myScore - ev.cutScore) * 10) / 10;
-    if (diff >= 0) {
-      return `내 환산점수(${ev.myScore}점)가 작년 합격선(${ev.cutScore}점)보다 ${diff}점 높아요. ${ev.verdict.label} 지원!`;
-    }
-    return `작년 합격선(${ev.cutScore}점)까지 환산점수 ${Math.abs(diff)}점 부족해요. 과목당 약 ${ev.perSubjectQuestions}문제 더 맞히면 닿아요.`;
+  const label = ev.verdict?.label || '';
+  // 합격선 표기 — 점수 기준으로 비교했으면 환산점수로, 등급 기준이면 등급으로
+  const cutText = ev.comparisonBasis === 'score' && ev.cutScore != null
+    ? `${CUTLINE_YEAR}학년도 합격선(환산 ${ev.cutScore}점)`
+    : `${CUTLINE_YEAR}학년도 합격선(약 ${ev.cutGrade}등급)`;
+
+  // ① 만점을 받아도 못 닿는 경우
+  if (ev.reachable === false) {
+    return `${cutText}은 검정고시 만점을 받아도 닿기 어려워요. ${label} 지원이에요.`;
   }
 
-  // 등급 기반 비교
-  if (ev.shortPoints <= 0) {
-    return `지금 평균이면 작년 합격선(약 ${ev.cutGrade}등급) 안쪽이에요. ${ev.verdict.label} 지원!`;
+  // ② 합격선 안쪽 (gap ≤ 0)
+  if (ev.shortPoints === 0) {
+    if (ev.comparisonBasis === 'score' && ev.myScore != null && ev.cutScore != null) {
+      const diff = Math.round((ev.myScore - ev.cutScore) * 10) / 10;
+      return `내 환산점수(${ev.myScore}점)가 ${cutText}보다 ${diff}점 높아요. ${label} 지원!`;
+    }
+    return `지금 평균이면 ${cutText} 안쪽이에요. ${label} 지원!`;
   }
-  return `작년 합격선(약 ${ev.cutGrade}등급)까지 평균 ${ev.shortPoints}점 정도 부족해요. 과목당 약 ${ev.perSubjectQuestions}문제만 더 맞히면 닿아요.`;
+
+  // ③ 부족 — '적정'이어도 부족한 건 부족하다고 말한다
+  const near = ev.verdict?.key === 'fit' ? ' 거의 닿았어요.' : '';
+  return `${cutText}까지 평균 ${ev.shortPoints}점 정도 부족해요.` +
+    ` 과목당 약 ${ev.perSubjectQuestions}문제 더 맞히면 닿아요.${near} (${label} 지원)`;
 }
 
 // 칸수式 합격 가능성 게이지 (5단계). gap = myGrade - cutGrade (+면 부족)
@@ -488,8 +691,8 @@ export function coachLine(ev) {
 export function admissionChance(ev) {
   if (!ev || !ev.applicable || ev.gap == null) return null;
   const g = ev.gap;
-  if (g <= -1.0) return { level: 5, label: '안정', tone: 'good', desc: '작년 합격선보다 여유 있어요' };
-  if (g <= 0.3) return { level: 4, label: '적정', tone: 'ok', desc: '작년 합격선과 비슷한 수준이에요' };
+  if (g <= -1.0) return { level: 5, label: '안정', tone: 'good', desc: `${CUTLINE_YEAR}학년도 합격선보다 여유 있어요` };
+  if (g <= 0.3) return { level: 4, label: '적정', tone: 'ok', desc: `${CUTLINE_YEAR}학년도 합격선과 비슷한 수준이에요` };
   if (g <= 1.0) return { level: 3, label: '소신', tone: 'warn', desc: '조금 부족하지만 노려볼 만해요' };
   if (g <= 2.0) return { level: 2, label: '도전', tone: 'hard', desc: '아직 합격선까지 거리가 있어요' };
   return { level: 1, label: '어려움', tone: 'hard', desc: '지금 점수로는 많이 부족해요' };

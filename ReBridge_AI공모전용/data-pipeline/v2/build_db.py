@@ -142,8 +142,16 @@ def load_results(con, src, progs, matcher):
 
 
 # ── 전형 + 검정고시 지원가부 ────────────────────────────────────────
-_SRC_PDF = re.compile(r"\(([^()]*\.pdf)\)\s*$")
+# ⚠️ 2026-09-03 수정. 이전 패턴은 r"\(([^()]*\.pdf)\)\s*$" 였다.
+# 파일명 자체에 소괄호가 들어 있다 — '…_2028_시행계획(1차수).pdf'.
+# [^()]* 는 그 안쪽 괄호를 못 넘어서 실제로는 **한 건도** 안 잡혔고(1,007행 전부 미매치),
+# 그 결과 모든 전형이 doctrine(KCUE 기본사항) 출처 + confidence=low 로 들어갔다.
+# 이제 문자열 끝의 '.pdf)' 를 앵커로 잡고 안쪽 괄호쌍을 허용한다.
+_SRC_PDF = re.compile(r"\(([^()]*(?:\([^()]*\)[^()]*)*\.pdf)\)\s*$")
 _SRC_PAGE = re.compile(r"\bp\.?\s*(\d+)")
+# 파일명 없이 '○○대학교 2028 시행계획 p.3,4,5…' 형태만 있는 출처도 있다(50행).
+# 이것도 근거는 시행계획이므로 doctrine 으로 떨어뜨리지 않는다.
+_SRC_PLAN_TEXT = re.compile(r"시행\s*계획|모집\s*요강")
 
 
 def _parse_admission_source(s):
@@ -169,12 +177,19 @@ def load_admissions(con, src, matcher):
         uid = r["univId"]
         status = r.get("status") or "confirmed"
         fname, page = _parse_admission_source(r.get("source"))
+        raw_src = C.squash(r.get("source"))
         if fname:
             pdf = C.PDF_ROOT / "2028" / fname
             sid = src.get(kind="plan", title=fname, year=2028,
                           path=pdf if pdf.exists() else None,
                           publisher="개별 대학 입학처")
             conf = "high"
+        elif raw_src and _SRC_PLAN_TEXT.search(raw_src) and status != "baseline":
+            # 파일명은 못 뽑았지만 근거가 시행계획인 경우 — 출처 문자열 자체를 제목으로 등록
+            sid = src.get(kind="plan", year=2028, title=raw_src,
+                          publisher="개별 대학 입학처",
+                          note="출처 문자열에서 PDF 파일명을 못 뽑음. 페이지는 첫 번째 것만 기록")
+            conf = "mid"
         else:
             sid, page, conf = doctrine, None, "low"
 

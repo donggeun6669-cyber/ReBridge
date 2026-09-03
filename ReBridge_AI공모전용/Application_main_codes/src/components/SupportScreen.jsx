@@ -13,6 +13,7 @@ import {
 import centersRaw from '../data/kkumdrim.json';
 import { COMMON_SUPPORT } from '../data/commonSupport';
 import { getCenterBenefits } from '../lib/benefits';
+import { V1_UNIV_ONLY } from '../lib/persona.js';
 import '../styles.support.css';
 
 // 카테고리/공통지원 icon 이름 → lucide 컴포넌트 매핑
@@ -228,9 +229,12 @@ export default function SupportScreen({ goTo = () => {}, goBack = () => {}, para
           {region === '전체' ? '전국' : region} <b>{list.length}곳</b>
         </p>
         <div style={{ display: 'flex', gap: 6 }}>
-          <button className="support-map-link" onClick={() => goTo('community', { board: 'review' })}>
-            <MessageCircle size={14} /> 후기
-          </button>
+          {/* 후기(커뮤니티) — v1에서는 커뮤니티를 숨기므로 함께 감춘다 */}
+          {!V1_UNIV_ONLY && (
+            <button className="support-map-link" onClick={() => goTo('community', { board: 'review' })}>
+              <MessageCircle size={14} /> 후기
+            </button>
+          )}
           <button className="support-map-link" onClick={() => goTo('dreamdrive')}>
             <MapIcon size={14} /> 지도
           </button>
