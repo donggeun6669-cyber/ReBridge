@@ -30,9 +30,12 @@ export const GED_2027_SOURCE_LABEL =
   '대교협 「2027학년도 검정고시 출신자 지원 가능 전형」';
 
 // 합격선 데이터의 학년도와 내신 등급 체계.
-// 2026학년도 전형결과(대교협 어디가) 기준 — cutlines_2026.json.
-// (cutlines_2025.json은 지우지 않고 남겨두지만 앱은 읽지 않는다)
+// 판정 기준은 2026학년도 전형결과(대교협 어디가) — cutlines_2026.json.
+// 2025학년도(cutlines_2025.json)는 '비교용'으로 함께 읽는다. 두 해를 평균내지는 않는다.
+// 한 해만 보면 그 해의 우연에 휘둘리기 때문에, 두 해가 크게 다른 대학은 화면에서
+// 둘 다 보여주고 알린다. 자세한 이유는 lib/scoreEngine.js 머리말 참조.
 export const CUTLINE_YEAR = 2026;
+export const CUTLINE_PREV_YEAR = 2025;
 export const CUTLINE_GRADE_SCALE = 9;
 
 // 합격선 출처 — 어디가는 학생부교과·학생부종합·수능위주 3갈래만 공개한다.
@@ -51,9 +54,38 @@ export const FIVE_GRADE_FROM = 2028;
 // 합격선 블록 제목
 export const CUTLINE_LABEL = `${CUTLINE_YEAR}학년도 합격선`;
 
-// 합격선 자료가 없을 때
-export const CUTLINE_NO_DATA_LABEL = `${CUTLINE_YEAR}학년도 합격선 자료가 없어요`;
+// 합격선 자료가 없을 때 — 두 해 모두 없다는 뜻이다.
+export const CUTLINE_NO_DATA_LABEL =
+  `${CUTLINE_PREV_YEAR}·${CUTLINE_YEAR}학년도 합격선 자료가 없어요`;
 export const CUTLINE_NO_DATA_SHORT = `${CUTLINE_YEAR}학년도 합격선 자료 없음`;
+
+// ── 두 학년도 합격선 ──────────────────────────────────────
+// 최신 연도에 값이 없어 이전 연도로 내려간 경우 (연도를 감추지 않는다)
+export const cutlineFallbackNotice = (year) =>
+  `${CUTLINE_YEAR}학년도 자료가 없어 ${year}학년도 합격선을 보여드려요. 한 해 전 결과라 지금과 다를 수 있어요.`;
+
+// 두 해가 크게 다를 때 — 한 해만 믿으면 안 된다고 알린다.
+// 비교할 수 없는 자료(집계 학과 수가 너무 다름)면 차이를 '변동'이라고 말하지 않는다.
+export const cutlineVolatilityNotice = (v) => {
+  if (!v || v.level === 'low') return null;
+  if (v.level === 'incomparable') {
+    return `${CUTLINE_PREV_YEAR}학년도 자료도 있지만, 두 해가 집계한 학과 수가 달라 ` +
+      `(${v.prevN}개 → ${v.recentN}개) 곧바로 견주기는 어려워요. ` +
+      `${CUTLINE_YEAR}학년도 기준으로 보고 있어요.`;
+  }
+  const 강 = v.level === 'high' ? '많이' : '꽤';
+  const 방향 = v.harder === 'recent'
+    ? `${CUTLINE_YEAR}학년도가 더 높은 성적을 요구했어요`
+    : v.harder === 'prev'
+      ? `${CUTLINE_PREV_YEAR}학년도가 더 높은 성적을 요구했어요`
+      : '두 해가 비슷했어요';
+  return `이 전형은 합격선이 해마다 ${강} 달라져요. ` +
+    `${CUTLINE_PREV_YEAR}학년도 ${v.prevGrade}등급 → ${CUTLINE_YEAR}학년도 ${v.recentGrade}등급 ` +
+    `(차이 ${v.gradeDiff}등급, ${방향}). 한 해 결과만 믿지 말고 여유를 두세요.`;
+};
+
+// 두 해 비교 블록 제목
+export const CUTLINE_COMPARE_LABEL = `${CUTLINE_PREV_YEAR}·${CUTLINE_YEAR}학년도 합격선 비교`;
 
 // 등급제 전환 고지 — 대상 학년도를 구분해서 말한다.
 // (2027학년도 지원자는 아직 9등급제라 "이 합격선은 못 쓴다"고 말하면 틀린다.)

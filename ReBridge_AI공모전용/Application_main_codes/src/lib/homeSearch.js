@@ -1,5 +1,5 @@
 // 홈 통합 검색 — 대학 / 직업 / 용어 / 앱 메뉴 / 꿈드림센터 / 지원혜택
-import universities from '../data/universities.json';
+import universities from './universityList.js';
 import kkumdrim from '../data/kkumdrim.json';
 import { JOB_CATALOG } from '../data/careerData.js';
 import { ADMISSION_TERMS, CAREER_TERMS } from '../data/glossary.js';

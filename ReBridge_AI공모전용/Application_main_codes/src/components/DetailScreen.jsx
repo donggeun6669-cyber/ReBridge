@@ -10,6 +10,7 @@ import {
   evaluateAdmission, coachLine, gedAffinity, admissionChance,
   getComparative, comparativeAvailability, gedFit,
   applyComparativeConversion, gedAverage, gradeToMinAvg,
+  gedFreshmenStanding,
 } from '../lib/scoreEngine.js';
 import { loadGedText2027, matchGedTextEntry } from '../lib/gedText2027.js';
 import { loadCompText2027 } from '../lib/compText2027.js';
@@ -24,6 +25,7 @@ import {
   PLAN_SECTION_TITLE, NO_2027_DATA_LABEL, NO_2027_DATA_NOTICE,
   PHASE_ESTIMATED_NOTICE, QUOTA_OUTSIDE_TITLE, QUOTA_OUTSIDE_NOTICE,
   YEAR_SPLIT_NOTICE, ADMISSION_DATA_YEAR, PLAN_YEAR,
+  CUTLINE_YEAR, cutlineFallbackNotice, cutlineVolatilityNotice,
   applyDeadline,
 } from '../data/meta.js';
 
@@ -320,6 +322,8 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
   const comp = getComparative(realUnivId);
   const compAvail = comparativeAvailability(comp);
   const compType = comp?.comparativeGradeType === 'numeric_table' ? 'numeric' : comp ? 'prose' : 'none';
+  // 검정고시 출신 신입생 실측 통계(대학알리미). 자료 없는 대학은 null.
+  const gedStanding = gedFreshmenStanding(realUnivId);
   const calcBasis = hasScore ? conversionBasis(profile, comp) : null;
 
   // 각 가능 전형 평가
@@ -432,6 +436,38 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
           )}
         </div>
       </div>
+
+      {/* 검정고시 출신 신입생 — 대학알리미 공시 실측값.
+          합격선은 일반학생 기준 추정이라, "실제로 검정고시로 들어간 사람이 있나"에
+          답해주는 건 이 숫자뿐이다. 자료가 있는 대학에만 나온다. */}
+      {gedStanding && (
+        <div className="ged-freshmen">
+          <div className="ged-freshmen-head">
+            <Users size={15} />
+            <b>검정고시로 입학한 선배</b>
+            <span className="ged-freshmen-year">{gedStanding.year}학년도</span>
+          </div>
+          <p className="ged-freshmen-main">
+            신입생 {gedStanding.total.toLocaleString()}명 중{' '}
+            <b>{gedStanding.ged.toLocaleString()}명</b>이 검정고시 출신이에요
+            {' '}({gedStanding.ratio}%).
+          </p>
+          {gedStanding.times != null && (
+            <p className="ged-freshmen-sub">
+              전국 평균은 {gedStanding.nationalRatio}%예요.{' '}
+              {gedStanding.level === 'high'
+                ? `이 대학은 그보다 ${gedStanding.times}배 많아요.`
+                : gedStanding.level === 'low'
+                  ? '이 대학은 그보다 적은 편이에요.'
+                  : '전국 평균과 비슷한 수준이에요.'}
+            </p>
+          )}
+          <p className="ged-freshmen-src">
+            출처: 대학알리미 신입생 출신고교유형별 현황 · 검정고시 전형만이 아니라
+            모든 전형으로 입학한 검정고시 출신자를 합친 수예요.
+          </p>
+        </div>
+      )}
 
       {/* 2027 자료가 없는 대학 — 무엇을 보고 있는지 먼저 밝힌다 */}
       {!is2027 && (
@@ -550,7 +586,10 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
                       {/* 합격선 블록 */}
                       {ev && ev.applicable && ev.cutGrade != null ? (
                         <div className="adm-block">
-                          <div className="adm-block-title">{CUTLINE_LABEL}</div>
+                          {/* 연도는 ev.cutlineYear를 쓴다 — 최신 자료가 없어 이전 학년도로
+                              내려간 전형이 있어서, 제목을 고정하면 다른 해 값을 다른 해
+                              이름으로 보여주게 된다. */}
+                          <div className="adm-block-title">{ev.cutlineYear ?? CUTLINE_YEAR}학년도 합격선</div>
                           <div className="adm-cut">
                             약 <b>{ev.cutGrade}등급</b>
                             {/* 컷 종류·집계 근거·신뢰도. 하나도 없으면 괄호 자체를 생략한다. */}
@@ -606,8 +645,21 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
                               이 대학은 등급별 환산점수만 공개했어요. 검정고시 평균을 등급으로 바꾸는 구간은 표준 추정이라, 등급 판정은 참고값이에요.
                             </div>
                           )}
+                          {/* 최신 학년도 자료가 없어 이전 학년도를 쓴 경우 — 연도를 감추지 않는다 */}
+                          {ev.cutlineIsFallbackYear && (
+                            <div className="adm-disclaimer">{cutlineFallbackNotice(ev.cutlineYear)}</div>
+                          )}
+                          {/* 두 해가 크게 다르면 두 해를 나란히 알린다.
+                              집계 학과 수가 너무 달라 견줄 수 없는 경우도 그 사실을 그대로 말한다. */}
+                          {cutlineVolatilityNotice(ev.cutlineVolatility) && (
+                            <div className="adm-disclaimer">
+                              {cutlineVolatilityNotice(ev.cutlineVolatility)}
+                            </div>
+                          )}
                           <div className="adm-disclaimer">{CUTLINE_SCALE_NOTICE}</div>
-                          <p className="adm-src">출처: {CUTLINE_SOURCE_LABEL}</p>
+                          <p className="adm-src">
+                            출처: 대교협 어디가 {ev.cutlineYear ?? CUTLINE_YEAR}학년도 전형결과
+                          </p>
                         </div>
                       ) : (
                         <div className="adm-block adm-block-empty">

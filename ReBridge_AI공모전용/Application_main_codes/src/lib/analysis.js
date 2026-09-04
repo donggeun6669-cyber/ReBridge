@@ -9,10 +9,11 @@
 //   · 2028 (admissions.json) — 대학입학전형 시행계획. 구조 정보는 풍부하지만 학년도가 다르다.
 //     2027 자료가 없는 대학(156개, 전문대 138 포함)만 여기로 폴백한다.
 // 모든 전형 행에는 어느 쪽에서 왔는지 dataYear(2027|2028)를 붙여 화면이 구분해 표시한다.
-import universities from '../data/universities.json';
+import universities from './universityList.js';
 import admissions from '../data/admissions.json';
 import admissions2027 from '../data/admissions_2027.min.json';
 import cutlines from '../data/cutlines_2026.json';
+import cutlinesPrev from '../data/cutlines_2025.json';
 import comparative from '../data/comparative_2027.json';
 import { evaluateAdmission, admissionChance, gedSubjectCount } from './scoreEngine.js';
 import { ADMISSION_DATA_YEAR, PLAN_YEAR } from '../data/meta.js';
@@ -237,7 +238,11 @@ export function getExploreList() {
 
     const comp = comparative[u.univId] || null;
     const comparativeType = comparativeTypeOf(comp);
+    // 합격선은 두 학년도 중 한 곳에라도 수시 값이 있으면 '있다'고 본다.
+    // 최신 연도에만 없다고 자료 없음으로 적으면, 실제로 있는 근거를 감추게 된다.
     const cut = cutlines[u.univId] || null;
+    const cutPrev = cutlinesPrev[u.univId] || null;
+    const hasCut = hasSusiCutline(cut) || hasSusiCutline(cutPrev);
 
     out.push({
       univId: u.univId,
@@ -250,10 +255,10 @@ export function getExploreList() {
       dataYear: picked.dataYear,
       is2027: picked.is2027,
       comparativeType,
-      hasCutline: hasSusiCutline(cut),
+      hasCutline: hasCut,
       // 데이터 충실도 점수(둘러보기 정렬용): 합격선·환산표·전형수
       dataScore:
-        (hasSusiCutline(cut) ? 3 : 0) +
+        (hasCut ? 3 : 0) +
         (comparativeType === 'numeric' ? 3 : comparativeType === 'prose' ? 1 : 0) +
         Math.min(eligible.length, 5),
       // 프로필 점수 비교용(best 전형)
@@ -300,7 +305,14 @@ function makeResultItem(u, best, rows, profile, comp) {
     eligibleCount: rows.length,
     confirmed: isConfirmedStatus(best.status),
     baseline,                            // 대교협 기본사항 템플릿 행인지
-    hasCutline: hasSusiCutline(cutlines[u.univId] || null),
+    hasCutline:
+      hasSusiCutline(cutlines[u.univId] || null) ||
+      hasSusiCutline(cutlinesPrev[u.univId] || null),
+    // 이 칸수가 어느 학년도 합격선으로 나온 것인지. 화면은 이걸 반드시 표시한다.
+    cutlineYear: ev.cutlineYear ?? null,
+    cutlineIsFallbackYear: ev.cutlineIsFallbackYear ?? false,
+    // 두 해가 크게 다르면 화면이 둘 다 보여준다 (null이면 비교할 자료가 없다는 뜻)
+    cutlineVolatility: ev.cutlineVolatility ?? null,
     hasScore: ev.hasScore,               // 검정고시 점수를 입력했는지
     conversionMethod: ev.conversionMethod, // 'standard'면 추정표(공식 환산표 아님)
     conversionEstimated: ev.conversionEstimated, // 추정표이거나 등급 구간이 추정이면 true

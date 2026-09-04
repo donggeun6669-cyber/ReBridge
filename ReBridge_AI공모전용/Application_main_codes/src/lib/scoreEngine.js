@@ -8,9 +8,24 @@
 //   3) cutGradeAvg·cutScoreAvg 는 항상 null 이다. 어디가 원천에 '평균' 컷이 없어서 일부러 비웠다.
 //      → 실제로 쓰이는 값은 cutGrade70 / cutScore70 이고 화면의 컷 종류 라벨은 항상 '70%컷'이다.
 //        50%컷은 byType['50%컷'], 정시 백분위는 byType['백분위70%'] 에 있다.
-// cutlines_2025.json은 근거로 남겨두지만 앱은 읽지 않는다(연도가 섞이면 안 되므로 폴백도 없다).
+//
+// ⚠️ 합격선은 두 학년도를 함께 쓴다 — 다만 '섞지는' 않는다.
+//   한 해 값만 보면 그 해의 우연(경쟁률·모집인원 변동)에 판정이 휘둘린다.
+//   실제로 2025·2026이 모두 있는 142개(대학×전형) 조합을 비교해보면 차이 중앙값은
+//   0.26등급으로 대체로 안정적이지만, 12%(17개)는 1등급 넘게 벌어지고 최대 3.69등급까지
+//   차이가 난다. 1등급 차이는 합불을 가르는 크기다.
+//   그래서
+//     · 판정(칸수·verdict)의 기준은 항상 한 학년도다. 두 해를 평균내지 않는다.
+//       평균을 내면 그 값이 어느 해 것도 아닌 숫자가 되어 출처를 댈 수 없다.
+//     · 대신 두 해가 얼마나 다른지(volatility)를 함께 실어 보낸다.
+//       변동이 크면 화면이 두 해를 나란히 보여주고 해마다 출렁인다고 알린다.
+//     · 최신 연도에 값이 없고 이전 연도에만 있으면 그 값을 쓰되, cutlineYear를 그 연도로
+//       바꿔 어느 해 자료인지 반드시 드러낸다. 연도를 감춘 폴백은 하지 않는다.
+//   cutlines_2025.json은 2026과 달리 meta 키가 없고 출처가 src.files/src.pages 형식이다.
 import cutlines from '../data/cutlines_2026.json';
-import { CUTLINE_YEAR } from '../data/meta.js';
+import cutlinesPrev from '../data/cutlines_2025.json';
+import gedFreshmen from '../data/ged_freshmen.json';
+import { CUTLINE_YEAR, CUTLINE_PREV_YEAR } from '../data/meta.js';
 import comparative from '../data/comparative_2027.json';
 
 // 검정고시(고졸) 핵심 과목
@@ -153,19 +168,166 @@ export function gedSubjectCount(gedScores) {
 // 합격선 파일의 최상위 meta 키 — 대학이 아니므로 조회·순회에서 항상 뺀다.
 export const CUTLINE_META = cutlines.meta || null;
 
-// (univId, admissionType) 합격선 조회
+// (univId, admissionType) 합격선 조회 — 한 학년도만.
 // 어디가는 학생부교과·학생부종합·수능위주 3갈래만 공개한다.
 // 논술·실기 전형에 값이 없는 건 누락이 아니라 원천에 없는 것이다 → null이 정상.
-export function getCutline(univId, admissionType) {
+export function getCutline(univId, admissionType, year = CUTLINE_YEAR) {
   if (!univId || univId === 'meta') return null;
-  const u = cutlines[univId];
+  const src = year === CUTLINE_PREV_YEAR ? cutlinesPrev : cutlines;
+  const u = src[univId];
   if (!u) return null;
   return u[admissionType] || null;
 }
 
+// 이 합격선 블록에 쓸 수 있는 값이 하나라도 있는가
+function hasCutValue(cut) {
+  return !!cut && (
+    cut.cutGradeAvg != null || cut.cutGrade70 != null ||
+    cut.cutScoreAvg != null || cut.cutScore70 != null
+  );
+}
+
+// 두 해 차이를 어느 정도부터 '알려야 할 변동'으로 볼 것인가 (등급 절대차)
+//   1등급은 합불을 가르는 크기라 high, 0.5는 칸수 하나가 흔들리는 크기라 medium.
+export const CUTLINE_VOLATILITY_HIGH = 1.0;
+export const CUTLINE_VOLATILITY_MEDIUM = 0.5;
+
+// ⚠️ 변동을 말하기 전에 '두 해를 비교해도 되는 자료인가'부터 따진다.
+//   두 해의 집계 학과 수(n)가 크게 다르면, 값의 차이는 합격선이 움직인 게 아니라
+//   무엇을 집계했는지가 달라서 생긴 것이다. 실제로 걸러보면 이런 사례가 많다.
+//     · 동아대 학생부종합 2025는 학과 1개(1.86등급), 2026은 135개(4.6등급)
+//     · 건양대 학생부교과 2025는 학과 2개, 2026은 82개
+//   이걸 "합격선이 2.7등급 올랐다"고 보여주면 사실이 아닌 말을 하는 것이다.
+//   그래서 두 해 모두 학과 5개 이상이고, 적은 쪽이 많은 쪽의 1/3 이상일 때만 비교한다.
+//   이 조건으로 148쌍 중 30쌍이 '비교 불가'로 빠지고, 남은 118쌍의 차이 중앙값은
+//   0.20등급으로 안정적이며 1등급 이상 벌어지는 건 8쌍이다.
+export const CUTLINE_COMPARE_MIN_N = 5;
+export const CUTLINE_COMPARE_MIN_RATIO = 1 / 3;
+
+/**
+ * 두 학년도 합격선을 함께 조회한다.
+ *
+ * 판정에 쓸 한 해(primary)를 고르고, 나머지 해는 비교용으로 붙여서 돌려준다.
+ * 두 해를 평균내지 않는다 — 어느 해 것도 아닌 숫자가 되어 출처를 댈 수 없기 때문이다.
+ *
+ * @returns {{
+ *   cut: object|null,        판정에 쓸 합격선 (없으면 null)
+ *   year: number|null,       그 합격선이 어느 학년도 것인가 — 화면에 반드시 표시할 것
+ *   prev: object|null,       비교용 다른 학년도 합격선
+ *   prevYear: number|null,
+ *   isFallbackYear: boolean, 최신 연도가 없어 이전 연도를 쓴 경우 true
+ *   volatility: null | {     두 해 등급 컷이 모두 있을 때만 계산된다
+ *     level: 'high'|'medium'|'low',
+ *     gradeDiff: number,     |최신 - 이전| (등급)
+ *     harder: 'recent'|'prev'|'same',  어느 해가 더 높은 성적을 요구했나
+ *     recentGrade: number, prevGrade: number,
+ *   }
+ * }}
+ */
+export function getCutlineWithHistory(univId, admissionType) {
+  const recent = getCutline(univId, admissionType, CUTLINE_YEAR);
+  const prev = getCutline(univId, admissionType, CUTLINE_PREV_YEAR);
+  const hasRecent = hasCutValue(recent);
+  const hasPrev = hasCutValue(prev);
+
+  if (!hasRecent && !hasPrev) {
+    return { cut: null, year: null, prev: null, prevYear: null, isFallbackYear: false, volatility: null };
+  }
+
+  // 최신 연도를 기준으로 삼는다. 없을 때만 이전 연도로 내려가되 연도를 바꿔 표시한다.
+  const useRecent = hasRecent;
+  const cut = useRecent ? recent : prev;
+  const year = useRecent ? CUTLINE_YEAR : CUTLINE_PREV_YEAR;
+  const other = useRecent ? (hasPrev ? prev : null) : null;
+  const otherYear = other ? CUTLINE_PREV_YEAR : null;
+
+  // 변동 판정은 등급 컷으로만 한다.
+  // 점수 컷은 대학이 환산식을 바꾸면 스케일 자체가 달라져서 두 해를 빼는 게 무의미하다.
+  let volatility = null;
+  if (hasRecent && hasPrev) {
+    const g1 = recent.cutGradeAvg ?? recent.cutGrade70 ?? null;
+    const g0 = prev.cutGradeAvg ?? prev.cutGrade70 ?? null;
+    if (g1 != null && g0 != null) {
+      const n1 = recent.n ?? 0;
+      const n0 = prev.n ?? 0;
+      const enough = n1 >= CUTLINE_COMPARE_MIN_N && n0 >= CUTLINE_COMPARE_MIN_N;
+      const balanced =
+        Math.max(n1, n0) > 0 &&
+        Math.min(n1, n0) / Math.max(n1, n0) >= CUTLINE_COMPARE_MIN_RATIO;
+      const diff = Math.round(Math.abs(g1 - g0) * 100) / 100;
+      const common = {
+        gradeDiff: diff,
+        // 등급은 숫자가 작을수록 높은 성적이다.
+        harder: g1 < g0 ? 'recent' : g1 > g0 ? 'prev' : 'same',
+        recentGrade: g1, prevGrade: g0,
+        recentN: n1, prevN: n0,
+      };
+      volatility = (enough && balanced)
+        ? {
+            ...common,
+            level: diff >= CUTLINE_VOLATILITY_HIGH ? 'high'
+                 : diff >= CUTLINE_VOLATILITY_MEDIUM ? 'medium' : 'low',
+            comparable: true,
+          }
+        : {
+            // 두 해 값이 다 있어도 비교할 수 없는 경우다. 차이를 '변동'이라고 말하지 않는다.
+            ...common,
+            level: 'incomparable',
+            comparable: false,
+            reason: !enough ? 'sample_too_small' : 'sample_mismatch',
+          };
+    }
+  }
+
+  return { cut, year, prev: other, prevYear: otherYear, isFallbackYear: !useRecent, volatility };
+}
+
 // 합격선 값이 하나라도 있는 대학 목록(진단·커버리지 확인용)
+// 두 해 중 한 곳에라도 있으면 포함한다.
 export function cutlineUnivIds() {
-  return Object.keys(cutlines).filter((k) => k !== 'meta');
+  const ids = new Set(Object.keys(cutlines).filter((k) => k !== 'meta'));
+  for (const k of Object.keys(cutlinesPrev)) if (k !== 'meta') ids.add(k);
+  return [...ids];
+}
+
+// ── 검정고시 출신 신입생 통계 (대학알리미 공시) ────────────────────────
+// "이 대학에 검정고시로 들어간 사람이 실제로 있나?"에 답하는 유일한 공식 자료다.
+// 합격선과 달리 추정이 섞이지 않은 실측값이라, 자료가 있으면 그대로 보여준다.
+
+/** univId의 검정고시 신입생 통계. 없으면 null. */
+export function getGedFreshmen(univId) {
+  if (!univId || univId === 'meta') return null;
+  return gedFreshmen[univId] || null;
+}
+
+/** 전국 집계 — "전국 평균 대비 이 대학"을 말할 때 쓴다. */
+export const GED_FRESHMEN_META = gedFreshmen.meta || null;
+
+/**
+ * 이 대학이 전국 평균보다 검정고시생을 많이 받는가.
+ * @returns {null | { ratio, nationalRatio, times, level: 'high'|'mid'|'low', year, ged, total }}
+ *   times = 전국 평균 대비 배수. level은 화면 강조용 구간.
+ */
+export function gedFreshmenStanding(univId) {
+  const it = getGedFreshmen(univId);
+  const latest = it?.latest;
+  if (!latest || latest.ratio == null) return null;
+
+  const nat = GED_FRESHMEN_META?.national?.byYear?.[String(latest.year)] ?? null;
+  const nationalRatio = nat?.ratio ?? null;
+  const times = nationalRatio ? Math.round((latest.ratio / nationalRatio) * 10) / 10 : null;
+
+  return {
+    year: latest.year,
+    ged: latest.ged,
+    total: latest.total,
+    ratio: latest.ratio,
+    nationalRatio,
+    times,
+    trend: it.trend || null,
+    // 전국 평균의 1.5배 이상이면 검정고시생이 많이 가는 곳, 0.5배 미만이면 드문 곳.
+    level: times == null ? null : times >= 1.5 ? 'high' : times < 0.5 ? 'low' : 'mid',
+  };
 }
 
 // univId 대표 비교내신 환산 정보
@@ -525,18 +687,22 @@ export function evaluateAdmission(profile, adm) {
     };
   }
 
-  const cut = getCutline(adm.univId, adm.admissionType);
-  const hasAnyCutline =
-    cut && (
-      cut.cutGradeAvg != null || cut.cutGrade70 != null ||
-      cut.cutScoreAvg != null || cut.cutScore70 != null
-    );
+  // 두 학년도를 함께 조회한다. 판정은 한 해 기준이고, 나머지 해는 화면에 같이 실어 보낸다.
+  const hist = getCutlineWithHistory(adm.univId, adm.admissionType);
+  const cut = hist.cut;
+  const hasAnyCutline = hasCutValue(cut);
+  // 화면이 "어느 해 자료인지" 항상 말할 수 있도록 판정 결과에 연도를 붙여 나간다.
+  base.cutlineYear = hist.year;
+  base.cutlineIsFallbackYear = hist.isFallbackYear;
+  base.cutlinePrev = hist.prev;
+  base.cutlinePrevYear = hist.prevYear;
+  base.cutlineVolatility = hist.volatility;
   if (!hasAnyCutline) {
     return {
       ...base,
       applicable: false,
       dataGap: 'cutline',
-      reason: `이 전형의 ${CUTLINE_YEAR}학년도 합격선은 공개된 자료에 없어요. 검정고시 입결을 따로 공개하지 않는 대학이 많아, 지금은 구하기 어려운 정보예요.`,
+      reason: `이 전형은 ${CUTLINE_PREV_YEAR}·${CUTLINE_YEAR}학년도 모두 공개된 합격선 자료가 없어요. 검정고시 입결을 따로 공개하지 않는 대학이 많아, 지금은 구하기 어려운 정보예요.`,
     };
   }
 
@@ -553,7 +719,7 @@ export function evaluateAdmission(profile, adm) {
       cutGrade, cutScore, cutGradeType, cutScoreType,
       cutN: cut.n,
       cutConfidence: cut.confidence,
-      reason: `검정고시 과목 점수를 입력하면 ${CUTLINE_YEAR}학년도 합격선과 비교해드릴게요.`,
+      reason: `검정고시 과목 점수를 입력하면 ${hist.year}학년도 합격선과 비교해드릴게요.`,
     };
   }
 
@@ -681,9 +847,12 @@ export function coachLine(ev) {
 
   const label = ev.verdict?.label || '';
   // 합격선 표기 — 점수 기준으로 비교했으면 환산점수로, 등급 기준이면 등급으로
+  // 연도는 ev.cutlineYear — 최신 자료가 없어 이전 학년도를 쓴 전형이 있어서,
+  // 고정 연도로 쓰면 다른 해 값을 다른 해 이름으로 말하게 된다.
+  const cy = ev.cutlineYear ?? CUTLINE_YEAR;
   const cutText = ev.comparisonBasis === 'score' && ev.cutScore != null
-    ? `${CUTLINE_YEAR}학년도 합격선(환산 ${ev.cutScore}점)`
-    : `${CUTLINE_YEAR}학년도 합격선(약 ${ev.cutGrade}등급)`;
+    ? `${cy}학년도 합격선(환산 ${ev.cutScore}점)`
+    : `${cy}학년도 합격선(약 ${ev.cutGrade}등급)`;
 
   // ① 만점을 받아도 못 닿는 경우
   if (ev.reachable === false) {

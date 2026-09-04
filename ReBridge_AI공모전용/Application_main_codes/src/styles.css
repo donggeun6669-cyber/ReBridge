@@ -5014,3 +5014,26 @@ button {
 
 /* 탐색 카드의 학년도 표시 — uni-sub가 nowrap이라 줄을 따로 뺀다 */
 .uni-year { display: block; margin-top: 5px; }
+
+/* 검정고시 출신 신입생 통계 (대학알리미 공시 실측값) — 서연 디자인 전 임시 스타일 */
+.ged-freshmen {
+  margin: 4px 0 12px;
+  padding: 12px 13px;
+  border-radius: var(--r-sm);
+  background: var(--surface-2, #f6f7f9);
+}
+.ged-freshmen-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}
+.ged-freshmen-head svg { flex-shrink: 0; }
+.ged-freshmen-year {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--text-sub);
+}
+.ged-freshmen-main { margin-top: 6px; font-size: 13px; line-height: 1.55; }
+.ged-freshmen-sub { margin-top: 3px; font-size: 12px; line-height: 1.55; color: var(--text-sub); }
+.ged-freshmen-src { margin-top: 6px; font-size: 11px; line-height: 1.5; color: var(--text-sub); }

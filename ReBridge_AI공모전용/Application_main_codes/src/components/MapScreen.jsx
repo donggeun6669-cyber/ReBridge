@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowLeft, ChevronRight, MapPin, X } from 'lucide-react';
-import universities from '../data/universities.json';
+import universities from '../lib/universityList.js';
 import { getExploreList } from '../lib/analysis.js';
 import { useKakaoMap, MAP_ENABLED } from '../lib/kakaoMap.js';
 
