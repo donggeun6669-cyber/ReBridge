@@ -1,6 +1,6 @@
 import { useMemo, useState, useCallback, useRef, useEffect } from 'react';
 import {
-  CUTLINE_YEAR, CUTLINE_SOURCE_LABEL,
+  CUTLINE_YEAR, CUTLINE_SOURCE_LABEL, CUTLINE_SOURCE_LABEL_ALL,
   ADMISSION_DATA_YEAR, PLAN_YEAR, GED_2027_SOURCE_LABEL,
   ADMISSION_DATA_UNIV_COUNT, applyDeadline,
 } from '../data/meta.js';
@@ -527,7 +527,7 @@ export default function ResultsScreen({ goTo = () => {}, goBack = () => {} }) {
           />
           <p className="note" style={{ marginTop: 16 }}>
             {yearNotice}
-            <br />합격 가능성 예측은 일반학생 입결 기반 참고값이에요({CUTLINE_SOURCE_LABEL}).
+            <br />합격 가능성 예측은 일반학생 입결 기반 참고값이에요({CUTLINE_SOURCE_LABEL_ALL}).
             <br />'추정' 표시는 대학이 검정고시 환산표를 공개하지 않아, 공개된 다른 대학 표의 중앙값으로 계산한 경우예요.
             <br />'대학 미확인 · 일반 안내'는 대교협 기본사항 기준 안내라 대학 시행계획 확인이 필요해요.
           </p>

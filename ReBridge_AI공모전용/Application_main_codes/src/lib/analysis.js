@@ -12,10 +12,16 @@
 import universities from './universityList.js';
 import admissions from '../data/admissions.json';
 import admissions2027 from '../data/admissions_2027.min.json';
-import cutlines from '../data/cutlines_2026.json';
-import cutlinesPrev from '../data/cutlines_2025.json';
+import cutlines4y from '../data/cutlines_2026.json';
+import cutlines4yPrev from '../data/cutlines_2025.json';
+import cutlinesCollege from '../data/cutlines_college_2026.json';
+import cutlinesCollegePrev from '../data/cutlines_college_2025.json';
 import comparative from '../data/comparative_2027.json';
 import { evaluateAdmission, admissionChance, gedSubjectCount } from './scoreEngine.js';
+
+// 4년제·전문대는 원천이 다르지만 univId가 겹치지 않는다 (scoreEngine 머리말 참조).
+const cutlines = { ...cutlines4y, ...cutlinesCollege };
+const cutlinesPrev = { ...cutlines4yPrev, ...cutlinesCollegePrev };
 import { ADMISSION_DATA_YEAR, PLAN_YEAR } from '../data/meta.js';
 // 상위권 제외 목록(src/data/topTierExclude.js)은 남겨두되 여기서는 쓰지 않는다.
 // 목록에서 통째로 빼면 "왜 이 대학이 안 보이지?"가 되기 때문에, 목록에는 넣고

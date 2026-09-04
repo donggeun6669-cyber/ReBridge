@@ -22,10 +22,24 @@
 //     · 최신 연도에 값이 없고 이전 연도에만 있으면 그 값을 쓰되, cutlineYear를 그 연도로
 //       바꿔 어느 해 자료인지 반드시 드러낸다. 연도를 감춘 폴백은 하지 않는다.
 //   cutlines_2025.json은 2026과 달리 meta 키가 없고 출처가 src.files/src.pages 형식이다.
-import cutlines from '../data/cutlines_2026.json';
-import cutlinesPrev from '../data/cutlines_2025.json';
+import cutlines4y from '../data/cutlines_2026.json';
+import cutlines4yPrev from '../data/cutlines_2025.json';
+import cutlinesCollege from '../data/cutlines_college_2026.json';
+import cutlinesCollegePrev from '../data/cutlines_college_2025.json';
 import gedFreshmen from '../data/ged_freshmen.json';
 import { CUTLINE_YEAR, CUTLINE_PREV_YEAR } from '../data/meta.js';
+
+// 4년제(대교협 어디가)와 전문대(전문대교협)는 원천도 컷 종류도 다르지만,
+// univId가 겹치지 않아 한 대학은 언제나 한쪽에만 있다. 조회할 때 합쳐서 본다.
+//   · 4년제  : cutGrade70 (70%컷). 원천에 평균이 없어 cutGradeAvg는 늘 null이다.
+//   · 전문대 : cutGradeAvg (합격자 평균) + cutGradeLowest (합격자 최저).
+//              70%컷·환산점수가 원천에 없어 그쪽은 늘 null이다.
+// 화면은 cutGradeType('평균'/'70%컷')으로 무엇을 보고 있는지 구분해 말한다.
+const cutlines = { ...cutlines4y, ...cutlinesCollege };
+const cutlinesPrev = { ...cutlines4yPrev, ...cutlinesCollegePrev };
+// meta는 두 파일이 각각 갖고 있어 합치면 뒤엣것으로 덮인다. 조회에서 meta는 늘 건너뛰므로
+// 값 자체는 쓰이지 않지만, 출처를 물을 때를 대비해 원본을 따로 남겨 둔다.
+export const CUTLINE_META_COLLEGE = cutlinesCollege.meta || null;
 import comparative from '../data/comparative_2027.json';
 
 // 검정고시(고졸) 핵심 과목
@@ -166,7 +180,7 @@ export function gedSubjectCount(gedScores) {
 }
 
 // 합격선 파일의 최상위 meta 키 — 대학이 아니므로 조회·순회에서 항상 뺀다.
-export const CUTLINE_META = cutlines.meta || null;
+export const CUTLINE_META = cutlines4y.meta || null;
 
 // (univId, admissionType) 합격선 조회 — 한 학년도만.
 // 어디가는 학생부교과·학생부종합·수능위주 3갈래만 공개한다.
@@ -697,6 +711,9 @@ export function evaluateAdmission(profile, adm) {
   base.cutlinePrev = hist.prev;
   base.cutlinePrevYear = hist.prevYear;
   base.cutlineVolatility = hist.volatility;
+  // 전문대 원천에만 있는 '합격자 최저 등급'. "이 등급까지도 붙었다"는 뜻이라
+  // 평균보다 실제 지원 판단에 쓸모가 크다. 4년제에는 없어 null이다.
+  base.cutGradeLowest = cut?.cutGradeLowest ?? null;
   if (!hasAnyCutline) {
     return {
       ...base,

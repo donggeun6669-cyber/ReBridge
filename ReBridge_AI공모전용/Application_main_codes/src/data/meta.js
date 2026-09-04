@@ -41,6 +41,14 @@ export const CUTLINE_GRADE_SCALE = 9;
 // 합격선 출처 — 어디가는 학생부교과·학생부종합·수능위주 3갈래만 공개한다.
 // 논술·실기 전형에 합격선이 없는 건 누락이 아니라 원천에 없는 것이다.
 export const CUTLINE_SOURCE_LABEL = `대교협 어디가 ${CUTLINE_YEAR}학년도 전형결과`;
+
+// 전문대는 자료를 낸 곳이 다르다 — 공공누리가 아니고 무단 복제·배포가 금지돼 있어
+// 학과 단위 원본은 싣지 않고 대학×전형 집계값만 쓴다. 출처는 반드시 함께 밝힌다.
+export const CUTLINE_SOURCE_LABEL_COLLEGE =
+  `전문대교협 전문대학포털 ${CUTLINE_YEAR}학년도 전형결과`;
+// 4년제·전문대가 한 목록에 섞여 나오는 화면(결과·둘러보기)에서 쓰는 합친 표기
+export const CUTLINE_SOURCE_LABEL_ALL =
+  `${CUTLINE_SOURCE_LABEL} · 전문대는 전문대교협 전문대학포털`;
 export const CUTLINE_TYPE_COVERAGE = ['학생부교과', '학생부종합', '수능위주'];
 export const CUTLINE_TYPE_NOTICE =
   `${CUTLINE_SOURCE_LABEL}는 학생부교과·학생부종합·수능위주 3개 유형만 공개해요. ` +

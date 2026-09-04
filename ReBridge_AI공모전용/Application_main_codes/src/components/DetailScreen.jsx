@@ -324,6 +324,8 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
   const compType = comp?.comparativeGradeType === 'numeric_table' ? 'numeric' : comp ? 'prose' : 'none';
   // 검정고시 출신 신입생 실측 통계(대학알리미). 자료 없는 대학은 null.
   const gedStanding = gedFreshmenStanding(realUnivId);
+  // 합격선 출처가 4년제(대교협)냐 전문대(전문대교협)냐를 가른다.
+  const isCollege = univ.kind === '전문대학';
   const calcBasis = hasScore ? conversionBasis(profile, comp) : null;
 
   // 각 가능 전형 평가
@@ -607,6 +609,15 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
                               );
                             })()}
                           </div>
+                          {/* 합격자 최저 등급 — 전문대 자료에만 있다.
+                              평균은 "보통 이 정도로 붙는다"이고, 최저는 "이 등급까지도 붙었다"라
+                              지원을 망설이는 사람에게는 이쪽이 더 중요한 정보다. */}
+                          {ev.cutGradeLowest != null && (
+                            <div className="adm-cut-lowest">
+                              합격자 중 가장 낮은 등급은 <b>{ev.cutGradeLowest}등급</b>이었어요
+                              {ev.cutGrade != null && ' (평균은 위 숫자예요)'}.
+                            </div>
+                          )}
                           {/* 몇 점 맞아야 하는지 글로 풀어주기 —
                               판정 문구는 반드시 ev.verdict와 같은 기준으로만 말한다.
                               (예전엔 평균만 비교해서 verdict가 '도전'인데 "충분해요"라고 하는 모순이 있었다) */}
@@ -657,8 +668,10 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
                             </div>
                           )}
                           <div className="adm-disclaimer">{CUTLINE_SCALE_NOTICE}</div>
+                          {/* 4년제와 전문대는 자료를 낸 곳이 다르다. 출처를 뭉뚱그리지 않는다. */}
                           <p className="adm-src">
-                            출처: 대교협 어디가 {ev.cutlineYear ?? CUTLINE_YEAR}학년도 전형결과
+                            출처: {isCollege ? '전문대교협 전문대학포털' : '대교협 어디가'}{' '}
+                            {ev.cutlineYear ?? CUTLINE_YEAR}학년도 전형결과
                           </p>
                         </div>
                       ) : (
@@ -884,7 +897,10 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
         <br />
         {PLAN_BASIS_NOTICE}
         <br />
-        합격선·비교내신은 <b>{CUTLINE_LABEL} 자료 참고용</b>이에요 (출처: {CUTLINE_SOURCE_LABEL}).
+        합격선·비교내신은 <b>{CUTLINE_LABEL} 자료 참고용</b>이에요 (출처:{' '}
+        {isCollege
+          ? '전문대교협 전문대학포털 전년도 입시결과'
+          : CUTLINE_SOURCE_LABEL}).
       </p>
     </div>
   );

@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect } from 'react';
 import {
-  CUTLINE_YEAR, CUTLINE_SOURCE_LABEL,
+  CUTLINE_YEAR, CUTLINE_SOURCE_LABEL_ALL,
   PLAN_YEAR, GED_2027_SOURCE_LABEL, ADMISSION_DATA_UNIV_COUNT,
 } from '../data/meta.js';
 import { Search, X, ChevronRight, SlidersHorizontal, Sparkles, Map as MapIcon, ArrowLeft, Target } from 'lucide-react';
@@ -283,7 +283,7 @@ export default function ExploreScreen({ goTo = () => {}, goBack = () => {}, canG
         {' '}이 자료에 없는 대학은 <b>{PLAN_YEAR}학년도 시행계획</b> 기준이라 카드에 학년도를 표시했어요.
         {' '}{PLAN_YEAR}학년도 전형 구조는 대학 상세에서 별도로 볼 수 있어요.
         <br />
-        합격선·비교내신은 <b>{CUTLINE_YEAR}학년도 자료 참고용</b>({CUTLINE_SOURCE_LABEL})이고, 실제는 모집요강을 확인해요.
+        합격선·비교내신은 <b>{CUTLINE_YEAR}학년도 자료 참고용</b>({CUTLINE_SOURCE_LABEL_ALL})이고, 실제는 모집요강을 확인해요.
       </p>
     </div>
   );

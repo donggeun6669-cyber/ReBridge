@@ -5037,3 +5037,12 @@ button {
 .ged-freshmen-main { margin-top: 6px; font-size: 13px; line-height: 1.55; }
 .ged-freshmen-sub { margin-top: 3px; font-size: 12px; line-height: 1.55; color: var(--text-sub); }
 .ged-freshmen-src { margin-top: 6px; font-size: 11px; line-height: 1.5; color: var(--text-sub); }
+
+/* 전문대 합격자 최저 등급 — "이 등급까지도 붙었다" (서연 디자인 전 임시) */
+.adm-cut-lowest {
+  margin-top: 4px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--text-sub);
+}
+.adm-cut-lowest b { color: var(--text); font-weight: 700; }
