@@ -1,7 +1,11 @@
 import { useMemo, useState, useCallback, useRef, useEffect } from 'react';
-import { CUTLINE_YEAR } from '../data/meta.js';
 import {
-  ArrowLeft, MapPin, Sparkles, Info,
+  CUTLINE_YEAR, CUTLINE_SOURCE_LABEL,
+  ADMISSION_DATA_YEAR, PLAN_YEAR, GED_2027_SOURCE_LABEL,
+  ADMISSION_DATA_UNIV_COUNT, applyDeadline,
+} from '../data/meta.js';
+import {
+  ArrowLeft, MapPin, Sparkles, Info, CalendarClock,
   ChevronRight, ChevronLeft, SlidersHorizontal, X,
 } from 'lucide-react';
 import { analyzeProfile, getEssayList } from '../lib/analysis.js';
@@ -67,8 +71,24 @@ const ROW_TAG_STYLE = {
   whiteSpace: 'nowrap',
 };
 
+// 행이 어느 학년도 자료에서 왔는지 — 두 학년도가 한 목록에 섞이므로 매 행에 밝힌다.
+function YearTag({ dataYear }) {
+  const is2027 = dataYear === ADMISSION_DATA_YEAR;
+  return (
+    <span
+      className={`year-tag${is2027 ? ' year-tag-now' : ''}`}
+      title={is2027
+        ? `${GED_2027_SOURCE_LABEL} 기준이에요.`
+        : `${GED_2027_SOURCE_LABEL}에 이 대학은 없어서(${ADMISSION_DATA_UNIV_COUNT}개 대학만 수록) ${PLAN_YEAR}학년도 시행계획으로 보여줘요.`}
+    >
+      {dataYear}학년도 기준
+    </span>
+  );
+}
+
 // 결과 행
-function ResultRow({ r, onClick, badge }) {
+function ResultRow({ r, onClick, badge, today }) {
+  const dl = applyDeadline(r.applyCloseDate, r.applyCloseTime, today);
   return (
     <button className="result-row" onClick={onClick}>
       <div className="result-row-body">
@@ -77,10 +97,18 @@ function ResultRow({ r, onClick, badge }) {
           <MapPin size={11} />
           {r.region}
           {r.kind === '전문대학' ? ' · 전문대학' : ''}
-          <span className="result-row-type">{r.bestType} · {r.bestName}</span>
+          <span className="result-row-type">{r.bestType || '전형유형 미상'} · {r.bestName}</span>
           {r.baseline && (
             <span style={ROW_TAG_STYLE} title="대교협 2028 기본사항의 일반 안내예요. 대학이 발표한 전형이 아니에요.">
               대학 미확인 · 일반 안내
+            </span>
+          )}
+        </div>
+        <div className="result-row-meta">
+          <YearTag dataYear={r.dataYear} />
+          {dl && !dl.past && (
+            <span className={`dday-badge dday-${dl.days <= 3 ? 'urgent' : dl.days <= 10 ? 'soon' : 'far'}`}>
+              <CalendarClock size={11} /> 접수 마감 {dl.label}
             </span>
           )}
         </div>
@@ -211,7 +239,7 @@ function Pagination({ page, totalPages, setPage }) {
 }
 
 // ── 결과 섹션 ──────────────────────────────────────────────────────────
-function ResultSection({ state, goTo, badgeFn, showChance = true }) {
+function ResultSection({ state, goTo, badgeFn, showChance = true, today }) {
   const [filterOpen, setFilterOpen] = useState(false);
   const topRef = useRef(null);
   const mountedRef = useRef(false);
@@ -293,6 +321,7 @@ function ResultSection({ state, goTo, badgeFn, showChance = true }) {
               {i > 0 && <div className="result-divider" />}
               <ResultRow
                 r={r}
+                today={today}
                 onClick={() => goTo('detail', { univ: r.name, univId: r.univId })}
                 badge={badgeFn(r)}
               />
@@ -309,9 +338,10 @@ function ResultSection({ state, goTo, badgeFn, showChance = true }) {
 // ── 논술 전형 카드 ──────────────────────────────────────────────────────
 const STAR_COLORS = { green: '#16a34a', brand: 'var(--brand)', gold: '#d97706' };
 
-function EssayCard({ item, goTo }) {
+function EssayCard({ item, goTo, today }) {
   const filled   = '★'.repeat(item.star);
   const empty    = '☆'.repeat(3 - item.star);
+  const dl = applyDeadline(item.applyCloseDate, item.applyCloseTime, today);
 
   const csatBadge =
     item.csatStatus === 'ok'      ? <span className="essay-csat-badge ok">수능 최저 충족</span>
@@ -335,6 +365,12 @@ function EssayCard({ item, goTo }) {
         </div>
         {item.desc && <div className="essay-card-desc">{item.desc}</div>}
         <div className="essay-card-foot">
+          <YearTag dataYear={item.dataYear} />
+          {dl && !dl.past && (
+            <span className={`dday-badge dday-${dl.days <= 3 ? 'urgent' : dl.days <= 10 ? 'soon' : 'far'}`}>
+              <CalendarClock size={11} /> 접수 마감 {dl.label}
+            </span>
+          )}
           {item.csatMinimum && !item.csatMinimum.includes('없음') && (
             <span className="essay-csat-text">{item.csatMinimum}</span>
           )}
@@ -343,6 +379,13 @@ function EssayCard({ item, goTo }) {
             <span className="essay-cond-badge">조건부</span>
           )}
         </div>
+        {/* 전형방법이 2027 자료에 없어 2028 시행계획에서 빌려 온 경우 반드시 밝힌다 */}
+        {item.methodYear === PLAN_YEAR && item.dataYear === ADMISSION_DATA_YEAR && (
+          <div className="essay-card-desc" style={{ opacity: .75 }}>
+            ※ 논술 비중·수능최저는 {PLAN_YEAR}학년도 시행계획 기준이에요
+            ({ADMISSION_DATA_YEAR}학년도 자료에는 전형방법이 없어요).
+          </div>
+        )}
       </div>
       <ChevronRight size={14} className="result-row-arrow" />
     </button>
@@ -384,6 +427,8 @@ export default function ResultsScreen({ goTo = () => {}, goBack = () => {} }) {
   const data = useMemo(() => (profile ? analyzeProfile(profile) : null), [profile]);
   const essayData = useMemo(() => (profile ? getEssayList(profile) : []), [profile]);
   const [tab, setTab] = useState('수시');
+  // D-day 기준 '오늘' — 렌더마다 새로 만들지 않는다
+  const today = useMemo(() => new Date(), []);
 
   const susiState    = useFilteredPaged(data?.susi?.results ?? []);
   const jeongsiState = useFilteredPaged(data?.jeongsi?.results ?? []);
@@ -408,6 +453,17 @@ export default function ResultsScreen({ goTo = () => {}, goBack = () => {} }) {
   const { susi, jeongsi } = data;
   const hasScore = !!data.hasScore;
   const summary = profileOneLiner(profile);
+  const yearMix = data.yearMix || { with2027: 0, without2027: 0 };
+
+  // 목록 하단 고지문 — 무엇이 어느 학년도 자료인지 밝힌다
+  const yearNotice = (
+    <>
+      지원 가능 여부는 <b>{GED_2027_SOURCE_LABEL}</b> 기준이에요
+      ({ADMISSION_DATA_UNIV_COUNT}개 대학 수록).
+      {' '}이 자료에 없는 대학은 <b>{PLAN_YEAR}학년도 시행계획</b>으로 보여주고 행에 표시했어요.
+      {' '}{PLAN_YEAR}학년도 전형 구조는 대학 상세에서 별도 섹션으로 따로 표시해요.
+    </>
+  );
 
   return (
     <div className="screen">
@@ -458,15 +514,20 @@ export default function ResultsScreen({ goTo = () => {}, goBack = () => {} }) {
           )}
           <div className="result-count">
             지원 가능한 대학 <b>{susi.total}곳</b>
+            <span className="result-exclude-hint">
+              · {ADMISSION_DATA_YEAR}학년도 기준 {yearMix.with2027}곳 / {PLAN_YEAR}학년도 기준 {yearMix.without2027}곳
+            </span>
           </div>
           <ResultSection
             state={susiState}
             goTo={goTo}
+            today={today}
             badgeFn={(r) => <SusiBadge r={r} hasScore={hasScore} />}
             showChance={hasScore}
           />
           <p className="note" style={{ marginTop: 16 }}>
-            합격 가능성 예측은 일반학생 입결 기반 참고값이에요.
+            {yearNotice}
+            <br />합격 가능성 예측은 일반학생 입결 기반 참고값이에요({CUTLINE_SOURCE_LABEL}).
             <br />'추정' 표시는 대학이 검정고시 환산표를 공개하지 않아, 공개된 다른 대학 표의 중앙값으로 계산한 경우예요.
             <br />'대학 미확인 · 일반 안내'는 대교협 기본사항 기준 안내라 대학 시행계획 확인이 필요해요.
           </p>
@@ -539,14 +600,16 @@ export default function ResultsScreen({ goTo = () => {}, goBack = () => {} }) {
           {essayState.filtered.length > 0 && (
             <div className="essay-list">
               {essayState.filtered.map((item) => (
-                <EssayCard key={`${item.univId}-${item.admissionName}`} item={item} goTo={goTo} />
+                <EssayCard key={`${item.univId}-${item.admissionName}`} item={item} goTo={goTo} today={today} />
               ))}
             </div>
           )}
 
           <p className="note" style={{ marginTop: 16 }}>
-            ★★★ 논술 100% 전형은 검정고시생에게 가장 유리해요.
+            {yearNotice}
+            <br />★★★ 논술 100% 전형은 검정고시생에게 가장 유리해요.
             <br />수능 최저 충족 여부는 프로필의 모의고사 등급 기준이에요.
+            <br />{CUTLINE_SOURCE_LABEL}는 논술 전형의 합격선을 공개하지 않아, 논술은 칸수 대신 전형 성격으로 안내해요.
           </p>
         </>
       )}
@@ -572,9 +635,11 @@ export default function ResultsScreen({ goTo = () => {}, goBack = () => {} }) {
               <ResultSection
                 state={jeongsiState}
                 goTo={goTo}
+                today={today}
                 badgeFn={() => <span className="fit-tag fit-ok">지원 가능</span>}
                 showChance={false}
               />
+              <p className="note" style={{ marginTop: 16 }}>{yearNotice}</p>
             </>
           )}
         </>

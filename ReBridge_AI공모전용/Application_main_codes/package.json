@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "dev:lan": "vite --host 0.0.0.0",
+    "data:2027": "node scripts/prepare2027.mjs",
     "build": "node node_modules/vite/bin/vite.js build",
     "preview": "vite preview",
     "deploy": "npx vercel --prod",

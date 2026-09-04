@@ -33,7 +33,14 @@ CREATE TABLE IF NOT EXISTS source_file (
   retrieved_at  TEXT,               -- YYYY-MM-DD
   note          TEXT,
   UNIQUE (kind, sha256)
-);
+  -- ⚠️ 2026-09-04 추가 (전문대 자료 적재 — ingest_college_results.py).
+  --    4년제 자료 대부분은 공공누리(대교협·교육부)라 재배포에 제약이 없었다.
+  --    전문대교협/프로칼리지(procollege.kr)는 공공누리 표시가 없고
+  --    저작권법상 무단 복제·배포 금지·상업적 이용 시 사전 협의가 필요하다(조사보고.md 참고).
+  --    이 차이를 소스 단위로 남겨야 나중에 "이 데이터 재배포해도 되나"를 매번 사람이
+  --    새로 조사하지 않는다. 값이 없으면(NULL) "아직 조사 안 함"이지 "공공누리"가 아니다.
+  --    이미 있는 DB에는 IF NOT EXISTS가 반영되지 않으므로 ensure_columns()가 ALTER TABLE로 붙인다.
+, license TEXT);
 
 
 -- ════════════════════════════════════════════════════════════════
@@ -86,6 +93,47 @@ CREATE TABLE IF NOT EXISTS admission (
 );
 
 CREATE INDEX IF NOT EXISTS ix_adm_univ_year ON admission(univ_id, year);
+
+-- ⚠️ 2026-09-03 — 위 UNIQUE는 phase/type이 NULL이면 중복을 못 막는다.
+-- SQLite는 NULL끼리 서로 다르다고 보기 때문이다(ged_conversion에서 겪은 것과 같은 함정).
+-- 두 가지로 막는다.
+--   ① 적재 스크립트는 NULL 대신 '미상'을 쓴다 (ingest_ged_2027.py 의 UNKNOWN).
+--   ② 그래도 NULL이 들어오면 아래 인덱스가 잡는다.
+-- '미상'은 "값이 없다"가 아니라 "원문으로는 못 가른다"는 뜻이다. 추정한 값이 아니다.
+CREATE UNIQUE INDEX IF NOT EXISTS ux_admission
+  ON admission (univ_id, year, COALESCE(phase, '~'), COALESCE(type, '~'),
+                COALESCE(name_key, '~'));
+
+-- 전형별 지원자격 **원문** (2026-09-03 추가 — ingest_ged_2027.py)
+--
+-- 왜 원문을 통째로 두나
+--   2027 대교협 「검정고시 출신자 지원 가능 전형」은 자격 문구 자체가 상품이다.
+--   요약하면 앱에서 "원문 보기"를 못 한다. 자르지 않고 그대로 보관한다.
+--   한 전형에 세부 지원자격이 여러 갈래인 경우가 흔하다(3,783행 → 전형 2,496건).
+--   그래서 seq로 여러 행을 받는다.
+CREATE TABLE IF NOT EXISTS admission_requirement (
+  admission_id  INTEGER NOT NULL REFERENCES admission(admission_id),
+  seq           INTEGER NOT NULL,
+  common_text   TEXT,               -- 공통 지원자격 원문
+  detail_text   TEXT,               -- 세부 지원자격 원문
+  extra_text    TEXT,               -- 기타(추가사항) 원문
+  source_id     INTEGER NOT NULL REFERENCES source_file(source_id),
+  page          INTEGER,
+  PRIMARY KEY (admission_id, seq)
+);
+
+-- 원서접수 마감 (2026-09-03 추가 — ingest_ged_2027.py)
+-- 대교협 일정표가 **대학 단위**로 고시한다. 전형 축이 아니다.
+CREATE TABLE IF NOT EXISTS admission_deadline (
+  univ_id       TEXT NOT NULL REFERENCES university(univ_id),
+  year          INTEGER NOT NULL,
+  phase         TEXT NOT NULL,      -- 수시 | 정시
+  close_date    TEXT,               -- YYYY-MM-DD (학년도 −1년 9월 = 수시 접수)
+  close_time    TEXT,               -- HH:MM
+  raw_label     TEXT,               -- 원문 표기 (예: '동국대(서울･고양)')
+  source_id     INTEGER NOT NULL REFERENCES source_file(source_id),
+  PRIMARY KEY (univ_id, year, phase)
+);
 
 -- 전형 × 모집단위 (모집인원·수능최저는 학과마다 다르다)
 CREATE TABLE IF NOT EXISTS admission_program (
@@ -171,15 +219,35 @@ CREATE TABLE IF NOT EXISTS ged_conversion (
   min_score     REAL,
   source_id     INTEGER NOT NULL REFERENCES source_file(source_id),
   page          INTEGER,
-  confidence    TEXT NOT NULL DEFAULT 'mid'
+  confidence    TEXT NOT NULL DEFAULT 'mid',
+  -- ⚠️ 2026-09-03 추가 (2027 모집요강 적재).
+  --    검정고시 비교내신 산출식은 **모집요강에만** 있다. 시행계획에는 없다.
+  --    모집요강에서 새로 나온 것들을 담기 위해 컬럼만 덧붙였다(기존 컬럼은 그대로).
+  grade_bands_json      TEXT,   -- ★ 평균점수 구간 → 등급. 앱에서 가장 중요하다.
+                                --   [{"grade":1,"raw":"100~97","lo":97,"hi":100,"kind":"range"} …]
+                                --   검정고시생이 가진 건 '평균점수'다. 이게 있어야 등급이 나온다.
+  score_bands_json      TEXT,   -- 등급 없이 '점수 구간 → 환산점수'만 있는 표
+  percentile_bands_json TEXT,   -- 석차백분율 구간(재학생용). 검정고시 계산에 쓰면 안 된다.
+  formula_text          TEXT,   -- 산식이 문장이면 그 원문(JSON 배열: page+text)
+  quote                 TEXT,   -- 표 원문 그대로. 사람이 검증할 때 이게 전부다
+  source_file           TEXT,   -- '{대학명}/susi.pdf'
+  table_label           TEXT,
+  validation            TEXT,   -- pass | fail
+  validation_note       TEXT,   -- 실패 사유(단조성·범위·등급 수·정렬)
+  kind                  TEXT    -- 구간표 | 환산표 | 구간표+환산표 | 구간→점수표 | 산문만
 );
 
 -- ⚠️ UNIQUE(univ_id, year, admission_id)로는 중복이 막히지 않는다.
 -- SQLite는 NULL끼리 서로 다르다고 보기 때문에, 대학 단위 환산표(admission_id IS NULL)가
 -- 얼마든지 중복 삽입된다(2026-09-02 실측: 188 + 84 = 272행으로 불어남).
 -- COALESCE로 NULL을 -1로 바꿔서 잡는다.
-CREATE UNIQUE INDEX IF NOT EXISTS ux_conversion
-  ON ged_conversion (univ_id, year, COALESCE(admission_id, -1));
+-- ⚠️ 2026-09-03 축 변경. 2027 모집요강은 **수시·정시가 따로** 온다
+-- (한 대학이 수시용 비교내신표와 정시용 비교내신표를 다르게 쓴다).
+-- 기존 ux_conversion 은 phase 를 안 봐서 둘째 행이 통째로 막혔다.
+-- 컬럼은 하나도 바꾸지 않고 유니크 축에 phase 만 더한다.
+DROP INDEX IF EXISTS ux_conversion;
+CREATE UNIQUE INDEX IF NOT EXISTS ux_conversion_v2
+  ON ged_conversion (univ_id, year, COALESCE(admission_id, -1), COALESCE(phase, ''));
 
 
 -- ════════════════════════════════════════════════════════════════
@@ -195,6 +263,7 @@ CREATE TABLE IF NOT EXISTS cutline (
   admission_type TEXT,
   admission_name TEXT,
   cut_type      TEXT NOT NULL,              -- 70%컷 | 80%컷 | 50%컷 | 평균 | 최종등록 | 최저
+                                            -- | 미제출 (값 없음. 경쟁률·모집인원만 있는 행)
   cut_grade     REAL,
   cut_score     REAL,
   recruit_count INTEGER,
@@ -203,12 +272,42 @@ CREATE TABLE IF NOT EXISTS cutline (
   source_id     INTEGER NOT NULL REFERENCES source_file(source_id),
   page          INTEGER,
   confidence    TEXT NOT NULL DEFAULT 'mid',
-  note          TEXT
+  note          TEXT,
+  -- ⚠️ 2026-09-03 추가 (어디가 CSV 적재분). 기존 컬럼은 하나도 손대지 않았다.
+  --    이미 만들어진 DB에는 CREATE TABLE IF NOT EXISTS가 반영되지 않으므로
+  --    parse_adiga_csv.ensure_columns()가 ALTER TABLE로 없는 것만 붙인다.
+  campus            TEXT,     -- 본교 | 제2캠퍼스 … (univ_id 하나에 캠퍼스가 여럿 접힌다)
+  recruit_initial   INTEGER,  -- 모집인원 최초(A)
+  recruit_carryover INTEGER,  -- 모집인원 이월(B)   ※ recruit_count = 최종(A+B)
+  fill_count        INTEGER,  -- 충원인원(명). fill_rate(율)와 다르다 — 원문 그대로 둔다
+  max_score         REAL,     -- 총점(만점). 환산점수가 몇 점 만점인지
+  pct_avg           REAL,     -- 정시 평균 백분위 (그 행의 cut_type이 가리키는 컷의 값)
+  csat_detail       TEXT,     -- 정시 영역별 백분위·등급 JSON (국어/수학/탐구/한국사/영어)
+  admission_subtype TEXT      -- 전형명에 논술·실기·면접이 보일 때만. 대분류는 바꾸지 않는다
 );
 
 CREATE INDEX IF NOT EXISTS ix_cut_univ_year ON cutline(univ_id, year);
 CREATE INDEX IF NOT EXISTS ix_cut_program   ON cutline(program_id);
 CREATE INDEX IF NOT EXISTS ix_cut_type      ON cutline(year, admission_type);
+
+
+-- ════════════════════════════════════════════════════════════════
+-- 대학알리미 '신입생의 출신 고등학교 유형별 현황' — 검정고시 출신 신입생 수
+-- ⚠️ 2026-09-03 신규 추가. v2/out/academyinfo/ged_freshmen_by_univ.jsonl(613행,
+--    캠퍼스 합산본) 적재용. 캠퍼스별 원본은 ged_freshmen.jsonl(729행)에 별도 있다 —
+--    이중계상 방지를 위해 이 테이블은 합산본만 담는다.
+-- ════════════════════════════════════════════════════════════════
+CREATE TABLE IF NOT EXISTS ged_freshmen (
+  ged_freshmen_id INTEGER PRIMARY KEY,
+  univ_id       TEXT NOT NULL REFERENCES university(univ_id),
+  year          INTEGER NOT NULL,
+  ged_count     INTEGER,            -- 검정고시 출신 신입생 수
+  total_count   INTEGER,            -- 총 신입생 수
+  ratio         REAL,               -- 검정고시 비율(%)
+  source_file   TEXT                -- 'academyinfo/4자_출신고교유형_{year}.xlsx'
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS ux_ged_freshmen ON ged_freshmen(univ_id, year);
 
 
 -- ════════════════════════════════════════════════════════════════

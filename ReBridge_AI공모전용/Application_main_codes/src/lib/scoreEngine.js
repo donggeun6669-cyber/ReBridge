@@ -1,9 +1,17 @@
 // 검정고시 점수 → 비교내신 환산(대학별 5케이스) → 합격선 비교(점수 우선, 등급 폴백)
 // 규칙 기반(AI 없음). 대학별 conversion 데이터가 없으면 표준 추정표로 폴백.
-// 입결(results)은 2025학년도(9등급제) 기준, 입시제도는 2028(5등급제)이므로 직접비교는 '참고용'.
-import cutlines from '../data/cutlines_2025.json';
+// 입결(results)은 2026학년도(9등급제) 기준, 입시제도는 2028(5등급제)이므로 직접비교는 '참고용'.
+//
+// ⚠️ cutlines_2026.json 주의점 (2025 파일과 다른 3가지)
+//   1) 최상위에 meta 키가 있다 — 대학을 순회할 때 반드시 건너뛴다.
+//   2) 출처가 src.files/src.pages 가 아니라 src.csv / src.url / src.publisher / src.retrievedAt 다.
+//   3) cutGradeAvg·cutScoreAvg 는 항상 null 이다. 어디가 원천에 '평균' 컷이 없어서 일부러 비웠다.
+//      → 실제로 쓰이는 값은 cutGrade70 / cutScore70 이고 화면의 컷 종류 라벨은 항상 '70%컷'이다.
+//        50%컷은 byType['50%컷'], 정시 백분위는 byType['백분위70%'] 에 있다.
+// cutlines_2025.json은 근거로 남겨두지만 앱은 읽지 않는다(연도가 섞이면 안 되므로 폴백도 없다).
+import cutlines from '../data/cutlines_2026.json';
 import { CUTLINE_YEAR } from '../data/meta.js';
-import comparative from '../data/comparative_2028.json';
+import comparative from '../data/comparative_2027.json';
 
 // 검정고시(고졸) 핵심 과목
 export const GED_SUBJECTS = ['국어', '수학', '영어', '사회', '과학', '한국사'];
@@ -25,7 +33,7 @@ export const POINTS_PER_QUESTION = 4;
 // 아래 값은 "실제 공개된 표"에서만 계산한 중앙값이다.
 //
 // 표본: 9등급 스케일로 '검정고시 평균 → 등급'을 확정할 수 있는 대학 6곳
-//   ① 직접 표(comparative_2028.json의 conversion.gradeTable, minAvg→grade)
+//   ① 직접 표(comparative_2027.json의 conversion.gradeTable, minAvg→grade)
 //      - uA0000079 강서대   : 100→2, 95→3, 90→4, 85→5, 80→6, 75→7, 65→8
 //      - uA0000209 호남신학대: 96→1, 92→2, 88→3, 84→4, 80→5, 76→6, 72→7, 66→8
 //   ② 합성 표(comparative의 '평균→환산점수' × data-pipeline
@@ -142,11 +150,22 @@ export function gedSubjectCount(gedScores) {
   return _filledSubjectKeys(gedScores).length;
 }
 
+// 합격선 파일의 최상위 meta 키 — 대학이 아니므로 조회·순회에서 항상 뺀다.
+export const CUTLINE_META = cutlines.meta || null;
+
 // (univId, admissionType) 합격선 조회
+// 어디가는 학생부교과·학생부종합·수능위주 3갈래만 공개한다.
+// 논술·실기 전형에 값이 없는 건 누락이 아니라 원천에 없는 것이다 → null이 정상.
 export function getCutline(univId, admissionType) {
+  if (!univId || univId === 'meta') return null;
   const u = cutlines[univId];
   if (!u) return null;
   return u[admissionType] || null;
+}
+
+// 합격선 값이 하나라도 있는 대학 목록(진단·커버리지 확인용)
+export function cutlineUnivIds() {
+  return Object.keys(cutlines).filter((k) => k !== 'meta');
 }
 
 // univId 대표 비교내신 환산 정보
@@ -157,11 +176,11 @@ export function getComparative(univId) {
 // ============================================================
 // 대학별 비교내신 환산 — 5케이스 (gumjung.co.kr 방식)
 //
-// comparative_2028.json에 대학별 "conversion" 객체를 추가하면
+// comparative_2027.json에 대학별 "conversion" 객체를 추가하면
 // 대학 공식/표대로 정확한 비교내신을 계산함.
 // 데이터 없는 대학은 표준 추정표(GRADE_MIN_AVG)로 자동 폴백.
 //
-// conversion 객체 스키마 (comparative_2028.json에 추가):
+// conversion 객체 스키마 (comparative_2027.json에 추가):
 // {
 //   "conversion": {
 //     "type": "grade_table" | "score_table" | "score_formula" | "formula_complex" | "subject_weighted",
@@ -210,7 +229,7 @@ export const CONV_TYPES = {
  * 검정고시 점수 → 대학별 비교내신 등급 & 환산점수
  * @param {number|null} avg 전과목 평균
  * @param {object} gedScores 과목별 점수 { 국어, 수학, ... }
- * @param {object|null} comp comparative_2028.json 대학 항목
+ * @param {object|null} comp comparative_2027.json 대학 항목
  * @returns {{ grade: number|null, gradeExact: number|null, score: number|null, method: string }}
  *   grade      = 표시용 등급(대학 표의 값 그대로 / 폴백표의 정수 등급)
  *   gradeExact = 구간 안을 선형 보간한 소수 등급(비교 계산용). 없으면 grade와 같다.

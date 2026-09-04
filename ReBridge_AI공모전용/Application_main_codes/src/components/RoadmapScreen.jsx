@@ -2,14 +2,47 @@ import { useMemo } from 'react';
 import {
   ArrowLeft, ChevronRight, ClipboardList, FileText, Scale,
   CalendarDays, Target, MessageCircle, CheckCircle2,
-  Info, Search, Bookmark, Flag,
+  Info, Search, Bookmark, Flag, CalendarClock,
 } from 'lucide-react';
 import { buildRoadmap } from '../lib/roadmap.js';
 import { getUniversityDetail } from '../lib/analysis.js';
 import { evaluateAdmission, admissionChance } from '../lib/scoreEngine.js';
 import { getBookmarks } from '../lib/bookmarks.js';
 import { loadProfile } from '../lib/persona.js';
-import { CUTLINE_GAP_NOTE, CUTLINE_NO_DATA_SHORT } from '../data/meta.js';
+import {
+  CUTLINE_GAP_NOTE, CUTLINE_NO_DATA_SHORT,
+  ADMISSION_DATA_YEAR, GED_2027_SOURCE_LABEL, applyDeadline,
+} from '../data/meta.js';
+
+// 관심 대학 중 원서 접수 마감이 남은 곳 — 가까운 순.
+// applyCloseDate가 있는 건 2027 자료가 있는 대학뿐이라, 없는 대학은 애초에 대상이 아니다.
+// (없는 날짜를 지어내지 않는다)
+const DEADLINE_ALERT_DAYS = 30; // 한 달 안쪽만 알림 — 그보다 멀면 로드맵 단계로 충분
+
+function upcomingDeadlines(bookmarkIds, today) {
+  const out = [];
+  for (const id of bookmarkIds) {
+    const d = getUniversityDetail(id);
+    if (!d) continue;
+    let best = null;
+    for (const r of d.rows) {
+      if (!r.applyCloseDate) continue;
+      if (r.gedEligible !== '가능' && r.gedEligible !== '조건부') continue;
+      const dl = applyDeadline(r.applyCloseDate, r.applyCloseTime, today);
+      if (!dl || dl.past || dl.days > DEADLINE_ALERT_DAYS) continue;
+      if (!best || dl.days < best.dl.days) best = { dl, row: r };
+    }
+    if (best) {
+      out.push({
+        univId: id,
+        name: d.univ.name,
+        phase: best.row.phase || '원서',
+        dl: best.dl,
+      });
+    }
+  }
+  return out.sort((a, b) => a.dl.days - b.dl.days);
+}
 
 const ICONS = {
   ClipboardList, FileText, Scale, CalendarDays, Target, MessageCircle, CheckCircle2,
@@ -44,6 +77,12 @@ export default function RoadmapScreen({ goTo = () => {}, goBack = () => {} }) {
   // 개인 맞춤 — 점수가 있으면 칸수 분포, 관심 대학 수.
   const hasScore = !!(profile.gedScores && profile.gedAvg != null);
   const bookmarkCount = useMemo(() => getBookmarks().length, []);
+
+  // 관심 대학 원서 접수 마감 알림 — 자료가 있는 대학만 뜬다
+  const deadlineAlerts = useMemo(
+    () => upcomingDeadlines(getBookmarks(), new Date()),
+    []
+  );
 
   // 단계별 개인 맞춤 액션(버튼) — id로 매칭.
   function stageAction(id) {
@@ -99,6 +138,36 @@ export default function RoadmapScreen({ goTo = () => {}, goBack = () => {} }) {
       <div className="intro-sub">
         검정고시부터 대학 등록까지, 다음에 뭘 언제 해야 하는지 같이 챙길게요.
       </div>
+
+      {/* 관심 대학 원서 접수 마감 — 코앞인 것부터 */}
+      {deadlineAlerts.length > 0 && (
+        <div className="rm-deadlines">
+          <span className="mini-label"><CalendarClock size={12} /> 원서 접수 마감이 다가와요</span>
+          <ul className="rm-deadline-list">
+            {deadlineAlerts.map((a) => (
+              <li key={a.univId}>
+                <button
+                  className="rm-deadline-row"
+                  onClick={() => goTo('detail', { univ: a.name, univId: a.univId })}
+                >
+                  <span className="rm-deadline-text">
+                    <b>{a.name}</b> {a.phase} 접수
+                  </span>
+                  <span className={`dday-badge dday-${a.dl.days <= 3 ? 'urgent' : a.dl.days <= 10 ? 'soon' : 'far'}`}>
+                    {a.dl.label}
+                  </span>
+                  <ChevronRight size={15} className="rm-target-arrow" />
+                </button>
+                <span className="rm-deadline-date">{a.dl.dateLabel} 마감</span>
+              </li>
+            ))}
+          </ul>
+          <p className="rm-targets-note">
+            <Info size={11} /> {ADMISSION_DATA_YEAR}학년도 마감일은 {GED_2027_SOURCE_LABEL} 기준이에요.
+            {' '}이 자료에 없는 대학은 여기 뜨지 않아요 — 입학처 공고로 확인하세요.
+          </p>
+        </div>
+      )}
 
       {nextStage && (
         <div className="rm-next">

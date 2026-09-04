@@ -1,7 +1,8 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 import {
   ArrowLeft, MapPin, ExternalLink, Target, Users, MessageSquare,
   ChevronDown, Table2, Info, Lock, FileCheck2, Bookmark, Sparkles,
+  CalendarClock, FileText, AlertCircle,
 } from 'lucide-react';
 import { getUniversityDetail, getUniversityDetailByName } from '../lib/analysis.js';
 import { isBookmarked, toggleBookmark } from '../lib/bookmarks.js';
@@ -10,12 +11,20 @@ import {
   getComparative, comparativeAvailability, gedFit,
   applyComparativeConversion, gedAverage, gradeToMinAvg,
 } from '../lib/scoreEngine.js';
+import { loadGedText2027, matchGedTextEntry } from '../lib/gedText2027.js';
+import { loadCompText2027 } from '../lib/compText2027.js';
 import DocumentsChecklist from './DocumentsChecklist.jsx';
 import ChanceGauge from './ChanceGauge.jsx';
 import { loadProfile } from '../lib/persona.js';
 import {
   CUTLINE_LABEL, CUTLINE_NO_DATA_LABEL, CUTLINE_NO_DATA_SHORT,
-  CUTLINE_SCALE_NOTICE, PLAN_BASIS_NOTICE, STANDARD_CONVERSION_NOTICE,
+  CUTLINE_SCALE_NOTICE, CUTLINE_SOURCE_LABEL, CUTLINE_TYPE_NOTICE,
+  PLAN_BASIS_NOTICE, STANDARD_CONVERSION_NOTICE,
+  ADMISSION_2027_SECTION_TITLE, ADMISSION_2027_SOURCE_NOTICE,
+  PLAN_SECTION_TITLE, NO_2027_DATA_LABEL, NO_2027_DATA_NOTICE,
+  PHASE_ESTIMATED_NOTICE, QUOTA_OUTSIDE_TITLE, QUOTA_OUTSIDE_NOTICE,
+  YEAR_SPLIT_NOTICE, ADMISSION_DATA_YEAR, PLAN_YEAR,
+  applyDeadline,
 } from '../data/meta.js';
 
 function cleanCsat(raw) {
@@ -89,10 +98,185 @@ function conversionBasis(profile, comp) {
   return { lines, grade, score, method };
 }
 
+// ── 원서 접수 마감 D-day 배지 ─────────────────────────────────────────
+function DeadlineBadge({ row, today }) {
+  const dl = applyDeadline(row.applyCloseDate, row.applyCloseTime, today);
+  if (!dl) return null;
+  const tone = dl.past ? 'past' : dl.days <= 3 ? 'urgent' : dl.days <= 10 ? 'soon' : 'far';
+  return (
+    <span className={`dday-badge dday-${tone}`}>
+      <CalendarClock size={11} />
+      {dl.label} · {dl.dateLabel} 마감
+    </span>
+  );
+}
+
+// ── 환산표 근거 원문 (모집요강 발췌, public에서 필요할 때만 fetch) ─────
+// 비교내신 산출 관련 쪽만 뽑은 발췌라서, 원본 PDF 링크를 반드시 함께 보여준다.
+function CompRawText({ univId, phase }) {
+  const [open, setOpen] = useState(false);
+  const [state, setState] = useState({ status: 'idle', data: null, error: null });
+
+  const fetchText = useCallback(() => {
+    setState({ status: 'loading', data: null, error: null });
+    loadCompText2027(univId)
+      .then((data) => setState({ status: 'done', data, error: null }))
+      .catch((err) => setState({ status: 'error', data: null, error: err?.message || '불러오지 못했어요' }));
+  }, [univId]);
+
+  function toggle() {
+    const next = !open;
+    setOpen(next);
+    if (next && state.status === 'idle') fetchText();
+  }
+
+  const data = state.data;
+  // 실제로 환산표를 뽑아낸 쪽(cited)만. 지금 보는 전형의 phase 것을 앞에 둔다.
+  const pages = (data?.pages || [])
+    .filter((p) => p.cited)
+    .sort((a, b) => (a.phase === phase ? -1 : 0) - (b.phase === phase ? -1 : 0));
+
+  return (
+    <div className="ged-raw">
+      <button className="ged-raw-toggle" onClick={toggle} aria-expanded={open}>
+        <FileText size={13} />
+        {open ? '환산표 근거 원문 접기' : '환산표 근거 원문 보기 (2027 모집요강 발췌)'}
+        <ChevronDown size={14} className={`ged-raw-chev${open ? ' on' : ''}`} />
+      </button>
+
+      {open && (
+        <div className="ged-raw-body">
+          {state.status === 'loading' && <p className="ged-raw-note">원문을 불러오는 중이에요…</p>}
+          {state.status === 'error' && (
+            <p className="ged-raw-note error">
+              <AlertCircle size={12} /> {state.error}
+              <button className="ged-raw-retry" onClick={fetchText}>다시 시도</button>
+            </p>
+          )}
+          {state.status === 'done' && pages.length === 0 && (
+            <p className="ged-raw-note">이 대학의 환산표 발췌가 자료에 없어요. 아래 모집요강 원본에서 확인하세요.</p>
+          )}
+          {state.status === 'done' && pages.map((p, idx) => (
+            <div key={idx} className="ged-raw-entry">
+              <p className="ged-raw-src">{p.sourceFile} · p.{p.page}{p.phase ? ` · ${p.phase}` : ''}</p>
+              <pre>{p.text}</pre>
+            </div>
+          ))}
+          {state.status === 'done' && (
+            <p className="ged-raw-note">
+              * 비교내신 관련 쪽만 발췌한 것이라 모집요강 전체가 아니에요. 전체 원문:{' '}
+              {(data?.sources || []).map((src, i) => (
+                <a key={i} href={src.sourceUrl} target="_blank" rel="noreferrer">
+                  {src.phase || '요강'} PDF{i < data.sources.length - 1 ? ' · ' : ''}
+                </a>
+              ))}
+            </p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── 지원자격 원문 (public에서 필요할 때만 fetch) ───────────────────────
+// 요약하지 않는다. 대교협 자료의 common/detail/extra를 쪽수와 함께 그대로 보여준다.
+function RequirementText({ univId, row }) {
+  const [open, setOpen] = useState(false);
+  const [state, setState] = useState({ status: 'idle', entry: null, error: null });
+
+  const fetchText = useCallback(() => {
+    setState({ status: 'loading', entry: null, error: null });
+    loadGedText2027(univId)
+      .then((entries) => {
+        setState({ status: 'done', entry: matchGedTextEntry(entries, row), error: null });
+      })
+      .catch((err) => {
+        setState({ status: 'error', entry: null, error: err?.message || '불러오지 못했어요' });
+      });
+  }, [univId, row]);
+
+  function toggle() {
+    const next = !open;
+    setOpen(next);
+    if (next && state.status === 'idle') fetchText();
+  }
+
+  const entry = state.entry;
+  const reqs = entry?.requirements || [];
+
+  return (
+    <div className="ged-raw">
+      <button className="ged-raw-toggle" onClick={toggle} aria-expanded={open}>
+        <FileText size={13} />
+        {open ? '지원자격 원문 접기' : '지원자격 원문 보기'}
+        <ChevronDown size={14} className={`ged-raw-chev${open ? ' on' : ''}`} />
+      </button>
+
+      {open && (
+        <div className="ged-raw-body">
+          {state.status === 'loading' && <p className="ged-raw-note">원문을 불러오는 중이에요…</p>}
+          {state.status === 'error' && (
+            <p className="ged-raw-note error">
+              <AlertCircle size={12} /> {state.error}
+              <button className="ged-raw-retry" onClick={fetchText}>다시 시도</button>
+            </p>
+          )}
+          {state.status === 'done' && !entry && (
+            <p className="ged-raw-note">이 전형의 지원자격 원문이 자료에 없어요.</p>
+          )}
+          {state.status === 'done' && entry && (
+            <>
+              {entry.gedQuote && (
+                <blockquote className="ged-quote">{entry.gedQuote}</blockquote>
+              )}
+              {reqs.length === 0 && (
+                <p className="ged-raw-note">이 전형의 지원자격 원문이 자료에 없어요.</p>
+              )}
+              {reqs.map((q, i) => (
+                <div className="ged-req" key={i}>
+                  <div className="ged-req-head">
+                    지원자격 {reqs.length > 1 ? `${i + 1}` : ''}
+                    {q.page != null && <span className="ged-req-page">원문 {q.page}쪽</span>}
+                  </div>
+                  {q.common && (
+                    <div className="ged-req-part">
+                      <span className="ged-req-label">공통</span>
+                      <pre>{q.common}</pre>
+                    </div>
+                  )}
+                  {q.detail && (
+                    <div className="ged-req-part">
+                      <span className="ged-req-label">세부</span>
+                      <pre>{q.detail}</pre>
+                    </div>
+                  )}
+                  {q.extra && (
+                    <div className="ged-req-part">
+                      <span className="ged-req-label">추가</span>
+                      <pre>{q.extra}</pre>
+                    </div>
+                  )}
+                </div>
+              ))}
+              {entry.sourceFile && (
+                <p className="ged-raw-source">출처 파일: {entry.sourceFile}</p>
+              )}
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univId, univName }) {
   const profile = useMemo(loadProfile, []);
   const [openRows, setOpenRows] = useState(() => new Set());
+  const [openPlanRows, setOpenPlanRows] = useState(() => new Set());
   const [showCalcBasis, setShowCalcBasis] = useState(false);
+  const [showQuota, setShowQuota] = useState(false);
+  // D-day 기준 '오늘'은 렌더마다 새로 만들지 않는다(같은 화면에서 값이 흔들리지 않게)
+  const today = useMemo(() => new Date(), []);
 
   const detail = useMemo(() => {
     if (univId) return getUniversityDetail(univId);
@@ -125,7 +309,7 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
     );
   }
 
-  const { univ, rows, eligibleCount } = detail;
+  const { univ, rows, eligibleCount, is2027, planRows, quotaRows } = detail;
   const okRows = rows.filter((r) => r.gedEligible === '가능' || r.gedEligible === '조건부');
   const noRows = rows.filter((r) => r.gedEligible === '불가');
 
@@ -145,6 +329,19 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
       : null;
     return { r, ev, chance: ev ? admissionChance(ev) : null, fit: gedFit(r, compType) };
   });
+
+  // 2028 시행계획을 '구조 참고'로만 따로 보여줄지 — 2027 자료가 있는 대학만 해당.
+  // 2027이 없는 대학은 위 목록 자체가 2028이므로 중복해서 보여주지 않는다.
+  const showPlanSection = is2027 && planRows.length > 0;
+
+  // 접수 마감이 가장 급한 전형 (상단 요약용)
+  // ⚠️ 훅이 아니다 — 위쪽에 조기 return이 있어서 useMemo를 여기 두면 훅 순서가 깨진다.
+  let nearestDeadline = null;
+  for (const r of okRows) {
+    const dl = applyDeadline(r.applyCloseDate, r.applyCloseTime, today);
+    if (!dl || dl.past) continue;
+    if (!nearestDeadline || dl.days < nearestDeadline.days) nearestDeadline = dl;
+  }
 
   // 담임 한마디 — 점수 있으면 칸수 분포로, 없으면 전형 안내
   let coachSummary;
@@ -167,6 +364,13 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
 
   function toggle(i) {
     setOpenRows((prev) => {
+      const next = new Set(prev);
+      next.has(i) ? next.delete(i) : next.add(i);
+      return next;
+    });
+  }
+  function togglePlan(i) {
+    setOpenPlanRows((prev) => {
       const next = new Set(prev);
       next.has(i) ? next.delete(i) : next.add(i);
       return next;
@@ -215,6 +419,12 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
         <div className="coach-panel-body">
           <span className="coach-panel-kicker">담임 한마디</span>
           <span className="coach-panel-text">{coachSummary}</span>
+          {nearestDeadline && (
+            <span className="coach-panel-dday">
+              <CalendarClock size={13} /> 가장 빠른 원서 접수 마감 {nearestDeadline.label}
+              {' · '}{nearestDeadline.dateLabel}
+            </span>
+          )}
           {!hasScore && (
             <button className="coach-panel-cta" onClick={() => goTo('profile')}>
               내 점수 입력하기
@@ -223,16 +433,30 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
         </div>
       </div>
 
+      {/* 2027 자료가 없는 대학 — 무엇을 보고 있는지 먼저 밝힌다 */}
+      {!is2027 && (
+        <div className="year-warn">
+          <AlertCircle size={15} />
+          <div>
+            <b>{NO_2027_DATA_LABEL}</b>
+            <p>{NO_2027_DATA_NOTICE}</p>
+          </div>
+        </div>
+      )}
+
       {okRows.length > 0 && (
         <>
           <div className="detail-section-title">
-            지원할 수 있는 전형 <span className="count-pill">{okRows.length}</span>
+            {is2027 ? ADMISSION_2027_SECTION_TITLE : PLAN_SECTION_TITLE}
+            <span className="count-pill">{okRows.length}</span>
           </div>
+          {is2027 && <p className="section-sub">{YEAR_SPLIT_NOTICE}</p>}
           <div className="result-list">
             {evals.map(({ r, ev, chance, fit }, i) => {
               const aff = gedAffinity(r);
               const open = openRows.has(i);
               const rowComp = r.comparativeGrade || (comp ? comp.comparativeGrade : null);
+              const is2027Row = r.dataYear === ADMISSION_DATA_YEAR;
               return (
                 <article className={`adm-card ${open ? 'open' : ''}`} key={`${r.admissionName}-${i}`}>
                   {/* 요약(항상 보임) */}
@@ -248,9 +472,14 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
                       )}
                     </div>
                     <div className="adm-summary-meta">
-                      {r.phase} · {r.admissionType}
+                      {r.phase || '수시/정시 미상'} · {r.admissionType || '전형유형 미상'}
                       <span className={`affinity-mini ${aff.tone}`}>검정고시 {aff.grade}</span>
                     </div>
+                    {is2027Row && r.applyCloseDate && (
+                      <div className="adm-summary-meta">
+                        <DeadlineBadge row={r} today={today} />
+                      </div>
+                    )}
                     {/* 한 줄 코치 / 데이터 부재 안내 */}
                     {ev && ev.applicable && (
                       <div className="adm-oneline">{coachLine(ev)}</div>
@@ -266,6 +495,40 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
                   {/* 상세(펼침) */}
                   {open && (
                     <div className="adm-detail">
+                      {/* 검정고시 지원 가부 — 2027 자료는 수록 자체가 '지원 가능'이라는 뜻 */}
+                      {is2027Row && (
+                        <div className="adm-block ged2027-block">
+                          <div className="adm-block-title">
+                            <FileCheck2 size={13} /> 검정고시 지원 가부
+                            <span className={`avail-tag ${r.gedEligible === '가능' ? 'on' : 'off'}`}>
+                              {r.gedEligible}
+                            </span>
+                          </div>
+                          <p className="adm-block-desc">
+                            {r.gedEligible === '가능'
+                              ? `${ADMISSION_DATA_YEAR}학년도 대교협 자료에 검정고시 지원 가능 전형으로 실려 있어요.`
+                              : '검정고시 지원에 별도 조건이 붙는 전형이에요. 아래 원문을 꼭 확인하세요.'}
+                          </p>
+                          {r.gedEligible === '조건부' && r.gedIneligibleReason && (
+                            <div className="adm-reason">{r.gedIneligibleReason}</div>
+                          )}
+                          {r.applyCloseDate && (
+                            <div className="adm-need">
+                              <CalendarClock size={13} />
+                              <span>
+                                원서 접수 마감 <b>{applyDeadline(r.applyCloseDate, r.applyCloseTime, today)?.dateLabel}</b>
+                                {' '}({applyDeadline(r.applyCloseDate, r.applyCloseTime, today)?.label})
+                              </span>
+                            </div>
+                          )}
+                          {r.phaseBasis === 'type' && (
+                            <div className="adm-disclaimer">{PHASE_ESTIMATED_NOTICE}</div>
+                          )}
+                          <RequirementText univId={realUnivId} row={r} />
+                          {r.source && <p className="adm-src">출처: {r.source}</p>}
+                        </div>
+                      )}
+
                       {/* 검정고시 적합도 — 합격 가능성이 아니라 '지원하기 좋은 정도'(비확률적) */}
                       <div className="adm-block fit-block">
                         <div className="adm-block-title">
@@ -344,6 +607,7 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
                             </div>
                           )}
                           <div className="adm-disclaimer">{CUTLINE_SCALE_NOTICE}</div>
+                          <p className="adm-src">출처: {CUTLINE_SOURCE_LABEL}</p>
                         </div>
                       ) : (
                         <div className="adm-block adm-block-empty">
@@ -352,19 +616,24 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
                             <div>
                               <b>{ev?.dataGap === 'csat' ? '수능 기준 전형이에요' : CUTLINE_NO_DATA_LABEL}</b>
                               <p>{ev?.reason || '점수를 입력하면 비교해드릴게요.'}</p>
+                              {(r.admissionType === '논술' || r.admissionType === '실기') && (
+                                <p>{CUTLINE_TYPE_NOTICE}</p>
+                              )}
                             </div>
                           </div>
                         </div>
                       )}
 
-                      {/* 전형 요소 */}
-                      <div className="adm-facts">
-                        <span className="fact"><Target size={13} /> 수능최저 {cleanCsat(r.csatMinimum)}</span>
-                        <span className="fact"><MessageSquare size={13} /> 면접 {r.interview ? '있음' : '없음'}</span>
-                        {r.recruitCount != null && (
-                          <span className="fact"><Users size={13} /> {r.recruitCount}명</span>
-                        )}
-                      </div>
+                      {/* 전형 요소 — 2028 시행계획 행에만 있는 정보 */}
+                      {!is2027Row && (
+                        <div className="adm-facts">
+                          <span className="fact"><Target size={13} /> 수능최저 {cleanCsat(r.csatMinimum)}</span>
+                          <span className="fact"><MessageSquare size={13} /> 면접 {r.interview ? '있음' : '없음'}</span>
+                          {r.recruitCount != null && (
+                            <span className="fact"><Users size={13} /> {r.recruitCount}명</span>
+                          )}
+                        </div>
+                      )}
 
                       {/* 비교내신 가용성 + 계산 근거 */}
                       <div className="adm-block">
@@ -410,6 +679,8 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
                             <pre>{rowComp}</pre>
                           </details>
                         )}
+
+                        <CompRawText univId={realUnivId} phase={r.phase} />
                       </div>
 
                       {r.evalMethod && (
@@ -418,7 +689,7 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
                           <p className="adm-block-desc">{r.evalMethod}</p>
                         </div>
                       )}
-                      {r.gedEligible === '조건부' && r.gedIneligibleReason && (
+                      {!is2027Row && r.gedEligible === '조건부' && r.gedIneligibleReason && (
                         <div className="adm-reason">{r.gedIneligibleReason}</div>
                       )}
 
@@ -429,6 +700,103 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
                         </summary>
                         <DocumentsChecklist adm={{ ...r, univId: realUnivId }} />
                       </details>
+                    </div>
+                  )}
+                </article>
+              );
+            })}
+          </div>
+          {is2027 && <p className="adm-src section-src">{ADMISSION_2027_SOURCE_NOTICE}</p>}
+        </>
+      )}
+
+      {/* 정원외 특별전형 — 일반 학생 대상이 아니라 기본 목록에서 뺐다 */}
+      {quotaRows.length > 0 && (
+        <div className="quota-section">
+          <button className="quota-toggle" onClick={() => setShowQuota((v) => !v)} aria-expanded={showQuota}>
+            {QUOTA_OUTSIDE_TITLE} <span className="count-pill">{quotaRows.length}</span>
+            <ChevronDown size={16} className={`ged-raw-chev${showQuota ? ' on' : ''}`} />
+          </button>
+          <p className="section-sub">{QUOTA_OUTSIDE_NOTICE}</p>
+          {showQuota && (
+            <div className="result-list">
+              {quotaRows.map((r, i) => (
+                <article className="adm-card" key={`quota-${i}`}>
+                  <div className="adm-summary-top" style={{ padding: '14px 16px 4px' }}>
+                    <span className="adm-name">{r.admissionName}</span>
+                    <span className={`avail-tag ${r.gedEligible === '가능' ? 'on' : 'off'}`}>
+                      검정고시 {r.gedEligible}
+                    </span>
+                  </div>
+                  <div className="adm-summary-meta" style={{ padding: '0 16px 12px' }}>
+                    {r.phase || '수시/정시 미상'} · {r.admissionType || '전형유형 미상'}
+                    {r.applyCloseDate && (
+                      <>
+                        {' '}
+                        <DeadlineBadge row={r} today={today} />
+                      </>
+                    )}
+                  </div>
+                  <div style={{ padding: '0 16px 14px' }}>
+                    <RequirementText univId={realUnivId} row={r} />
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* 2028학년도 전형 구조 — 학년도가 다르므로 아래로 내리고 제목으로 구분한다 */}
+      {showPlanSection && (
+        <>
+          <div className="detail-section-title muted">
+            {PLAN_SECTION_TITLE} <span className="count-pill">{planRows.length}</span>
+          </div>
+          <p className="section-sub">
+            {PLAN_YEAR}학년도 대학입학전형 시행계획이에요. 전형 방법·수능최저처럼
+            {' '}{ADMISSION_DATA_YEAR}학년도 자료에 없는 <b>구조</b>를 참고하려고 남겨 둔 것이고,
+            지원 가능 여부는 위 {ADMISSION_DATA_YEAR}학년도 목록이 기준이에요.
+          </p>
+          <div className="result-list">
+            {planRows.map((r, i) => {
+              const open = openPlanRows.has(i);
+              return (
+                <article className={`adm-card plan-card ${open ? 'open' : ''}`} key={`plan-${i}`}>
+                  <button className="adm-summary" onClick={() => togglePlan(i)}>
+                    <div className="adm-summary-top">
+                      <span className="adm-name">{r.admissionName}</span>
+                      <span className="year-tag">{PLAN_YEAR}학년도</span>
+                    </div>
+                    <div className="adm-summary-meta">
+                      {r.phase} · {r.admissionType}
+                      {r.gedEligible === '불가' && <span className="badge no">검정고시 불가</span>}
+                    </div>
+                    <ChevronDown size={18} className="adm-chevron" />
+                  </button>
+                  {open && (
+                    <div className="adm-detail">
+                      <div className="adm-facts">
+                        <span className="fact"><Target size={13} /> 수능최저 {cleanCsat(r.csatMinimum)}</span>
+                        <span className="fact"><MessageSquare size={13} /> 면접 {r.interview ? '있음' : '없음'}</span>
+                        {r.recruitCount != null && (
+                          <span className="fact"><Users size={13} /> {r.recruitCount}명</span>
+                        )}
+                      </div>
+                      {r.evalMethod && (
+                        <div className="adm-block">
+                          <div className="adm-block-title">전형 방법</div>
+                          <p className="adm-block-desc">{r.evalMethod}</p>
+                        </div>
+                      )}
+                      {r.gedReflection && (
+                        <div className="adm-block">
+                          <div className="adm-block-title">검정고시 성적 반영</div>
+                          <p className="adm-block-desc">{r.gedReflection}</p>
+                        </div>
+                      )}
+                      {r.gedIneligibleReason && <div className="adm-reason">{r.gedIneligibleReason}</div>}
+                      {r.source && <p className="adm-src">출처: {r.source}</p>}
                     </div>
                   )}
                 </article>
@@ -458,9 +826,13 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
       )}
 
       <p className="note">
+        {is2027
+          ? ADMISSION_2027_SOURCE_NOTICE
+          : `${ADMISSION_DATA_YEAR}학년도 지원 가능 전형 자료에 이 대학은 실려 있지 않아, 이 화면은 ${PLAN_YEAR}학년도 시행계획 기준이에요.`}
+        <br />
         {PLAN_BASIS_NOTICE}
         <br />
-        합격선·비교내신은 <b>{CUTLINE_LABEL} 자료 참고용</b>이에요.
+        합격선·비교내신은 <b>{CUTLINE_LABEL} 자료 참고용</b>이에요 (출처: {CUTLINE_SOURCE_LABEL}).
       </p>
     </div>
   );

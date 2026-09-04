@@ -255,6 +255,7 @@ def norm_phase(s):
 # ── DB ──────────────────────────────────────────────────────────────
 def connect(path=DB_PATH):
     con = sqlite3.connect(path)
+    con.execute("PRAGMA busy_timeout = 30000")
     con.execute("PRAGMA foreign_keys = ON")
     con.row_factory = sqlite3.Row
     return con

@@ -153,6 +153,36 @@ python3 v2/extract_ged_text.py --year 2027
 
 ### ③ 2026학년도 전형결과 → `results_2026/`
 
+#### ③-A 어디가 대학별 CSV (2026-09-03 도입 · **이쪽이 정본**)
+
+`results_2026/adiga/` 에 캠퍼스별 CSV 197개 + `manifest.csv` 가 있다.
+PDF가 아니라 **HTML 표를 그대로 뽑은 CSV**라 아래 PDF 파서(③-B)를 쓸 수 없다.
+전용 파서는 `v2/parse_adiga_csv.py` 다.
+
+```bash
+python3 v2/parse_adiga_csv.py                          # 파싱 + 통계만 (아무것도 안 씀)
+python3 v2/parse_adiga_csv.py --to-db --export --jsonl # L1 적재 + 앱 JSON + 학과 JSONL
+```
+
+| 산출물 | 내용 |
+|---|---|
+| L1 `cutline` (year=2026) | 64,233행 · 대학 183개 · 전 행 `source_id` 있음 |
+| `src/data/cutlines_2026.json` | 앱용 집계 452블록 / 대학 176개 (+ 최상위 `meta`) |
+| `v2/out/cutlines_2026_programs.jsonl` | 학과 단위 42,785행 (앱 번들에 넣지 않음) |
+| `v2/out/cutlines_2026_report.md` | 커버리지 + 학년도 검증 근거 |
+
+⚠️ **학년도** — manifest URL의 `searchSyr=2027`은 **2027학년도 안내 페이지** 주소이고,
+그 안의 `tsrdCmphSlcnArtclUpCd=30` 탭이 **"2026학년도 전형 결과"**다. 담긴 값은 2026학년도다.
+검증 근거는 `parse_adiga_csv.py` 상단 주석과 리포트에 적어 뒀다.
+
+⚠️ 어디가 전형결과 공개는 **학생부교과·학생부종합·수능위주 세 갈래뿐**이다.
+논술·실기 전형 결과는 이 자료에 없다.
+
+⚠️ 어디가에서 **못 구한 대학 30개**가 있다(포항공대·KAIST·한서대·배재대 등).
+목록은 `manifest.csv` 의 '못 구함' 행과 리포트에 그대로 있다.
+
+#### ③-B 지역별 전형결과 PDF (기존 경로)
+
 ```bash
 # 1. PDF → 1차 JSON  (34개 PDF에 약 60초)
 python3 extract_results_2025.py --year 2026 \
@@ -189,14 +219,42 @@ OCR이 필요하면 v1 `ocr_recover_b.py` 를 참고하십시오.
 
 ### ④ 2027 검정고시 지원가능 전형 (5권역) → `ged_eligible_2027/`
 
-이 5개 PDF는 **형식이 시행계획과 다릅니다.** 전용 파서가 아직 없습니다.
-파일을 넣으신 뒤 알려 주시면 형식을 보고 파서를 만듭니다.
-그 전까지는 텍스트만 떠서 눈으로 확인할 수 있습니다.
+**2026-09-03 완료.** 전용 파서는 `v2/ingest_ged_2027.py` 입니다.
+시행계획과 달리 이 5권역 PDF는 대교협이 만든 하나의 표라 6열이 전부 고정입니다.
+그래서 시행계획에서는 포기했던 **전형 축을 그대로 읽을 수 있습니다.**
+
+```
+지역 | 대학 | 전형명 | 공통 지원자격 | 세부 지원자격 | 기타(추가사항)
+```
 
 ```bash
-python3 v2/extract_text.py --year 2027 \
-        --pdf-dir ../Application_main_codes/src/data/pdf_sources/ged_eligible_2027
+python3 v2/ingest_ged_2027.py --extract                  # PDF 755쪽 → 3,783행 (약 35초)
+python3 v2/ingest_ged_2027.py --build --to-db            # 정규화 + L1 적재
+python3 v2/ingest_ged_2027.py --export --write           # 앱용 JSON 설치
 ```
+
+**기대 산출물**
+
+| 파일 | 내용 |
+|---|---|
+| `v2/out/ged_2027/rows.jsonl` | 표 원본 6열 (3,783행) |
+| `v2/out/ged_2027/deadlines.json` | 수시 접수마감 표 원본 |
+| `v2/out/ged_2027/report.md` | 커버리지 리포트 |
+| `src/data/admissions_2027.json` | 앱 번들용 **요약본** (전형 목록·가부·마감일) |
+| `src/data/ged_eligible_2027_text.json` | **원문본**. 앱이 "원문 보기"로 지연 로드 |
+
+L1에는 `admission`(year=2027) · `admission_requirement`(자격 원문) ·
+`ged_eligibility`(전형별 가부) · `admission_deadline`(대학별 마감) 으로 들어갑니다.
+
+**이 자료를 읽을 때 알아야 할 것 세 가지**
+
+1. **수록 = 지원 가능.** 제목이 「검정고시 출신자 **지원 가능** 전형」이라 표에 실린 것
+   자체가 가부 판정입니다. 세부 지원자격에 검정고시를 제한하는 문구가 있을 때만
+   `조건부`로 낮추고 **그 문구를 인용으로 남깁니다**(2027 실측 23건).
+2. **`기타(추가사항)` 칸은 3,783행 전부 비어 있습니다.** 원본이 그렇습니다. 파싱 실패가 아닙니다.
+3. **수시/정시는 원문에 없습니다.** 전형유형으로 추정한 값이며(대교협 표준분류:
+   학생부교과·학생부종합·논술=수시, 수능위주=정시), 실기/실적과 정원외 특별전형은
+   양쪽에 다 있어 `미상`으로 둡니다. 판정률 67.7%. `phaseBasis` 로 근거를 구분하십시오.
 
 ---
 
@@ -349,3 +407,145 @@ python3 v2/check.py --sql "SELECT univ_id, verdict, page, evidence_pages
 자동 추출표에는 그 구간이 없어 앱 표준 추정 구간을 쓰기 때문입니다.
 차이는 리포트에 적히고, 원문을 보고 사람이 정하면 됩니다
 (덮어쓸 때만 `--overwrite-existing`).
+
+---
+
+## 🆕 2027학년도 **모집요강** 파이프라인 (2026-09-03 추가)
+
+### 왜 따로 만들었나 — 한 줄로
+
+> **검정고시 비교내신 산출식은 모집요강에만 있다. 시행계획·기본사항에는 없다.**
+
+그래서 대학별 `susi.pdf` / `jeongsi.pdf` 를 따로 받아
+`pdf_sources/guides_2027/{대학명}/` 에 넣고, 전용 스크립트 3개를 새로 두었습니다.
+시행계획용 스크립트(`extract_text.py` / `ingest_plans.py`)는 **건드리지 않았습니다.**
+
+### 실행 순서
+
+```bash
+cd ~/dev/GitHub/ReBridge/ReBridge_AI공모전용/data-pipeline
+
+# ① PDF 396개 → 페이지별 텍스트 (pdftotext -layout, 약 40초)
+python3 v2/extract_guides_text.py --year 2027
+
+# ② 검정고시 관련 페이지 원문 모으기 (앱 '원문 보기' 재료)
+python3 v2/extract_guides_ged.py --year 2027
+
+# ③ 비교내신 산출식 구조화 + L1 적재
+python3 v2/ingest_guides_conversion.py --year 2027 --to-db
+
+# ④ 모집인원 (확실한 표만)
+python3 v2/ingest_guides_recruit.py --year 2027
+```
+
+### 왜 `pdftotext -layout` 인가 (PyMuPDF가 아니라)
+
+모집요강 환산표는 **가로로 누워 있습니다.**
+
+```
+백점만점성적    100    95이상   90이상  …  65미만
+  반영점수     1,000    940     920   …    400
+```
+
+열이 세로로 정렬돼 있어야 어느 점수가 어느 등급 칸인지 알 수 있는데,
+`-layout` 은 그 **가로 위치를 글자 칸으로 보존**합니다. 이 파이프라인은 셀 개수가 아니라
+**칸 위치**로 열을 맞춥니다. 그래야 아래 같은 표를 안 틀립니다.
+
+```
+  석차등급      1     2     3     4     5     6     7     8     9
+검정고시 점수                100   96이상  90이상  85이상  80이상  75이상  75미만   ← 앞 두 칸이 비어 있다
+```
+(경기대 수시 p.38 실측. 개수로 맞추면 100이 1등급이 되어 완전히 틀립니다.)
+
+### 산출물 — 앱은 이걸 읽으면 됩니다
+
+| 파일 | 무엇 | 앱에서 쓰는 키 |
+|---|---|---|
+| `out/guides_2027/ged_text/{univId}.json` | 검정고시 관련 페이지 **원문 그대로** | `pages[].text` `pages[].page` `pages[].source_file` `pages[].phaseKo` `sources[].sourceUrl` |
+| `out/guides_2027/ged_text/_index.json` | 위 파일 목록 | `items[].univId` `items[].pages` `items[].hasComparative` |
+| `out/guides_2027/conversion_2027.jsonl` | 비교내신 구조화 (한 줄 = 대학 × 수시/정시) | 아래 표 참고 |
+| `out/guides_2027/conversion_2027_report.md` | 검증 실패·산문만 목록 | — |
+| `out/guides_2027/recruit_2027.jsonl` | 모집단위별 모집인원 | `program` `recruitCount` `confidence` `rawLine` |
+| `out/rebridge.db` → `ged_conversion WHERE year=2027` | 위를 적재한 것 | — |
+
+`conversion_2027.jsonl` 한 줄의 주요 키:
+
+| 키 | 뜻 |
+|---|---|
+| `univId` `univ` `year`(2027) `phase`(수시/정시) `campus` | 식별 |
+| **`gradeBands`** | ★ **평균점수 구간 → 등급.** `[{grade,raw,lo,hi,kind}]` — 검정고시생이 가진 건 평균점수다. 앱에서 가장 중요 |
+| `scoreBands` | 등급 없이 `구간 → 환산점수`만 있는 표 |
+| `gradeTable` | `등급 → 환산점수`. `[{grade,score}]` |
+| `percentileBands` | 석차백분율 구간(**재학생용**). 검정고시 계산에 쓰면 안 된다 |
+| `grade_scale` | `'9'` \| `'5'` \| `null`(원문에 단서 없음) |
+| `appliesTo` | `검정고시전용` \| `재학생준용` \| `불명` |
+| `maxScore` `minScore` `scoreLabel` `bandLabel` `tableLabel` | 표 메타 |
+| `quote` | 표 **원문 그대로**. 사람이 대조할 때 이게 전부다 |
+| `contextQuote` `formulas` | 표 앞뒤 문맥 / 산문 산식 원문 |
+| `page` `source_file` `sourceUrl` `sha256` | 출처 |
+| `kind` | `구간표+환산표` \| `구간표` \| `구간→점수표` \| `환산표` \| `산문만` \| `근거없음` |
+| `validation` `validationFails` | `pass`/`fail` 과 사유. **fail 이어도 값을 고치지 않았다** |
+
+DB 쪽 대응 컬럼: `grade_bands_json` `score_bands_json` `percentile_bands_json`
+`formula_text` `quote` `source_file` `table_label` `validation` `validation_note` `kind`.
+
+### 스키마에서 바꾼 것 (컬럼은 하나도 안 바꿨습니다)
+
+- `ged_conversion` 에 위 컬럼 9개를 **추가**만 했습니다.
+- 유니크 축을 `ux_conversion(univ_id, year, admission_id)` →
+  `ux_conversion_v2(univ_id, year, admission_id, phase)` 로 바꿨습니다.
+  2027은 한 대학이 **수시용·정시용 비교내신표를 다르게** 쓰기 때문에,
+  phase 를 안 보면 둘째 행이 통째로 막힙니다. 2028 행에는 영향이 없습니다
+  (phase 가 NULL → `COALESCE(phase,'')` 로 예전과 같은 축).
+
+### 안 한 것 / 사람이 봐야 할 것
+
+- **스캔본 10개는 OCR을 하지 않았습니다.** 목록은 `out/text/guides_2027/_manifest.json`
+  의 `scanned` 에 있습니다.
+- `validation='fail'` 행은 **값을 그대로 두고 사유만 붙였습니다.** 지어내지 않기 위해서입니다.
+- 모집인원은 **'모집단위 | 모집인원' 두 열이 붙어 있는 표만** 읽었습니다.
+  전형×모집단위 행렬은 손대지 않았습니다(어긋난 숫자는 없는 것보다 나쁩니다).
+
+## 🎓 전문대학(2~3년제) 「전년도 입시결과」 (2026-09-04 추가)
+
+원본: `Application_main_codes/src/data/pdf_sources/college/results/전년도입시결과_{2016..2026}학년도_전문대학포털.xls`
+(전문대교협/프로칼리지 연도 단위 일괄 다운로드. 조사 경위는 같은 폴더 `조사보고.md`).
+
+```bash
+python3 v2/ingest_college_results.py            # 파싱 통계만
+python3 v2/ingest_college_results.py --to-db    # cutline 적재
+```
+
+- 11개 연도 131,830행 원본 → cutline 255,957행 (`university.kind='전문대학'`).
+- 4년제 어디가 CSV와 달리 원본에 '50%/70%컷' 구분이 없다. `cut_type`은 **평균·최저**
+  두 가지만 쓰고, 학생부(교과내신 등급)·수능·교과외 축을 값이 있는 것만 별도 행으로 만든다
+  (`note`의 `축=` 표기로 구분). 수능 값인데 원문에 등급/백분위 표기가 없으면 단위를 추정하지
+  않고 `cut_score`에 원문 숫자만 넣은 뒤 `confidence='low'`로 낮춘다.
+- 원본 '입학정원'은 학과 전체 정원이지 그 모집시기의 모집인원이 아니라서(수시1차·수시2차·
+  정시에 같은 값이 반복된다) `recruit_count`에 넣지 않고 `note`에만 남긴다.
+- 2025·2026학년도는 138개 마스터와 이름이 100% 일치했다. 그 이전 연도는 폐교·개명·통합된
+  학교(동주대·서라벌대·고구려대·인천재능대→재능대 등)가 섞여 있어 매칭 실패분은 지어내지
+  않고 건너뛴 뒤 개수만 `ingest_log`에 남긴다.
+
+### 스키마에서 바꾼 것
+
+- `source_file`에 `license` 컬럼을 **추가**만 했다(기존 컬럼 안 건드림). 전문대교협/
+  프로칼리지 자료는 공공누리가 아니라서(무단 복제·배포 금지, 상업적 이용 시 사전 협의
+  필요) 소스 단위로 라이선스 문구를 남겨야 나중에 재조사하지 않는다. 값이 없으면(NULL)
+  "아직 조사 안 함"이지 "공공누리"라는 뜻이 아니다.
+
+### 안 한 것 — 사유와 함께 남겨 둔 것
+
+- **대학별 전형방법 엑셀**(`guides_2026~2028/대학별전형방법_*.xls`, 학과×전형 모집인원·
+  성적반영비율)은 파싱 가능함을 확인했으나 이번 범위에서는 적재하지 않았다. 전문대의
+  전형구분 체계(일반전형/특별전형)가 4년제 `admission.type`(학생부교과/종합/논술/실기/
+  수능위주)과 달라 그대로 채우면 혼동을 준다 — 설계를 더 봐야 한다.
+- **입학전형기본사항 PDF의 검정고시 원칙 조항**("검정고시 출신자를 지원자격에서 제한할
+  수 없음")은 대학별이 아니라 협의회 공통 규정이라, `ged_eligibility_univ`(대학 단위 PK)에
+  넣으면 실제로 확인 안 된 138개 대학 전부에 "가능"을 지어내는 꼴이 된다. 구조화하지
+  않고 `조사보고.md` 원문 인용으로만 남겼다.
+- **2018/2019 레거시 파일 3종**(`2018 전년도 전문대학 입시결과(20180622).xlsx`,
+  `2018학년도 전문대학 정시 모집 결과.xlsx`, `2019학년도 전문대학 입학전형 자료.xls`)은
+  구조가 완전히 다르다(앞 둘은 연도별 통합본과 겹치는 학과×전형 피벗, 마지막은 합격선이
+  아니라 학과 소개·취업분야·자격증 카탈로그). 연도별 통합본과 중복이거나 검정고시/합격선과
+  무관해 이번 적재에서 제외했다.
