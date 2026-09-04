@@ -59,8 +59,8 @@ const TRACK_DATA = {
   },
   univ: {
     kicker: '검정고시 맞춤 입시',
-    heroLine1: '우리가 갈 수 있는',
-    heroLine2: '대학, 찾아드려요',
+    heroLine1: '갈 수 있는 대학,',
+    heroLine2: '우리가 찾아드려요',
     ctaSub: '내 검정고시 점수로',
     ctaMain: '맞는 대학 찾기',
     ctaScreen: 'results',
