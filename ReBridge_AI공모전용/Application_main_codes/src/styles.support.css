@@ -541,3 +541,21 @@
 .spt-card-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
 .spt-phone-btn { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; text-decoration: none; transition: background .15s; }
 .spt-phone-btn:hover { background: #dcfce7; }
+
+/* 나이 맞춤 안내 (2026-09 서연님 UI 개선안 — 시작 화면에서 받은 나이를 실제로 쓰는 자리) */
+.support-age-note {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin: 14px 0 4px;
+  padding: 14px 16px;
+  border-radius: var(--r-sm);
+  background: var(--green-soft);
+  color: var(--green-dark);
+  font-size: 14px;
+  line-height: 1.6;
+  font-weight: 500;
+}
+.support-age-note.off { background: var(--bg-soft); color: var(--text-sub); }
+.support-age-note b { font-weight: 700; }
+.support-age-emoji { font-size: 16px; line-height: 1.5; flex: 0 0 auto; }

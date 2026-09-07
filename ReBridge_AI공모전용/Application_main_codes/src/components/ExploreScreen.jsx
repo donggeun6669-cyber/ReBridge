@@ -1,8 +1,4 @@
 import { useMemo, useState, useEffect } from 'react';
-import {
-  CUTLINE_YEAR, CUTLINE_SOURCE_LABEL_ALL,
-  PLAN_YEAR, GED_2027_SOURCE_LABEL, ADMISSION_DATA_UNIV_COUNT,
-} from '../data/meta.js';
 import { Search, X, ChevronRight, SlidersHorizontal, Sparkles, Map as MapIcon, ArrowLeft, Target } from 'lucide-react';
 import { getExploreList } from '../lib/analysis.js';
 import { loadProfile } from '../lib/persona.js';
@@ -246,12 +242,8 @@ export default function ExploreScreen({ goTo = () => {}, goBack = () => {}, canG
                 {s.kind === '전문대학' ? ' · 전문대학' : ''}
                 {s.eligibleCount > 0 ? ` · 검정고시 ${s.eligibleCount}전형` : ''}
                 {hasScore && !s.chance && s.noChanceReason ? ` · ${s.noChanceReason}` : ''}
-              </span>
-              {/* 어느 학년도 자료로 센 전형 수인지 밝힌다 (한 줄이 좁아 따로 뺐다) */}
-              <span className="uni-year">
-                <span className={`year-tag${s.is2027 ? ' year-tag-now' : ''}`}>
-                  {s.dataYear}학년도 기준
-                </span>
+                {/* 최신 학년도 자료면 굳이 안 밝힌다 — 다른 해 자료일 때만 알린다 */}
+                {!s.is2027 ? ` · ${s.dataYear}학년도 기준` : ''}
               </span>
             </span>
             <ChevronRight size={18} className="uni-arrow" />
@@ -273,18 +265,14 @@ export default function ExploreScreen({ goTo = () => {}, goBack = () => {}, canG
         </button>
       )}
 
-      <p className="note">
-        <b>칸수 게이지</b>(안정·적정·소신…)는 내 점수로 본 <b>합격 가능성</b>이에요.
-        <br />
-        <b>지원 수월/지원 가능</b>은 합격선 자료가 없을 때, <b>검정고시생이 지원하기 좋은 정도</b>(전형 성격·환산표·수능최저)를 알려주는 거예요 —
-        <b> 합격 확률이 아니에요.</b> 카드를 누르면 그 이유를 자세히 볼 수 있어요.
-        <br />
-        지원 가능 여부는 <b>{GED_2027_SOURCE_LABEL}</b> 기준이에요({ADMISSION_DATA_UNIV_COUNT}개 대학 수록).
-        {' '}이 자료에 없는 대학은 <b>{PLAN_YEAR}학년도 시행계획</b> 기준이라 카드에 학년도를 표시했어요.
-        {' '}{PLAN_YEAR}학년도 전형 구조는 대학 상세에서 별도로 볼 수 있어요.
-        <br />
-        합격선·비교내신은 <b>{CUTLINE_YEAR}학년도 자료 참고용</b>({CUTLINE_SOURCE_LABEL_ALL})이고, 실제는 모집요강을 확인해요.
-      </p>
+      <button className="explore-help-link" onClick={() => goTo('explore-help')}>
+        <span className="explore-help-emoji" aria-hidden="true">💡</span>
+        <span className="explore-help-text">
+          <b>이 목록 읽는 법</b>
+          <span>칸수 게이지 · 지원 수월 · 어느 해 자료인지</span>
+        </span>
+        <ChevronRight size={18} />
+      </button>
     </div>
   );
 }

@@ -8,6 +8,7 @@ import { getPersona, getNav, activeTabId, loadProfile, V1_UNIV_ONLY, isHiddenScr
 
 const HomeScreen = lazy(() => import('./components/HomeScreen.jsx'));
 const ExploreScreen = lazy(() => import('./components/ExploreScreen.jsx'));
+const ExploreHelpScreen = lazy(() => import('./components/ExploreHelpScreen.jsx'));
 const ProfileScreen = lazy(() => import('./components/ProfileScreen.jsx'));
 const MyPageScreen = lazy(() => import('./components/MyPageScreen.jsx'));
 const GuideScreen = lazy(() => import('./components/GuideScreen.jsx'));
@@ -53,7 +54,7 @@ const TAB_ROOTS = ['home', 'support', 'community', 'mypage'].filter((s) => !isHi
 // → 어딘가에 링크가 남아 있어도 아래 "준비 중" 폴백으로 떨어진다.
 const KNOWN_SCREENS = [
   'guide', 'glossary', 'results', 'detail', 'documents', 'saved', 'map', 'help',
-  'checklist', 'forms-guide', 'dreamdrive', 'ged-guide', 'univ-explore', 'path',
+  'checklist', 'forms-guide', 'dreamdrive', 'ged-guide', 'univ-explore', 'explore-help', 'path',
   'onboarding', 'study-roadmap', 'study-planner', 'support', 'roadmap',
   'job-home', 'job-explore', 'job-roadmap', 'job-questions', 'job-detail', 'job-info', 'job-psych',
   'job-training', 'job-apply',
@@ -74,8 +75,10 @@ export default function App() {
 
   function handleSplashDone() {
     setSplash(false);
-    // 온보딩 필터 없음 — 누구나 홈으로. 홈이 '상태'에 따라 미정/트랙을 그린다.
-    setStack([{ screen: 'home', params: {} }]);
+    // 2026-09 서연님 UI 개선안: 첫 실행이면 인사 화면부터.
+    // getPersona()가 null = 아직 아무것도 안 고른 사람 → '어서 와요' + 나이·상황 질문.
+    // 한 번 고른 뒤에는 다시 묻지 않고 홈으로 간다(프로필에서 언제든 다시 할 수 있음).
+    setStack([{ screen: getPersona() ? 'home' : 'onboarding', params: {} }]);
   }
 
   function handleProfileComplete() {
@@ -139,6 +142,7 @@ export default function App() {
             CareerHub와 '준비 중'이 같이 그려지던 이중 렌더도 함께 사라진다) */}
         {!splash && !V1_UNIV_ONLY && screen === 'explore'     && <CareerHubScreen goTo={goTo} persona={persona} />}
         {!splash && screen === 'univ-explore' && <ExploreScreen goTo={goTo} goBack={goBack} canGoBack={stack.length > 1} />}
+        {!splash && screen === 'explore-help' && <ExploreHelpScreen goBack={goBack} />}
         {!splash && screen === 'path'        && (
           <PathGuideScreen pathKey={params.key} goBack={goBack} />
         )}

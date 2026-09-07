@@ -40,11 +40,49 @@ export function getPersona(profile) {
   return { stage: p.stage, goal: p.goal || 'undecided' };
 }
 
-export function savePersona({ stage, goal }) {
+export function savePersona({ stage, goal, age }) {
   const prev = loadProfile() || {};
   const next = { ...prev, stage, goal };
+  if (age !== undefined) next.age = age;
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(next)); } catch { /* 무시 */ }
   return next;
+}
+
+// ── 나이 (2026-09 서연님 UI 개선안: 시작 화면에서 나이를 묻고 맞춤 안내) ─────────
+// 생년월일이 아니라 '나이대'만 받는다. 개인 식별이 안 되고, 이 기기(localStorage)에만 남는다.
+// 서버로 보내지 않는다 — 보내려는 리팩터링을 하지 말 것.
+export const AGE_OPTIONS = [
+  { key: 'u15', label: '15세 이하', min: 0,  max: 15 },
+  { key: '16',  label: '16세',      min: 16, max: 16 },
+  { key: '17',  label: '17세',      min: 17, max: 17 },
+  { key: '18',  label: '18세',      min: 18, max: 18 },
+  { key: '19',  label: '19세',      min: 19, max: 19 },
+  { key: '20t', label: '20~24세',   min: 20, max: 24 },
+  { key: 'o25', label: '25세 이상', min: 25, max: 200 },
+];
+
+export function saveAge(ageKey) {
+  const prev = loadProfile() || {};
+  const next = { ...prev, age: ageKey };
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(next)); } catch { /* 무시 */ }
+  return next;
+}
+
+export function getAge() {
+  return loadProfile()?.age || null;
+}
+
+export function ageOption(ageKey = getAge()) {
+  return AGE_OPTIONS.find((o) => o.key === ageKey) || null;
+}
+
+// 꿈드림(학교밖청소년지원센터)은 만 9~24세가 대상이다.
+// 근거는 src/data/commonSupport.js — 거기 요약문과 같은 기준을 쓴다.
+// 나이를 모르면 null(= 화면에서 대상 여부를 단정하지 않음)을 준다.
+export function dreamdrimEligible(ageKey = getAge()) {
+  const o = ageOption(ageKey);
+  if (!o) return null;
+  return o.min <= 24 && o.max >= 9;
 }
 
 // 취업 트랙 — 관심 직업을 1~3개 저장한다. job = { name, field, programId, programLabel }

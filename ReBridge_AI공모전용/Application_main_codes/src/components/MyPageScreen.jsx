@@ -5,7 +5,7 @@ import {
   RefreshCw, Target, Briefcase, HelpCircle, RotateCcw, Route,
   Award, FileText, ShieldCheck, ScrollText,
 } from 'lucide-react';
-import { getPersona, loadProfile, getActiveTrack, V1_UNIV_ONLY } from '../lib/persona';
+import { getPersona, loadProfile, getActiveTrack, V1_UNIV_ONLY, ageOption } from '../lib/persona';
 import { MAP_ENABLED } from '../lib/kakaoMap.js';
 import '../styles.mypage.css';
 
@@ -273,6 +273,12 @@ export default function MyPageScreen({ goTo = () => {}, goBack = () => {} }) {
               <GoalIcon goal={goal} />
               {GOAL_LABEL[goal] || goal}
             </span>
+            {/* 시작 화면에서 고른 나이. '말하고 싶지 않아요'를 고르면 칩 자체가 안 뜬다. */}
+            {ageOption() && (
+              <span className="mp-persona-chip mp-persona-chip--stage">
+                🎂 {ageOption().label}
+              </span>
+            )}
           </div>
         </div>
       )}

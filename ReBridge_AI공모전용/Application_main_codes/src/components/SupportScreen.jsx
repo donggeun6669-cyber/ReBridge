@@ -13,7 +13,7 @@ import {
 import centersRaw from '../data/kkumdrim.json';
 import { COMMON_SUPPORT } from '../data/commonSupport';
 import { getCenterBenefits } from '../lib/benefits';
-import { V1_UNIV_ONLY } from '../lib/persona.js';
+import { V1_UNIV_ONLY, ageOption, dreamdrimEligible } from '../lib/persona.js';
 import '../styles.support.css';
 
 // 카테고리/공통지원 icon 이름 → lucide 컴포넌트 매핑
@@ -222,6 +222,25 @@ export default function SupportScreen({ goTo = () => {}, goBack = () => {}, para
           </button>
         ))}
       </div>
+
+      {/* 나이 맞춤 안내 — 시작 화면에서 나이를 고른 사람에게만 뜬다.
+          꿈드림 대상은 만 9~24세(근거: data/commonSupport.js).
+          나이를 안 고른 사람에겐 아무것도 단정하지 않는다. */}
+      {ageOption() && (
+        <div className={`support-age-note${dreamdrimEligible() ? '' : ' off'}`}>
+          <span className="support-age-emoji" aria-hidden="true">
+            {dreamdrimEligible() ? '✅' : '💡'}
+          </span>
+          <span>
+            {dreamdrimEligible() ? (
+              <><b>{ageOption().label}</b>이면 꿈드림센터를 무료로 이용할 수 있어요.</>
+            ) : (
+              <><b>{ageOption().label}</b>은 꿈드림 지원 나이(만 9~24세)를 벗어나요.
+                아래 공통 지원과 센터 상담은 그대로 문의할 수 있어요.</>
+            )}
+          </span>
+        </div>
+      )}
 
       {/* 결과 헤더 */}
       <div className="support-result-head">

@@ -37,24 +37,24 @@ const TRACK_DATA = {
     ctaScreen: 'study-roadmap',
     faqTitle: '검정고시 궁금한 점',
     icons: [
-      { label: '내 로드맵',   icon: Route,        c1: '#4FA8E6', c2: '#1C6FB2', screen: 'study-roadmap' },
-      { label: '공부 플래너', icon: ListChecks,    c1: '#52C97A', c2: '#248B41', screen: 'study-planner' },
-      { label: '대학 찾기',   icon: School,        c1: '#FFD166', c2: '#F59E0B', screen: 'univ-explore' },
-      { label: '지원 혜택',   icon: Gift,          c1: '#7ECAF5', c2: '#2E8BD0', screen: 'support' },
-      { label: '꿈드림센터',  icon: MapPin,        c1: '#A78BFA', c2: '#6D28D9', screen: 'dreamdrive' },
-      { label: '입시 용어',   icon: BookOpen,      c1: '#FCA5A5', c2: '#DC2626', screen: 'glossary', params: { track: 'univ' } },
-      { label: '커뮤니티',    icon: MessageCircle, c1: '#6EE7B7', c2: '#059669', screen: 'community' },
-      { label: '체크리스트',  icon: ListChecks,    c1: '#FDB87A', c2: '#EA580C', screen: 'checklist' },
+      { label: '내 로드맵',   emoji: '🗺️', screen: 'study-roadmap' },
+      { label: '공부 플래너', emoji: '📝', screen: 'study-planner' },
+      { label: '대학 찾기',   emoji: '🏫', screen: 'univ-explore' },
+      { label: '지원 혜택',   emoji: '🎁', screen: 'support' },
+      { label: '꿈드림센터',  emoji: '📍', screen: 'dreamdrive' },
+      { label: '입시 용어',   emoji: '📖', screen: 'glossary', params: { track: 'univ' } },
+      { label: '커뮤니티',    emoji: '💬', screen: 'community' },
+      { label: '체크리스트',  emoji: '✅', screen: 'checklist' },
     ],
     shortcuts: [
-      { icon: Calendar,       bg: '#E7F1FB', color: '#2E8BD0', title: '지금 뭘 공부해야 할 때일까요?', sub: '오늘 할 일 · 시험 D-day 확인',  screen: 'study-planner' },
-      { icon: MessageCircle,  bg: '#E4F6E9', color: '#248B41', title: '담임에게 물어보기',              sub: '막히면 여기서 바로 질문해요',    screen: 'help' },
+      { emoji: '📅', title: '지금 뭘 공부해야 할 때일까요?', sub: '오늘 할 일 · 시험 D-day 확인',  screen: 'study-planner' },
+      { emoji: '🙋', title: '담임에게 물어보기',              sub: '막히면 여기서 바로 질문해요',    screen: 'help' },
     ],
     faqs: [
-      { icon: Calendar,      bg: '#E7F1FB', color: '#2E8BD0', label: '시험 일정이 언제에요?',    screen: 'ged-guide' },
-      { icon: HelpCircle,    bg: '#E4F6E9', color: '#248B41', label: '어떤 과목을 봐야 해요?',   screen: 'ged-guide' },
-      { icon: Target,        bg: '#FFF4E5', color: '#EA580C', label: '합격 점수가 뭐에요?',      screen: 'ged-guide' },
-      { icon: MapPin,        bg: '#F0EBFF', color: '#6D28D9', label: '꿈드림센터가 뭐에요?',     screen: 'dreamdrive' },
+      { emoji: '📅', label: '시험 일정이 언제에요?',    screen: 'ged-guide' },
+      { emoji: '📚', label: '어떤 과목을 봐야 해요?',   screen: 'ged-guide' },
+      { emoji: '🎯', label: '합격 점수가 뭐에요?',      screen: 'ged-guide' },
+      { emoji: '📍', label: '꿈드림센터가 뭐에요?',     screen: 'dreamdrive' },
     ],
   },
   univ: {
@@ -66,24 +66,24 @@ const TRACK_DATA = {
     ctaScreen: 'results',
     faqTitle: '입시 용어 & 궁금한 점',
     icons: [
-      { label: '내 로드맵',  icon: Route,        c1: '#4FA8E6', c2: '#1C6FB2', screen: 'roadmap' },
-      { label: '대학 찾기',  icon: School,        c1: '#52C97A', c2: '#248B41', screen: 'univ-explore' },
-      { label: '내 점수',    icon: ClipboardList, c1: '#FFD166', c2: '#F59E0B', screen: 'results' },
-      { label: '지원 혜택',  icon: Gift,          c1: '#7ECAF5', c2: '#2E8BD0', screen: 'support' },
-      { label: '꿈드림센터', icon: MapPin,        c1: '#A78BFA', c2: '#6D28D9', screen: 'dreamdrive' },
-      { label: '입시 용어',  icon: BookOpen,      c1: '#FCA5A5', c2: '#DC2626', screen: 'glossary', params: { track: 'univ' } },
-      { label: '커뮤니티',   icon: MessageCircle, c1: '#6EE7B7', c2: '#059669', screen: 'community' },
-      { label: '체크리스트', icon: ListChecks,    c1: '#FDB87A', c2: '#EA580C', screen: 'checklist' },
+      { label: '내 로드맵',  emoji: '🗺️', screen: 'roadmap' },
+      { label: '대학 찾기',  emoji: '🏫', screen: 'univ-explore' },
+      { label: '내 점수',    emoji: '💯', screen: 'results' },
+      { label: '지원 혜택',  emoji: '🎁', screen: 'support' },
+      { label: '꿈드림센터', emoji: '📍', screen: 'dreamdrive' },
+      { label: '입시 용어',  emoji: '📖', screen: 'glossary', params: { track: 'univ' } },
+      { label: '커뮤니티',   emoji: '💬', screen: 'community' },
+      { label: '체크리스트', emoji: '✅', screen: 'checklist' },
     ],
     shortcuts: [
-      { icon: Calendar,      bg: '#E7F1FB', color: '#2E8BD0', title: '지금 내가 뭘 해야 할 때일까요?', sub: '지금 시기에 맞는 할 일 확인',  screen: 'checklist' },
-      { icon: MessageCircle, bg: '#E4F6E9', color: '#248B41', title: '담임에게 물어보기',               sub: '막히면 여기서 바로 질문해요', screen: 'help' },
+      { emoji: '📅', title: '지금 내가 뭘 해야 할 때일까요?', sub: '지금 시기에 맞는 할 일 확인',  screen: 'checklist' },
+      { emoji: '🙋', title: '담임에게 물어보기',               sub: '막히면 여기서 바로 질문해요', screen: 'help' },
     ],
     faqs: [
-      { icon: HelpCircle, bg: '#E7F1FB', color: '#2E8BD0', label: '전형이 뭐에요?',           screen: 'glossary', params: { track: 'univ' } },
-      { icon: Zap,        bg: '#E4F6E9', color: '#248B41', label: '검정고시도 수시 돼요?',     screen: 'glossary', params: { track: 'univ' } },
-      { icon: Scale,      bg: '#F0EBFF', color: '#6D28D9', label: '비교내신이 뭐에요?',       screen: 'glossary', params: { track: 'univ' } },
-      { icon: Target,     bg: '#FFF4E5', color: '#EA580C', label: '수능 최저가 뭐에요?',      screen: 'glossary', params: { track: 'univ' } },
+      { emoji: '❓', label: '전형이 뭐에요?',           screen: 'glossary', params: { track: 'univ' } },
+      { emoji: '⚡', label: '검정고시도 수시 돼요?',     screen: 'glossary', params: { track: 'univ' } },
+      { emoji: '⚖️', label: '비교내신이 뭐에요?',       screen: 'glossary', params: { track: 'univ' } },
+      { emoji: '🎯', label: '수능 최저가 뭐에요?',      screen: 'glossary', params: { track: 'univ' } },
     ],
   },
   job: {
@@ -95,24 +95,24 @@ const TRACK_DATA = {
     ctaScreen: 'job-info',
     faqTitle: '진로 궁금한 점',
     icons: [
-      { label: '내 로드맵',  icon: Route,        c1: '#4FA8E6', c2: '#1C6FB2', screen: 'job-roadmap' },
-      { label: '직업 탐색',  icon: Compass,       c1: '#52C97A', c2: '#248B41', screen: 'job-info' },
-      { label: '진로 검사',  icon: ListChecks,    c1: '#FFD166', c2: '#F59E0B', screen: 'job-psych' },
-      { label: '지원 혜택',  icon: Gift,          c1: '#7ECAF5', c2: '#2E8BD0', screen: 'support' },
-      { label: '꿈드림센터', icon: MapPin,        c1: '#A78BFA', c2: '#6D28D9', screen: 'dreamdrive' },
-      { label: '진로 용어',  icon: BookOpen,      c1: '#FCA5A5', c2: '#DC2626', screen: 'glossary', params: { track: 'job' } },
-      { label: '커뮤니티',   icon: MessageCircle, c1: '#6EE7B7', c2: '#059669', screen: 'community' },
-      { label: '직업훈련',   icon: Briefcase,     c1: '#FDB87A', c2: '#EA580C', screen: 'job-training' },
+      { label: '내 로드맵',  emoji: '🗺️', screen: 'job-roadmap' },
+      { label: '직업 탐색',  emoji: '🧭', screen: 'job-info' },
+      { label: '진로 검사',  emoji: '🧪', screen: 'job-psych' },
+      { label: '지원 혜택',  emoji: '🎁', screen: 'support' },
+      { label: '꿈드림센터', emoji: '📍', screen: 'dreamdrive' },
+      { label: '진로 용어',  emoji: '📖', screen: 'glossary', params: { track: 'job' } },
+      { label: '커뮤니티',   emoji: '💬', screen: 'community' },
+      { label: '직업훈련',   emoji: '🧰', screen: 'job-training' },
     ],
     shortcuts: [
-      { icon: ListChecks,    bg: '#E7F1FB', color: '#2E8BD0', title: '진로 검사 해보기',    sub: '나에게 맞는 직업 유형 확인',   screen: 'job-psych' },
-      { icon: MessageCircle, bg: '#E4F6E9', color: '#248B41', title: '담임에게 물어보기',   sub: '막히면 여기서 바로 질문해요',  screen: 'help' },
+      { emoji: '🧪', title: '진로 검사 해보기',    sub: '나에게 맞는 직업 유형 확인',   screen: 'job-psych' },
+      { emoji: '🙋', title: '담임에게 물어보기',   sub: '막히면 여기서 바로 질문해요',  screen: 'help' },
     ],
     faqs: [
-      { icon: GraduationCap, bg: '#E7F1FB', color: '#2E8BD0', label: '고졸로 취업 돼요?',          screen: 'glossary', params: { track: 'job' } },
-      { icon: Zap,           bg: '#E4F6E9', color: '#248B41', label: '국비지원이 뭐에요?',          screen: 'glossary', params: { track: 'job' } },
-      { icon: Briefcase,     bg: '#F0EBFF', color: '#6D28D9', label: '직업훈련이 뭐에요?',          screen: 'job-training' },
-      { icon: HelpCircle,    bg: '#FFF4E5', color: '#EA580C', label: '검정고시로 뭘 할 수 있어요?', screen: 'glossary', params: { track: 'job' } },
+      { emoji: '🎓', label: '고졸로 취업 돼요?',          screen: 'glossary', params: { track: 'job' } },
+      { emoji: '⚡', label: '국비지원이 뭐에요?',          screen: 'glossary', params: { track: 'job' } },
+      { emoji: '🧰', label: '직업훈련이 뭐에요?',          screen: 'job-training' },
+      { emoji: '❓', label: '검정고시로 뭘 할 수 있어요?', screen: 'glossary', params: { track: 'job' } },
     ],
   },
 };
@@ -300,11 +300,9 @@ export default function TrackHome({ track, goTo = () => {}, onSwitch = () => {} 
       <div className="th2-white-block">
         <p className="th2-sec-title">바로가기</p>
         <div className="th2-icon-grid">
-          {icons.map(({ label, icon: Icon, c1, c2, screen, params }) => (
+          {icons.map(({ label, emoji, screen, params }) => (
             <button key={label} className="th2-icon-item" onClick={() => goTo(screen, params || {})}>
-              <span className="th2-icon-box" style={{ background: `linear-gradient(135deg,${c1},${c2})` }}>
-                <Icon size={22} color="#fff" />
-              </span>
+              <span className="th2-icon-box" aria-hidden="true">{emoji}</span>
               <span className="th2-icon-label">{label}</span>
             </button>
           ))}
@@ -314,11 +312,9 @@ export default function TrackHome({ track, goTo = () => {}, onSwitch = () => {} 
       <p className="th2-sec-title">지금 바로</p>
       <div className="th2-gray-block">
         <div className="th2-shortcut-list">
-          {shortcuts.map(({ icon: Icon, bg, color, title, sub, screen, params }) => (
+          {shortcuts.map(({ emoji, title, sub, screen, params }) => (
             <button key={title} className="th2-shortcut-row" onClick={() => goTo(screen, params || {})}>
-              <span className="th2-shortcut-ico" style={{ background: bg }}>
-                <Icon size={20} color={color} />
-              </span>
+              <span className="th2-shortcut-ico" aria-hidden="true">{emoji}</span>
               <span className="th2-shortcut-text">
                 <span className="th2-shortcut-title">{title}</span>
                 <span className="th2-shortcut-sub">{sub}</span>
@@ -332,11 +328,9 @@ export default function TrackHome({ track, goTo = () => {}, onSwitch = () => {} 
       <p className="th2-sec-title">{d.faqTitle}</p>
       <div className="th2-gray-block">
         <div className="th2-faq-grid">
-          {faqs.map(({ icon: Icon, bg, color, label, screen, params }) => (
+          {faqs.map(({ emoji, label, screen, params }) => (
             <button key={label} className="th2-faq-card" onClick={() => goTo(screen, params || {})}>
-              <span className="th2-faq-ico" style={{ background: bg }}>
-                <Icon size={18} color={color} />
-              </span>
+              <span className="th2-faq-ico" aria-hidden="true">{emoji}</span>
               <span className="th2-faq-label">{label}</span>
             </button>
           ))}

@@ -5,52 +5,68 @@
    ===================================================================== */
 
 :root {
-  /* 검고담임 "green + blue" brand — 밝고 신뢰감 있는 톤 */
-  --grad-brand: linear-gradient(120deg, #4FA8E6 0%, #2E8BD0 55%, #1C6FB2 100%);
-  --grad-soft: linear-gradient(135deg, #EAF4FC 0%, #DBEBFA 100%);
-  --grad-warm: linear-gradient(120deg, #57CC7D 0%, #36B85A 100%);
+  /* 검고담임 brand — 2026-09 서연님 UI 개선안 반영.
+     금융앱(삼쩜삼·모니모)처럼 "그라디언트 최소 / 그림자 최소 / 여백 최대"로 간다.
+     그라디언트 토큰은 호환 위해 남기되, 값은 거의 단색이다 —
+     화면 전체가 파랗게 번들거리는 게 'AI가 만든 티'의 주범이었다. 되돌리지 말 것. */
+  --grad-brand: linear-gradient(135deg, #3D96D8 0%, #2E8BD0 100%);
+  --grad-soft: linear-gradient(135deg, #F0F6FC 0%, #EAF2FB 100%);
+  --grad-warm: linear-gradient(135deg, #3FBE64 0%, #36B85A 100%);
   --brand: #2E8BD0;       /* 검고담임 파랑(담임) */
   --brand-deep: #1C6FB2;
-  --brand-tint: #E7F1FB;
+  --brand-tint: #EAF3FB;
   --coral: #36B85A;       /* 검고담임 초록(검고) — 보조색 */
   --coral-deep: #248B41;
-  --coral-tint: #E4F6E9;
+  --coral-tint: #E7F7EC;
   --accent-gold: #57B0E6; /* 보조 하늘색 */
 
-  /* cool neutrals */
-  --bg: #F1F5F9;          /* 푸른빛 그레이 — 카드가 떠오르는 배경 */
-  --bg-soft: #EEF3F8;     /* 옅은 블루그레이 — 보조 박스/태그 배경 */
-  --card: #ffffff;
-  --text: #1F2733;
-  --text-sub: #6B7686;
-  --border: #E5EBF1;
-
-  /* Semantic */
+  /* Semantic — 합격/주의/경고. 카드 로고·태그·배지가 전부 이걸 쓴다.
+     ⚠️ 2026-09 토큰 정리 때 이 블록을 통째로 빠뜨려 대학 카드 로고 배경이
+     사라졌던 적이 있다(변수가 없으면 선언 자체가 무효가 된다). 지우지 말 것. */
   --green: #36B85A;
-  --green-soft: #E4F6E9;
+  --green-soft: #E7F7EC;
   --green-dark: #248B41;
   --caution: #F2A93B;
-  --caution-soft: #FFF2DC;
+  --caution-soft: #FFF6E5;
   --danger: #F2785F;
   --danger-soft: #FDECE7;
 
-  /* Elevation (토스식 부드러운 그림자) */
-  --shadow-sm: 0 1px 2px rgba(38, 38, 38, 0.04), 0 2px 8px rgba(38, 38, 38, 0.06);
-  --shadow-md: 0 4px 16px rgba(38, 38, 38, 0.08);
-  --shadow-brand: 0 6px 18px rgba(46, 139, 208, 0.28);
-  --shadow-warm: 0 6px 18px rgba(54, 184, 90, 0.26);
+  /* neutrals — 푸른기를 빼고 종이에 가깝게(친근함). 카드는 흰색, 배경은 아주 옅은 회색. */
+  --bg: #F6F7F9;
+  --bg-soft: #F1F3F6;     /* 보조 박스/태그 배경 */
+  --card: #ffffff;
+  --text: #1B2129;
+  --text-sub: #737D8C;
+  --border: #EBEEF2;
 
-  /* Radius */
-  --r-sm: 12px;
-  --r-md: 16px;
-  --r-lg: 22px;
+  /* Elevation — 카드가 '떠 있는' 느낌을 줄이고 경계선으로 구분한다. */
+  --shadow-sm: 0 1px 2px rgba(27, 33, 41, 0.04);
+  --shadow-md: 0 2px 10px rgba(27, 33, 41, 0.06);
+  --shadow-brand: 0 3px 12px rgba(46, 139, 208, 0.16);
+  --shadow-warm: 0 3px 12px rgba(54, 184, 90, 0.16);
+
+  /* Radius — 전반적으로 키워서 둥글둥글하게 */
+  --r-sm: 14px;
+  --r-md: 18px;
+  --r-lg: 26px;
   --r-pill: 999px;
+
+  /* 여백 스케일 — 화면끼리 간격이 제각각이던 걸 토큰으로 묶었다 */
+  --gap-xs: 8px;
+  --gap-sm: 12px;
+  --gap-md: 18px;
+  --gap-lg: 26px;
+  --gap-xl: 36px;
 
   --app-max: 430px;
 
-  font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont,
-    system-ui, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+  /* SUIT = 둥근 터미널의 한글 산돌 계열. Pretendard는 폴백. */
+  font-family: 'SUIT Variable', SUIT, 'Pretendard Variable', Pretendard,
+    -apple-system, BlinkMacSystemFont, system-ui, 'Apple SD Gothic Neo',
+    'Noto Sans KR', sans-serif;
+  letter-spacing: -0.1px;
 }
+
 
 * {
   margin: 0;
@@ -219,10 +235,8 @@ button {
   font-size: 20px;
   font-weight: 800;
   letter-spacing: 0;
-  background: var(--grad-brand);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  /* 그라디언트 텍스트 제거 — 단색이 훨씬 또렷하고 덜 인위적이다 (2026-09 UI 개선). */
+  color: var(--brand-deep);
 }
 .avatar-btn {
   width: 38px;
@@ -619,10 +633,8 @@ button {
   color: var(--text);
 }
 .hero h1 .accent {
-  background: var(--grad-brand);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  /* 그라디언트 텍스트 제거 — 단색이 훨씬 또렷하고 덜 인위적이다 (2026-09 UI 개선). */
+  color: var(--brand-deep);
 }
 .hero p {
   margin-top: 14px;
@@ -900,16 +912,17 @@ button {
 .uni-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: var(--gap-sm);
 }
 .uni-card {
   display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 15px 16px;
+  align-items: center;
+  gap: 14px;
+  padding: 20px 18px;
   border-radius: var(--r-md);
   background: var(--card);
-  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
+  box-shadow: none;
   text-align: left;
   width: 100%;
 }
@@ -921,7 +934,7 @@ button {
   border-radius: 13px;
   display: grid;
   place-items: center;
-  background: var(--grad-soft);
+  background: var(--bg-soft);
   color: var(--brand-deep);
   font-weight: 800;
   font-size: 15px;
@@ -936,11 +949,11 @@ button {
   flex-direction: column;
 }
 .uni-name {
-  font-size: 15.5px;
+  font-size: 16px;
   font-weight: 700;
 }
 .uni-sub {
-  margin-top: 3px;
+  margin-top: 6px;
   font-size: 13px;
   color: var(--text-sub);
   font-weight: 500;
@@ -952,7 +965,7 @@ button {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: 10px;
 }
 .uni-name-row .uni-name {
   white-space: nowrap;
@@ -3098,10 +3111,8 @@ button {
   letter-spacing: -0.02em;
 }
 .home-title .accent {
-  background: var(--grad-brand);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  /* 그라디언트 텍스트 제거 — 단색이 훨씬 또렷하고 덜 인위적이다 (2026-09 UI 개선). */
+  color: var(--brand-deep);
 }
 
 /* ── 메인 CTA 카드 ── */
@@ -5046,3 +5057,103 @@ button {
   color: var(--text-sub);
 }
 .adm-cut-lowest b { color: var(--text); font-weight: 700; }
+
+
+/* =====================================================================
+   대학 탐색 → '이 목록 읽는 법' (2026-09 서연님 UI 개선안)
+   목록 아래 5줄짜리 설명 문단을 빼내고, 그 자리엔 링크 한 줄만 남겼다.
+   ===================================================================== */
+.explore-help-link {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  margin-top: var(--gap-lg);
+  padding: 18px;
+  border-radius: var(--r-md);
+  background: var(--bg-soft);
+  border: none;
+  text-align: left;
+  color: var(--text-sub);
+  cursor: pointer;
+}
+.explore-help-emoji { font-size: 22px; line-height: 1; flex: 0 0 auto; }
+.explore-help-text { flex: 1; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.explore-help-text b { font-size: 15px; font-weight: 700; color: var(--text); }
+.explore-help-text span { font-size: 13px; }
+
+/* 안내 페이지 본문 — ehelp- 접두사. help-* 는 HelpScreen이 이미 쓰고 있어
+   (.help-body 가 flex 컬럼이라 <b>가 줄바꿈된다) 절대 재사용하지 말 것. */
+.ehelp-sec {
+  padding: var(--gap-lg) 0;
+  border-bottom: 1px solid var(--border);
+}
+.ehelp-sec:last-of-type { border-bottom: none; }
+.ehelp-emoji { font-size: 26px; line-height: 1; display: block; margin-bottom: 12px; }
+.ehelp-title {
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.3px;
+}
+.ehelp-body {
+  margin-top: 12px;
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--text-sub);
+  font-weight: 500;
+}
+.ehelp-body b { color: var(--text); font-weight: 700; }
+.ehelp-callout {
+  margin-top: 14px;
+  padding: 14px 16px;
+  border-radius: var(--r-sm);
+  background: #FFF6E5;
+  border: 1px solid #F5E3BE;
+  font-size: 14px;
+  line-height: 1.7;
+  color: #8a6516;
+  font-weight: 500;
+}
+.ehelp-callout b { font-weight: 700; }
+
+
+/* =====================================================================
+   이모지 아이콘 (2026-09 서연님 UI 개선안)
+   lucide 선 아이콘 대신 컬러 이모지를 쓰는 자리들.
+   '기능' 아이콘(화살표·X·검색·체크)은 선 아이콘 그대로 둔다 — 섞어 쓰는 게 의도다.
+   ===================================================================== */
+
+/* 홈 바로가기 8칸 — 그라디언트 박스를 걷어내고 옅은 배경 + 이모지로 */
+.th2-icon-box {
+  background: var(--bg-soft) !important;
+  display: grid;
+  place-items: center;
+  font-size: 24px;
+  line-height: 1;
+  box-shadow: none !important;
+}
+/* 지금 바로 / FAQ 아이콘 */
+.th2-shortcut-ico,
+.th2-faq-ico {
+  background: var(--bg-soft) !important;
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+  line-height: 1;
+}
+/* 하단 탭 — 비활성은 채도를 낮춰 활성 탭이 또렷하게 보이도록 */
+.tab-bar .tab-ico-wrap {
+  font-size: 21px;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  /* 완전 흑백으로 만들면 이모지가 회색 덩어리로 뭉개진다 — 살짝만 뺀다 */
+  filter: grayscale(0.55);
+  opacity: 0.55;
+  transition: filter 0.15s, opacity 0.15s;
+}
+.tab-bar .tab-item.active .tab-ico-wrap {
+  filter: none;
+  opacity: 1;
+}
