@@ -211,7 +211,7 @@ export default function ExploreScreen({ goTo = () => {}, goBack = () => {}, canG
       {!hasScore && !isSearching && (
         <button className="explore-banner" onClick={() => goTo('profile')}>
           <span className="explore-banner-body">
-            <b>내 검정고시 점수</b>를 넣으면<br />각 대학 합격 가능성까지 한눈에 보여요
+            <b>내 검정고시 점수</b>를 넣으면<br />각 대학 합격 가능성을 볼 수 있어요
           </span>
           <ChevronRight size={18} />
         </button>

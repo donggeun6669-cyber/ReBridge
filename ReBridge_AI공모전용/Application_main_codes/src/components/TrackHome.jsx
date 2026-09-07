@@ -9,7 +9,7 @@ import {
 
 import LogoMark from './LogoMark.jsx';
 import { searchAll } from '../lib/homeSearch.js';
-import { V1_UNIV_ONLY, isHiddenScreen } from '../lib/persona.js';
+import { V1_UNIV_ONLY, isHiddenScreen, loadProfile } from '../lib/persona.js';
 
 // 상단 트랙 스위처. v1(V1_UNIV_ONLY)에서는 대입만 남고, 1개뿐이면 스위처 자체를 감춘다.
 const ALL_TRACK_ICONS = [
@@ -47,8 +47,8 @@ const TRACK_DATA = {
       { label: '체크리스트',  emoji: '✅', screen: 'checklist' },
     ],
     shortcuts: [
-      { emoji: '📅', title: '지금 뭘 공부해야 할 때일까요?', sub: '오늘 할 일 · 시험 D-day 확인',  screen: 'study-planner' },
-      { emoji: '🙋', title: '담임에게 물어보기',              sub: '막히면 여기서 바로 질문해요',    screen: 'help' },
+      { emoji: '📅', title: '오늘 할 일 · 시험 D-day', screen: 'study-planner' },
+      { emoji: '🙋', title: '담임에게 물어보기', screen: 'help' },
     ],
     faqs: [
       { emoji: '📅', label: '시험 일정이 언제에요?',    screen: 'ged-guide' },
@@ -76,14 +76,16 @@ const TRACK_DATA = {
       { label: '체크리스트', emoji: '✅', screen: 'checklist' },
     ],
     shortcuts: [
-      { emoji: '📅', title: '지금 내가 뭘 해야 할 때일까요?', sub: '지금 시기에 맞는 할 일 확인',  screen: 'checklist' },
-      { emoji: '🙋', title: '담임에게 물어보기',               sub: '막히면 여기서 바로 질문해요', screen: 'help' },
+      { emoji: '📅', title: '지금 시기에 할 일', screen: 'checklist' },
+      { emoji: '🙋', title: '담임에게 물어보기', screen: 'help' },
     ],
+    // 질문마다 GuideScreen 전용 페이지로 보낸다.
+    // 예전엔 넷 다 glossary(용어 목록)로 가서 어느 걸 눌러도 같은 화면이었다(2026-09 서연님 지적).
     faqs: [
-      { emoji: '❓', label: '전형이 뭐에요?',           screen: 'glossary', params: { track: 'univ' } },
-      { emoji: '⚡', label: '검정고시도 수시 돼요?',     screen: 'glossary', params: { track: 'univ' } },
-      { emoji: '⚖️', label: '비교내신이 뭐에요?',       screen: 'glossary', params: { track: 'univ' } },
-      { emoji: '🎯', label: '수능 최저가 뭐에요?',      screen: 'glossary', params: { track: 'univ' } },
+      { emoji: '❓', label: '전형이 뭐예요?',        screen: 'guide', params: { topic: 'types' } },
+      { emoji: '⚡', label: '검정고시도 수시 돼요?', screen: 'guide', params: { topic: 'susi' } },
+      { emoji: '⚖️', label: '비교내신이 뭐예요?',   screen: 'guide', params: { topic: 'compare' } },
+      { emoji: '🎯', label: '수능 최저가 뭐예요?',   screen: 'guide', params: { topic: 'csat' } },
     ],
   },
   job: {
@@ -105,12 +107,12 @@ const TRACK_DATA = {
       { label: '직업훈련',   emoji: '🧰', screen: 'job-training' },
     ],
     shortcuts: [
-      { emoji: '🧪', title: '진로 검사 해보기',    sub: '나에게 맞는 직업 유형 확인',   screen: 'job-psych' },
-      { emoji: '🙋', title: '담임에게 물어보기',   sub: '막히면 여기서 바로 질문해요',  screen: 'help' },
+      { emoji: '🧪', title: '진로 검사', screen: 'job-psych' },
+      { emoji: '🙋', title: '담임에게 물어보기', screen: 'help' },
     ],
     faqs: [
-      { emoji: '🎓', label: '고졸로 취업 돼요?',          screen: 'glossary', params: { track: 'job' } },
-      { emoji: '⚡', label: '국비지원이 뭐에요?',          screen: 'glossary', params: { track: 'job' } },
+      { emoji: '🎓', label: '고졸 학력으로 뭘 할 수 있어요?', screen: 'glossary', params: { track: 'job', termId: '동등학력 (인정자)' } },
+      { emoji: '⚡', label: '국비지원이 뭐예요?',          screen: 'glossary', params: { track: 'job', termId: '국비지원 (훈련)' } },
       { emoji: '🧰', label: '직업훈련이 뭐에요?',          screen: 'job-training' },
       { emoji: '❓', label: '검정고시로 뭘 할 수 있어요?', screen: 'glossary', params: { track: 'job' } },
     ],
@@ -129,6 +131,19 @@ export default function TrackHome({ track, goTo = () => {}, onSwitch = () => {} 
   const shortcuts = visible(d.shortcuts);
   const faqs = visible(d.faqs);
   const [q, setQ] = useState('');
+  // 점수를 넣은 사람에겐 점수를, 아직인 사람에겐 다음 할 일을 보여준다.
+  const hero = useMemo(() => {
+    if (track !== 'univ') return { kicker: d.kicker, line1: d.heroLine1, line2: d.heroLine2 };
+    const p = loadProfile();
+    if (p?.gedAvg != null) {
+      return {
+        kicker: `검정고시 평균 ${p.gedAvg}점`,
+        line1: '지금 지원할 수 있는',
+        line2: '대학을 볼까요?',
+      };
+    }
+    return { kicker: null, line1: '검정고시 점수를 넣으면', line2: '갈 수 있는 대학이 보여요' };
+  }, [track, d]);
   const res = useMemo(() => searchAll(q), [q]);
   const noHit = !res.empty && !res.univs.length && !res.jobs.length && !res.terms.length && !res.menus.length && !res.centers.length && !res.supports.length;
 
@@ -156,11 +171,13 @@ export default function TrackHome({ track, goTo = () => {}, onSwitch = () => {} 
         )}
       </header>
 
+      {/* 2026-09 서연님: 앱 안에서 자기소개(광고 카피)를 하지 않는다.
+          점수가 있으면 '내 상태'를, 없으면 '지금 할 일'을 띄운다. */}
       <section className="th2-hero">
-        <span className="th2-chip">{d.kicker}</span>
+        {hero.kicker && <span className="th2-chip">{hero.kicker}</span>}
         <h1 className="th2-title">
-          {d.heroLine1}<br />
-          <span className="th2-accent">{d.heroLine2}</span>
+          {hero.line1}<br />
+          <span className="th2-accent">{hero.line2}</span>
         </h1>
       </section>
 
@@ -317,7 +334,8 @@ export default function TrackHome({ track, goTo = () => {}, onSwitch = () => {} 
               <span className="th2-shortcut-ico" aria-hidden="true">{emoji}</span>
               <span className="th2-shortcut-text">
                 <span className="th2-shortcut-title">{title}</span>
-                <span className="th2-shortcut-sub">{sub}</span>
+                {/* 부제는 제목이 설명을 필요로 할 때만. 되풀이하는 부제는 지웠다(2026-09) */}
+                {sub && <span className="th2-shortcut-sub">{sub}</span>}
               </span>
               <ChevronRight size={14} className="th2-chev" />
             </button>

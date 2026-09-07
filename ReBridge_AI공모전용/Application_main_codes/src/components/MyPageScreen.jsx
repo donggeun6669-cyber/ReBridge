@@ -90,7 +90,8 @@ function MenuRow({ ico, icoClass, title, sub, onClick }) {
       <span className={`mp-menu-ico ${icoClass}`}><Icon size={18} /></span>
       <span className="mp-menu-text">
         <span className="mp-menu-title">{title}</span>
-        <span className="mp-menu-sub">{sub}</span>
+        {/* 부제는 제목만으로 부족할 때만 (2026-09) */}
+        {sub && <span className="mp-menu-sub">{sub}</span>}
       </span>
       <ChevronRight size={16} className="mp-menu-arrow" />
     </button>
@@ -321,10 +322,10 @@ export default function MyPageScreen({ goTo = () => {}, goBack = () => {} }) {
         {isUniv || (!isJob && !isStudy) ? (
           <>
             <MenuRow ico={Bookmark} icoClass="ico-brand" title="관심 대학"
-              sub="저장한 대학교 목록" onClick={() => goTo('saved')} />
+              onClick={() => goTo('saved')} />
             <div className="mp-row-divider" />
             <MenuRow ico={ClipboardCheck} icoClass="ico-coral" title="서류 체크리스트"
-              sub="제출 서류 빠짐없이 확인" onClick={() => goTo('checklist')} />
+              onClick={() => goTo('checklist')} />
             {/* 대학 지도 — 카카오맵 스위치가 꺼져 있으면 메뉴도 숨긴다(빈 지도로 보내지 않기) */}
             {MAP_ENABLED && (
               <>

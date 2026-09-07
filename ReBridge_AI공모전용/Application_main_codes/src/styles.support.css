@@ -391,15 +391,19 @@
   gap: 4px;
   padding: 5px 10px;
   border-radius: var(--r-pill);
-  background: var(--coral-tint);
+  /* 칩이 6개씩 붙는 카드라 배경을 채우면 화면이 온통 초록이 된다(2026-09 서연님).
+     테두리만 초록으로 두고 안은 비운다. 검색어에 걸린 칩만 채워서 눈에 띄게. */
+  background: transparent;
+  border: 1px solid var(--coral);
   color: var(--coral-deep);
   font-size: 11.5px;
   font-weight: 700;
 }
+.support-benefit-chip svg { color: var(--coral); }
 .support-benefit-chip.hit {
-  background: var(--grad-warm);
-  color: #fff;
-  box-shadow: var(--shadow-warm);
+  background: var(--coral-tint);
+  border-color: var(--coral-deep);
+  color: var(--coral-deep);
 }
 .support-benefit-note {
   margin-top: 8px;

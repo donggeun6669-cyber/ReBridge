@@ -5154,21 +5154,6 @@ button {
   font-size: 20px;
   line-height: 1;
 }
-/* 하단 탭 — 비활성은 채도를 낮춰 활성 탭이 또렷하게 보이도록 */
-.tab-bar .tab-ico-wrap {
-  font-size: 21px;
-  line-height: 1;
-  display: grid;
-  place-items: center;
-  /* 완전 흑백으로 만들면 이모지가 회색 덩어리로 뭉개진다 — 살짝만 뺀다 */
-  filter: grayscale(0.55);
-  opacity: 0.55;
-  transition: filter 0.15s, opacity 0.15s;
-}
-.tab-bar .tab-item.active .tab-ico-wrap {
-  filter: none;
-  opacity: 1;
-}
 
 
 /* =====================================================================
