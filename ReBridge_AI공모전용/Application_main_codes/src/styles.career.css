@@ -63,7 +63,7 @@
   border-radius: 50%;
   color: #fff;
 }
-.cc-brand .career-card-arrow { background: var(--grad-brand); }
+.cc-brand .career-card-arrow { background: var(--brand); }
 .cc-green .career-card-arrow { background: var(--grad-warm); }
 .cc-gold  .career-card-arrow { background: linear-gradient(120deg, #46B6AE 0%, #2E948C 100%); }
 

@@ -233,7 +233,7 @@
 .support-region-chip.active {
   background: var(--grad-brand);
   border-color: transparent;
-  color: #fff;
+  color: var(--on-brand);
   box-shadow: var(--shadow-brand);
 }
 .support-chip-cnt {
@@ -278,7 +278,7 @@
 }
 .support-cat-card.active .support-cat-ico {
   background: var(--grad-brand);
-  color: #fff;
+  color: var(--on-brand);
 }
 .support-cat-label {
   font-size: 12.5px;
@@ -462,7 +462,7 @@
 }
 .support-action-btn.call {
   background: var(--grad-brand);
-  color: #fff;
+  color: var(--on-brand);
   box-shadow: var(--shadow-brand);
 }
 .support-action-btn.map {

@@ -23,7 +23,7 @@
   color: var(--text-sub); font-size: 14px; font-weight: 600; cursor: pointer;
   transition: all .15s;
 }
-.cm-tab.sel { background: var(--grad-brand); color: #fff; border-color: transparent; box-shadow: var(--shadow-brand); }
+.cm-tab.sel { background: var(--grad-brand); color: var(--on-brand); border-color: transparent; box-shadow: var(--shadow-brand); }
 
 /* 정렬 토글(최신/인기) */
 .cm-sort { display: flex; gap: 6px; margin: -4px 2px 14px; }
@@ -123,7 +123,7 @@
   margin-top: 4px;
   z-index: 30;
   display: inline-flex; align-items: center; gap: 7px;
-  background: var(--grad-brand); color: #fff; border: none;
+  background: var(--grad-brand); color: var(--on-brand); border: none;
   padding: 12px 18px; border-radius: var(--r-pill); font-size: 14px; font-weight: 700;
   box-shadow: var(--shadow-brand); cursor: pointer;
 }
@@ -188,7 +188,7 @@
 }
 .cm-send {
   flex-shrink: 0; width: 44px; border: none; border-radius: var(--r-sm);
-  background: var(--grad-brand); color: #fff; cursor: pointer;
+  background: var(--grad-brand); color: var(--on-brand); cursor: pointer;
   display: inline-flex; align-items: center; justify-content: center;
 }
 .cm-send:disabled { opacity: .5; }
@@ -214,7 +214,7 @@
   border: none; border-radius: var(--r-sm); padding: 13px 18px;
   font-size: 15px; font-weight: 700; cursor: pointer; width: 100%;
 }
-.cm-btn.primary { background: var(--grad-brand); color: #fff; box-shadow: var(--shadow-brand); }
+.cm-btn.primary { background: var(--grad-brand); color: var(--on-brand); box-shadow: var(--shadow-brand); }
 .cm-btn.primary:disabled { opacity: .5; box-shadow: none; }
 .cm-btn.ghost { background: var(--card); color: var(--text-sub); border: 1px solid var(--border); }
 .cm-btn.sm { width: auto; padding: 8px 14px; font-size: 13px; }

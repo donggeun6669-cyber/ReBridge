@@ -128,7 +128,7 @@
 
 /* ═════════ 누적 대시보드(기록 탭) ═════════ */
 .study-dash-hero {
-  background: var(--grad-brand); color: #fff; border-radius: var(--r-lg);
+  background: var(--grad-brand); color: var(--on-brand); border-radius: var(--r-lg);
   box-shadow: var(--shadow-brand); padding: 20px; margin-bottom: 16px;
 }
 .study-dash-hero-lbl { font-size: 12.5px; font-weight: 700; opacity: 0.92; }
@@ -168,7 +168,7 @@
 .study-subjbar { display: flex; align-items: center; gap: 10px; }
 .study-subjbar-name { flex: 0 0 46px; font-size: 12.5px; font-weight: 700; color: var(--text); }
 .study-subjbar-track { flex: 1; height: 10px; border-radius: 999px; background: var(--bg-soft); overflow: hidden; }
-.study-subjbar-fill { display: block; height: 100%; border-radius: 999px; background: var(--grad-brand); }
+.study-subjbar-fill { display: block; height: 100%; border-radius: 999px; background: var(--brand); }
 .study-subjbar-val { flex: 0 0 auto; min-width: 78px; text-align: right; font-size: 11.5px; font-weight: 700; color: var(--text-sub); }
 .study-subjbar-pct { color: var(--brand-deep); font-weight: 800; }
 .study-empty { font-size: 13px; color: var(--text-sub); padding: 18px; text-align: center; background: var(--bg-soft); border-radius: var(--r-md); }
@@ -248,7 +248,7 @@
 .study-rm-progress-title { font-size: 13.5px; font-weight: 800; color: var(--text); }
 .study-rm-progress-pct { font-size: 13.5px; font-weight: 800; color: var(--brand-deep); }
 .study-rm-progress-bar { height: 10px; border-radius: 999px; background: var(--bg-soft); overflow: hidden; margin-bottom: 8px; }
-.study-rm-progress-fill { display: block; height: 100%; border-radius: 999px; background: var(--grad-brand); transition: width 0.4s; }
+.study-rm-progress-fill { display: block; height: 100%; border-radius: 999px; background: var(--brand); transition: width 0.4s; }
 .study-rm-progress-sub { font-size: 12px; color: var(--text-sub); line-height: 1.45; }
 .study-rm-progress-sub b { color: var(--brand-deep); }
 

@@ -9,7 +9,11 @@
      금융앱(삼쩜삼·모니모)처럼 "그라디언트 최소 / 그림자 최소 / 여백 최대"로 간다.
      그라디언트 토큰은 호환 위해 남기되, 값은 거의 단색이다 —
      화면 전체가 파랗게 번들거리는 게 'AI가 만든 티'의 주범이었다. 되돌리지 말 것. */
-  --grad-brand: linear-gradient(135deg, #3D96D8 0%, #2E8BD0 100%);
+  /* 큰 면을 채우는 색. 2026-09-07 크림 시안 이후 파랑에서 연노랑으로 바꿨다
+     — 진한 파랑이 크림 배경과 부딪혔다(서연님). 파랑은 글자·아이콘에만 쓴다.
+     ⚠️ 이 토큰을 파랑으로 되돌리면 앱 전체 버튼이 다시 부딪힌다. */
+  --grad-brand: #FFE9B0;
+  --on-brand: #6B4A00;      /* 위 색 위에 얹는 글자색 */
   --grad-soft: linear-gradient(135deg, #F0F6FC 0%, #EAF2FB 100%);
   --grad-warm: linear-gradient(135deg, #3FBE64 0%, #36B85A 100%);
   --brand: #2E8BD0;       /* 검고담임 파랑(담임) */
@@ -35,7 +39,9 @@
      기존 연파랑 배경이 관공서 느낌이라 크림으로 바꿨다. 되돌리지 말 것.
      색은 크림/노랑 하나 + 로고 파랑만 쓴다 — 하늘·민트까지 넣었더니 정신없었다. */
   --bg: #FFF8EE;          /* 화면 배경 (bg/cream) */
-  --bg-soft: #FFF1CC;     /* 보조 박스·아이콘 칸 (accent/yellow-soft) */
+  /* 큰 보조 면(섹션 블록·빈칸)은 따뜻한 중립 회색. 여기까지 노랑을 칠했더니
+     노란 CTA가 배경에 묻혔다. 시안의 노랑(#FFF1CC)은 '아이콘 칸' 전용이다. */
+  --bg-soft: #F6F1E8;
   --card: #ffffff;
   --text: #1E2A3A;        /* text/primary */
   --text-sub: #7A7468;    /* text/sub — 따뜻한 회색 */
@@ -658,7 +664,7 @@ button {
   padding: 17px 20px;
   border-radius: var(--r-md);
   background: var(--grad-brand);
-  color: #fff;
+  color: var(--on-brand);
   font-size: 16.5px;
   font-weight: 700;
   letter-spacing: 0;
@@ -820,7 +826,7 @@ button {
   display: grid;
   place-items: center;
   background: var(--grad-brand);
-  color: #fff;
+  color: var(--on-brand);
   box-shadow: var(--shadow-brand);
 }
 .discover-body {
@@ -1277,6 +1283,7 @@ button {
   gap: 12px;
   padding: 20px 18px;
   background: var(--grad-brand);
+  color: var(--on-brand);
 }
 .mp-avatar {
   flex-shrink: 0;
@@ -3049,7 +3056,7 @@ button {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--grad-brand);
+  background: var(--bg);
   opacity: 1;
   transition: opacity 0.4s ease;
 }
@@ -3136,7 +3143,7 @@ button {
   padding: 40px 24px;
   border-radius: var(--r-lg);
   background: var(--grad-brand);
-  color: #fff;
+  color: var(--on-brand);
   text-align: left;
   box-shadow: var(--shadow-brand);
   transition: transform 0.12s ease, filter 0.15s ease;
@@ -3180,7 +3187,7 @@ button {
   display: inline-block;
   width: 3px;
   height: 14px;
-  background: var(--grad-brand);
+  background: var(--accent-ink);
   border-radius: 2px;
   flex-shrink: 0;
 }
@@ -4531,7 +4538,7 @@ button {
 .th2-suggest-chip2:hover { border-color: var(--brand); color: var(--brand); }
 
 /* ── TrackHome v2 (세탁 앱 레이아웃) ── */
-.th2-hero { padding: 4px 0 16px; }
+.th2-hero { padding: 18px 0 22px; }   /* 상단바와 붙어 있어 여백을 늘렸다(서연님) */
 .th2-chip {
   display: inline-flex; align-self: flex-start;
   padding: 5px 11px; border-radius: var(--r-pill);
@@ -4539,8 +4546,11 @@ button {
   background: var(--accent); color: var(--accent-text);
   font-size: 11.5px; font-weight: 800; letter-spacing: 0.03em;
 }
-.th2-title { font-size: 26px; font-weight: 800; color: var(--text); line-height: 1.3; }
-.th2-accent { color: var(--brand); }
+.th2-title { font-size: 26px; font-weight: 800; color: var(--text); line-height: 1.35; margin-top: 10px; }
+.th2-accent {
+  /* 파랑은 크림 위에서 튄다(서연님). 아이콘 칸과 같은 갈색으로 맞춘다. */
+  color: var(--accent-ink);
+}
 
 .th2-cta {
   width: 100%; background: var(--grad-brand); border-radius: var(--r-md);
@@ -4548,11 +4558,11 @@ button {
   border: none; cursor: pointer; margin-bottom: 14px;
 }
 .th2-cta-left { display: flex; flex-direction: column; gap: 3px; text-align: left; }
-.th2-cta-sub { font-size: 10px; color: rgba(255,255,255,.7); }
-.th2-cta-main { font-size: 15px; font-weight: 800; color: #fff; }
+.th2-cta-sub { font-size: 10px; color: var(--accent-text); opacity: .8; }
+.th2-cta-main { font-size: 15px; font-weight: 800; color: var(--on-brand); }
 .th2-cta-arrow {
-  width: 30px; height: 30px; background: rgba(255,255,255,.2);
-  border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; flex-shrink: 0;
+  width: 30px; height: 30px; background: rgba(107,74,0,.14);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--on-brand); flex-shrink: 0;
 }
 
 .th2-white-block { padding: 16px 0; margin-bottom: 2px; }
@@ -5139,7 +5149,7 @@ button {
 
 /* 홈 바로가기 8칸 — 그라디언트 박스를 걷어내고 옅은 배경 + 이모지로 */
 .th2-icon-box {
-  background: var(--bg-soft) !important;
+  background: var(--accent-soft) !important;
   display: grid;
   place-items: center;
   font-size: 24px;
@@ -5149,7 +5159,7 @@ button {
 /* 지금 바로 / FAQ 아이콘 */
 .th2-shortcut-ico,
 .th2-faq-ico {
-  background: var(--bg-soft) !important;
+  background: var(--accent-soft) !important;
   display: grid;
   place-items: center;
   font-size: 20px;
