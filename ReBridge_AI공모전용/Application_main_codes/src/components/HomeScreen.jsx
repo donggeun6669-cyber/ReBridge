@@ -53,42 +53,54 @@ export default function HomeScreen({ goTo = () => {}, goBack = () => {} }) {
     return <TrackHome track={track} goTo={goTo} onSwitch={switchTrack} />;
   }
 
+  // ── 첫 화면 — 2026-09-07 서연님 확정 시안 'A 따뜻한 크림' ─────────────────
+  // 레퍼런스: The Mix(구조·온기) + 토스(타이포·여백).
+  // 제목을 "아직 시작 전이에요"에서 바꾼 이유: 뒤처졌다는 말로 읽히지 않게 하려고.
   return (
-    <div className="screen">
+    <div className="screen start-screen">
+      {/* 우상단 노란 원 — 배경 장식. 화면 밖으로 넘치므로 부모가 overflow를 잘라준다 */}
+      <span className="start-blob" aria-hidden="true" />
+
       <header className="topbar">
         <span className="brand-lockup">
-          <LogoMark size={24} />
+          <LogoMark size={26} />
           <span className="wordmark">검고담임</span>
         </span>
       </header>
 
-      <section className="home-hero">
-        <p className="home-kicker">함께 가요</p>
-        <h1 className="home-title">아직 시작 전이에요</h1>
-        <p className="home-lead">비슷한 친구들은 이렇게 시작했어요.<br />눌러보면 나에게 맞춰드려요.</p>
+      <section className="start-hero">
+        <div className="start-hero-text">
+          <span className="start-chip">함께 가요</span>
+          <h1 className="start-title">어디서부터<br />시작할까요?</h1>
+          <p className="start-lead">
+            비슷한 친구들은 이렇게 시작했어요.<br />
+            눌러보면 나에게 맞춰드려요.
+          </p>
+        </div>
+        <span className="start-hero-mark" aria-hidden="true"><LogoMark size={96} /></span>
       </section>
 
-      <div className="home-examples">
+      <div className="start-cards">
         {EXAMPLES.map(({ track: t, icon: Icon, title, sub }) => (
-          <button key={t} className="home-example-row" onClick={() => choose(t)}>
-            <span className="home-example-ico"><Icon size={20} /></span>
-            <span className="home-example-text">
-              <span className="home-example-title">{title}</span>
-              <span className="home-example-sub">{sub}</span>
+          <button key={t} className="start-card" onClick={() => choose(t)}>
+            <span className="start-card-ico"><Icon size={22} /></span>
+            <span className="start-card-body">
+              <span className="start-card-title">{title}</span>
+              <span className="start-card-sub">{sub}</span>
             </span>
-            <ChevronRight size={18} className="home-example-arrow" />
+            <ChevronRight size={18} className="start-card-arrow" />
           </button>
         ))}
       </div>
 
       {/* 커뮤니티 둘러보기 — v1에서는 커뮤니티를 숨기므로 함께 감춘다. */}
       {!V1_UNIV_ONLY && (
-        <button className="home-browse" onClick={() => goTo('community')}>
+        <button className="start-browse" onClick={() => goTo('community')}>
           아직 잘 모르겠어요 · 다른 친구들 이야기 둘러보기
         </button>
       )}
 
-      <p className="note" style={{ marginTop: 28 }}>
+      <p className="start-note">
         검정고시·진학·진로, 학교 밖 청소년의
         <br />
         다음 한 걸음을 함께 찾는 앱이에요.

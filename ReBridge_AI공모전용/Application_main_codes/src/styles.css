@@ -31,17 +31,27 @@
   --danger: #F2785F;
   --danger-soft: #FDECE7;
 
-  /* neutrals — 푸른기를 빼고 종이에 가깝게(친근함). 카드는 흰색, 배경은 아주 옅은 회색. */
-  --bg: #F6F7F9;
-  --bg-soft: #F1F3F6;     /* 보조 박스/태그 배경 */
+  /* 2026-09-07 서연님 확정 시안 'A 따뜻한 크림'.
+     기존 연파랑 배경이 관공서 느낌이라 크림으로 바꿨다. 되돌리지 말 것.
+     색은 크림/노랑 하나 + 로고 파랑만 쓴다 — 하늘·민트까지 넣었더니 정신없었다. */
+  --bg: #FFF8EE;          /* 화면 배경 (bg/cream) */
+  --bg-soft: #FFF1CC;     /* 보조 박스·아이콘 칸 (accent/yellow-soft) */
   --card: #ffffff;
-  --text: #1B2129;
-  --text-sub: #737D8C;
-  --border: #EBEEF2;
+  --text: #1E2A3A;        /* text/primary */
+  --text-sub: #7A7468;    /* text/sub — 따뜻한 회색 */
+  --text-muted: #8A8478;  /* text/muted — 하단 안내문·비활성 탭 */
+  --border: #F2E6D2;      /* border/warm */
+
+  /* 노랑 계열 — 시안의 강조색 */
+  --accent: #FFE9B0;      /* 칩·버튼·활성 탭 배경 */
+  --accent-soft: #FFF1CC; /* 아이콘 칸 배경 */
+  --accent-ink: #7A5200;  /* 아이콘 색 */
+  --accent-text: #6B4A00; /* 칩·버튼 글자 */
+  --chevron: #B0A899;     /* 카드 오른쪽 화살표 */
 
   /* Elevation — 카드가 '떠 있는' 느낌을 줄이고 경계선으로 구분한다. */
-  --shadow-sm: 0 1px 2px rgba(27, 33, 41, 0.04);
-  --shadow-md: 0 2px 10px rgba(27, 33, 41, 0.06);
+  --shadow-sm: 0 1px 2px rgba(120, 90, 30, 0.04);
+  --shadow-md: 0 2px 10px rgba(120, 90, 30, 0.06);
   --shadow-brand: 0 3px 12px rgba(46, 139, 208, 0.16);
   --shadow-warm: 0 3px 12px rgba(54, 184, 90, 0.16);
 
@@ -168,19 +178,8 @@ button {
 .tab-item.active {
   color: var(--brand);
 }
-/* 활성 탭 상단 인디케이터 */
-.tab-item.active::before {
-  content: '';
-  position: absolute;
-  top: -8px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 28px;
-  height: 3px;
-  background: var(--grad-brand);
-  border-radius: 0 0 3px 3px;
-}
-/* 탭 아이콘 박스 — 활성시 브랜드 틴트 배경 */
+/* 활성 탭 상단 인디케이터 — 시안에 없어서 뺐다(노란 아이콘 칸이 그 역할을 한다) */
+/* 탭 아이콘 박스 — 활성시 노란 칸 (2026-09-07 확정 시안) */
 .tab-item .tab-ico-wrap {
   width: 36px;
   height: 26px;
@@ -190,7 +189,7 @@ button {
   transition: background 0.15s ease;
 }
 .tab-item.active .tab-ico-wrap {
-  background: var(--brand-tint);
+  background: var(--accent);
 }
 
 /* =====================================================================
@@ -4534,9 +4533,11 @@ button {
 /* ── TrackHome v2 (세탁 앱 레이아웃) ── */
 .th2-hero { padding: 4px 0 16px; }
 .th2-chip {
-  display: inline-block; background: var(--brand-tint); color: var(--brand-deep);
-  font-size: 10px; font-weight: 700; padding: 3px 10px;
-  border-radius: var(--r-pill); margin-bottom: 8px;
+  display: inline-flex; align-self: flex-start;
+  padding: 5px 11px; border-radius: var(--r-pill);
+  /* 시안(2026-09-07)의 '함께 가요' 칩과 같은 노랑. 첫 화면과 홈이 따로 놀지 않게. */
+  background: var(--accent); color: var(--accent-text);
+  font-size: 11.5px; font-weight: 800; letter-spacing: 0.03em;
 }
 .th2-title { font-size: 26px; font-weight: 800; color: var(--text); line-height: 1.3; }
 .th2-accent { color: var(--brand); }
@@ -5163,3 +5164,113 @@ button {
    ===================================================================== */
 .onb-hello-title { font-size: 31px; }
 .onb-q { font-size: 28px; }
+
+/* =====================================================================
+   첫 화면 (트랙 선택) — 2026-09-07 서연님 확정 시안 'A 따뜻한 크림'
+   수치는 시안 README 그대로. 임의로 바꾸지 말 것.
+   ===================================================================== */
+.start-screen { position: relative; overflow: hidden; }
+.start-blob {
+  position: absolute;
+  top: -60px;
+  right: -70px;
+  width: 240px;
+  height: 240px;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0.45;
+  pointer-events: none;
+}
+/* 배경 원 위로 내용이 오게 */
+.start-screen > *:not(.start-blob) { position: relative; }
+
+.start-hero {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 4px 6px;
+}
+.start-hero-text { display: flex; flex-direction: column; gap: 10px; flex: 1; min-width: 0; }
+.start-hero-mark { flex: none; margin-bottom: 4px; }
+
+.start-chip {
+  display: inline-flex;
+  align-self: flex-start;
+  padding: 5px 11px;
+  border-radius: var(--r-pill);
+  background: var(--accent);
+  font-size: 11.5px;
+  font-weight: 800;
+  color: var(--accent-text);
+  letter-spacing: 0.03em;
+}
+.start-title {
+  margin: 0;
+  font-size: 30px;
+  line-height: 1.28;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+.start-lead {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #6B6559;
+}
+
+.start-cards { display: flex; flex-direction: column; gap: 10px; margin-top: 18px; }
+.start-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 16px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  box-shadow: var(--shadow-md);
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.12s;
+}
+.start-card:active { transform: scale(0.99); }
+.start-card-ico {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  flex: none;
+  border-radius: 14px;
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+}
+.start-card-body { display: flex; flex-direction: column; flex: 1; min-width: 0; gap: 2px; }
+.start-card-title { font-size: 16px; font-weight: 700; color: var(--text); }
+.start-card-sub { font-size: 12.5px; color: var(--text-sub); }
+.start-card-arrow { flex: none; color: var(--chevron); }
+
+.start-browse {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin-top: 14px;
+  padding: 14px 16px;
+  border: none;
+  border-radius: var(--r-pill);
+  background: var(--accent);
+  color: var(--accent-text);
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.start-note {
+  margin: 26px 0 0;
+  text-align: center;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-muted);
+  font-weight: 500;
+}
