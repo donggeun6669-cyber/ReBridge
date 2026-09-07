@@ -79,20 +79,7 @@ ReBridge_AI공모전용/
 
 개발 규칙과 아키텍처 상세는 [CLAUDE.md](CLAUDE.md)에 있습니다.
 
-## 팀원용 — 처음 시작하기
-
-```bash
-git clone https://github.com/donggeun6669-cyber/ReBridge.git
-cd ReBridge/ReBridge_AI공모전용/Application_main_codes
-npm install
-npm run dev            # → http://localhost:5173
-```
-
-`.env` 없이 그냥 돌아갑니다. 커뮤니티는 목(mock) 모드로 뜹니다.
-
-**작업하기 전에 `git pull`, 끝나면 `git push`.** `main`에 push하면 바로 배포됩니다.
-
-### UI를 고칠 때
+## UI를 고칠 때
 
 | 하고 싶은 것 | 고칠 곳 |
 | --- | --- |
