@@ -1,4 +1,4 @@
-import { useState, useCallback, lazy, Suspense } from 'react';
+import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import { ArrowLeft } from 'lucide-react';
 // 스플래시·하단탭만 즉시 로드하고, 화면들은 lazy로 쪼개 첫 로딩 번들을 가볍게 한다.
 // (대형 JSON을 물고 있는 대입 관련 화면들이 초기 번들에서 빠지는 효과)
@@ -43,11 +43,18 @@ const CommunityWriteScreen = /* #__PURE__ */ lazy(() => import('./components/Com
 const AuthScreen = /* #__PURE__ */ lazy(() => import('./components/AuthScreen.jsx'));
 const SupportScreen = lazy(() => import('./components/SupportScreen.jsx'));
 const PolicyScreen = lazy(() => import('./components/PolicyScreen.jsx'));
+// 팀 내부용 데이터 원본 화면 — 서비스 동선에 링크가 없고 주소 뒤 #data 로만 열린다.
+const RawDataScreen = /* #__PURE__ */ lazy(() => import('./components/RawDataScreen.jsx'));
 
 // 하단 글로벌 탭의 루트 화면들(여기로 가면 스택 리셋).
 // v1(V1_UNIV_ONLY)에서는 커뮤니티가 빠져 3개가 된다.
 // 트랙 화면(학습/대입/직업)은 홈 안의 TrackHome이 그리므로 여기 없음.
 const TAB_ROOTS = ['home', 'support', 'community', 'mypage'].filter((s) => !isHiddenScreen(s));
+
+// 주소 뒤 #data 로 들어오면 데이터 원본 화면부터 연다(스플래시도 건너뛴다).
+// UI를 고치는 사람이 실제 데이터를 보려고 쓰는 통로다. 일반 사용자 동선에는 링크가 없다.
+const RAW_HASH = '#data';
+const isRawHash = () => typeof window !== 'undefined' && window.location.hash === RAW_HASH;
 
 // v1에서 숨긴 화면(커뮤니티/인증·직업·학습)은 이 목록에서도 빠진다.
 // → 어딘가에 링크가 남아 있어도 아래 "준비 중" 폴백으로 떨어진다.
@@ -59,6 +66,7 @@ const KNOWN_SCREENS = [
   'job-training', 'job-apply',
   'community', 'community-post', 'community-write', 'community-auth',
   'privacy', 'terms',
+  'data-raw',
 ].filter((s) => !isHiddenScreen(s));
 
 // 직업 트랙은 답변(jobProfile)이 있어야 맞춤 안내가 되므로, 없으면 질문부터.
@@ -69,8 +77,10 @@ function jobLandingFor(landing) {
 }
 
 export default function App() {
-  const [splash, setSplash] = useState(true);
-  const [stack, setStack] = useState([{ screen: 'home', params: {} }]);
+  const [splash, setSplash] = useState(!isRawHash());
+  const [stack, setStack] = useState(
+    isRawHash() ? [{ screen: 'data-raw', params: {} }] : [{ screen: 'home', params: {} }],
+  );
 
   function handleSplashDone() {
     setSplash(false);
@@ -116,12 +126,35 @@ export default function App() {
     window.scrollTo(0, 0);
   }, []);
 
+  // 주소창에 #data 를 직접 쳐 넣었을 때도 열리게 한다(앱이 이미 떠 있는 경우).
+  useEffect(() => {
+    function onHashChange() {
+      if (!isRawHash()) return;
+      setSplash(false);
+      setStack((s) => (s[s.length - 1].screen === 'data-raw'
+        ? s
+        : [...s, { screen: 'data-raw', params: {} }]));
+    }
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
+  }, []);
+
+  // 데이터 원본 화면에서 뒤로 — #data 를 지워야 뒤로 간 자리에서 다시 열리지 않는다.
+  const leaveRawData = useCallback(() => {
+    if (isRawHash()) {
+      window.history.replaceState(null, '', window.location.pathname + window.location.search);
+    }
+    setStack((s) => (s.length > 1 ? s.slice(0, -1) : [{ screen: 'home', params: {} }]));
+    window.scrollTo(0, 0);
+  }, []);
+
   const isMainScreen = [...TAB_ROOTS, 'profile', 'onboarding'].includes(screen);
 
   // 하단 탭은 항상 고정(홈·지원·커뮤니티·MY). 온보딩/프로필 화면에서만 숨김.
   const persona = getPersona();
   const nav = getNav();
-  const showNav = !splash && !['onboarding', 'profile'].includes(screen);
+  // 데이터 원본은 팀 내부용 전체화면이라 하단 탭을 띄우지 않는다.
+  const showNav = !splash && !['onboarding', 'profile', 'data-raw'].includes(screen);
 
   return (
     <div className="app-shell">
@@ -194,6 +227,9 @@ export default function App() {
         {/* 법적 고지 — 청소년 대상 서비스 필수 + 스토어 심사 요건 */}
         {!splash && screen === 'privacy'         && <PolicyScreen doc="privacy" goBack={goBack} />}
         {!splash && screen === 'terms'           && <PolicyScreen doc="terms"   goBack={goBack} />}
+
+        {/* 데이터 원본 — 팀 내부용. 주소 뒤 #data 로만 들어온다. */}
+        {!splash && screen === 'data-raw'        && <RawDataScreen goBack={leaveRawData} />}
 
         {/* 미구현 화면 fallback */}
         {!splash && !isMainScreen && !KNOWN_SCREENS.includes(screen) && (
