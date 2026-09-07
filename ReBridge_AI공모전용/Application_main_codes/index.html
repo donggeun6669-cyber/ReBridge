@@ -27,31 +27,7 @@
     <meta property="og:image" content="https://gumgomentor.vercel.app/GumgomentorLOGO.png" />
     <meta property="og:url" content="https://gumgomentor.vercel.app" />
     <meta property="og:locale" content="ko_KR" />
-    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
-    <!-- 본문 폰트: SUIT (둥근 터미널 + 여유로운 자간 — 2026-09 서연님 UI 개선안).
-         Pretendard는 SUIT가 못 뜰 때를 위한 폴백으로 남겨둔다. 순서를 바꾸지 말 것. -->
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/gh/sun-typeface/SUIT@2/fonts/variable/woff2/SUIT.css"
-      media="print"
-      onload="this.media='all'"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css"
-      media="print"
-      onload="this.media='all'"
-    />
-    <noscript>
-      <link
-        rel="stylesheet"
-        href="https://cdn.jsdelivr.net/gh/sun-typeface/SUIT@2/fonts/variable/woff2/SUIT.css"
-      />
-      <link
-        rel="stylesheet"
-        href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css"
-      />
-    </noscript>
+    <!-- 폰트는 src/index.jsx 에서 번들로 불러온다 (CDN 의존 제거, 2026-09) -->
   </head>
   <body>
     <div id="root"></div>
