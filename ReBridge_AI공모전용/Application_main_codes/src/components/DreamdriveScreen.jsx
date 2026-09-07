@@ -35,7 +35,10 @@ function BenefitChips({ center }) {
         })}
       </div>
       {note && <p className="kdream-benefit-note">{note}</p>}
-      <p className="kdream-benefit-disclaimer">※ 정확한 대상·금액은 센터에 확인이 필요해요.</p>
+      {/* 센터마다 붙는 단 하나의 주의문. benefitNote 끝에도 같은 말이 있어
+          한 카드에 "센터에 확인"이 두 번 나왔다(2026-09 서연님 지적).
+          본문은 사실만 적고, 확인 안내는 여기 한 줄로만 둔다. */}
+      <p className="kdream-benefit-disclaimer">※ 정확한 대상·금액·일정은 센터에 확인이 필요해요.</p>
     </div>
   );
 }
