@@ -9,17 +9,13 @@ import {
 
 import LogoMark from './LogoMark.jsx';
 import { searchAll } from '../lib/homeSearch.js';
-import { V1_UNIV_ONLY, isHiddenScreen } from '../lib/persona.js';
 
-// 상단 트랙 스위처. v1(V1_UNIV_ONLY)에서는 대입만 남고, 1개뿐이면 스위처 자체를 감춘다.
-const ALL_TRACK_ICONS = [
+// 상단 트랙 스위처.
+const TRACK_ICONS = [
   { id: 'study', Icon: Pencil,    label: '검정고시' },
   { id: 'univ',  Icon: School,    label: '대입' },
   { id: 'job',   Icon: Briefcase, label: '일·진로' },
 ];
-const TRACK_ICONS = V1_UNIV_ONLY
-  ? ALL_TRACK_ICONS.filter((t) => t.id === 'univ')
-  : ALL_TRACK_ICONS;
 
 const SUGGEST = {
   study: ['검정고시 일정', '꿈드림센터', '공부 플래너', '지원 혜택'],
@@ -117,17 +113,12 @@ const TRACK_DATA = {
   },
 };
 
-// 숨긴 화면으로 가는 바로가기/단축/FAQ 항목을 걸러낸다(v1 전용, 평소엔 그대로 통과).
-function visible(items) {
-  return (items || []).filter((it) => !isHiddenScreen(it.screen));
-}
-
 export default function TrackHome({ track, goTo = () => {}, onSwitch = () => {} }) {
   const d = TRACK_DATA[track] || TRACK_DATA.univ;
   const suggests = SUGGEST[track] || SUGGEST.univ;
-  const icons = visible(d.icons);
-  const shortcuts = visible(d.shortcuts);
-  const faqs = visible(d.faqs);
+  const icons = d.icons;
+  const shortcuts = d.shortcuts;
+  const faqs = d.faqs;
   const [q, setQ] = useState('');
   const res = useMemo(() => searchAll(q), [q]);
   const noHit = !res.empty && !res.univs.length && !res.jobs.length && !res.terms.length && !res.menus.length && !res.centers.length && !res.supports.length;
@@ -169,7 +160,7 @@ export default function TrackHome({ track, goTo = () => {}, onSwitch = () => {} 
         <Search size={15} className="th2-search-ico" />
         <input
           className="th2-search-input"
-          placeholder={V1_UNIV_ONLY ? '대학·용어 검색' : '대학·직업·용어 검색'}
+          placeholder="대학·직업·용어 검색"
           value={q}
           onChange={(e) => setQ(e.target.value)}
         />
@@ -197,24 +188,15 @@ export default function TrackHome({ track, goTo = () => {}, onSwitch = () => {} 
             <div className="th-nohit">
               <span className="th-nohit-emoji"><Search size={28} strokeWidth={1.5} /></span>
               <p className="th-nohit-title">찾는 내용이 없어요</p>
-              {/* v1에서는 커뮤니티를 숨기므로 '커뮤니티에 질문하기'를 걸지 않는다. */}
-              {V1_UNIV_ONLY ? (
-                <p className="th-nohit-sub">
-                  <b>"{q}"</b>에 맞는 결과를 찾지 못했어요.<br />다른 말로 검색해 볼까요?
-                </p>
-              ) : (
-                <>
-                  <p className="th-nohit-sub">
-                    <b>"{q}"</b>에 대해 커뮤니티에서<br />친구들한테 바로 물어볼 수 있어요
-                  </p>
-                  <button
-                    className="th-nohit-btn"
-                    onClick={() => goTo('community-write', { board: 'talk', initialTitle: q })}
-                  >
-                    <MessageCircle size={14} /> 커뮤니티에 질문하기
-                  </button>
-                </>
-              )}
+              <p className="th-nohit-sub">
+                <b>"{q}"</b>에 대해 커뮤니티에서<br />친구들한테 바로 물어볼 수 있어요
+              </p>
+              <button
+                className="th-nohit-btn"
+                onClick={() => goTo('community-write', { board: 'talk', initialTitle: q })}
+              >
+                <MessageCircle size={14} /> 커뮤니티에 질문하기
+              </button>
             </div>
           )}
           {res.menus.length > 0 && (
@@ -240,8 +222,7 @@ export default function TrackHome({ track, goTo = () => {}, onSwitch = () => {} 
               ))}
             </div>
           )}
-          {/* 직업 검색 결과 — v1에서는 직업 트랙을 숨기므로 블록째 감춘다. */}
-          {!V1_UNIV_ONLY && res.jobs.length > 0 && (
+          {res.jobs.length > 0 && (
             <div className="th-res-group">
               <p className="th-res-label">직업</p>
               {res.jobs.map((j) => (

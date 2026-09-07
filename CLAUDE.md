@@ -26,25 +26,62 @@ npm run verify         # 배포 캐시 우회 검증 (node verify-deploy.mjs)
 
 테스트/린트/CI 없음.
 
+## 팀 작업 (3인)
+
+- 팀원도 이 레포에서 **Claude Code로 직접 작업한다.** 주 작업자는 UI(화면 모양·문구)다.
+  기능 구조를 바꾸는 제안보다 **눈에 보이는 것을 고치는 쪽**으로 도와라.
+- 팀원이 "이 데이터 뭐 들어 있어?"라고 물으면 코드를 열어 보여주기 전에
+  **`https://gumgomentor.vercel.app/#data`(또는 로컬 `#data`)를 먼저 안내한다.**
+- 브랜치를 따로 쓰지 않는다. `main`에서 바로 작업하고 push하면 배포된다.
+  → **작업 시작 전 `git pull`을 반드시 먼저.** 안 하면 충돌난다.
+- 팀원 push 후 배포가 실제로 됐는지 한 번 확인해 주는 게 안전하다.
+
+## ⚠️ v1 숨김 플래그는 걷어냈다 (2026-09-07)
+
+2026-09-03 커밋 `1be9c03`에서 `V1_UNIV_ONLY = true`로 커뮤니티·진로(job)·학습(study)
+트랙을 **가려뒀다가, 2026-09-07에 전부 되살리고 플래그 자체를 제거했다.**
+지금은 세 트랙과 커뮤니티가 모두 노출되는 게 정상이다.
+
+- "진로 탭이 안 보인다 / 준비 중이 뜬다"는 보고가 오면 **플래그를 다시 찾지 말 것.** 없다.
+  `src/App.jsx`의 `KNOWN_SCREENS`에 그 화면 이름이 있는지부터 확인한다.
+- 다시 일부만 노출하고 싶어져도 **플래그를 되살리지 말 것.** 화면을 가리는 장치가
+  11개 파일에 흩어져 유지보수가 어려웠다. 노출 범위는 페르소나/트랙으로 조절한다.
+
 ## 아키텍처
 
 - **React 18 + Vite 6**, JS/JSX (TypeScript 아님, `"type":"module"`).
 - **커스텀 라우터** — react-router 아님. `src/App.jsx`가 `{screen, params}` 스택을 들고 `goTo()`/`goBack()`을 모든 화면에 prop으로 넘긴다. 새 화면은 `KNOWN_SCREENS`(+ 탭 루트면 `TAB_ROOTS`)에 등록해야 함. 안 하면 "준비 중" placeholder.
-- **페르소나 기반 UI** (`src/lib/persona.js`) — `{stage, goal}`에 따라 노출 기능/탭이 달라짐. 상태는 localStorage `rebridge_profile`. 모든 사용자에게 모든 기능을 보여주지 않는 게 원칙.
-- **점수 엔진은 규칙 기반, AI 아님** (`src/lib/scoreEngine.js`). 2025 입결(9등급)과 2028 전형(5등급)은 직접 비교 불가 — UI는 "참고용"임을 명시하고 합격 보장 표현 금지.
+- **페르소나 기반 UI** (`src/lib/persona.js`) — `{stage, goal}`에 따라 노출 기능이 달라짐. 상태는 localStorage `rebridge_profile`. 모든 사용자에게 모든 기능을 한꺼번에 보여주지 않는 게 원칙.
+- **트랙 3개** — 홈에서 고른 길(`activeTrack`)에 따라 `TrackHome`이 다른 대시보드를 그린다.
+  `study`(검정고시) · `univ`(대입) · `job`(일·진로). 카드·문구·바로가기는 전부
+  `src/components/TrackHome.jsx` 위쪽 `TRACK_DATA` 한 곳에 있다.
+  하단 탭은 트랙과 무관하게 항상 4개(홈·지원·커뮤니티·MY).
+- **점수 엔진은 규칙 기반, AI 아님** (`src/lib/scoreEngine.js`).
+  **연도는 전부 `src/data/meta.js` 한 곳에서 읽는다** — 화면에 연도를 하드코딩하지 말 것.
+  현재: 지원 학년도 2027 · 합격선 기준 2026(비교용 2025) · 시행계획 2028.
+  2028학년도부터 고교 내신이 5등급제라 그 이전(9등급)과 직접 비교가 불가능하다.
+  UI는 "참고용"임을 명시하고 합격 보장 표현 금지.
 - **커뮤니티 백엔드는 Supabase, 없으면 자동으로 localStorage mock으로 폴백** (`src/lib/supabaseClient.js`). 데모 인증코드 `DREAM-TEST` / `DREAM-DEMO`는 mock 모드에서만 시드·노출된다.
   - **Supabase 프로젝트는 `Rebridge(Gumgomentor)`(ref `oeghpijufjgekngzpasd`, 도쿄) 전용이다.**
     2026-08-30에 학원관리 앱과 같이 쓰던 프로젝트에서 분리했다. 학원 쪽(`donggeun6669-cyber's Project`)을
     다시 물리지 말 것 — 공개 저장소라 anon 키가 번들에 노출되는데, 그쪽엔 실명 학생 정보가 있다.
   - ⚠️ **폴백은 키가 '없을 때'만 동작한다.** 키가 있는데 프로젝트가 정지되면 mock으로 안 떨어지고
-    커뮤니티가 조용히 먹통이 된다(2026-07~08 한 달간 실제로 그랬다). 무료 플랜은 1주 미사용 시 자동 정지.
+    커뮤니티가 조용히 먹통이 된다. 무료 플랜은 1주 미사용 시 자동 정지된다.
+    2026-07~08에 한 달, **2026-09-07에 또 한 번** 실제로 정지돼 있었다(그날 복구함).
+    **커뮤니티가 안 되면 코드를 보기 전에 프로젝트 상태부터 확인할 것** — Supabase 대시보드에서
+    `Rebridge(Gumgomentor)`가 `INACTIVE`면 Restore를 누르면 몇 분 뒤 살아난다.
 - 기획·기능·데이터 현황은 `ReBridge_AI공모전용/Planning/PRD.md` 한 장에 통합돼 있다.
 
 ## 디렉터리 (`Application_main_codes/`)
 
 - `src/components/` — `*Screen.jsx` 화면들 + `BottomNav`, `SplashScreen`, `TrackHome`
 - `src/lib/` — 로직 (persona, scoreEngine, careernet, community, auth, youthVerify …)
-- `src/data/` — 정적 데이터셋 (universities.json, admissions.json, jobData.js, glossary.js …)
+- `src/data/` — 정적 데이터셋 26개. 크게 두 갈래다.
+  - **수집 데이터(JSON 12개)** — universities · admissions_2027(.min) · admissions(2028시행계획) ·
+    cutlines_2025/2026 · cutlines_college_2025/2026 · comparative_2027/2028 · ged_freshmen · kkumdrim
+  - **직접 쓴 안내(JS 14개)** — meta(연도·출처 단일 소스) · gedGuide · schedule · glossary ·
+    checklists · policies · careerData · careerMentor · jobData …
+  - `pdf_sources/`(2.5GB)는 파이프라인 입력물이고 gitignore된다. 앱은 읽지 않는다.
 - `api/` — Vercel 서버리스 함수 (`careernet.js`) — API 키 프록시
 - `supabase/schema.sql` — 커뮤니티 테이블 + RLS + `redeem_code` RPC
 - `src/components/RawDataScreen.jsx` + `src/lib/rawDatasets.js` — **데이터 원본 화면(팀 내부용)**.

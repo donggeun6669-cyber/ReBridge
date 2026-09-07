@@ -5,7 +5,7 @@ import {
   RefreshCw, Target, Briefcase, HelpCircle, RotateCcw, Route,
   Award, FileText, ShieldCheck, ScrollText,
 } from 'lucide-react';
-import { getPersona, loadProfile, getActiveTrack, V1_UNIV_ONLY } from '../lib/persona';
+import { getPersona, loadProfile, getActiveTrack } from '../lib/persona';
 import { MAP_ENABLED } from '../lib/kakaoMap.js';
 import '../styles.mypage.css';
 
@@ -104,11 +104,8 @@ export default function MyPageScreen({ goTo = () => {}, goBack = () => {} }) {
   const chips = toChips(profile);
 
   // 사용자 유형 = 활성 트랙. (홈에서 고른 길) — 없으면 persona.goal로 보조 추론.
-  // v1(V1_UNIV_ONLY)은 대입 트랙 하나뿐이라 무조건 'univ'로 고정한다.
-  //   → 아래 취업/검정고시 전용 메뉴 블록이 자동으로 전부 빠진다.
   let track = useMemo(getActiveTrack, []);
-  if (V1_UNIV_ONLY) track = 'univ';
-  else if (!track && persona) {
+  if (!track && persona) {
     if (persona.goal === 'job') track = 'job';
     else if (persona.stage === 'studying' && persona.goal !== 'university') track = 'study';
     else track = 'univ';

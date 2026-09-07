@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import { GraduationCap, BookOpen, Briefcase, ArrowRight, ChevronLeft } from 'lucide-react';
 import LogoMark from './LogoMark.jsx';
-import { savePersona, getNav, V1_UNIV_ONLY } from '../lib/persona.js';
+import { savePersona, getNav } from '../lib/persona.js';
 import '../styles.onboarding.css';
 
-// 1단계: 최상위 길 — 검정고시(대학) vs 취업 vs 고민중
-// v1(V1_UNIV_ONLY)에서는 '취업' 선택지를 빼고, 아예 2단계(검정고시 단계)부터 시작한다.
-const ALL_TRACK_OPTS = [
+// 1단계: 최상위 길 — 검정고시(대학) vs 취업
+const TRACK_OPTS = [
   {
     key: 'university',
     icon: GraduationCap,
@@ -23,9 +22,6 @@ const ALL_TRACK_OPTS = [
     color: 'green',
   },
 ];
-const TRACK_OPTS = V1_UNIV_ONLY
-  ? ALL_TRACK_OPTS.filter((o) => o.key === 'university')
-  : ALL_TRACK_OPTS;
 
 // 2단계(검정고시 선택 시): 검정고시 단계
 const STAGE_OPTS = [
@@ -54,8 +50,7 @@ function hasScores() {
 
 export default function OnboardingScreen({ goTo = () => {}, presetTrack = null }) {
   // 진로 허브에서 '대학 진학'으로 진입하면 검정고시 단계 질문부터 시작.
-  // v1은 길이 대입 하나뿐이므로 1단계를 건너뛰고 바로 단계 질문으로.
-  const [step, setStep] = useState(V1_UNIV_ONLY || presetTrack === 'university' ? 1 : 0);
+  const [step, setStep] = useState(presetTrack === 'university' ? 1 : 0);
 
   function finish(goal, stage) {
     savePersona({ goal, stage });
@@ -87,7 +82,7 @@ export default function OnboardingScreen({ goTo = () => {}, presetTrack = null }
   return (
     <div className="screen onb-screen">
       <header className="onb-top">
-        {step > 0 && !V1_UNIV_ONLY ? (
+        {step > 0 ? (
           <button className="icon-btn" aria-label="뒤로" onClick={() => setStep(0)}>
             <ChevronLeft size={22} />
           </button>
@@ -99,13 +94,10 @@ export default function OnboardingScreen({ goTo = () => {}, presetTrack = null }
         )}
       </header>
 
-      {/* v1은 단계가 하나뿐이라 진행 점을 감춘다 */}
-      {!V1_UNIV_ONLY && (
-        <div className="onb-progress">
-          <span className={`onb-dot ${step >= 0 ? 'on' : ''}`} />
-          <span className={`onb-dot ${step >= 1 ? 'on' : ''}`} />
-        </div>
-      )}
+      <div className="onb-progress">
+        <span className={`onb-dot ${step >= 0 ? 'on' : ''}`} />
+        <span className={`onb-dot ${step >= 1 ? 'on' : ''}`} />
+      </div>
 
       {step === 0 ? (
         <>
