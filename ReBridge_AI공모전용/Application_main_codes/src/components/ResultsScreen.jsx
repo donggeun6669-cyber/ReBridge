@@ -1,6 +1,6 @@
 import { useMemo, useState, useCallback, useRef, useEffect } from 'react';
 import {
-  CUTLINE_YEAR, CUTLINE_SOURCE_LABEL, CUTLINE_SOURCE_LABEL_ALL,
+  CUTLINE_YEAR, CUTLINE_SOURCE_LABEL,
   ADMISSION_DATA_YEAR, PLAN_YEAR, GED_2027_SOURCE_LABEL,
   ADMISSION_DATA_UNIV_COUNT, applyDeadline,
 } from '../data/meta.js';
@@ -74,6 +74,9 @@ const ROW_TAG_STYLE = {
 // 행이 어느 학년도 자료에서 왔는지 — 두 학년도가 한 목록에 섞이므로 매 행에 밝힌다.
 function YearTag({ dataYear }) {
   const is2027 = dataYear === ADMISSION_DATA_YEAR;
+  // 최신 학년도 자료면 굳이 안 밝힌다 — 매 행에 붙으면 목록이 배지로 뒤덮인다.
+  // (다른 해 자료일 때만 알린다. 대학 탐색 화면과 같은 규칙)
+  if (is2027) return null;
   return (
     <span
       className={`year-tag${is2027 ? ' year-tag-now' : ''}`}
@@ -97,7 +100,9 @@ function ResultRow({ r, onClick, badge, today }) {
           <MapPin size={11} />
           {r.region}
           {r.kind === '전문대학' ? ' · 전문대학' : ''}
-          <span className="result-row-type">{r.bestType || '전형유형 미상'} · {r.bestName}</span>
+          <span className="result-row-type" title={`${r.bestType || '전형유형 미상'} · ${r.bestName}`}>
+            {r.bestType || '전형유형 미상'} · {r.bestName}
+          </span>
           {r.baseline && (
             <span style={ROW_TAG_STYLE} title="대교협 2028 기본사항의 일반 안내예요. 대학이 발표한 전형이 아니에요.">
               대학 미확인 · 일반 안내
@@ -307,11 +312,14 @@ function ResultSection({ state, goTo, badgeFn, showChance = true, today }) {
         </div>
       )}
 
-      {/* 결과 수 */}
-      <p className="result-filtered-count">
-        {filtered.length}개 대학
-        {filtered.length === 0 && <span style={{ color: 'var(--brand)' }}> — 조건을 바꿔보세요</span>}
-      </p>
+      {/* 결과 수 — 헤더에 이미 전체 개수가 있으므로, 필터로 숫자가 달라졌을 때만 보여준다
+          (필터를 안 걸면 같은 숫자가 두 번 나와 화면만 복잡해졌다) */}
+      {(activeFilterCount > 0 || filtered.length === 0) && (
+        <p className="result-filtered-count">
+          {filtered.length}개 대학
+          {filtered.length === 0 && <span style={{ color: 'var(--brand)' }}> — 조건을 바꿔보세요</span>}
+        </p>
+      )}
 
       {/* 리스트 */}
       {filtered.length > 0 && (
@@ -455,16 +463,6 @@ export default function ResultsScreen({ goTo = () => {}, goBack = () => {} }) {
   const summary = profileOneLiner(profile);
   const yearMix = data.yearMix || { with2027: 0, without2027: 0 };
 
-  // 목록 하단 고지문 — 무엇이 어느 학년도 자료인지 밝힌다
-  const yearNotice = (
-    <>
-      지원 가능 여부는 <b>{GED_2027_SOURCE_LABEL}</b> 기준이에요
-      ({ADMISSION_DATA_UNIV_COUNT}개 대학 수록).
-      {' '}이 자료에 없는 대학은 <b>{PLAN_YEAR}학년도 시행계획</b>으로 보여주고 행에 표시했어요.
-      {' '}{PLAN_YEAR}학년도 전형 구조는 대학 상세에서 별도 섹션으로 따로 표시해요.
-    </>
-  );
-
   return (
     <div className="screen">
       <header className="topbar center">
@@ -515,7 +513,7 @@ export default function ResultsScreen({ goTo = () => {}, goBack = () => {} }) {
           <div className="result-count">
             지원 가능한 대학 <b>{susi.total}곳</b>
             <span className="result-exclude-hint">
-              · {ADMISSION_DATA_YEAR}학년도 기준 {yearMix.with2027}곳 / {PLAN_YEAR}학년도 기준 {yearMix.without2027}곳
+              {ADMISSION_DATA_YEAR}학년도 기준 {yearMix.with2027}곳 · {PLAN_YEAR}학년도 기준 {yearMix.without2027}곳
             </span>
           </div>
           <ResultSection
@@ -525,12 +523,14 @@ export default function ResultsScreen({ goTo = () => {}, goBack = () => {} }) {
             badgeFn={(r) => <SusiBadge r={r} hasScore={hasScore} />}
             showChance={hasScore}
           />
-          <p className="note" style={{ marginTop: 16 }}>
-            {yearNotice}
-            <br />합격 가능성 예측은 일반학생 입결 기반 참고값이에요({CUTLINE_SOURCE_LABEL_ALL}).
-            <br />'추정' 표시는 대학이 검정고시 환산표를 공개하지 않아, 공개된 다른 대학 표의 중앙값으로 계산한 경우예요.
-            <br />'대학 미확인 · 일반 안내'는 대교협 기본사항 기준 안내라 대학 시행계획 확인이 필요해요.
-          </p>
+          <button className="explore-help-link" onClick={() => goTo('explore-help')}>
+            <span className="explore-help-emoji" aria-hidden="true">💡</span>
+            <span className="explore-help-text">
+              <b>이 목록 읽는 법</b>
+              <span>칸수 게이지 · 추정 표시 · 어느 해 자료인지</span>
+            </span>
+            <ChevronRight size={18} />
+          </button>
         </>
       )}
 
@@ -539,7 +539,7 @@ export default function ResultsScreen({ goTo = () => {}, goBack = () => {} }) {
         <>
           <div className="result-count">
             논술 전형 지원 가능 <b>{essayData.length}곳</b>
-            <span className="result-exclude-hint">· 검정고시 지원 가능·조건부 한정</span>
+            <span className="result-exclude-hint">검정고시 지원 가능·조건부 한정</span>
           </div>
 
           {/* 논술 카테고리 안내 */}
@@ -605,12 +605,20 @@ export default function ResultsScreen({ goTo = () => {}, goBack = () => {} }) {
             </div>
           )}
 
+          {/* 논술에만 해당하는 설명은 여기 남기고, 공통 고지문은 안내 페이지로 뺐다 */}
           <p className="note" style={{ marginTop: 16 }}>
-            {yearNotice}
-            <br />★★★ 논술 100% 전형은 검정고시생에게 가장 유리해요.
+            ★★★ 논술 100% 전형은 검정고시생에게 가장 유리해요.
             <br />수능 최저 충족 여부는 프로필의 모의고사 등급 기준이에요.
             <br />{CUTLINE_SOURCE_LABEL}는 논술 전형의 합격선을 공개하지 않아, 논술은 칸수 대신 전형 성격으로 안내해요.
           </p>
+          <button className="explore-help-link" onClick={() => goTo('explore-help')}>
+            <span className="explore-help-emoji" aria-hidden="true">💡</span>
+            <span className="explore-help-text">
+              <b>이 목록 읽는 법</b>
+              <span>칸수 게이지 · 추정 표시 · 어느 해 자료인지</span>
+            </span>
+            <ChevronRight size={18} />
+          </button>
         </>
       )}
 
@@ -639,7 +647,14 @@ export default function ResultsScreen({ goTo = () => {}, goBack = () => {} }) {
                 badgeFn={() => <span className="fit-tag fit-ok">지원 가능</span>}
                 showChance={false}
               />
-              <p className="note" style={{ marginTop: 16 }}>{yearNotice}</p>
+              <button className="explore-help-link" onClick={() => goTo('explore-help')}>
+                <span className="explore-help-emoji" aria-hidden="true">💡</span>
+                <span className="explore-help-text">
+                  <b>이 목록 읽는 법</b>
+                  <span>칸수 게이지 · 추정 표시 · 어느 해 자료인지</span>
+                </span>
+                <ChevronRight size={18} />
+              </button>
             </>
           )}
         </>
