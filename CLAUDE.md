@@ -47,6 +47,12 @@ npm run verify         # 배포 캐시 우회 검증 (node verify-deploy.mjs)
 - `src/data/` — 정적 데이터셋 (universities.json, admissions.json, jobData.js, glossary.js …)
 - `api/` — Vercel 서버리스 함수 (`careernet.js`) — API 키 프록시
 - `supabase/schema.sql` — 커뮤니티 테이블 + RLS + `redeem_code` RPC
+- `src/components/RawDataScreen.jsx` + `src/lib/rawDatasets.js` — **데이터 원본 화면(팀 내부용)**.
+  `src/data/`의 파일을 가공 없이 표로 보여준다. 주소 뒤 `#data`로만 열린다
+  (https://gumgomentor.vercel.app/#data). 사용자 동선에는 링크가 없다.
+  UI를 고치기 전에 "실제로 어떤 필드가 있는지" 볼 때 쓴다.
+  새 데이터 파일을 만들면 `rawDatasets.js`의 `DATASETS`에 한 줄 추가한다.
+  ⚠️ 로더는 전부 동적 import다 — 정적 import로 바꾸면 첫 로딩 번들에 4MB가 얹힌다.
 - `data-pipeline/` — 별도 Python 툴체인. 대학 PDF에서 admissions JSON 추출 (앱과 무관, 오프라인). `sources/`에 공공데이터 원본 보존 — 삭제 금지
 
 ## 보안 주의
@@ -60,30 +66,25 @@ npm run verify         # 배포 캐시 우회 검증 (node verify-deploy.mjs)
 - **지도는 현재 꺼져 있다** (`MAP_ENABLED = false`). 도메인 등록 확인 전까지 SDK 호출 차단 중이며, 동근님 확인 후 `true`로 되돌린다. 지도 관련 버그처럼 보이는 건 대부분 이 스위치 때문이니 먼저 확인할 것.
 - 외부 API는 커리어넷·Supabase·카카오맵 3개뿐. 나머지 정부 사이트 도메인은 전부 단순 링크다. 상세는 `Planning/PRD.md` §7.
 
-## 배포 구조 (2026-07 정리)
+## 배포 구조 (2026-09-07 재확인)
 
-- **GitHub `main` 푸시 → Vercel 자동 배포.** 레포가 Vercel 프로젝트 **`gumgomentor`**(프로덕션, https://gumgomentor.vercel.app)에 Git 연동돼 있다.
+- **GitHub `main` 푸시 → Vercel 자동 배포 → `gumgomentor.vercel.app` 자동 갱신.**
+  레포가 Vercel 프로젝트 **`gumgomentor`**에 Git 연동돼 있고, 대외 주소가 그 프로젝트의
+  프로덕션 도메인이다. **푸시 말고는 할 일이 없다** — `vercel alias`도, 수동 배포도 필요 없다.
+  (2026-09-07 실측: 푸시 32초 뒤 새 배포에 `gumgomentor.vercel.app`이 붙어 있었다)
 - 저장소는 **2026-07-30 공개(public)로 전환**했다. 과거 비공개 시절에는 Hobby 플랜 제약으로
   팀원 커밋이 HEAD면 자동배포가 거부됐는데(2026-06-23 실제 발생), 공개 전환으로 해소됐다.
   팀원 push 후 배포 성공 여부는 여전히 한 번 확인하는 게 안전하다.
-- **주소 정리 (2026-07-30).** 대외 안내 주소는 `gumgomentor.vercel.app` 하나로 통일했다.
+- **주소는 `gumgomentor.vercel.app` 하나만 안내한다.**
+  - `rebridge-rho.vercel.app` — 프로젝트 옛 이름(`rebridge`) 때문에 Vercel이 자동 생성한 주소.
+    같은 배포를 가리키므로 **틀린 주소는 아니지만 대외에 쓰지 않는다.** 지우지도 말 것(자동 생성분).
   - 🏆 `gumgomentor-award.vercel.app` — 공모전 수상본(2026-06-04 배포) 동결. 자동배포가 닿지 않는
     고정 별칭이므로 **여기에 `vercel alias`를 다시 걸지 말 것.** 소스는 git 태그 `award-v1`.
   - `gumgomentor-beta.vercel.app`(3차 수정배포)는 프로젝트째 삭제했다.
-  - ⚠️ **`gumgomentor.vercel.app`은 아직 수동 별칭이라 자동배포를 따라가지 않는다.**
-    프로젝트가 `rebridge` → `gumgomentor`로 이름만 바뀐 탓에, Vercel이 자동 생성한
-    프로덕션 주소는 여전히 `rebridge-rho.vercel.app`이고 배포마다 그쪽만 갱신된다.
-    푸시 후에는 아래를 실행해 운영 주소를 최신 배포로 다시 물려야 한다.
-    ```bash
-    npx vercel --prod                            # ⚠️ 레포 루트에서 실행 (아래 참고)
-    npx vercel alias set <출력된 배포 URL> gumgomentor.vercel.app
-    ```
-    ⚠️ **수동 배포는 레포 루트에서 한다.** Vercel 프로젝트의 Root Directory가
-    `ReBridge_AI공모전용/Application_main_codes`로 잡혀 있어서, 앱 폴더에서 `vercel --prod`를 돌리면
-    "Root Directory does not exist"로 실패한다. (npm 명령은 앱 폴더에서 하는 규칙과 다르니 주의)
-    **영구 해결:** Vercel 대시보드 → `gumgomentor` 프로젝트 → Settings → Domains 에서
-    `gumgomentor.vercel.app`을 `main` 브랜치의 프로덕션 도메인으로 지정하고
-    `rebridge-rho.vercel.app`을 제거하면 이 수동 작업이 없어진다. (CLI로는 불가)
+- ⚠️ **수동 배포(`npx vercel --prod`)가 정말 필요하면 레포 루트에서 한다.** Vercel 프로젝트의
+  Root Directory가 `ReBridge_AI공모전용/Application_main_codes`로 잡혀 있어서, 앱 폴더에서 돌리면
+  "Root Directory does not exist"로 실패한다. (npm 명령은 앱 폴더에서 하는 규칙과 다르니 주의)
+  다만 자동배포가 잘 도는 지금은 쓸 일이 없다.
 - 서버 비밀 키(`CAREERNET_API_KEY`)와 Supabase 공개 키(`VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY`)는 Vercel 프로젝트 환경변수에 등록되어 있음(`npx vercel env ls`로 확인).
 - `dist/`, `.vercel/`, `.env*`는 전부 gitignore됨(추적 안 됨).
 
