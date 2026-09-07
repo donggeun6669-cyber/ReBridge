@@ -3,9 +3,8 @@ import { createRoot } from 'react-dom/client';
 import App from './App.jsx';
 // 폰트는 CDN이 아니라 번들에 넣는다 (2026-09).
 // jsdelivr가 막히거나 느린 환경에서 폰트가 통째로 안 뜨는 사고를 막으려는 것.
-// 둘 다 unicode-range로 쪼개져 있어 브라우저가 실제 쓰는 글자 조각만 받는다.
-import 'wanted-sans/fonts/webfonts/variable/split/WantedSansVariable.css'; // 본문
-import '@fontsource/jua/400.css';                                          // 큰 제목
+// unicode-range로 쪼개져 있어 브라우저가 실제 쓰는 글자 조각만 받는다.
+import 'wanted-sans/fonts/webfonts/variable/split/WantedSansVariable.css';
 import './styles.css';
 
 createRoot(document.getElementById('root')).render(
