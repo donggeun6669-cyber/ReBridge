@@ -89,10 +89,14 @@ export default function GlossaryScreen({ track: trackProp, params = {}, goTo = (
                     style={{ transform: open ? 'rotate(90deg)' : 'none' }}
                   />
                 </div>
-                <p className="gloss-short">{t.short}</p>
-                {open && t.detail && <p className="gloss-detail">{t.detail}</p>}
+                {/* 2026-09 서연님: short와 detail을 따로 된 두 덩어리로 보여주니
+                    같은 설명이 두 번 시작하는 것처럼 읽혔다. 펼치면 한 문단으로 잇는다.
+                    (접혀 있을 땐 미리보기로 short만 보여준다) */}
+                <p className="gloss-short">
+                  {open && t.detail ? `${t.short} ${t.detail}` : t.short}
+                </p>
                 {open && t.check && (
-                  <p className="gloss-detail gloss-detail-warn">
+                  <p className="gloss-detail-warn">
                     학교 밖 청소년·검정고시생에게 적용이 다를 수 있어요. 정확한 건
                     {glossary.key === 'career' ? ' 고용센터(1350)나 관련 기관에' : ' 모집요강·교육청에'} 직접 확인하세요.
                   </p>

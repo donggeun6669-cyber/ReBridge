@@ -4435,19 +4435,21 @@ button {
 .gloss-short {
   margin: 7px 0 0;
   font-size: 13.5px;
-  line-height: 1.55;
+  line-height: 1.6;
   color: var(--text-sub);
 }
-.gloss-detail {
-  margin: 9px 0 0;
+/* 펼치면 short+detail이 한 문단이 된다 — 본문이라 조금 더 또렷하게 */
+.gloss-item.is-open .gloss-short {
+  color: var(--text);
+  margin-bottom: 2px;
+}
+/* 주의문 전용. 회색 설명 박스는 본문과 합쳐져서 없어졌다(2026-09). */
+.gloss-detail-warn {
+  margin: 11px 0 0;
   font-size: 13px;
   line-height: 1.6;
-  color: var(--text);
-  background: var(--bg-soft);
   border-radius: var(--r-sm);
   padding: 10px 12px;
-}
-.gloss-detail-warn {
   color: var(--caution);
   background: var(--caution-soft);
 }
