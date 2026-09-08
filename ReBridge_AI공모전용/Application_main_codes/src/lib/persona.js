@@ -78,11 +78,23 @@ export function ageOption(ageKey = getAge()) {
 
 // 꿈드림(학교밖청소년지원센터)은 만 9~24세가 대상이다.
 // 근거는 src/data/commonSupport.js — 거기 요약문과 같은 기준을 쓴다.
-// 나이를 모르면 null(= 화면에서 대상 여부를 단정하지 않음)을 준다.
-export function dreamdrimEligible(ageKey = getAge()) {
+//
+// 나이를 '나이대'로만 받기 때문에 구간이 기준선에 걸칠 수 있다.
+// 예: '15세 이하'에는 만 9세 미만도 들어간다 → 무조건 '가능'이라고 하면 거짓말이 된다.
+//   'yes'     구간 전체가 9~24세 안 → 대상
+//   'partial' 구간이 걸쳐 있음 → 단정하지 말고 기준만 알려준다
+//   'no'      구간 전체가 범위 밖 → 대상 아님
+//   null      나이를 안 골랐음 → 아무 말도 하지 않는다
+export const DREAMDRIM_MIN_AGE = 9;
+export const DREAMDRIM_MAX_AGE = 24;
+
+export function dreamdrimEligibility(ageKey = getAge()) {
   const o = ageOption(ageKey);
   if (!o) return null;
-  return o.min <= 24 && o.max >= 9;
+  const inside = o.min >= DREAMDRIM_MIN_AGE && o.max <= DREAMDRIM_MAX_AGE;
+  if (inside) return 'yes';
+  const overlaps = o.min <= DREAMDRIM_MAX_AGE && o.max >= DREAMDRIM_MIN_AGE;
+  return overlaps ? 'partial' : 'no';
 }
 
 // 취업 트랙 — 관심 직업을 1~3개 저장한다. job = { name, field, programId, programLabel }

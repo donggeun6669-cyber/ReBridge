@@ -13,7 +13,10 @@ import {
 import centersRaw from '../data/kkumdrim.json';
 import { COMMON_SUPPORT } from '../data/commonSupport';
 import { getCenterBenefits } from '../lib/benefits';
-import { V1_UNIV_ONLY, ageOption, dreamdrimEligible } from '../lib/persona.js';
+import {
+  V1_UNIV_ONLY, ageOption, dreamdrimEligibility,
+  DREAMDRIM_MIN_AGE, DREAMDRIM_MAX_AGE,
+} from '../lib/persona.js';
 import '../styles.support.css';
 
 // 카테고리/공통지원 icon 이름 → lucide 컴포넌트 매핑
@@ -227,23 +230,29 @@ export default function SupportScreen({ goTo = () => {}, goBack = () => {}, para
       </div>
 
       {/* 나이 맞춤 안내 — 시작 화면에서 나이를 고른 사람에게만 뜬다.
-          꿈드림 대상은 만 9~24세(근거: data/commonSupport.js).
-          나이를 안 고른 사람에겐 아무것도 단정하지 않는다. */}
-      {ageOption() && (
-        <div className={`support-age-note${dreamdrimEligible() ? '' : ' off'}`}>
-          <span className="support-age-emoji" aria-hidden="true">
-            {dreamdrimEligible() ? '✅' : '💡'}
-          </span>
-          <span>
-            {dreamdrimEligible() ? (
-              <><b>{ageOption().label}</b>이면 꿈드림센터를 무료로 이용할 수 있어요.</>
-            ) : (
-              <><b>{ageOption().label}</b>은 꿈드림 지원 나이(만 9~24세)를 벗어나요.
-                아래 공통 지원과 센터 상담은 그대로 문의할 수 있어요.</>
-            )}
-          </span>
-        </div>
-      )}
+          ⚠️ 기준(만 9~24세)을 먼저 말하고 그 다음에 내 경우를 말한다.
+          "17세면 무료" 식으로 쓰면 17세만 되는 것처럼 읽힌다(2026-09 서연님 지적).
+          근거는 data/commonSupport.js. */}
+      {ageOption() && (() => {
+        const state = dreamdrimEligibility();
+        const RULE = <>꿈드림센터는 <b>만 {DREAMDRIM_MIN_AGE}~{DREAMDRIM_MAX_AGE}세</b>면 무료로 이용할 수 있어요.</>;
+        return (
+          <div className={`support-age-note${state === 'yes' ? '' : ' off'}`}>
+            <span className="support-age-emoji" aria-hidden="true">
+              {state === 'yes' ? '✅' : '💡'}
+            </span>
+            <span>
+              {state === 'yes' && <>{RULE} 지금 나이({ageOption().label})면 해당돼요.</>}
+              {/* '15세 이하'처럼 구간이 기준선에 걸치면 단정하지 않는다 */}
+              {state === 'partial' && <>{RULE} 만 {DREAMDRIM_MIN_AGE}세부터예요.</>}
+              {state === 'no' && (
+                <>꿈드림센터는 <b>만 {DREAMDRIM_MIN_AGE}~{DREAMDRIM_MAX_AGE}세</b>가 대상이에요.
+                  아래 공통 지원과 센터 상담은 그대로 문의할 수 있어요.</>
+              )}
+            </span>
+          </div>
+        );
+      })()}
 
       {/* 결과 헤더 */}
       <div className="support-result-head">

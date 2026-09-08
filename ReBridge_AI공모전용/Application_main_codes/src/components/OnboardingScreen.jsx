@@ -143,7 +143,7 @@ export default function OnboardingScreen({ goTo = () => {}, presetTrack = null }
       {cur === 'age' && (
         <>
           <h1 className="onb-q">몇 살이에요?</h1>
-          <p className="onb-sub">나이에 따라 받을 수 있는 지원이 달라서 물어봐요.</p>
+          <p className="onb-sub">나이에 따라 받을 수 있는 지원이 달라서 물어봐요. 만 나이로 골라주세요.</p>
           <div className="onb-age-grid">
             {AGE_OPTIONS.map((o) => (
               <button
