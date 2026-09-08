@@ -102,6 +102,9 @@
   padding: 22px 18px;
   border-radius: var(--r-lg);
   color: #fff;
+  /* 흰 글자를 쓰므로 어두운 배경이 기본이어야 한다.
+     ph-* 변형이 없는 색(예: 'brand')이 들어오면 배경 없이 흰 글자만 남는다. */
+  background: var(--brand-deep);
   margin-bottom: 16px;
 }
 .ph-green { background: var(--grad-warm); box-shadow: var(--shadow-warm); }

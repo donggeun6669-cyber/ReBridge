@@ -3085,16 +3085,18 @@ button {
   from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+/* ⚠️ 배경이 파랑에서 크림으로 바뀐 뒤(2026-09-07 시안) 흰 글자가 그대로 남아
+   스플래시에서 '검고담임'이 안 보였다. 배경을 바꿀 땐 여기 글자색도 같이 본다. */
 .splash-wordmark {
   font-size: 32px;
   font-weight: 800;
-  color: #fff;
+  color: var(--brand-deep);
   letter-spacing: -0.01em;
 }
 .splash-sub {
   font-size: 14px;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.72);
+  color: var(--text-sub);
   letter-spacing: 0.04em;
 }
 
