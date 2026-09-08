@@ -31,7 +31,8 @@ export default function ChanceGauge({ chance, compact = false, estimated = false
           style={{
             fontSize: compact ? 10 : 10.5,
             fontWeight: 700,
-            color: '#6B7280',
+            // 흰 카드 위 4.39:1이라 기준(4.5)에 못 미쳤다 — 한 단계 어둡게
+            color: '#5C636E',
             background: '#F3F4F6',
             border: '1px solid #E5E7EB',
             borderRadius: 6,

@@ -20,7 +20,7 @@
   --brand-deep: #1C6FB2;
   --brand-tint: #EAF3FB;
   --coral: #36B85A;       /* 검고담임 초록(검고) — 보조색 */
-  --coral-deep: #248B41;
+  --coral-deep: #1F7A38;  /* 칩 글자색. 흰 카드 4.33 → 5.39:1 */
   --coral-tint: #E7F7EC;
   --accent-gold: #57B0E6; /* 보조 하늘색 */
 
@@ -29,10 +29,14 @@
      사라졌던 적이 있다(변수가 없으면 선언 자체가 무효가 된다). 지우지 말 것. */
   --green: #36B85A;
   --green-soft: #E7F7EC;
-  --green-dark: #248B41;
-  --caution: #F2A93B;
+  --green-dark: #1F7A38;  /* 칩·게이지 라벨 글자색. 4.33:1 → 5.39:1 */
+  /* 글자색으로 쓰인다(배경은 --caution-soft). #F2A93B는 흰 카드 위 2.00:1로
+     '센터에 확인이 필요해요' 같은 주의문이 거의 안 읽혔다. */
+  --caution: #96620F;     /* 흰 5.18:1 / 크림 4.92:1 */
   --caution-soft: #FFF6E5;
-  --danger: #F2785F;
+  /* 글자색으로만 쓰인다(배경은 --danger-soft). 원래 값 #F2785F는 크림 위에서
+     2.61:1로 거의 안 읽혔다 — '처음부터 다시 시작' 같은 위험 동작이라 더 중요하다. */
+  --danger: #C0472E;      /* 크림 4.76:1 */
   --danger-soft: #FDECE7;
 
   /* 2026-09-07 서연님 확정 시안 'A 따뜻한 크림'.
@@ -44,7 +48,9 @@
   --bg-soft: #F6F1E8;
   --card: #ffffff;
   --text: #1E2A3A;        /* text/primary */
-  --text-sub: #7A7468;    /* text/sub — 따뜻한 회색 */
+  /* 시안 값은 #7A7468이었는데 크림 배경 위에서 4.40:1로 기준(4.5:1)에 못 미쳐
+     본문·칩·라벨 수십 곳이 흐리게 보였다. 색감은 그대로 두고 한 단계만 어둡게. */
+  --text-sub: #736C5E;    /* 크림 4.93:1 / 흰 카드 5.20:1 */
   --text-muted: #8A8478;  /* text/muted — 하단 안내문·비활성 탭 */
   --border: #F2E6D2;      /* border/warm */
 
@@ -182,7 +188,9 @@ button {
   position: relative;
 }
 .tab-item.active {
-  color: var(--brand);
+  /* --brand(#2E8BD0)는 흰 탭바 위에서 3.67:1로 미달. 시안이 지정한 로고 파랑
+     #1C6FB2(=--brand-deep)이면 5.29:1로 통과하고 색도 시안과 맞는다. */
+  color: var(--brand-deep);
 }
 /* 활성 탭 상단 인디케이터 — 시안에 없어서 뺐다(노란 아이콘 칸이 그 역할을 한다) */
 /* 탭 아이콘 박스 — 활성시 노란 칸 (2026-09-07 확정 시안) */
@@ -1292,8 +1300,9 @@ button {
   border-radius: 50%;
   display: grid;
   place-items: center;
-  background: rgba(255, 255, 255, 0.2);
-  border: 2px solid rgba(255, 255, 255, 0.35);
+  background: rgba(107, 74, 0, 0.10);
+  border: 2px solid rgba(107, 74, 0, 0.18);
+  color: var(--on-brand);
 }
 .mp-card-header-text {
   flex: 1;
@@ -1305,12 +1314,13 @@ button {
 .mp-card-name {
   font-size: 16px;
   font-weight: 800;
-  color: #fff;
+  color: var(--on-brand);
 }
 .mp-card-sub {
   font-size: 12px;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.8);
+  /* 연노랑 배경 위 — 흰색이면 안 보인다. 갈색을 옅게. */
+  color: rgba(107, 74, 0, 0.78);
 }
 .mp-edit-btn {
   flex-shrink: 0;
@@ -1319,14 +1329,14 @@ button {
   gap: 5px;
   padding: 7px 13px;
   border-radius: var(--r-pill);
-  background: rgba(255, 255, 255, 0.22);
-  color: #fff;
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--on-brand);
   font-size: 13px;
   font-weight: 700;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(107, 74, 0, 0.18);
   transition: background 0.15s;
 }
-.mp-edit-btn:active { background: rgba(255,255,255,0.35); }
+.mp-edit-btn:active { background: rgba(255,255,255,0.95); }
 
 /* 칩 영역 */
 .mp-chips {

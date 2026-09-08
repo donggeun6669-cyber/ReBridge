@@ -138,7 +138,8 @@ export default function MyPageScreen({ goTo = () => {}, goBack = () => {} }) {
       <div className="mp-card" style={{ marginTop: 6 }}>
         <div className="mp-card-header">
           <span className="mp-avatar">
-            <User size={30} color="#fff" />
+            {/* 색은 CSS(.mp-avatar)가 정한다 — 배경색이 바뀌면 같이 따라가게 */}
+            <User size={30} />
           </span>
           <div className="mp-card-header-text">
             <span className="mp-card-name">
