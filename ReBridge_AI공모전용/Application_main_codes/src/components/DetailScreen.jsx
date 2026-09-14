@@ -524,7 +524,11 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
                     )}
                     {ev && !ev.applicable && (
                       <div className="adm-oneline muted">
-                        <Info size={12} /> {ev.dataGap === 'csat' ? '수능 기준 전형 — 검정고시 평균으로 비교 어려움' : CUTLINE_NO_DATA_SHORT}
+                        <Info size={12} /> {ev.dataGap === 'csat'
+                          ? '수능 기준 전형 — 검정고시 평균으로 비교 어려움'
+                          : ev.dataGap === 'conversion'
+                          ? '이 대학은 검정고시 환산 기준 미공개 — 계산 불가'
+                          : CUTLINE_NO_DATA_SHORT}
                       </div>
                     )}
                     <ChevronDown size={18} className="adm-chevron" />
@@ -679,7 +683,11 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
                           <div className="adm-empty-row">
                             <Lock size={14} />
                             <div>
-                              <b>{ev?.dataGap === 'csat' ? '수능 기준 전형이에요' : CUTLINE_NO_DATA_LABEL}</b>
+                              <b>{ev?.dataGap === 'csat'
+                                ? '수능 기준 전형이에요'
+                                : ev?.dataGap === 'conversion'
+                                ? '검정고시 환산 기준을 공개하지 않은 대학이에요'
+                                : CUTLINE_NO_DATA_LABEL}</b>
                               <p>{ev?.reason || '점수를 입력하면 비교해드릴게요.'}</p>
                               {(r.admissionType === '논술' || r.admissionType === '실기') && (
                                 <p>{CUTLINE_TYPE_NOTICE}</p>

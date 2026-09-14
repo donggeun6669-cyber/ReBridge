@@ -324,6 +324,9 @@ function makeResultItem(u, best, rows, profile, comp) {
     conversionEstimated: ev.conversionEstimated, // 추정표이거나 등급 구간이 추정이면 true
     chance,
     dataGap,
+    // 학생부종합은 등급만으로 결과가 안 정해진다는 안내를 화면까지 실어 보낸다(2026-09).
+    isHolistic: ev.isHolistic ?? null,
+    holisticNote: ev.holisticNote ?? null,
     _score:
       (TYPE_RANK[best.admissionType] || 0) * 10 +
       rows.length +

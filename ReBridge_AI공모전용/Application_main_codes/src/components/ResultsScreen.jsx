@@ -43,6 +43,18 @@ function SusiBadge({ r, hasScore }) {
   if (r.chance) {
     return <ChanceGauge chance={r.chance} compact estimated={r.conversionEstimated ?? r.conversionMethod === 'standard'} />;
   }
+  // 대학이 검정고시 환산 기준을 공개하지 않은 경우(2026-09).
+  // 추정치로 칸수를 내던 걸 멈췄으므로, 왜 칸수가 없는지 여기서 밝힌다.
+  if (hasScore && r.dataGap === 'conversion') {
+    return (
+      <span
+        className="fit-tag fit-unknown"
+        title="이 대학은 검정고시 점수를 몇 등급으로 볼지 공개하지 않았어요. 기준이 없어 합격 가능성을 계산할 수 없어요."
+      >
+        환산 기준 미공개
+      </span>
+    );
+  }
   // 점수를 넣었는데도 합격선 자료가 없는 경우 — '예측 불가'가 아니라 '자료 없음'
   if (hasScore && r.dataGap === 'cutline') {
     return <span className="fit-tag fit-unknown" title={`이 대학·전형의 ${CUTLINE_YEAR}학년도 합격선이 공개 자료에 없어요.`}>자료 없음</span>;
@@ -516,6 +528,11 @@ export default function ResultsScreen({ goTo = () => {}, goBack = () => {} }) {
               {ADMISSION_DATA_YEAR}학년도 기준 {yearMix.with2027}곳 · {PLAN_YEAR}학년도 기준 {yearMix.without2027}곳
             </span>
           </div>
+          {/* 학종은 정성평가라 등급만으로 안 정해진다 — 목록 위에 한 번만 알린다(2026-09) */}
+          <p className="result-holistic-note">
+            <b>학생부종합</b>은 서류·면접으로 함께 평가해요. 검정고시생은 학교생활기록부 대신
+            <b> 대체서식</b>을 내기 때문에, 등급이 비슷해도 결과는 달라질 수 있어요.
+          </p>
           <ResultSection
             state={susiState}
             goTo={goTo}
@@ -633,7 +650,13 @@ export default function ResultsScreen({ goTo = () => {}, goBack = () => {} }) {
             </div>
           ) : (
             <>
-              <div className="result-count">
+                    {/* 정시는 수능 점수로 겨루는 자리라 검정고시 여부가 유불리를 만들지 않는다.
+                        수시와 같은 기준으로 읽으면 안 되므로 탭 안에서 분명히 말한다(2026-09 서연님). */}
+                    <p className="result-holistic-note">
+                      <b>정시는 수능 점수로만 겨뤄요.</b> 검정고시 출신이라고 더 불리하거나
+                      유리하지 않고, 비교내신도 쓰지 않아요. 수시와 같은 기준으로 보면 안 돼요.
+                    </p>
+                    <div className="result-count">
                 수능 후 지원 가능한 대학 <b>{jeongsi.total}곳</b>
               </div>
               <div className="result-note" style={{ marginTop: 8 }}>

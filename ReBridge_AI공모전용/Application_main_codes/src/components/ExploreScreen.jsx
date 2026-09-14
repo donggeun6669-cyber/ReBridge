@@ -22,7 +22,12 @@ const SORTS = [
 ];
 
 // 점수는 있는데 칸수가 안 뜨는 이유(왜 어떤 카드는 칸수, 어떤 카드는 적합도만 뜨는지 설명).
-const NO_CHANCE_REASON = { csat: '수능 기준', cutline: '합격선 자료 없음' };
+const NO_CHANCE_REASON = {
+  csat: '수능 기준',
+  cutline: '합격선 자료 없음',
+  // 대학이 검정고시 환산 기준을 공개하지 않아 계산 자체가 불가한 경우(2026-09).
+  conversion: '환산 기준 미공개',
+};
 
 // 약칭(로고용 2글자)
 function shortName(name) {

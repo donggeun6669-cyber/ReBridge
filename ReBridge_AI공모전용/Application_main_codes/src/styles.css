@@ -5300,3 +5300,17 @@ button {
   color: var(--text-muted);
   font-weight: 500;
 }
+
+/* 수시(학종)·정시 탭 머리 안내 — 같은 목록이라도 읽는 법이 다르다는 걸
+   목록 위에서 한 번 말해 준다(2026-09 서연님: 검정고시+정시는 일반고 정시와 같다). */
+.result-holistic-note {
+  margin: 12px 0 4px;
+  padding: 13px 15px;
+  border-radius: var(--r-sm);
+  background: var(--bg-soft);
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--text-sub);
+  font-weight: 500;
+}
+.result-holistic-note b { color: var(--text); font-weight: 700; }

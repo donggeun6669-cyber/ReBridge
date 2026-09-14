@@ -611,14 +611,29 @@ export function gedFit(adm, comparativeType) {
 
   let level = 'ok';
   if (type === '학생부종합') {
-    level = 'good';
-    reasons.push('학생부종합이에요. 내신 등급 대신 검정고시 성적·서류·면접으로 평가해서, 학교를 안 다닌 점이 불리하게 작용하지 않아요.');
+    // 2026-09 수정. 예전에는 무조건 'good'(지원 수월) + "학교를 안 다닌 점이 불리하게
+    // 작용하지 않아요"라고 단정했다. 근거가 없는 안심이었고, 그 탓에 환산 기준조차
+    // 공개 안 한 상위권 대학까지 '지원 수월'로 떴다.
+    // 사실만 적는다: 학종은 서류·면접 정성평가이고, 검정고시생은 학교생활기록부 대신
+    // 대체서식으로 평가받는다. 유불리를 단정하지 않는다.
+    level = 'ok';
+    reasons.push(
+      '학생부종합은 내신 등급만이 아니라 서류·면접으로 함께 평가해요. ' +
+      '검정고시생은 학교생활기록부 대신 대체서식을 내고, 평가 방식은 대학마다 달라요.'
+    );
+    if (!hasTable) {
+      reasons.push('이 대학은 검정고시 비교내신 환산 기준을 공개하지 않았어요. 입학처에 문의해 확인하세요.');
+    }
   } else if (type === '논술') {
     level = 'ok';
     reasons.push('논술 위주 전형이라 내신 비중이 작아요. 논술 실력으로 승부해볼 수 있어요.');
   } else if (type === '학생부교과') {
     reasons.push('학생부교과는 검정고시 점수를 내신 등급으로 "환산"해서 반영해요.');
-    level = hasTable ? 'good' : 'ok';
+    // 환산표가 없으면 내 점수가 몇 등급이 되는지 자체를 알 수 없다 — '수월'이라 할 수 없다.
+    level = hasTable ? 'good' : 'check';
+    if (!hasTable) {
+      reasons.push('그런데 이 대학은 환산 기준을 공개하지 않았어요. 입학처 문의가 필요해요.');
+    }
   } else if (type === '수능위주') {
     level = 'check';
     reasons.push('수능 성적이 핵심인 전형이에요. 수능을 준비할 계획일 때 적합해요.');
@@ -677,8 +692,18 @@ export function evaluateAdmission(profile, adm) {
   const gradeBandEstimated = comp?.conversion?.gradeBandSource === 'app_standard_estimate';
   const conversionEstimated = conversionMethod === 'standard' || gradeBandEstimated;
 
+  // 학생부종합은 서류·면접 정성평가라 등급만으로 결과가 정해지지 않는다.
+  // 게다가 검정고시생은 학교생활기록부가 없어 '학생부 대체서식'으로 평가받는다.
+  // 칸수를 내되(B) 화면이 이 한계를 반드시 같이 말하도록 판정에 실어 보낸다.
+  const isHolistic = adm.admissionType === '학생부종합';
+
   const base = {
     avg,
+    isHolistic,
+    holisticNote: isHolistic
+      ? '학생부종합은 서류·면접으로 함께 평가해요. 검정고시생은 학교생활기록부 대신 ' +
+        '대체서식을 내기 때문에, 등급이 비슷해도 결과는 달라질 수 있어요.'
+      : null,
     myGrade,
     myGradeExact,
     myScore,
@@ -698,6 +723,29 @@ export function evaluateAdmission(profile, adm) {
       applicable: false,
       dataGap: 'csat',
       reason: '정시(수능위주)는 수능 성적 기준이라 검정고시 평균으로 직접 비교하긴 어려워요. 수능 모의고사로 위치를 확인해봐요.',
+    };
+  }
+
+  // ── 환산 근거 등급 ──────────────────────────────────────────────────
+  // 2026-09. 서연님·동근님 확인: 성균관대·서강대 같은 상위권이 '적정'으로 뜨던 원인이
+  // 여기였다. 그 대학들은 검정고시 비교내신 환산표를 공개하지 않는데(comparative의
+  // comparativeGradeType === 'prose'), 앱이 다른 대학 표의 중앙값으로 등급을
+  // 지어내서 합격선과 비교하고 있었다. 대학이 안 밝힌 기준을 우리가 만든 셈이다.
+  //
+  //   A 계산 가능 : 대학 공식 환산표 + 학생부교과(정량) → 칸수를 낸다
+  //   B 참고만    : 공식 환산표 + 학생부종합(정성평가) → 칸수는 내되 한계를 밝힌다
+  //   C 계산 불가 : 환산표 미공개 → 칸수를 내지 않는다. 입학처 문의로 안내한다
+  //
+  // ⚠️ C에서 다시 칸수를 내지 말 것. 근거 없는 숫자가 학생의 지원 판단을 바꾼다.
+  if (conversionMethod === 'standard') {
+    return {
+      ...base,
+      applicable: false,
+      dataGap: 'conversion',
+      reason:
+        '이 대학은 검정고시 점수를 몇 등급으로 볼지 공개하지 않았어요. ' +
+        '기준이 없으면 합격 가능성을 계산할 수 없어서 칸수를 보여주지 않아요. ' +
+        '입학처에 비교내신 환산 기준을 문의해 보세요.',
     };
   }
 
