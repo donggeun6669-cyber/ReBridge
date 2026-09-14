@@ -1,0 +1,286 @@
+/* 데이터 원본 화면 — 팀 내부용.
+   서비스 화면(.app-frame, 430px)에 갇히면 표를 볼 수 없어서 이 화면만 틀 밖으로 나온다.
+   꾸미지 않는다. 값이 잘 보이는 게 전부다. */
+
+.raw-root {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  font-size: 13px;
+}
+
+/* ── 상단 ─────────────────────────────────────────── */
+.raw-topbar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+}
+.raw-back {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card);
+  color: var(--text);
+  cursor: pointer;
+}
+.raw-topbar-text { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+.raw-topbar-text strong { font-size: 15px; }
+.raw-topbar-text span { font-size: 12px; color: var(--text-sub); }
+
+/* ── 본문 2단 ─────────────────────────────────────── */
+.raw-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+@media (min-width: 900px) {
+  .raw-body { flex-direction: row; }
+}
+
+/* 왼쪽 목록 */
+.raw-side {
+  flex: none;
+  padding: 12px;
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  overflow-y: auto;
+  max-height: 34vh;
+}
+@media (min-width: 900px) {
+  .raw-side {
+    width: 260px;
+    max-height: none;
+    border-bottom: 0;
+    border-right: 1px solid var(--border);
+  }
+}
+.raw-side-group + .raw-side-group { margin-top: 16px; }
+.raw-side-label {
+  margin: 0 0 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-sub);
+  letter-spacing: -.2px;
+}
+.raw-side-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 7px 9px;
+  margin-bottom: 2px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  line-height: 1.35;
+}
+.raw-side-item:hover { background: var(--bg-soft); }
+.raw-side-item.is-on { background: var(--brand-tint); color: var(--brand-deep); }
+.raw-side-title { display: block; font-size: 12.5px; font-weight: 600; }
+.raw-side-file {
+  display: block;
+  font-size: 10.5px;
+  color: var(--text-sub);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/* 오른쪽 본문 */
+.raw-main {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.raw-head { margin-bottom: 12px; }
+.raw-title { margin: 0 0 4px; font-size: 17px; font-weight: 700; }
+.raw-path {
+  display: inline-block;
+  margin-bottom: 8px;
+  padding: 2px 6px;
+  border-radius: 5px;
+  background: var(--bg-soft);
+  color: var(--text-sub);
+  font-size: 11px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+.raw-note { margin: 0 0 4px; line-height: 1.6; max-width: 78ch; }
+.raw-source { margin: 0 0 4px; font-size: 12px; color: var(--text-sub); }
+.raw-warn {
+  margin: 8px 0 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--caution-soft);
+  color: #8A5A00;
+  line-height: 1.55;
+  max-width: 78ch;
+}
+
+.raw-msg { padding: 14px 0; color: var(--text-sub); }
+.raw-msg-err { color: var(--danger); }
+
+/* meta 블록 */
+.raw-meta {
+  margin: 10px 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card);
+}
+.raw-meta > summary {
+  padding: 8px 10px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 12px;
+}
+.raw-meta pre {
+  margin: 0;
+  padding: 0 10px 10px;
+  overflow-x: auto;
+  font-size: 11.5px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+/* 검색·버튼 줄 */
+.raw-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0 8px;
+}
+.raw-search {
+  flex: 1 1 240px;
+  min-width: 0;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card);
+  color: var(--text);
+  font-size: 13px;
+  font-family: inherit;
+}
+.raw-count { font-size: 12px; color: var(--text-sub); white-space: nowrap; }
+.raw-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card);
+  color: var(--text);
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.raw-btn:hover { background: var(--bg-soft); }
+
+/* 표 — 가로 스크롤은 표 안에서만 일어난다 */
+.raw-tablewrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card);
+}
+.raw-table {
+  border-collapse: collapse;
+  width: max-content;
+  min-width: 100%;
+  font-size: 12px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+.raw-table th,
+.raw-table td {
+  padding: 6px 9px;
+  border-bottom: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  text-align: left;
+  vertical-align: top;
+  max-width: 320px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.raw-table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--bg-soft);
+  font-weight: 700;
+  white-space: nowrap;
+}
+.raw-table tbody tr { cursor: pointer; }
+.raw-table tbody tr:hover { background: var(--bg-soft); }
+.raw-table tbody tr.is-open { background: var(--brand-tint); }
+.raw-th-idx,
+.raw-td-idx { color: var(--text-sub); text-align: right; width: 1%; }
+.raw-dim { color: var(--text-sub); }
+
+/* 펼친 줄의 원본 JSON */
+.raw-detail > td {
+  white-space: normal;
+  max-width: none;
+  background: var(--bg-soft);
+  padding: 0;
+}
+.raw-detail pre {
+  margin: 0;
+  padding: 10px 12px;
+  max-height: 420px;
+  overflow: auto;
+  font-size: 11.5px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.raw-more {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  padding: 9px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card);
+  color: var(--text);
+  font-size: 12.5px;
+  font-family: inherit;
+  cursor: pointer;
+}
+.raw-more:hover { background: var(--bg-soft); }
+
+.raw-foot {
+  margin: 14px 0 24px;
+  font-size: 11.5px;
+  color: var(--text-sub);
+  line-height: 1.6;
+}
+
+/* 다른 파일과 이어붙이는 방법 — 대학 이름이 왜 없는지 여기서 알려준다. */
+.raw-join {
+  margin: 8px 0 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--brand-tint);
+  color: var(--brand-deep);
+  line-height: 1.55;
+  max-width: 78ch;
+}
