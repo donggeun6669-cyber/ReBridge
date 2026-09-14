@@ -55,6 +55,17 @@ function SusiBadge({ r, hasScore }) {
       </span>
     );
   }
+  // 지원자격이 따로 있는 전형 — 등급이 좋아도 자격이 안 되면 지원 자체가 안 된다(2026-09).
+  if (hasScore && r.dataGap === 'special') {
+    return (
+      <span
+        className="fit-tag fit-unknown"
+        title="농어촌·기초생활수급·재직 경력처럼 지원자격이 따로 있는 전형이에요. 해당되는지 모집요강에서 먼저 확인하세요."
+      >
+        자격 확인 필요
+      </span>
+    );
+  }
   // 점수를 넣었는데도 합격선 자료가 없는 경우 — '예측 불가'가 아니라 '자료 없음'
   if (hasScore && r.dataGap === 'cutline') {
     return <span className="fit-tag fit-unknown" title={`이 대학·전형의 ${CUTLINE_YEAR}학년도 합격선이 공개 자료에 없어요.`}>자료 없음</span>;

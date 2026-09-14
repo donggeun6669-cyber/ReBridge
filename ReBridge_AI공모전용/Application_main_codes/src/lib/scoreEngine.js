@@ -583,10 +583,14 @@ function _gradeFromInverseFormula(score, params) {
 // 합격 가능성 라벨 (gap<0 = 내가 더 우수)
 // grade 기반: gap 단위 = 등급 (1등급 차이)
 // score 기반: gap은 정규화된 등급-환산값 (아래 evaluateAdmission 참조)
+// ⚠️ 아래 경계는 admissionChance의 CHANCE_BANDS와 반드시 같아야 한다.
+//    한쪽만 고치면 같은 전형이 카드에서는 '적정', 상세에서는 '안정'으로 갈린다.
+//    (2026-09 개정 근거는 CHANCE_BANDS 머리말에 적어 뒀다 — 합격선이 70%컷이라는 점,
+//     그리고 검정고시생에게만 있는 비교과·서류 손실.)
 function verdictFromGap(gap) {
-  if (gap <= -1.0) return { key: 'safe',  label: '안정', tone: 'good' };
-  if (gap <=  0.3) return { key: 'fit',   label: '적정', tone: 'ok'   };
-  if (gap <=  1.0) return { key: 'reach', label: '소신', tone: 'warn' };
+  if (gap <= -1.2) return { key: 'safe',  label: '안정', tone: 'good' };
+  if (gap <= -0.4) return { key: 'fit',   label: '적정', tone: 'ok'   };
+  if (gap <=  0.2) return { key: 'reach', label: '소신', tone: 'warn' };
   return             { key: 'hard',  label: '도전', tone: 'hard'  };
 }
 
@@ -597,8 +601,12 @@ export function gedAffinity(row) {
   if (elig === '불가') return { grade: 'X', label: '지원 불가', tone: 'hard' };
   if (elig === '조건부') return { grade: 'C', label: '조건부 가능', tone: 'warn' };
   // 가능
-  if (type === '학생부종합') return { grade: 'A', label: '검정고시에 유리', tone: 'good' };
-  if (type === '논술') return { grade: 'B', label: '비교적 유리', tone: 'good' };
+  // ⚠️ 2026-09. 예전에는 학생부종합을 'A 검정고시에 유리'로 표시했다. 근거가 없었다.
+  //    학종은 서류·면접 정성평가 비중이 크고, 검정고시생은 학교생활기록부 대신
+  //    대체서식으로 평가받는다. 유리하다고 말할 자료가 우리에게 없다.
+  //    '유리/불리'를 단정하지 말고 전형의 성격만 적는다.
+  if (type === '학생부종합') return { grade: 'C', label: '서류·면접 비중 큼', tone: 'ok' };
+  if (type === '논술') return { grade: 'B', label: '내신 비중 작음', tone: 'good' };
   if (type === '학생부교과') return { grade: 'B', label: '비교내신 적용', tone: 'ok' };
   if (type === '수능위주') return { grade: 'C', label: '수능 실력 필요', tone: 'ok' };
   return { grade: 'C', label: '지원 가능', tone: 'ok' };
@@ -658,6 +666,15 @@ export function gedFit(adm, comparativeType) {
     if (!hasTable) {
       reasons.push('그런데 이 대학은 환산 기준을 공개하지 않았어요. 입학처 문의가 필요해요.');
     }
+    // 2026-09. 교과 점수만 보면 안 된다. 모집요강 원문을 뒤져 보니 174개 대학 중 82곳이
+    // 검정고시 출신자의 출결·봉사(비교과)를 따로 다루고 있었다. 방식은 제각각이다
+    // (예: 부산대는 검정고시 평균 97점 이상이어야 출결 만점 10점, 90점이면 8점).
+    // 우리는 그 값을 대학별로 갖고 있지 않으므로 계산에 넣지 않는다. 대신 있다고 알린다.
+    reasons.push(
+      '학생부교과는 교과 성적 말고 출결·봉사 같은 비교과 배점이 따로 있는 대학이 많아요. ' +
+      '검정고시생은 학교생활기록부가 없어 대학이 정한 대체 기준으로 받는데 대학마다 달라서, ' +
+      '앱의 칸수에는 이 부분이 들어가 있지 않아요. 모집요강에서 꼭 확인하세요.'
+    );
   } else if (type === '수능위주') {
     level = 'check';
     reasons.push('수능 성적이 핵심인 전형이에요. 수능을 준비할 계획일 때 적합해요.');
@@ -678,8 +695,9 @@ export function gedFit(adm, comparativeType) {
   // 수능최저(수능위주 제외)
   if (type !== '수능위주') {
     if (noCsat) {
+      // 수능최저가 없다는 건 '문턱이 하나 없다'는 뜻이지 '수월하다'는 뜻이 아니다.
+      // 예전에는 이걸로 level을 good(지원 수월)까지 올렸다 — 과한 안심이라 걷어냈다.
       reasons.push('수능최저가 없어, 수능을 안 봐도 지원할 수 있어요.');
-      if (level === 'ok') level = 'good';
     } else if (!csatUnknown) {
       reasons.push('수능최저가 있어요 — 수능 일부 과목은 준비가 필요해요.');
     }
@@ -770,6 +788,22 @@ export function evaluateAdmission(profile, adm) {
         '이 대학은 검정고시 점수를 몇 등급으로 볼지 공개하지 않았어요. ' +
         '기준이 없으면 합격 가능성을 계산할 수 없어서 칸수를 보여주지 않아요. ' +
         '입학처에 비교내신 환산 기준을 문의해 보세요.',
+    };
+  }
+
+  // ── 자격이 따로 있는 전형 ──────────────────────────────────────────
+  // 합격선을 붙일 수 없는 전형이다. 위 SPECIAL_ELIGIBILITY_RE 머리말 참고.
+  if (hasSpecialEligibility(adm)) {
+    return {
+      ...base,
+      applicable: false,
+      dataGap: 'special',
+      specialEligibility: true,
+      reason:
+        '이 전형은 지원자격이 따로 있어요(농어촌 거주·기초생활수급·재직 경력 등). ' +
+        '해당되는지부터 모집요강에서 확인하세요. ' +
+        '그리고 이런 전형은 따로 공개된 합격선 자료가 없어서, 일반전형 합격선으로 ' +
+        '합격 가능성을 계산하면 틀린 숫자가 나와요. 그래서 칸수를 보여주지 않아요.',
     };
   }
 
@@ -963,16 +997,92 @@ export function coachLine(ev) {
     ` 과목당 약 ${ev.perSubjectQuestions}문제 더 맞히면 닿아요.${near} (${label} 지원)`;
 }
 
+// ── 자격이 따로 있는 전형 판별 ────────────────────────────────────────
+//
+// 2026-09. 동근님 지적("가천대가 안정으로 뜨면 안 된다")의 실제 원인 중 하나.
+// 가천대 2027 수시에서 검정고시로 지원 가능한 전형은 논술 2개와
+// 학생부종합 3개(교육기회균형·기회균형·특성화고졸재직자)뿐이다. 학생부교과
+// 일반전형은 검정고시 지원 자체가 안 된다. 그런데 앱은 그 기회균형 전형에
+// '가천대 학생부종합 전체 합격자 평균 3.79등급'을 합격선으로 붙여 '안정'이라고 했다.
+//
+// 두 가지가 동시에 틀렸다.
+//   ① 이 전형들은 농어촌 거주·기초생활수급·재직 경력 같은 자격이 따로 있다.
+//      해당되지 않으면 등급이 아무리 좋아도 지원 자체가 불가능하다.
+//   ② 어디가 입결은 대학 × 전형유형 단위 집계라 '기회균형 전형만의 합격선'이 아니다.
+//      일반전형이 섞인 평균을 기회균형에 붙이는 건 근거 없는 숫자다.
+//
+// 그래서 이런 전형은 칸수를 내지 않는다. 목록에서 빼지는 않는다 —
+// 자격에 해당하는 학생에게는 오히려 기회이기 때문이다. 자격을 먼저 확인하라고 말한다.
+//
+// ⚠️ 여기 걸리는 전형에 다시 칸수를 붙이지 말 것. 정원외(quotaOutside)와는 다른 축이다.
+//    정원외는 목록에서 아예 분리돼 있고, 이건 정원내인데 자격이 따로 있는 전형이다.
+const SPECIAL_ELIGIBILITY_RE =
+  /기회균형|기회균등|교육기회|고른기회|사회통합|사회적?배려|기회배려|농어촌|기초생활|차상위|저소득|특성화고|마이스터|재직자|만학도|성인학습자|평생학습자|장애|보훈|국가유공|서해5도|다문화|북한이탈|탈북|새터민|특수교육|위탁|산업체|계약학과|재외국민|외국인|경제배려|배려대상/;
+
+export function hasSpecialEligibility(adm) {
+  const name = `${adm?.admissionName || ''} ${adm?.nameKey || ''}`;
+  return SPECIAL_ELIGIBILITY_RE.test(name);
+}
+
 // 칸수式 합격 가능성 게이지 (5단계). gap = myGrade - cutGrade (+면 부족)
-// 진학사 '칸수' 느낌의 시각 단계. 작년 9등급제 입결 기반 '예상'임을 항상 라벨링.
+//
+// ── 기준을 왜 이렇게 잡았나 (2026-09 개정) ──────────────────────────────
+//
+// 옛 기준은 gap ≤ -1.0 안정 / ≤ 0.3 적정 / ≤ 1.0 소신 / ≤ 2.0 도전이었다.
+// 서연님이 "3등급이 나와도 안정, 5등급이 나와도 안정"이라고 한 게 여기서 나왔다.
+// 실제로 가천대 학생부종합(합격선 3.79등급)에서 90점(3등급, gap -0.93)과
+// 80점(4등급, gap -0.04)이 똑같이 '적정'이었다. 라벨 하나가 1.3등급을 덮은 것이다.
+//
+// ⚠️ 먼저 우리가 쓰는 합격선이 무엇인지 정확히 알고 있어야 한다.
+//    cutlines_2026.json의 298개 블록은 **전부 70%컷**이다(cutGradeAvg는 0개).
+//    70%컷 = 합격자를 성적순으로 줄 세웠을 때 상위 70% 지점의 등급.
+//    즉 합격자의 70%가 이 등급보다 우수했고, 30%만 이보다 아래였다는 뜻이다.
+//    '합격자 평균'이 아니라 **합격자 분포의 아래쪽 경계**에 가깝다.
+//    → gap = 0 은 "떨어진다"가 아니라 "합격자 하위 30% 언저리"다. 소신이다.
+//    → gap 이 음수로 1등급 이상 벌어져야 비로소 합격자 중상위권이다.
+//
+// 그 위에 검정고시생에게만 있는 손실을 얹는다. 근거는 두 가지다.
+//
+//  ① 70%컷은 '일반고 학생'의 교과 등급 분포다. 검정고시생이 비교내신으로 같은
+//     등급을 받아도 같은 자가 아니다. 학교생활기록부가 없어서 출결·봉사 같은
+//     비교과 배점을 대학이 정한 대체 기준으로 받고(모집요강마다 다르다),
+//     서류평가도 대체서식으로 받는다. 그 축의 자료는 우리에게 없다.
+//
+//  ② 알 수 없는 손실이 한쪽 방향으로만 있으면 여유를 두는 쪽이 맞다.
+//     느슨한 쪽이 틀리면 학생이 지원 기회를 날린다. 짠 쪽이 틀리면 한 칸 더
+//     안전하게 쓸 뿐이다. 두 실수의 비용이 같지 않다.
+//
+// ⚠️ 이 기준을 다시 느슨하게 만들지 말 것. 바꾸려면 근거(검정고시생 실제 입결)를
+//    먼저 가져올 것. 지금 그 자료는 공개된 곳이 없다.
+const CHANCE_BANDS = [
+  { max: -1.2, level: 5, label: '안정', tone: 'good' },
+  { max: -0.4, level: 4, label: '적정', tone: 'ok' },
+  { max: 0.2, level: 3, label: '소신', tone: 'warn' },
+  { max: 1.0, level: 2, label: '도전', tone: 'hard' },
+  { max: Infinity, level: 1, label: '어려움', tone: 'hard' },
+];
+
+const CHANCE_DESC = {
+  5: `${CUTLINE_YEAR}학년도 합격자 대부분보다 좋은 등급이에요`,
+  4: `${CUTLINE_YEAR}학년도 합격자 안쪽 등급이에요`,
+  3: `${CUTLINE_YEAR}학년도 합격선 경계예요. 안전하다는 뜻은 아니에요`,
+  2: '아직 합격선까지 거리가 있어요',
+  1: '지금 점수로는 많이 부족해요',
+};
+
 export function admissionChance(ev) {
   if (!ev || !ev.applicable || ev.gap == null) return null;
   const g = ev.gap;
-  if (g <= -1.0) return { level: 5, label: '안정', tone: 'good', desc: `${CUTLINE_YEAR}학년도 합격선보다 여유 있어요` };
-  if (g <= 0.3) return { level: 4, label: '적정', tone: 'ok', desc: `${CUTLINE_YEAR}학년도 합격선과 비슷한 수준이에요` };
-  if (g <= 1.0) return { level: 3, label: '소신', tone: 'warn', desc: '조금 부족하지만 노려볼 만해요' };
-  if (g <= 2.0) return { level: 2, label: '도전', tone: 'hard', desc: '아직 합격선까지 거리가 있어요' };
-  return { level: 1, label: '어려움', tone: 'hard', desc: '지금 점수로는 많이 부족해요' };
+  let band = CHANCE_BANDS.find((b) => g <= b.max) || CHANCE_BANDS[CHANCE_BANDS.length - 1];
+
+  // 학생부종합은 '안정'을 주지 않는다.
+  //   어디가의 학생부종합 70%컷은 '서류평가를 통과한 뒤' 합격한 학생들의 교과 등급이다.
+  //   검정고시생은 그 서류평가를 학교생활기록부가 아니라 대체서식으로 받는다.
+  //   즉 교과 등급이 좋아도 통과 여부를 우리가 알 수 없다 — '안정'이라고 말할 근거가 없다.
+  //   칸수를 아예 없애지는 않는다. 등급이 낮으면 어차피 어렵다는 정보는 여전히 맞기 때문이다.
+  if (ev.isHolistic && band.level === 5) band = CHANCE_BANDS[1];
+
+  return { level: band.level, label: band.label, tone: band.tone, desc: CHANCE_DESC[band.level] };
 }
 
 // 데이터 가용성 안내 — "없음/구할 수 없음"을 정직하게 표시하기 위한 메타.

@@ -634,6 +634,8 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
                           ? '수능 기준 전형 — 검정고시 평균으로 비교 어려움'
                           : ev.dataGap === 'conversion'
                           ? '이 대학은 검정고시 환산 기준 미공개 — 계산 불가'
+                          : ev.dataGap === 'special'
+                          ? '지원자격이 따로 있는 전형 — 자격부터 확인하세요'
                           : CUTLINE_NO_DATA_SHORT}
                       </div>
                     )}
@@ -793,6 +795,8 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
                                 ? '수능 기준 전형이에요'
                                 : ev?.dataGap === 'conversion'
                                 ? '검정고시 환산 기준을 공개하지 않은 대학이에요'
+                                : ev?.dataGap === 'special'
+                                ? '지원자격이 따로 있는 전형이에요'
                                 : CUTLINE_NO_DATA_LABEL}</b>
                               <p>{ev?.reason || '점수를 입력하면 비교해드릴게요.'}</p>
                               {(r.admissionType === '논술' || r.admissionType === '실기') && (
