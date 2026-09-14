@@ -41,6 +41,34 @@ const cutlinesPrev = { ...cutlines4yPrev, ...cutlinesCollegePrev };
 // 값 자체는 쓰이지 않지만, 출처를 물을 때를 대비해 원본을 따로 남겨 둔다.
 export const CUTLINE_META_COLLEGE = cutlinesCollege.meta || null;
 import comparative from '../data/comparative_2027.json';
+import admissions2027 from '../data/admissions_2027.min.json';
+
+// ── 합격선 하나가 몇 개 전형에 걸쳐 있나 ────────────────────────────────
+//
+// 2026-09 점검에서 나온 문제. 어디가 입결은 '대학 × 전형유형' 단위 집계다.
+// 그래서 충남대 학생부종합 6개 전형이 전부 같은 합격선 3.39등급을 쓰고,
+// 세종대는 성격이 전혀 다른 사이버국방 특별전형까지 같은 값(2.635)을 쓴다.
+// 63개 조합이 3개 이상 전형에 걸쳐 있었다.
+//
+// 이건 자료를 더 잘 구해서 고칠 수 있는 게 아니라 원천의 해상도 문제다.
+// 고칠 수 없으면 최소한 말은 해야 한다 — 화면이 "이 합격선은 N개 전형을 합친 값"이라고
+// 밝힐 수 있도록, 그 대학·전형유형에 검정고시로 지원 가능한 수시 전형이 몇 개인지 센다.
+//
+// ⚠️ 이 수는 '합격선을 만든 전형 수'가 아니라 '그 합격선을 같이 쓰게 되는 전형 수'다.
+//    문구를 쓸 때 두 가지를 섞지 말 것.
+const _typeSpread = (() => {
+  const m = new Map();
+  for (const r of admissions2027) {
+    if (r.gedEligible !== '가능' || r.phase !== '수시' || !r.admissionType) continue;
+    const k = `${r.univId}|${r.admissionType}`;
+    m.set(k, (m.get(k) || 0) + 1);
+  }
+  return m;
+})();
+
+export function cutlineSpread(univId, admissionType) {
+  return _typeSpread.get(`${univId}|${admissionType}`) || 0;
+}
 
 // 검정고시(고졸) 핵심 과목
 export const GED_SUBJECTS = ['국어', '수학', '영어', '사회', '과학', '한국사'];
@@ -591,7 +619,10 @@ function verdictFromGap(gap) {
   if (gap <= -1.2) return { key: 'safe',  label: '안정', tone: 'good' };
   if (gap <= -0.4) return { key: 'fit',   label: '적정', tone: 'ok'   };
   if (gap <=  0.2) return { key: 'reach', label: '소신', tone: 'warn' };
-  return             { key: 'hard',  label: '도전', tone: 'hard'  };
+  // 예전엔 여기가 끝이라 gap이 아무리 벌어져도 '도전'이었다. 그래서 카드에는
+  // 게이지가 '어려움'인데 같은 카드 설명문은 "도전 지원이에요"라고 적히는 모순이 있었다.
+  if (gap <=  1.0) return { key: 'hard',  label: '도전', tone: 'hard'  };
+  return             { key: 'far',   label: '어려움', tone: 'hard'  };
 }
 
 // 검정고시 친화도 (전형 성격 기준): A(매우 유리) ~ E / X(불가)
@@ -820,6 +851,10 @@ export function evaluateAdmission(profile, adm) {
   // 전문대 원천에만 있는 '합격자 최저 등급'. "이 등급까지도 붙었다"는 뜻이라
   // 평균보다 실제 지원 판단에 쓸모가 크다. 4년제에는 없어 null이다.
   base.cutGradeLowest = cut?.cutGradeLowest ?? null;
+  // 이 합격선을 같이 쓰게 되는 전형 수 / 집계에 들어간 모집단위 수.
+  // 둘 다 "이 숫자를 얼마나 믿어도 되나"를 화면이 말하게 하려고 싣는다.
+  base.cutSpread = cutlineSpread(adm.univId, adm.admissionType);
+  base.cutNarrow = cut?.n != null && cut.n <= 3;
   if (!hasAnyCutline) {
     return {
       ...base,
@@ -978,8 +1013,11 @@ export function coachLine(ev) {
     : `${cy}학년도 합격선(약 ${ev.cutGrade}등급)`;
 
   // ① 만점을 받아도 못 닿는 경우
+  // '어려움'은 뒤에 '지원이에요'를 붙이면 말이 안 된다('어려움 지원이에요').
+  // 라벨을 문장에 넣을 때는 항상 이렇게 갈라 쓴다.
+  const labelTail = label === '어려움' ? '지금은 어려운 지원이에요.' : `${label} 지원이에요.`;
   if (ev.reachable === false) {
-    return `${cutText}은 검정고시 만점을 받아도 닿기 어려워요. ${label} 지원이에요.`;
+    return `${cutText}은 검정고시 만점을 받아도 닿기 어려워요. ${labelTail}`;
   }
 
   // ② 합격선 안쪽 (gap ≤ 0)
@@ -994,7 +1032,7 @@ export function coachLine(ev) {
   // ③ 부족 — '적정'이어도 부족한 건 부족하다고 말한다
   const near = ev.verdict?.key === 'fit' ? ' 거의 닿았어요.' : '';
   return `${cutText}까지 평균 ${ev.shortPoints}점 정도 부족해요.` +
-    ` 과목당 약 ${ev.perSubjectQuestions}문제 더 맞히면 닿아요.${near} (${label} 지원)`;
+    ` 과목당 약 ${ev.perSubjectQuestions}문제 더 맞히면 닿아요.${near} (${label})`;
 }
 
 // ── 자격이 따로 있는 전형 판별 ────────────────────────────────────────

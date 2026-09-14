@@ -8,7 +8,7 @@ import { getUniversityDetail, getUniversityDetailByName } from '../lib/analysis.
 import { isBookmarked, toggleBookmark } from '../lib/bookmarks.js';
 import {
   evaluateAdmission, coachLine, gedAffinity, admissionChance,
-  getComparative, comparativeAvailability, gedFit,
+  getComparative, comparativeAvailability, gedFit, hasSpecialEligibility,
   applyComparativeConversion, gedAverage, gradeToMinAvg,
   gedFreshmenStanding,
 } from '../lib/scoreEngine.js';
@@ -433,6 +433,17 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
     return { r, ev, chance: ev ? admissionChance(ev) : null, fit: gedFit(r, compType) };
   });
 
+  // ── 자격 제한 전형밖에 없는 대학인가 ────────────────────────────────
+  // 2026-09. 가천대 2027 수시가 딱 이랬다. 검정고시로 지원 가능한 전형이 논술 2개와
+  // 학생부종합 3개인데 그 셋이 전부 기회균형·특성화고졸재직자였다. 즉 자격이 맞지 않으면
+  // 사실상 수시 지원 자체가 안 되는 대학인데, 화면은 전형 5개를 그냥 늘어놓기만 했다.
+  // 전체 195개 대학 중 8곳이 여기 해당한다. 목록을 보기 전에 먼저 말해 준다.
+  const susiRows = okRows.filter((r) => r.phase === '수시');
+  const generalSusi = susiRows.filter(
+    (r) => !hasSpecialEligibility(r) && r.admissionType !== '논술' && r.admissionType !== '실기'
+  );
+  const onlyRestricted = susiRows.length > 0 && generalSusi.length === 0;
+
   // 2028 시행계획을 '구조 참고'로만 따로 보여줄지 — 2027 자료가 있는 대학만 해당.
   // 2027이 없는 대학은 위 목록 자체가 2028이므로 중복해서 보여주지 않는다.
   const showPlanSection = is2027 && planRows.length > 0;
@@ -521,6 +532,21 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
           officeUrl={univ.admissionOfficeUrl}
         />
       </div>
+
+      {onlyRestricted && (
+        <div className="restricted-banner">
+          <AlertCircle size={16} />
+          <div>
+            <b>이 대학은 검정고시로 넣을 수 있는 일반 수시 전형이 없어요.</b>
+            <p>
+              {ADMISSION_DATA_YEAR}학년도 자료에 실린 수시 전형이 논술이거나,
+              농어촌·기초생활수급·재직 경력처럼 <b>지원자격이 따로 있는 전형</b>뿐이에요.
+              자격에 해당하면 오히려 기회지만, 해당되지 않으면 지원할 수 없어요.
+              자격부터 모집요강에서 확인하세요.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* 담임 한마디 */}
       <div className="coach-panel">
@@ -721,6 +747,27 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
                               );
                             })()}
                           </div>
+                          {/* 이 합격선을 몇 개 전형이 나눠 쓰는지 / 학과 몇 개로 낸 값인지.
+                              어디가 입결은 '대학 × 전형유형' 단위 집계라, 성격이 다른 전형들이
+                              같은 숫자를 쓰게 된다(충남대 학생부종합 6개 전형이 전부 3.39등급).
+                              자료를 더 잘 구해서 고칠 수 있는 게 아니라 원천의 해상도 문제다.
+                              고칠 수 없으면 말이라도 해야 한다. */}
+                          {(ev.cutSpread > 2 || ev.cutNarrow) && (
+                            <div className="adm-cut-caveat">
+                              {ev.cutSpread > 2 && (
+                                <span>
+                                  이 합격선은 {univ.name} <b>{r.admissionType} 전형 {ev.cutSpread}개를 통틀어</b>{' '}
+                                  집계한 값이에요. 전형마다 실제 합격선은 달라요.{' '}
+                                </span>
+                              )}
+                              {ev.cutNarrow && (
+                                <span>
+                                  게다가 <b>학과 {ev.cutN}개</b>만으로 낸 값이라 대학 전체를 대표한다고 보기 어려워요.{' '}
+                                </span>
+                              )}
+                              모집요강과 입학처 발표 입시결과를 꼭 같이 보세요.
+                            </div>
+                          )}
                           {/* 합격자 최저 등급 — 전문대 자료에만 있다.
                               평균은 "보통 이 정도로 붙는다"이고, 최저는 "이 등급까지도 붙었다"라
                               지원을 망설이는 사람에게는 이쪽이 더 중요한 정보다. */}
@@ -747,7 +794,9 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
                               } else if (ev.shortPoints > 0) {
                                 tail = ` ${who} 평균 ${myAvg}점에서 약 ${ev.shortPoints}점 더 필요해요.`;
                               } else {
-                                tail = ` ${who} 평균 ${myAvg}점은 ${ev.verdict.label} 지원권이에요.`;
+                                tail = ev.verdict.label === '어려움'
+                                  ? ` ${who} 평균 ${myAvg}점으로는 지금 어려워요.`
+                                  : ` ${who} 평균 ${myAvg}점은 ${ev.verdict.label} 지원권이에요.`;
                               }
                             }
                             return (

@@ -5071,6 +5071,33 @@ button {
 .calc-basis-src { margin-top: 6px; font-size: 11px; color: var(--text-muted); }
 .calc-basis-derived { border-left-color: var(--caution); }
 
+/* 합격선을 얼마나 믿어도 되는지 — 숫자 바로 아래 붙인다(스크롤해서 찾게 하지 않는다) */
+.adm-cut-caveat {
+  margin-top: 8px;
+  padding: 10px 12px;
+  border-radius: var(--r-sm);
+  background: var(--caution-soft);
+  color: var(--caution);
+  font-size: 12px;
+  line-height: 1.6;
+  font-weight: 600;
+}
+.adm-cut-caveat b { font-weight: 800; }
+
+/* 자격 제한 전형밖에 없는 대학 — 목록을 보기 전에 먼저 알린다 */
+.restricted-banner {
+  display: flex;
+  gap: 10px;
+  margin: 14px 0 4px;
+  padding: 14px 15px;
+  border-radius: var(--r-md);
+  background: var(--caution-soft);
+  border: 1px solid var(--caution);
+  color: var(--caution);
+}
+.restricted-banner b { font-weight: 800; font-size: 14px; display: block; }
+.restricted-banner p { margin-top: 6px; font-size: 12.5px; line-height: 1.65; font-weight: 600; }
+
 .ged-quote {
   margin: 0 0 9px;
   padding: 10px 12px;
