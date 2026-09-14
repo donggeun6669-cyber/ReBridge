@@ -24,7 +24,12 @@ const ONLY_TRACK = EXAMPLES.length === 1 ? EXAMPLES[0].track : null;
 export default function HomeScreen({ goTo = () => {}, goBack = () => {} }) {
   const [track, setTrack] = useState(() => ONLY_TRACK || getActiveTrack());
   // 세션에서 이미 트랙을 선택했으면 true (sessionStorage — 탭/앱 닫으면 리셋)
-  const [picked, setPicked] = useState(() => !!ONLY_TRACK || !!sessionStorage.getItem('rb_track_picked'));
+  // 온보딩에서 길을 골랐거나(=getActiveTrack이 값을 줌) 세션에서 이미 고른 사람은
+  // 시작 화면을 건너뛴다. 안 그러면 점수까지 넣은 사람에게 '어디서부터
+  // 시작할까요?'가 또 떠서 입력 직후 화면과 홈이 따로 논다(2026-09 서연님).
+  const [picked, setPicked] = useState(
+    () => !!ONLY_TRACK || !!getActiveTrack() || !!sessionStorage.getItem('rb_track_picked')
+  );
 
   // 자동 선택한 트랙도 저장해 둔다(MY·다른 화면이 activeTrack을 읽는다).
   useEffect(() => {

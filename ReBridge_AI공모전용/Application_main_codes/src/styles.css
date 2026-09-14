@@ -51,7 +51,8 @@
   /* 시안 값은 #7A7468이었는데 크림 배경 위에서 4.40:1로 기준(4.5:1)에 못 미쳐
      본문·칩·라벨 수십 곳이 흐리게 보였다. 색감은 그대로 두고 한 단계만 어둡게. */
   --text-sub: #736C5E;    /* 크림 4.93:1 / 흰 카드 5.20:1 */
-  --text-muted: #8A8478;  /* text/muted — 하단 안내문·비활성 탭 */
+  /* 시안 값 #8A8478은 크림 위 3.52:1로 미달. 한 단계만 어둡게. */
+  --text-muted: #767062;  /* 크림 4.67:1 */
   --border: #F2E6D2;      /* border/warm */
 
   /* 노랑 계열 — 시안의 강조색 */
@@ -4804,7 +4805,8 @@ button {
 
 /* ── 커뮤니티 별점 ── */
 .cm-star-row {
-  font-size: 14px; color: #f59e0b; letter-spacing: 1px;
+  /* #f59e0b는 흰 카드 위 2.15:1로 거의 안 보였다(2026-09). */
+  font-size: 14px; color: var(--caution); letter-spacing: 1px;
   margin-bottom: 4px;
 }
 .cm-star-num {

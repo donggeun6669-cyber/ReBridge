@@ -11,7 +11,7 @@
 //           커뮤니티·인증, 학습(study) 트랙, 직업(job) 트랙을 전부 숨긴다.
 //   false → 원래대로 전부 노출 (v1.1에서 되돌릴 때 이 값만 false로).
 //   ※ 기능을 지운 게 아니라 가린 것이다. 화면·데이터·로직은 그대로 남아 있다.
-export const V1_UNIV_ONLY = true;
+export const V1_UNIV_ONLY = false;
 
 // v1에서 가려야 하는 화면인지 판단. (커뮤니티/인증 · 직업 · 학습 · 진로허브)
 export function isHiddenScreen(screen) {
@@ -172,8 +172,24 @@ export function toggleJobStage(name, field, stageKey) {
 }
 
 // 활성 트랙(목표) — 'study' | 'univ' | 'job' | null(미정). 홈이 이 값으로 상태를 그린다.
+// goal/stage → 트랙. 온보딩은 goal만 저장하는데 홈은 activeTrack을 본다.
+// 이 다리가 없으면 점수까지 다 넣은 사람에게도 '어디서부터 시작할까요?'가
+// 다시 떠서, 입력 직후 화면과 홈이 따로 논다(2026-09 서연님 지적).
+export function trackFromPersona(p = loadProfile()) {
+  if (!p) return null;
+  if (p.goal === 'job') return 'job';
+  if (p.goal === 'university') {
+    // 대입이 목표여도 아직 시험 전이면 검정고시(학습) 트랙이 더 맞다.
+    // 단 점수를 이미 넣었으면 대입 화면으로 바로 보낸다.
+    if (p.stage === 'studying' && p.gedAvg == null) return 'study';
+    return 'univ';
+  }
+  return null;
+}
+
 export function getActiveTrack() {
-  return loadProfile()?.activeTrack || null;
+  // 사용자가 홈에서 직접 고른 트랙이 1순위, 없으면 온보딩 답에서 유추한다.
+  return loadProfile()?.activeTrack || trackFromPersona() || null;
 }
 export function setActiveTrack(track) {
   const prev = loadProfile() || {};
