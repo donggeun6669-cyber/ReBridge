@@ -16,6 +16,8 @@ import { loadGedText2027, matchGedTextEntry } from '../lib/gedText2027.js';
 import { loadCompText2027 } from '../lib/compText2027.js';
 import DocumentsChecklist from './DocumentsChecklist.jsx';
 import GuidelineCheck from './GuidelineCheck.jsx';
+import { scale2028 } from '../lib/comparative2028.js';
+import { eunNeun } from '../lib/korean.js';
 import ChanceGauge from './ChanceGauge.jsx';
 import { loadProfile } from '../lib/persona.js';
 import {
@@ -26,6 +28,8 @@ import {
   PLAN_SECTION_TITLE, NO_2027_DATA_LABEL, NO_2027_DATA_NOTICE,
   PHASE_ESTIMATED_NOTICE, QUOTA_OUTSIDE_TITLE, QUOTA_OUTSIDE_NOTICE,
   YEAR_SPLIT_NOTICE, ADMISSION_DATA_YEAR, PLAN_YEAR,
+  FIVE_GRADE_FROM, FIVE_GRADE_TITLE, FIVE_GRADE_SUMMARY,
+  FIVE_GRADE_UNKNOWN, FIVE_GRADE_NO_CHANCE, FIVE_GRADE_HARSH,
   CUTLINE_YEAR, cutlineFallbackNotice, cutlineVolatilityNotice,
   applyDeadline,
 } from '../data/meta.js';
@@ -272,6 +276,91 @@ function RequirementText({ univId, row }) {
   );
 }
 
+// ── 2028학년도 5등급제 전환 (2026-09) ─────────────────────────────────
+// 동근님 지적: "내년부터 입시제도가 바뀌어서 5등급제가 되는 거랑, 내신을 반영하는
+// 거랑 등등 변수가 정말 많을 거야." 그 변수를 앱이 감추지 않고 그대로 보여주는 블록.
+//
+// 하는 일은 세 가지뿐이다.
+//   ① 5등급제로 바뀐다는 사실과, 그게 검정고시생에게 왜 불리하게 작동하는지
+//   ② 그 대학 시행계획이 실제로 무엇을 적어 뒀는지 (5등급표/9등급표/둘 다/없음)
+//   ③ 우리가 계산하지 않는다는 것 — 2026학년도 9등급 입결과는 견줄 수 없으니까
+//
+// ⚠️ 여기에 '아마 이럴 것'을 쓰지 말 것. 시행계획에 없는 건 없다고 말한다.
+function FiveGradeBlock({ univId, univName }) {
+  const [open, setOpen] = useState(false);
+  const info = scale2028(univId);
+
+  // 그 대학이 시행계획에 뭘 적어 뒀는지 한 줄로 정리한다.
+  let stance;
+  if (!info) {
+    stance = `${univName || '이 대학'}의 ${FIVE_GRADE_FROM}학년도 시행계획은 아직 자료에 없어요.`;
+  } else if (info.mentionsFive && info.mentionsNine) {
+    stance = `${univName || '이 대학'}${eunNeun(univName || '이 대학')} 시행계획에 5등급 표와 9등급 표를 둘 다 적어 뒀어요. ` +
+      `보통 5등급은 ${FIVE_GRADE_FROM}년 이후 졸업자, 9등급은 ${FIVE_GRADE_FROM - 1}년 이전 졸업자에게 적용해요.`;
+  } else if (info.mentionsFive) {
+    stance = `${univName || '이 대학'}${eunNeun(univName || '이 대학')} 시행계획에 5등급 체계를 적어 뒀어요.`;
+  } else if (info.mentionsNine) {
+    stance = `${univName || '이 대학'}${eunNeun(univName || '이 대학')} 시행계획에 9등급 표만 적어 뒀어요.`;
+  } else {
+    stance = `${univName || '이 대학'}의 시행계획에서는 등급 체계를 어떻게 적용하는지 찾지 못했어요.`;
+  }
+
+  return (
+    <div className="adm-block five-grade">
+      <div className="adm-block-title">
+        <AlertCircle size={13} /> {FIVE_GRADE_TITLE}
+      </div>
+      <p className="adm-block-desc">{FIVE_GRADE_SUMMARY}</p>
+      <p className="adm-block-desc">{FIVE_GRADE_HARSH}</p>
+      <p className="adm-block-desc">{stance}</p>
+
+      {info?.table && (
+        <>
+          <div className="fg-table-title">
+            시행계획에 실린 검정고시 환산표
+            <span className="fg-scale">{info.tableScale}등급 체계</span>
+          </div>
+          <table className="fg-table">
+            <thead>
+              <tr><th>검정고시 평균</th><th>등급</th></tr>
+            </thead>
+            <tbody>
+              {info.table.map((r, i) => (
+                <tr key={i}>
+                  <td>
+                    {r.minAvg}
+                    {r.maxAvg != null ? `~${r.maxAvg}` : ''}점
+                  </td>
+                  <td>{r.grade != null ? `${r.grade}등급` : '등급 없음'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </>
+      )}
+
+      <p className="adm-disclaimer">{FIVE_GRADE_UNKNOWN}</p>
+      <p className="adm-disclaimer">{FIVE_GRADE_NO_CHANCE}</p>
+
+      {info?.raw && (
+        <>
+          <button className="ged-raw-toggle" onClick={() => setOpen((v) => !v)} aria-expanded={open}>
+            <FileText size={13} />
+            {open ? `${FIVE_GRADE_FROM} 시행계획 원문 접기` : `${FIVE_GRADE_FROM} 시행계획 원문 보기`}
+            <ChevronDown size={14} className={`ged-raw-chev${open ? ' on' : ''}`} />
+          </button>
+          {open && (
+            <div className="ged-raw-body">
+              <pre className="fg-raw">{info.raw}</pre>
+              {info.source && <p className="adm-src">출처: {info.source}</p>}
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
 export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univId, univName }) {
   const profile = useMemo(loadProfile, []);
   const [openRows, setOpenRows] = useState(() => new Set());
@@ -496,6 +585,9 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
             <span className="count-pill">{okRows.length}</span>
           </div>
           {is2027 && <p className="section-sub">{YEAR_SPLIT_NOTICE}</p>}
+          {/* 2027 자료가 없는 대학은 이 목록 자체가 2028 시행계획이다.
+              그러면 아래 '2028 참고' 섹션이 안 뜨므로 5등급 안내를 여기서 한다. */}
+          {!is2027 && <FiveGradeBlock univId={realUnivId} univName={univ.name} />}
           <div className="result-list">
             {evals.map(({ r, ev, chance, fit }, i) => {
               const aff = gedAffinity(r);
@@ -846,6 +938,7 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
             {' '}{ADMISSION_DATA_YEAR}학년도 자료에 없는 <b>구조</b>를 참고하려고 남겨 둔 것이고,
             지원 가능 여부는 위 {ADMISSION_DATA_YEAR}학년도 목록이 기준이에요.
           </p>
+          <FiveGradeBlock univId={realUnivId} univName={univ.name} />
           <div className="result-list">
             {planRows.map((r, i) => {
               const open = openPlanRows.has(i);

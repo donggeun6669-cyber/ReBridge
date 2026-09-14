@@ -2,6 +2,7 @@ import { ArrowLeft } from 'lucide-react';
 import {
   CUTLINE_YEAR, CUTLINE_SOURCE_LABEL_ALL,
   PLAN_YEAR, GED_2027_SOURCE_LABEL, ADMISSION_DATA_UNIV_COUNT,
+  FIVE_GRADE_TITLE, FIVE_GRADE_SUMMARY, FIVE_GRADE_HARSH, FIVE_GRADE_NO_CHANCE,
 } from '../data/meta.js';
 
 // 2026-09 서연님 UI 개선안: 대학 탐색·결과 화면 맨 아래에 박혀 있던 설명 문단을
@@ -78,6 +79,14 @@ export default function ExploreHelpScreen({ goBack = () => {} }) {
           카드에 학년도를 따로 표시해 뒀어요. {PLAN_YEAR}학년도 전형 구조는
           대학 상세 화면에서 볼 수 있어요.
         </p>
+      </section>
+
+      <section className="ehelp-sec">
+        <span className="ehelp-emoji" aria-hidden="true">🔄</span>
+        <h2 className="ehelp-title">{FIVE_GRADE_TITLE}</h2>
+        <p className="ehelp-body">{FIVE_GRADE_SUMMARY}</p>
+        <p className="ehelp-body">{FIVE_GRADE_HARSH}</p>
+        <p className="ehelp-callout">{FIVE_GRADE_NO_CHANCE}</p>
       </section>
 
       <section className="ehelp-sec">

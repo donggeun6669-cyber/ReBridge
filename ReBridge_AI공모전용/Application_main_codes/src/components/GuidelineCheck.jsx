@@ -2,15 +2,7 @@ import { useState } from 'react';
 import { BookOpenCheck, ChevronDown, ExternalLink } from 'lucide-react';
 import GUIDELINES from '../data/guidelines_2027.json';
 import { TARGET_ADMISSION_YEAR } from '../data/meta.js';
-
-// 받침이 있으면 '이/은/을', 없으면 '가/는/를'. 대학 이름을 문장에 넣을 때 필요하다.
-// (한글 음절 = 0xAC00 + 초성*588 + 중성*28 + 종성. 나머지가 0이면 받침이 없다.)
-function josa(word, withBatchim, withoutBatchim) {
-  const last = (word || '').trim().slice(-1);
-  const code = last.charCodeAt(0);
-  if (!last || Number.isNaN(code) || code < 0xac00 || code > 0xd7a3) return withoutBatchim;
-  return (code - 0xac00) % 28 === 0 ? withoutBatchim : withBatchim;
-}
+import { iGa } from '../lib/korean.js';
 
 // ── 모집요강에서 확인하기 (2026-09) ──────────────────────────────────────
 //
@@ -80,7 +72,7 @@ export default function GuidelineCheck({ univId, univName, source = null, office
         <div className="ged-raw-body">
           <p className="gcheck-lead">
             여기 내용은 정리한 자료예요.{' '}
-            <b>최종 근거는 {univName || '대학'}{josa(univName || '대학', '이', '가')} 낸 모집요강</b>이고,
+            <b>최종 근거는 {univName || '대학'}{iGa(univName || '대학')} 낸 모집요강</b>이고,
             아래에서 원본을 바로 열 수 있어요.
           </p>
 

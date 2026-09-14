@@ -4998,6 +4998,65 @@ button {
 }
 .gcheck-warn b { font-weight: 800; }
 
+/* ── 2028 5등급제 전환 블록 (FiveGradeBlock) ────────────────────────────
+   경고가 아니라 '알아둬야 하는 사실'이라서 위험색(빨강)은 쓰지 않는다.
+   다만 그냥 지나치면 안 되는 내용이라 주의색 테두리로 묶는다. */
+.five-grade {
+  border: 1px solid var(--caution);
+  background: var(--caution-soft);
+}
+.five-grade .adm-block-title { color: var(--caution); }
+.fg-table-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 14px 0 8px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--text);
+}
+.fg-scale {
+  margin-left: auto;
+  padding: 3px 9px;
+  border-radius: var(--r-pill);
+  background: var(--card);
+  border: 1px solid var(--border);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-sub);
+}
+.fg-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--card);
+  border-radius: var(--r-sm);
+  overflow: hidden;
+  font-size: 12.5px;
+}
+.fg-table th,
+.fg-table td {
+  padding: 8px 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+.fg-table th { font-weight: 700; color: var(--text-sub); background: var(--bg-soft); }
+.fg-table td { color: var(--text); }
+.fg-table tr:last-child td { border-bottom: none; }
+.fg-raw {
+  max-height: 320px;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 11.5px;
+  line-height: 1.55;
+  color: var(--text-sub);
+  background: var(--card);
+  border-radius: var(--r-sm);
+  padding: 10px 12px;
+  margin: 0;
+}
+.five-grade .ged-raw-toggle { margin-top: 12px; background: var(--card); }
+
 .ged-quote {
   margin: 0 0 9px;
   padding: 10px 12px;

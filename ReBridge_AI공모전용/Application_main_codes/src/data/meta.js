@@ -58,6 +58,53 @@ export const CUTLINE_TYPE_NOTICE =
 // 즉 2027학년도 지원자까지는 9등급제, 2028학년도 입학부터 5등급제.
 export const FIVE_GRADE_FROM = 2028;
 
+// ── 5등급제 전환이 검정고시생에게 뜻하는 것 ────────────────────────────
+// 2026-09 확인. 근거는 src/data/comparative_2028.json(대학 2028 시행계획 발췌)이다.
+//
+// 시행계획을 열어 보면 대학 상당수가 환산표를 '두 벌' 둔다.
+//   · 5등급 체계 — 2028년 이후 졸업(예정)자
+//   · 9등급 체계 — 2027년 이전 졸업자
+// 검정고시 출신자에게 어느 쪽을 적용하는지 시행계획에 안 적은 대학이 더 많다.
+//
+// 그리고 공개된 5등급 표는 구간이 훨씬 좁다. 실제 값:
+//   · 성공회대   검정고시 100점 → 2등급, 96.99점 이하는 전부 5등급
+//   · 국립금오공대 90점 이상 → 3등급, 60점 미만은 등급 없음
+//   · 상명대 5등급 환산점수 100/95/93/70/0 (9등급표는 100/98/96/94/90/80/60/40/0)
+// 즉 만점을 받아도 1등급이 안 되고, 한 등급만 내려가도 손실이 9등급제보다 크다.
+// 이건 '아마 그럴 것'이 아니라 대학이 낸 표에 그렇게 적혀 있는 것이다.
+export const FIVE_GRADE_TITLE = `${FIVE_GRADE_FROM}학년도부터 내신 5등급제`;
+
+// 실측값 — src/data/comparative_2028.json 기준(2028 시행계획 발췌 188개 대학).
+//   '5등급' 언급 62곳, 그중 '9등급'도 함께 적은 곳 45곳.
+// 다시 세려면: node -e "const a=require('./src/data/comparative_2028.json');
+//   const t=o=>o.comparativeGrade||''; console.log(Object.values(a).filter(v=>t(v).includes('5등급')).length)"
+export const FIVE_GRADE_PLAN_TOTAL = 188;
+export const FIVE_GRADE_PLAN_FIVE = 62;
+export const FIVE_GRADE_PLAN_BOTH = 45;
+
+export const FIVE_GRADE_SUMMARY =
+  `${FIVE_GRADE_FROM}학년도 입학부터 고교 내신이 9등급제에서 5등급제로 바뀌어요. ` +
+  `${FIVE_GRADE_FROM}학년도 시행계획을 낸 ${FIVE_GRADE_PLAN_TOTAL}개 대학 중 ${FIVE_GRADE_PLAN_FIVE}곳이 ` +
+  `5등급 체계를 적었고, 그중 ${FIVE_GRADE_PLAN_BOTH}곳은 9등급 표를 함께 둬요` +
+  `(보통 5등급은 ${FIVE_GRADE_FROM}년 이후 졸업자, 9등급은 ${FIVE_GRADE_FROM - 1}년 이전 졸업자).`;
+
+// 5등급 표가 왜 검정고시생에게 불리하게 작동하는지 — 전부 대학이 낸 표에 적힌 값이다.
+export const FIVE_GRADE_HARSH =
+  '공개된 5등급 표는 구간이 훨씬 좁아요. 검정고시 100점을 1등급이 아니라 2등급으로 보는 대학(성공회대), ' +
+  '90점 이상을 3등급으로 보는 대학(국립금오공대)이 있어요. ' +
+  '등급 하나 차이로 잃는 점수도 9등급제보다 커요.';
+
+export const FIVE_GRADE_UNKNOWN =
+  '검정고시 출신자에게 5등급 표와 9등급 표 중 어느 쪽을 적용하는지 ' +
+  '시행계획에 적지 않은 대학이 더 많아요. 이건 입학처에 직접 물어봐야 알 수 있어요.';
+
+// ⚠️ 앱은 지원 학년도를 묻지 않는다. 그래서 "2028 지원은 계산 안 한다"고 쓰면 거짓말이 된다.
+//    사실 그대로 — 칸수의 기준이 무엇인지 밝히고, 2028 지원자는 쓸 수 없다고 말한다.
+export const FIVE_GRADE_NO_CHANCE =
+  `앱의 칸수(합격 가능성)는 ${CUTLINE_YEAR}학년도 9등급제 입결과 ` +
+  `${TARGET_ADMISSION_YEAR}학년도 환산표로 계산한 값이에요. ` +
+  `${FIVE_GRADE_FROM}학년도에 지원한다면 이 칸수를 그대로 쓰면 안 돼요.`;
+
 // ── 파생 문구 ─────────────────────────────────────────────
 // 합격선 블록 제목
 export const CUTLINE_LABEL = `${CUTLINE_YEAR}학년도 합격선`;
