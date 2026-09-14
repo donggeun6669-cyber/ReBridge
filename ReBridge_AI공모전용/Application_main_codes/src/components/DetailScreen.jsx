@@ -848,6 +848,11 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
                                 {calcBasis.lines.map((line, idx) => (
                                   <p key={idx} className="calc-basis-line">{line}</p>
                                 ))}
+                                {comp?.conversionDerivation && (
+                                  <p className="calc-basis-quote calc-basis-derived">
+                                    계산 방법: {comp.conversionDerivation}
+                                  </p>
+                                )}
                                 {comp?.conversionQuote && (
                                   <p className="calc-basis-quote">
                                     모집요강 원문: {comp.conversionQuote}

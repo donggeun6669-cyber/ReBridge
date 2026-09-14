@@ -5069,6 +5069,7 @@ button {
   color: var(--text-sub);
 }
 .calc-basis-src { margin-top: 6px; font-size: 11px; color: var(--text-muted); }
+.calc-basis-derived { border-left-color: var(--caution); }
 
 .ged-quote {
   margin: 0 0 9px;
