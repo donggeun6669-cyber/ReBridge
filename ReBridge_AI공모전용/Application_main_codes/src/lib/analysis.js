@@ -218,6 +218,112 @@ export function getUniversityDetail(univId) {
   };
 }
 
+// ── 전형별 지원 가능 여부 (2026-09) ────────────────────────────────────
+//
+// 왜 만들었나
+//   동근님 요청: "어떤 전형은 검고가 지원가능이고 어떤 전형은 안 되는지 대학별로 보게 해줘."
+//   지금 화면은 이걸 보여줄 수 없었다. 자료가 두 벌인데 한 벌만 골라 쓰기 때문이다.
+//     · 2027 대교협 자료 = '지원 가능한 전형'만 모은 목록이라 '불가' 행이 아예 없다(0건).
+//     · 2028 시행계획 = 전형 전체 목록이라 '불가'가 160건 있다.
+//   2027 자료가 있는 대학은 2028을 '참고' 칸으로 밀어내므로, 195개 중 95개 대학에서
+//   "이 전형은 검정고시로 못 간다"는 정보가 화면에 아예 닿지 않고 있었다.
+//   (명지대 학생부교과(추천형) = 학교장 추천 필요 → 불가 같은 것들)
+//
+// 어떻게 하나
+//   두 학년도를 **합치지 않는다.** 전형명이 서로 달라서(2027 '학생부교과(일반전형)' vs
+//   2028 '학생부우수자') 이름으로 짝을 지으면 없는 대응을 만들어내게 된다.
+//   대신 전형유형으로 묶어 두 학년도를 나란히 보여주고, 각 행에 학년도를 붙인다.
+//   두 해가 다르면 다른 대로 보여준다 — 그게 사실이기 때문이다.
+//
+// ⚠️ 2027에 없다고 '불가'로 표시하지 말 것. 대교협 자료는 195개 대학만 싣고,
+//    실리지 않은 것이 곧 불가라는 근거는 어디에도 없다.
+// 화면에 보여줄 유형 순서. 위에 있는 TYPE_RANK(추천 정렬용 가중치)와는 목적이 다르다.
+const INVENTORY_TYPE_ORDER = ['학생부교과', '학생부종합', '논술', '실기', '수능위주', '일반(서류)'];
+const INVENTORY_TYPE_RANK = new Map(INVENTORY_TYPE_ORDER.map((t, i) => [t, i]));
+
+function typeRank(t) {
+  return INVENTORY_TYPE_RANK.has(t) ? INVENTORY_TYPE_RANK.get(t) : INVENTORY_TYPE_ORDER.length;
+}
+
+const INVENTORY_ELIG_RANK = { 가능: 0, 조건부: 1, 불가: 2 };
+
+function byEligName(a, b) {
+  const d = (INVENTORY_ELIG_RANK[a.gedEligible] ?? 3) - (INVENTORY_ELIG_RANK[b.gedEligible] ?? 3);
+  if (d !== 0) return d;
+  return String(a.admissionName || '').localeCompare(String(b.admissionName || ''));
+}
+
+/**
+ * 대학 하나의 전형을 유형별로 묶어, 두 학년도 자료를 나란히 돌려준다.
+ * @returns {null | {
+ *   univ, groups: Array<{ type, label, rows2027, rows2028, counts }>,
+ *   totals: { ok, cond, no },
+ *   has2027: boolean, has2028: boolean,
+ * }}
+ */
+export function getAdmissionInventory(univId) {
+  const u = universities.find((x) => x.univId === univId);
+  if (!u) return null;
+
+  // 정원외(재외국민·외국인·북한이탈주민 등)도 여기서는 숨기지 않는다.
+  // "어떤 전형이 있고 무엇이 되는가"를 보는 화면이라 빼면 목록이 거짓이 된다.
+  const rows2027 = ADMISSIONS_2027_BY_UNIV.get(univId) || [];
+  const rows2028 = ADMISSIONS_BY_UNIV.get(univId) || [];
+
+  const types = new Set();
+  for (const r of [...rows2027, ...rows2028]) types.add(r.admissionType || null);
+
+  const groups = [...types]
+    .sort((a, b) => typeRank(a) - typeRank(b))
+    .map((type) => {
+      const g27 = rows2027.filter((r) => (r.admissionType || null) === type).sort(byEligName);
+      const g28 = rows2028.filter((r) => (r.admissionType || null) === type).sort(byEligName);
+      const counts = { ok: 0, cond: 0, no: 0 };
+      for (const r of [...g27, ...g28]) {
+        if (r.gedEligible === '가능') counts.ok += 1;
+        else if (r.gedEligible === '조건부') counts.cond += 1;
+        else if (r.gedEligible === '불가') counts.no += 1;
+      }
+      return {
+        type,
+        // 유형이 비어 있는 행은 전부 재외국민·외국인·북한이탈주민 같은 특별전형이다(457건 확인).
+        label: type || '유형 미상(재외국민·외국인 등)',
+        rows2027: g27,
+        rows2028: g28,
+        counts,
+      };
+    });
+
+  const totals = groups.reduce(
+    (acc, g) => ({ ok: acc.ok + g.counts.ok, cond: acc.cond + g.counts.cond, no: acc.no + g.counts.no }),
+    { ok: 0, cond: 0, no: 0 }
+  );
+
+  return {
+    univ: u,
+    groups,
+    totals,
+    has2027: rows2027.length > 0,
+    has2028: rows2028.length > 0,
+  };
+}
+
+/**
+ * 검정고시로 지원할 수 있는 전형유형 목록 (가능·조건부 기준).
+ * 목록 화면의 '전형' 필터가 쓴다.
+ * ⚠️ 예전 필터는 카드에 보이는 '대표 전형 1개(bestType)'로만 걸러서,
+ *    학생부교과 전형이 있어도 대표가 학생부종합이면 '교과' 필터에서 사라졌다.
+ */
+export function availableTypesFor(univId) {
+  const picked = admissionRowsFor(univId, { includeQuotaOutside: false });
+  const set = new Set();
+  for (const r of picked.rows) {
+    if (r.gedEligible !== '가능' && r.gedEligible !== '조건부') continue;
+    if (r.admissionType) set.add(r.admissionType);
+  }
+  return set;
+}
+
 // 이름으로 대학 상세 찾기 (탐색 탭 등 univId가 없을 때)
 export function getUniversityDetailByName(name) {
   if (!name) return null;
@@ -267,6 +373,11 @@ export function getExploreList() {
         (hasCut ? 3 : 0) +
         (comparativeType === 'numeric' ? 3 : comparativeType === 'prose' ? 1 : 0) +
         Math.min(eligible.length, 5),
+      // 이 대학에 검정고시로 지원 가능한 전형유형 전부 (필터용).
+      // 대표 전형 하나로 거르면 "교과도 되는데 대표가 학종"인 대학이 필터에서 사라진다.
+      availableTypes: [...new Set(
+        eligible.map((r) => r.admissionType).filter(Boolean)
+      )],
       // 프로필 점수 비교용(best 전형)
       bestType: best?.admissionType || null,
       bestName: best?.admissionName || null,
@@ -296,6 +407,13 @@ function makeResultItem(u, best, rows, profile, comp) {
     region: u.region,
     kind: u.kind || '대학교',
     status: best.gedEligible === '가능' ? 'ok' : 'cond',
+    // 필터가 쓰는 값 — 대표 전형이 아니라 '이 대학에서 검정고시로 가능한 유형 전부'
+    availableTypes: [...new Set(
+      rows
+        .filter((r) => r.gedEligible === '가능' || r.gedEligible === '조건부')
+        .map((r) => r.admissionType)
+        .filter(Boolean)
+    )],
     bestType: best.admissionType,
     bestName: best.admissionName,
     bestGedEligible: best.gedEligible,

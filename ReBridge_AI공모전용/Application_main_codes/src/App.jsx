@@ -9,6 +9,7 @@ import { getPersona, getNav, activeTabId, loadProfile, V1_UNIV_ONLY, isHiddenScr
 const HomeScreen = lazy(() => import('./components/HomeScreen.jsx'));
 const ExploreScreen = lazy(() => import('./components/ExploreScreen.jsx'));
 const ExploreHelpScreen = lazy(() => import('./components/ExploreHelpScreen.jsx'));
+const AdmissionMatrixScreen = lazy(() => import('./components/AdmissionMatrixScreen.jsx'));
 const ProfileScreen = lazy(() => import('./components/ProfileScreen.jsx'));
 const MyPageScreen = lazy(() => import('./components/MyPageScreen.jsx'));
 const GuideScreen = lazy(() => import('./components/GuideScreen.jsx'));
@@ -53,7 +54,7 @@ const TAB_ROOTS = ['home', 'support', 'community', 'mypage'].filter((s) => !isHi
 // v1에서 숨긴 화면(커뮤니티/인증·직업·학습)은 이 목록에서도 빠진다.
 // → 어딘가에 링크가 남아 있어도 아래 "준비 중" 폴백으로 떨어진다.
 const KNOWN_SCREENS = [
-  'guide', 'glossary', 'results', 'detail', 'documents', 'saved', 'map', 'help',
+  'guide', 'glossary', 'results', 'detail', 'admission-matrix', 'documents', 'saved', 'map', 'help',
   'checklist', 'forms-guide', 'dreamdrive', 'ged-guide', 'univ-explore', 'explore-help', 'path',
   'onboarding', 'study-roadmap', 'study-planner', 'support', 'roadmap',
   'job-home', 'job-explore', 'job-roadmap', 'job-questions', 'job-detail', 'job-info', 'job-psych',
@@ -160,6 +161,9 @@ export default function App() {
         {!splash && screen === 'results'     && <ResultsScreen goTo={goTo} goBack={goBack} />}
         {!splash && screen === 'detail'      && (
           <DetailScreen goTo={goTo} goBack={goBack} univId={params.univId} univName={params.univ} />
+        )}
+        {!splash && screen === 'admission-matrix' && (
+          <AdmissionMatrixScreen goBack={goBack} univId={params.univId} univName={params.univ} />
         )}
         {!splash && screen === 'documents'   && (
           <DocumentsScreen

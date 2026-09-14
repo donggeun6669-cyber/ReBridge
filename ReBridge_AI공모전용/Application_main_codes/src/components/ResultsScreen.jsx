@@ -200,8 +200,16 @@ function useFilteredPaged(results) {
     else if (regionF === '수도권') out = out.filter((r) => METRO.has(r.region));
     else if (regionF === '지방') out = out.filter((r) => !METRO.has(r.region));
 
-    const typeMap = { '학종': '학생부종합', '논술': '논술', '교과': '학생부교과', '서류': '일반(서류)' };
-    if (typeF !== '전체') out = out.filter((r) => r.bestType === typeMap[typeF]);
+    // 2026-09 수정. 예전에는 카드에 보이는 '대표 전형 1개'(bestType)로만 걸렀다.
+    // 그래서 학생부교과 전형이 있는 대학이라도 대표가 학생부종합이면 '교과' 필터에서
+    // 통째로 사라졌다. 이제 그 대학에서 검정고시로 가능한 전형유형 전부를 본다.
+    const typeMap = { '학종': '학생부종합', '논술': '논술', '교과': '학생부교과', '실기': '실기', '서류': '일반(서류)' };
+    if (typeF !== '전체') {
+      const want = typeMap[typeF];
+      out = out.filter((r) =>
+        Array.isArray(r.availableTypes) ? r.availableTypes.includes(want) : r.bestType === want
+      );
+    }
 
     if (chanceF === '예측 가능') out = out.filter((r) => r.chance != null);
     else if (chanceF === '자료 없음') out = out.filter((r) => r.chance == null);
@@ -317,7 +325,7 @@ function ResultSection({ state, goTo, badgeFn, showChance = true, today }) {
       {filterOpen && (
         <div className="filter-panel">
           <FilterRow label="지역" options={['전체', '서울', '수도권', '지방']} value={state.regionF} onChange={state.setRegionF} />
-          <FilterRow label="전형" options={['전체', '학종', '논술', '교과', '서류']} value={state.typeF} onChange={state.setTypeF} />
+          <FilterRow label="전형" options={['전체', '교과', '학종', '논술', '실기', '서류']} value={state.typeF} onChange={state.setTypeF} />
           {showChance && (
             <FilterRow
               label="안정도"

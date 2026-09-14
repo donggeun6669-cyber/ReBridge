@@ -2,9 +2,9 @@ import { useMemo, useState, useEffect, useCallback } from 'react';
 import {
   ArrowLeft, MapPin, ExternalLink, Target, Users, MessageSquare,
   ChevronDown, Table2, Info, Lock, FileCheck2, Bookmark, Sparkles,
-  CalendarClock, FileText, AlertCircle,
+  CalendarClock, FileText, AlertCircle, LayoutList, ChevronRight,
 } from 'lucide-react';
-import { getUniversityDetail, getUniversityDetailByName } from '../lib/analysis.js';
+import { getUniversityDetail, getUniversityDetailByName, getAdmissionInventory } from '../lib/analysis.js';
 import { isBookmarked, toggleBookmark } from '../lib/bookmarks.js';
 import {
   evaluateAdmission, coachLine, gedAffinity, admissionChance,
@@ -438,6 +438,11 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
   // 학생부종합 3개인데 그 셋이 전부 기회균형·특성화고졸재직자였다. 즉 자격이 맞지 않으면
   // 사실상 수시 지원 자체가 안 되는 대학인데, 화면은 전형 5개를 그냥 늘어놓기만 했다.
   // 전체 195개 대학 중 8곳이 여기 해당한다. 목록을 보기 전에 먼저 말해 준다.
+  // 전형별 지원 가능 여부 요약 — 두 학년도 자료를 합친 전체 그림.
+  // 여기서는 숫자만 보여주고, 전형 하나하나는 전용 화면으로 넘긴다
+  // (한 페이지에 다 몰아넣지 않는다 — 2026-09 서연님 개선안).
+  const inventory = getAdmissionInventory(realUnivId);
+
   const susiRows = okRows.filter((r) => r.phase === '수시');
   const generalSusi = susiRows.filter(
     (r) => !hasSpecialEligibility(r) && r.admissionType !== '논술' && r.admissionType !== '실기'
@@ -546,6 +551,27 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
             </p>
           </div>
         </div>
+      )}
+
+      {inventory && (
+        <button
+          className="adm-matrix-card"
+          onClick={() => goTo('admission-matrix', { univId: realUnivId, univ: univ.name })}
+        >
+          <span className="amc-head">
+            <LayoutList size={15} />
+            전형별 지원 가능 여부
+            <ChevronRight size={16} className="amc-arrow" />
+          </span>
+          <span className="amc-counts">
+            <span className="amc-n ok"><b>{inventory.totals.ok}</b> 지원 가능</span>
+            <span className="amc-n cond"><b>{inventory.totals.cond}</b> 조건 확인</span>
+            <span className="amc-n no"><b>{inventory.totals.no}</b> 지원 불가</span>
+          </span>
+          <span className="amc-sub">
+            어떤 전형이 되고 어떤 전형이 안 되는지 한눈에 볼 수 있어요
+          </span>
+        </button>
       )}
 
       {/* 담임 한마디 */}
