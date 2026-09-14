@@ -178,6 +178,20 @@ export const NO_2027_DATA_NOTICE =
   `${GED_2027_SOURCE_LABEL}에 이 대학은 실려 있지 않아요(${ADMISSION_DATA_UNIV_COUNT}개 대학만 수록). ` +
   `아래 내용은 ${PLAN_YEAR}학년도 시행계획 기준이에요.`;
 
+// ── 전문대학 (2026-09) ────────────────────────────────────────────────
+// 전문대는 대교협 2027 자료에도, 2028 시행계획에도 전형이 실려 있지 않다.
+// 그래서 4년제용 고지문("2028 시행계획 기준이에요")을 그대로 쓰면 근거를 잘못 알려준다.
+// 전문대 전형은 전문대교협 전형결과에서 '실제로 뽑은 전형'을 읽어 만든 것이다.
+export const COLLEGE_SOURCE_LABEL = '전문대교협 전문대학포털 전형결과';
+export const COLLEGE_NO_PLAN_LABEL = '전문대는 전형 자료가 따로 없어요';
+export const COLLEGE_NO_PLAN_NOTICE =
+  `${GED_2027_SOURCE_LABEL}에도, ${PLAN_YEAR}학년도 시행계획에도 전문대학은 전형이 실려 있지 않아요. ` +
+  `그래서 ${COLLEGE_SOURCE_LABEL}에서 이 대학이 실제로 어떤 전형으로 뽑았는지를 읽어 만들었어요.`;
+export const COLLEGE_BASIS_NOTICE =
+  `전형 정보는 ${COLLEGE_SOURCE_LABEL}(지난 학년도 결과) 기준이에요. ` +
+  '올해도 같은 전형으로 뽑는지, 검정고시 성적을 어떻게 반영하는지는 ' +
+  '반드시 그 대학 모집요강에서 확인하세요.';
+
 // 수시/정시 구분이 원문이 아니라 전형유형에서 추정된 경우
 export const PHASE_ESTIMATED_NOTICE = '수시/정시 구분은 전형유형으로 추정한 값이에요.';
 

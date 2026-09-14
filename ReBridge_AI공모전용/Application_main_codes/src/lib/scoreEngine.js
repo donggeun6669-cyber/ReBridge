@@ -1058,6 +1058,9 @@ const SPECIAL_ELIGIBILITY_RE =
   /기회균형|기회균등|교육기회|고른기회|사회통합|사회적?배려|기회배려|농어촌|기초생활|차상위|저소득|특성화고|마이스터|재직자|만학도|성인학습자|평생학습자|장애|보훈|국가유공|서해5도|다문화|북한이탈|탈북|새터민|특수교육|위탁|산업체|계약학과|재외국민|외국인|경제배려|배려대상/;
 
 export function hasSpecialEligibility(adm) {
+  // 데이터가 직접 "자격 제한 전형"이라고 표시한 경우(전문대 수시 특별전형 등).
+  // 이름만 보고 판단하면 전문대 '수시 특별전형'처럼 묶음 이름인 행을 놓친다.
+  if (adm?.specialEligibility === true) return true;
   const name = `${adm?.admissionName || ''} ${adm?.nameKey || ''}`;
   return SPECIAL_ELIGIBILITY_RE.test(name);
 }

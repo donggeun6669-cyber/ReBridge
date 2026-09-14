@@ -26,6 +26,7 @@ import {
   PLAN_BASIS_NOTICE, STANDARD_CONVERSION_NOTICE,
   ADMISSION_2027_SECTION_TITLE, ADMISSION_2027_SOURCE_NOTICE,
   PLAN_SECTION_TITLE, NO_2027_DATA_LABEL, NO_2027_DATA_NOTICE,
+  COLLEGE_NO_PLAN_LABEL, COLLEGE_NO_PLAN_NOTICE, COLLEGE_BASIS_NOTICE, COLLEGE_SOURCE_LABEL,
   PHASE_ESTIMATED_NOTICE, QUOTA_OUTSIDE_TITLE, QUOTA_OUTSIDE_NOTICE,
   YEAR_SPLIT_NOTICE, ADMISSION_DATA_YEAR, PLAN_YEAR,
   FIVE_GRADE_FROM, FIVE_GRADE_TITLE, FIVE_GRADE_SUMMARY,
@@ -469,7 +470,22 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
     const safe = levels.filter((l) => l >= 4).length;
     const reach = levels.filter((l) => l === 3).length;
     if (levels.length === 0) {
-      coachSummary = `검정고시로 지원 가능한 전형이 ${eligibleCount}개 있어요. 다만 ${CUTLINE_NO_DATA_SHORT}이라 점수 비교는 어려워요.`;
+      // 왜 칸수가 안 나오는지 이유를 정확히 말한다.
+      // 예전엔 무조건 '합격선 자료 없음'이라고 했는데, 전문대는 합격선이 있는데도
+      // 검정고시 환산 기준이 없어서 못 내는 경우라 그 문구가 거짓이었다.
+      const gaps = evals.map((e) => e.ev?.dataGap).filter(Boolean);
+      // 섞여 있으면 가장 많은 사유를 말한다. 무조건 '합격선 자료 없음'이라고 하면
+      // 합격선은 있는데 환산 기준이 없는 전문대에서 거짓말이 된다.
+      const top = gaps.length
+        ? [...gaps].sort((a, b) =>
+            gaps.filter((g) => g === b).length - gaps.filter((g) => g === a).length)[0]
+        : null;
+      const why =
+        top === 'conversion' ? '이 대학이 검정고시 점수를 몇 등급으로 볼지 공개하지 않아서 점수 비교는 어려워요'
+        : top === 'special'  ? '지원자격이 따로 있는 전형이 많아 합격 가능성은 계산하지 않아요'
+        : top === 'csat'     ? '수능 성적으로 뽑는 전형이라 검정고시 평균으로는 비교가 어려워요'
+        : `${CUTLINE_NO_DATA_SHORT}이라 점수 비교는 어려워요`;
+      coachSummary = `검정고시로 지원 가능한 전형이 ${eligibleCount}개 있어요. 다만 ${why}.`;
     } else if (safe > 0) {
       coachSummary = `${isTarget ? '목표' : '지금'} 점수(평균 ${profile.gedAvg}점)면 ${safe}개 전형이 적정~안정권이에요. 충분히 노려볼 만해요!`;
     } else if (reach > 0) {
@@ -631,8 +647,8 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
         <div className="year-warn">
           <AlertCircle size={15} />
           <div>
-            <b>{NO_2027_DATA_LABEL}</b>
-            <p>{NO_2027_DATA_NOTICE}</p>
+            <b>{isCollege ? COLLEGE_NO_PLAN_LABEL : NO_2027_DATA_LABEL}</b>
+            <p>{isCollege ? COLLEGE_NO_PLAN_NOTICE : NO_2027_DATA_NOTICE}</p>
           </div>
         </div>
       )}
@@ -640,13 +656,29 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
       {okRows.length > 0 && (
         <>
           <div className="detail-section-title">
-            {is2027 ? ADMISSION_2027_SECTION_TITLE : PLAN_SECTION_TITLE}
+            {is2027
+              ? ADMISSION_2027_SECTION_TITLE
+              : isCollege
+                ? '이 대학이 뽑은 전형'
+                : PLAN_SECTION_TITLE}
             <span className="count-pill">{okRows.length}</span>
           </div>
           {is2027 && <p className="section-sub">{YEAR_SPLIT_NOTICE}</p>}
+          {/* 전문대는 대교협 2027 자료에도, 2028 시행계획에도 전형이 안 실려 있다.
+              전문대교협이 낸 전형결과에서 실제로 뽑은 전형을 읽어 만든 목록이라
+              근거가 무엇인지 여기서 밝힌다. */}
+          {!is2027 && isCollege && (
+            <p className="section-sub">
+              전문대교협 전문대학포털 <b>전형결과</b>에서 이 대학이 실제로 어떤 전형으로
+              뽑았는지를 읽어 만든 목록이에요. 지난 학년도 결과라 올해도 같은 전형으로
+              뽑는지는 모집요강에서 확인해야 해요.
+            </p>
+          )}
           {/* 2027 자료가 없는 대학은 이 목록 자체가 2028 시행계획이다.
               그러면 아래 '2028 참고' 섹션이 안 뜨므로 5등급 안내를 여기서 한다. */}
-          {!is2027 && <FiveGradeBlock univId={realUnivId} univName={univ.name} />}
+          {/* 전문대는 2028 시행계획 자료가 없어 블록이 "자료에 없어요"만 길게 뜬다.
+              도움이 안 되므로 4년제에만 보여준다. */}
+          {!is2027 && !isCollege && <FiveGradeBlock univId={realUnivId} univName={univ.name} />}
           <div className="result-list">
             {evals.map(({ r, ev, chance, fit }, i) => {
               const aff = gedAffinity(r);
@@ -1108,9 +1140,11 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
       <p className="note">
         {is2027
           ? ADMISSION_2027_SOURCE_NOTICE
-          : `${ADMISSION_DATA_YEAR}학년도 지원 가능 전형 자료에 이 대학은 실려 있지 않아, 이 화면은 ${PLAN_YEAR}학년도 시행계획 기준이에요.`}
+          : isCollege
+            ? COLLEGE_NO_PLAN_NOTICE
+            : `${ADMISSION_DATA_YEAR}학년도 지원 가능 전형 자료에 이 대학은 실려 있지 않아, 이 화면은 ${PLAN_YEAR}학년도 시행계획 기준이에요.`}
         <br />
-        {PLAN_BASIS_NOTICE}
+        {isCollege ? COLLEGE_BASIS_NOTICE : PLAN_BASIS_NOTICE}
         <br />
         합격선·비교내신은 <b>{CUTLINE_LABEL} 자료 참고용</b>이에요 (출처:{' '}
         {isCollege

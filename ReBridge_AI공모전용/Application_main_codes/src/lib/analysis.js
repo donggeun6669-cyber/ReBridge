@@ -12,6 +12,7 @@
 import universities from './universityList.js';
 import admissions from '../data/admissions.json';
 import admissions2027 from '../data/admissions_2027.min.json';
+import collegeAdmissions from '../data/admissions_college.json';
 import cutlines4y from '../data/cutlines_2026.json';
 import cutlines4yPrev from '../data/cutlines_2025.json';
 import cutlinesCollege from '../data/cutlines_college_2026.json';
@@ -31,11 +32,41 @@ import { ADMISSION_DATA_YEAR, PLAN_YEAR } from '../data/meta.js';
 const METRO = new Set(['서울', '경기', '인천']);
 
 // admissions는 불변 정적 데이터 — univId별 인덱스는 모듈 로드 시 한 번만 만든다.
+// ── 전문대학 전형 (2026-09) ─────────────────────────────────────────────
+// admissions.json의 전문대 138곳은 전 대학이 똑같은 두 줄짜리 틀이었다
+// ('수시 일반전형' + '정시 수능위주', 문구까지 동일, status=baseline).
+// admissions_college.json은 전문대교협 전형결과에서 '그 대학이 실제로 어떤 전형으로
+// 뽑았는지'를 읽어 만든 행이다(119곳). 근거가 있는 대학은 이걸로 갈아끼운다.
+// 근거가 없는 19곳은 종전 안내 문구를 그대로 두되 출처만 바로잡는다(아래 참조).
+//
+// ⚠️ 근거가 없는 대학에 '가능'을 만들어 붙이지 말 것. 협의회 공통 규정은
+//    "이 대학이 그렇게 뽑는다"는 뜻이 아니다(data-pipeline/v2/README.md 543행).
+const COLLEGE_BY_UNIV = new Map();
+for (const r of collegeAdmissions.rows) {
+  if (!COLLEGE_BY_UNIV.has(r.univId)) COLLEGE_BY_UNIV.set(r.univId, []);
+  COLLEGE_BY_UNIV.get(r.univId).push({ ...r, dataYear: PLAN_YEAR });
+}
+
+// 전문대 기본사항을 내는 곳은 전문대교협(KCCE)이다. 원본 admissions.json이
+// 대교협(KCUE)으로 적어 뒀는데, 기관을 잘못 알려주면 확인하러 간 학생이 헤맨다.
+const COLLEGE_BASELINE_SOURCE =
+  '한국전문대학교육협의회 「2028학년도 전문대학 입학전형 기본사항」: ' +
+  '검정고시 출신자의 수시 지원을 자격에서 제한하지 않도록 정하고 있어요. ' +
+  '다만 이건 협의회 공통 규정이라, 이 대학이 실제로 어떻게 뽑는지는 모집요강에서 확인해야 해요.';
+
 const ADMISSIONS_BY_UNIV = new Map();
 for (const r of admissions) {
+  // 전형결과로 실제 전형을 확인한 전문대는 틀 행을 쓰지 않는다.
+  if (COLLEGE_BY_UNIV.has(r.univId)) continue;
   if (!ADMISSIONS_BY_UNIV.has(r.univId)) ADMISSIONS_BY_UNIV.set(r.univId, []);
-  ADMISSIONS_BY_UNIV.get(r.univId).push({ ...r, dataYear: PLAN_YEAR });
+  const isCollegeTemplate = r.status === 'baseline' && r.admissionType === '일반(서류)';
+  ADMISSIONS_BY_UNIV.get(r.univId).push({
+    ...r,
+    dataYear: PLAN_YEAR,
+    ...(isCollegeTemplate ? { source: COLLEGE_BASELINE_SOURCE } : null),
+  });
 }
+for (const [uid, rows] of COLLEGE_BY_UNIV) ADMISSIONS_BY_UNIV.set(uid, rows);
 
 // 슬림 파일(scripts/prepare2027.mjs)이 잘라낸 출처 앞부분.
 // 화면에는 원문 그대로 붙여서 보여준다 — 스크립트의 SOURCE_PREFIX와 반드시 같아야 한다.
@@ -238,7 +269,7 @@ export function getUniversityDetail(univId) {
 // ⚠️ 2027에 없다고 '불가'로 표시하지 말 것. 대교협 자료는 195개 대학만 싣고,
 //    실리지 않은 것이 곧 불가라는 근거는 어디에도 없다.
 // 화면에 보여줄 유형 순서. 위에 있는 TYPE_RANK(추천 정렬용 가중치)와는 목적이 다르다.
-const INVENTORY_TYPE_ORDER = ['학생부교과', '학생부종합', '논술', '실기', '수능위주', '일반(서류)'];
+const INVENTORY_TYPE_ORDER = ['학생부교과', '학생부종합', '논술', '실기', '수능위주', '일반(서류)', '특별전형'];
 const INVENTORY_TYPE_RANK = new Map(INVENTORY_TYPE_ORDER.map((t, i) => [t, i]));
 
 function typeRank(t) {

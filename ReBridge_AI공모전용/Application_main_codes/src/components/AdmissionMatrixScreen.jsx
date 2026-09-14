@@ -41,6 +41,9 @@ function EligBadge({ value }) {
 
 function Row({ r, year }) {
   const special = hasSpecialEligibility(r);
+  // 전문대 행은 2028 시행계획이 아니라 전문대교협 전형결과에서 뽑은 것이다.
+  // 학년도를 2028로 적으면 근거를 잘못 알려주게 된다.
+  const shownYear = r.status === 'college_result' ? (r.resultYear ?? year) : year;
   return (
     <li className={`mx-row elig-${ELIG[r.gedEligible]?.cls || 'unknown'}`}>
       <div className="mx-row-top">
@@ -48,7 +51,7 @@ function Row({ r, year }) {
         <EligBadge value={r.gedEligible} />
       </div>
       <div className="mx-row-meta">
-        <span className="mx-year">{year}학년도</span>
+        <span className="mx-year">{shownYear}학년도</span>
         {/* 2027 자료에는 수시/정시가 안 적힌 행이 있다(실기 348건 등).
             빈칸으로 두면 정시인 줄 오해하므로 '미상'이라고 밝힌다. */}
         <span>{r.phase || '수시/정시 미상'}</span>
@@ -184,7 +187,11 @@ export default function AdmissionMatrixScreen({ goBack = () => {}, univId, univN
 
           {g.rows2028.length > 0 && (
             <>
-              <p className="mx-src-label">{PLAN_YEAR}학년도 대학입학전형 시행계획</p>
+              <p className="mx-src-label">
+                {g.rows2028.every((r) => r.status === 'college_result')
+                  ? '전문대교협 전문대학포털 전형결과 — 이 대학이 실제로 뽑은 전형'
+                  : `${PLAN_YEAR}학년도 대학입학전형 시행계획`}
+              </p>
               <ul className="mx-list">
                 {g.rows2028.map((r, i) => <Row key={`b${i}`} r={r} year={PLAN_YEAR} />)}
               </ul>
@@ -203,6 +210,11 @@ export default function AdmissionMatrixScreen({ goBack = () => {}, univId, univN
         <p>
           <b>{PLAN_YEAR}학년도</b> 자료는 대학이 낸 시행계획이라 <b>전형 전체</b>가 들어 있어요.
           그래서 ‘불가’와 그 이유도 같이 볼 수 있어요. 대신 지금 원서를 쓰는 학년도와는 달라요.
+        </p>
+        <p>
+          <b>전문대학</b>은 위 두 자료에 전형이 실려 있지 않아, 전문대교협이 낸
+          <b> 전형결과</b>에서 그 대학이 실제로 어떤 전형으로 뽑았는지를 읽어 만들었어요.
+          지난 학년도 결과라 올해도 같은 전형으로 뽑는지는 모집요강에서 확인해야 해요.
         </p>
         <p className="mx-note-warn">
           두 해가 다르게 적혀 있으면 합치지 않고 그대로 보여드려요.
