@@ -58,6 +58,13 @@ function conversionBasis(profile, comp) {
       const row = conv?.gradeTable?.find((r) => avg >= (r.minAvg ?? -Infinity) && avg <= (r.maxAvg ?? Infinity));
       if (row) {
         const bandEstimated = conv?.gradeBandSource === 'app_standard_estimate';
+        // perSubject 대학은 평균이 아니라 과목마다 표를 적용해 등급을 평균낸다(대학 계산과 같게).
+        // 그래서 "몇 점 구간 → 몇 등급" 한 줄로 설명하면 화면과 계산이 어긋난다.
+        if (conv?.perSubject) {
+          lines.push(`대학 공개 환산표를 과목마다 적용해 등급을 낸 뒤 평균했어요 → ${grade}등급`);
+          lines.push('이 대학은 평균 점수가 아니라 과목별 취득점수에 표를 적용해요.');
+          break;
+        }
         lines.push(`${bandEstimated ? '표준 추정 구간' : '대학 공개 환산표'} 적용: ${row.minAvg ?? 0}~${row.maxAvg ?? 100}점 → ${grade}등급`);
         if (score != null) lines.push(`환산 점수: ${score}점 (대학 공식 등급별 환산점수)`);
         lines.push(bandEstimated
@@ -837,6 +844,14 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
                                 {calcBasis.lines.map((line, idx) => (
                                   <p key={idx} className="calc-basis-line">{line}</p>
                                 ))}
+                                {comp?.conversionQuote && (
+                                  <p className="calc-basis-quote">
+                                    모집요강 원문: {comp.conversionQuote}
+                                  </p>
+                                )}
+                                {comp?.conversionSource && (
+                                  <p className="calc-basis-src">출처: {comp.conversionSource}</p>
+                                )}
                                 <p className="calc-basis-note">
                                   * 대학별 실제 환산식은 모집요강에서 최종 확인하세요.
                                 </p>

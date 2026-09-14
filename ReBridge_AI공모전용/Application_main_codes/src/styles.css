@@ -5057,6 +5057,19 @@ button {
 }
 .five-grade .ged-raw-toggle { margin-top: 12px; background: var(--card); }
 
+/* 환산 근거 박스 — 대학 원문을 그대로 인용한다(요약하지 않는다) */
+.calc-basis-quote {
+  margin-top: 8px;
+  padding: 9px 11px;
+  border-left: 3px solid var(--accent);
+  background: var(--bg-soft);
+  border-radius: 0 var(--r-sm) var(--r-sm) 0;
+  font-size: 11.5px;
+  line-height: 1.6;
+  color: var(--text-sub);
+}
+.calc-basis-src { margin-top: 6px; font-size: 11px; color: var(--text-muted); }
+
 .ged-quote {
   margin: 0 0 9px;
   padding: 10px 12px;

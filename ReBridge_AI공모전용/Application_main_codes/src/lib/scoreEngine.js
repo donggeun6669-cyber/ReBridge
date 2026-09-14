@@ -429,6 +429,30 @@ export function applyComparativeConversion(avg, gedScores, comp) {
     // Case 1, 2: 대학 발표 등급표 (등급 ± 환산점수)
     case CONV_TYPES.GRADE_TABLE: {
       if (!Array.isArray(conv.gradeTable)) break;
+
+      // perSubject: 대학이 표를 '과목별 취득점수'에 적용하라고 쓴 경우.
+      //   대학 계산 = 과목마다 등급을 매기고 그 등급들의 평균.
+      //   평균 점수에 표를 한 번 적용하는 것과 결과가 다르다(구간 경계에 걸린 과목 때문).
+      //   원문대로 과목별로 매기고 평균낸다. 과목 점수가 없으면 평균으로 폴백한다.
+      if (conv.perSubject) {
+        const keys = _filledSubjectKeys(gedScores);
+        if (keys.length > 0) {
+          const grades = [];
+          for (const k of keys) {
+            const v = Number(gedScores[k]);
+            const r = conv.gradeTable.find(
+              (t) => v >= (t.minAvg ?? -Infinity) && v <= (t.maxAvg ?? Infinity)
+            );
+            if (r?.grade != null) grades.push(Number(r.grade));
+          }
+          if (grades.length > 0) {
+            const mean = grades.reduce((a, b) => a + b, 0) / grades.length;
+            const g = Math.round(mean * 100) / 100;
+            return { grade: g, gradeExact: g, score: null, method: 'grade_table' };
+          }
+        }
+      }
+
       const row = conv.gradeTable.find(
         (r) => avg >= (r.minAvg ?? -Infinity) && avg <= (r.maxAvg ?? Infinity)
       );
