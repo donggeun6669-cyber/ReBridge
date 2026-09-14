@@ -4936,6 +4936,68 @@ button {
 }
 .ged-raw-source { margin-top: 8px; font-size: 11px; color: var(--text-sub); }
 
+/* ── 모집요강에서 확인하기 (GuidelineCheck) ──────────────────────────────
+   최종 근거는 앱이 아니라 대학 요강이라는 걸 화면에서도 드러낸다.
+   그래서 토글 자체를 다른 원문 토글보다 한 톤 진하게 둔다. */
+.gcheck { margin-top: 12px; }
+.gcheck > .ged-raw-toggle {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent-text);
+}
+.gcheck-lead {
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: var(--text-sub);
+  margin-bottom: 10px;
+}
+.gcheck-lead b { color: var(--text); font-weight: 700; }
+.gcheck-links { display: flex; flex-direction: column; gap: 7px; }
+.gcheck-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 11px 13px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: var(--card);
+  color: var(--accent-text);
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+}
+.gcheck-pages { margin-left: auto; font-size: 11.5px; font-weight: 600; color: var(--text-muted); }
+.gcheck-office { margin-top: 7px; }
+.gcheck-none {
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--text-sub);
+  padding: 10px 12px;
+  border-radius: var(--r-sm);
+  background: var(--bg-soft);
+}
+.gcheck-sub {
+  margin: 16px 0 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+}
+.gcheck-list { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 10px; }
+.gcheck-list li { font-size: 12.5px; line-height: 1.6; color: var(--text-sub); }
+.gcheck-list li b { display: block; color: var(--text); font-size: 13px; margin-bottom: 2px; }
+.gcheck-src { margin-top: 12px; }
+.gcheck-warn {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: var(--r-sm);
+  background: var(--caution-soft);
+  color: var(--caution);
+  font-size: 12.5px;
+  line-height: 1.6;
+  font-weight: 600;
+}
+.gcheck-warn b { font-weight: 800; }
+
 .ged-quote {
   margin: 0 0 9px;
   padding: 10px 12px;

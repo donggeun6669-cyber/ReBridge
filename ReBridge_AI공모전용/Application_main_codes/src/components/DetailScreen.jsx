@@ -15,6 +15,7 @@ import {
 import { loadGedText2027, matchGedTextEntry } from '../lib/gedText2027.js';
 import { loadCompText2027 } from '../lib/compText2027.js';
 import DocumentsChecklist from './DocumentsChecklist.jsx';
+import GuidelineCheck from './GuidelineCheck.jsx';
 import ChanceGauge from './ChanceGauge.jsx';
 import { loadProfile } from '../lib/persona.js';
 import {
@@ -417,6 +418,12 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
             입학처 바로가기 <ExternalLink size={14} />
           </a>
         )}
+        {/* 전형을 펼치기 전에도 원본 요강으로 갈 수 있게 대학 단위로 한 번 둔다 */}
+        <GuidelineCheck
+          univId={realUnivId}
+          univName={univ.name}
+          officeUrl={univ.admissionOfficeUrl}
+        />
       </div>
 
       {/* 담임 한마디 */}
@@ -773,6 +780,14 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
                         </summary>
                         <DocumentsChecklist adm={{ ...r, univId: realUnivId }} />
                       </details>
+
+                      {/* 최종 근거로 가는 길 — 앱이 아니라 대학 모집요강이 정답이다 */}
+                      <GuidelineCheck
+                        univId={realUnivId}
+                        univName={univ.name}
+                        source={r.source}
+                        officeUrl={univ.admissionOfficeUrl}
+                      />
                     </div>
                   )}
                 </article>

@@ -29,6 +29,7 @@ const SRC_TEXT = join(ROOT, 'public/data/ged_eligible_2027_text.json');
 const OUT_TEXT_DIR = join(ROOT, 'public/data/ged_text');
 const SRC_COMP_TEXT = join(ROOT, 'public/data/comparative_2027_text.json');
 const OUT_COMP_TEXT_DIR = join(ROOT, 'public/data/comp_text');
+const OUT_GUIDELINES = join(ROOT, 'src/data/guidelines_2027.json');
 
 // 번들에 남길 필드. 여기 없는 필드는 화면에서 쓰지 않는다는 뜻이다.
 //   · region/zone  — universities.json에 이미 있어서 뺀다
@@ -137,6 +138,47 @@ function shardCompText() {
   );
 }
 
+// 대학 모집요강 PDF 원본 주소만 따로 뽑아 번들에 넣는다.
+//
+// 왜 번들에 넣나: '모집요강에서 확인하기'는 원문 발췌(2.7MB)를 받기 전에도 떠야 한다.
+// 학생이 앱을 못 믿을 때 제일 먼저 눌러야 하는 게 이 링크라서, 네트워크를 한 번
+// 더 타게 만들면 안 된다. 주소만 남기면 대학 171곳이 20KB 남짓이다.
+//
+// ⚠️ 링크는 어디가(adiga.kr)가 대학별로 올린 2027학년도 모집요강 원본이다.
+//    우리가 만든 요약이 아니라 '대학이 낸 문서' 그 자체 — 값을 손으로 고치지 말 것.
+function exportGuidelineLinks() {
+  if (!existsSync(SRC_COMP_TEXT)) {
+    console.warn('guidelines 건너뜀: comparative_2027_text.json 이 없다');
+    return;
+  }
+  const byUniv = JSON.parse(readFileSync(SRC_COMP_TEXT, 'utf8'));
+  const out = {};
+  for (const [id, v] of Object.entries(byUniv)) {
+    if (id === 'meta') continue;
+    const seen = new Set();
+    const links = [];
+    for (const s of v?.sources || []) {
+      if (!s?.sourceUrl || seen.has(s.sourceUrl)) continue;
+      seen.add(s.sourceUrl);
+      // 같은 대학에 캠퍼스별 요강이 따로 있는 곳이 있다(강원대 4개, 가톨릭대 3개…).
+      // 파일명 뒤에 붙은 '_제2캠퍼스' 같은 꼬리를 캠퍼스 이름으로 살려 둔다.
+      // 안 그러면 화면에 '2027학년도 수시 모집요강 PDF'가 네 줄 똑같이 뜬다.
+      const m = /_([^/]+?)\.pdf$/i.exec(s.file || '');
+      links.push({
+        phase: s.phase || null,
+        url: s.sourceUrl,
+        pages: s.pages ?? null,
+        campus: m ? m[1] : null,
+      });
+    }
+    if (links.length) out[id] = links;
+  }
+  writeFileSync(OUT_GUIDELINES, JSON.stringify(out, null, 0));
+  const n = readFileSync(OUT_GUIDELINES).length;
+  console.log(`src/data/guidelines_2027.json: ${Object.keys(out).length}개 대학 · ${(n / 1024).toFixed(0)}KB`);
+}
+
 slimAdmissions();
 shardText();
 shardCompText();
+exportGuidelineLinks();
