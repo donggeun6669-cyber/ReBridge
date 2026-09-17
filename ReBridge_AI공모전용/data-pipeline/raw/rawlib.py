@@ -222,14 +222,25 @@ def cell_for(rows):
         for r in got:
             label = SHORT.get(r["문서종류"], r["문서종류"])
             if r["원문여부"] != "원문":
-                label += "·대체"
+                label += "·가공" if r["원문여부"] == "가공" else "·대체"
             parts.setdefault(r["형식"], [])
             if label not in parts[r["형식"]]:
                 parts[r["형식"]].append(label)
         return " / ".join(f"{fmt}({', '.join(v)})" for fmt, v in parts.items())
     if rows:
-        return "못 구함"
+        return miss_label(rows)
     return "미확인"
+
+
+# miss 사유 앞머리 → 칸 표시. 접속이 막혀 '없다'를 확인 못 한 것은 미확인으로 센다.
+TAGS = (("[확인 못 함]", "미확인"), ("[게시 전]", "게시 전"), ("[해당 없음]", "해당 없음"))
+
+
+def miss_label(rows):
+    labels = {next((v for t, v in TAGS if r["비고"].startswith(t)), "못 구함") for r in rows}
+    for v in ("못 구함", "미확인", "게시 전", "해당 없음"):   # 섞여 있으면 앞의 것
+        if v in labels:
+            return v
 
 
 def status_xlsx():
@@ -250,7 +261,8 @@ def status_xlsx():
         "miss": PatternFill("solid", fgColor="F8CBAD"),
         "none": PatternFill("solid", fgColor="EDEDED"),
     }
-    summary = {y: {"확보": 0, "대체만": 0, "못 구함": 0, "미확인": 0} for y in YEARS}
+    summary = {y: {"확보": 0, "대체만": 0, "못 구함": 0, "게시 전": 0, "해당 없음": 0, "미확인": 0}
+               for y in YEARS}
     for u in T:
         notes, cells = [], []
         for y in YEARS:
@@ -266,14 +278,14 @@ def status_xlsx():
             elif got:
                 summary[y]["확보"] += 1
             elif rows:
-                summary[y]["못 구함"] += 1
+                summary[y][miss_label(rows)] += 1
             else:
                 summary[y]["미확인"] += 1
         ws.append([u["no"], u["name"], u.get("kind", ""), u.get("region", ""), *cells, "\n".join(notes)])
         rix = ws.max_row
         for j, c in enumerate(cells):
             cell = ws.cell(rix, 5 + j)
-            cell.fill = fill["miss"] if c == "못 구함" else fill["none"] if c == "미확인" \
+            cell.fill = fill["miss"] if c == "못 구함" else fill["none"] if c in ("미확인", "게시 전", "해당 없음") \
                 else fill["sub"] if "대체" in c else fill["ok"]
     for c in ws[1]:
         c.font = Font(bold=True)
@@ -287,13 +299,15 @@ def status_xlsx():
     ws.auto_filter.ref = ws.dimensions
 
     s = wb.create_sheet("요약")
-    s.append(["연도", "원문 확보", "대체 자료만", "못 구함", "미확인", "합계"])
+    s.append(["연도", "원문 확보", "대체·가공만", "못 구함", "게시 전", "해당 없음", "미확인", "합계"])
     for y in YEARS:
         v = summary[y]
-        s.append([y, v["확보"], v["대체만"], v["못 구함"], v["미확인"], sum(v.values())])
+        s.append([y, v["확보"], v["대체만"], v["못 구함"], v["게시 전"], v["해당 없음"], v["미확인"],
+                  sum(v.values())])
     s.append([])
     s.append([f"기준: 대상 {len(T)}곳 (universities.json 351 − 제외 6). 만든 날: {dt.datetime.now():%Y-%m-%d %H:%M}"])
-    s.append(["칸 읽는 법: 형식(문서종류). 예) PDF(수시요강, 정시요강). '·대체' = 대학 원문이 아닌 합본·포털 자료"])
+    s.append(["칸 읽는 법: 형식(문서종류). 예) PDF(수시요강, 정시요강). '·대체' = 대학 원문이 아닌 합본·포털 자료, '·가공' = 원문을 이어붙이는 등 손댄 사본. "
+              "미확인·게시 전·해당 없음은 회색, 못 구함은 빨강"])
 
     f = wb.create_sheet("파일목록")
     f.append(FIELDS)

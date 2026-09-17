@@ -61,13 +61,15 @@ def links(code, syr):
         return url, None                           # 대학 페이지 없음
     s = html.unescape(body.decode("utf-8", "replace"))
     out = {}
+    # 이름표는 링크 '안쪽 뒤'에 있다: <a onclick="fnUnvFileDownOne(…)"><span>수시<br />모집요강</span></a>
+    # (2026-09-17 처음엔 링크 앞 글자를 읽어 한 칸씩 밀렸다 — 수시 칸에 정시 요강, 정시 칸에 재외국민 요강)
     for m in re.finditer(r"fnUnvFileDownOne\(\s*'(\d+)'\s*,\s*'(\d+)'\s*,\s*'Y'\s*,\s*'(\d+)'\s*,\s*'(\d+)'", s):
-        ctx = s[max(0, m.start() - 300):m.start()]
-        ctx = ctx[:ctx.rfind("<")]                  # 링크를 여는 <a ... onclick=" 조각은 버린다
-        ctx = re.sub(r"<[^>]+>", " ", ctx)
+        end = s.find("</a>", m.end())
+        ctx = s[m.end():end if end > 0 else m.end() + 300]
+        ctx = re.sub(r"<[^>]+>", " ", ctx[ctx.find(">") + 1:])
         ctx = re.sub(r"\s+", " ", ctx).strip()
         for label, doc in LABELS[syr].items():
-            if ctx.endswith(label) and m.group(4) == syr:
+            if ctx == label and m.group(4) == syr:
                 out[doc] = (m.group(1), m.group(2), m.group(3))
     return url, out
 
