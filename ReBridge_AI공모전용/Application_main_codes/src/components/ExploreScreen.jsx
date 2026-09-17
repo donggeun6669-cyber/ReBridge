@@ -1,11 +1,8 @@
 import { useMemo, useState, useEffect } from 'react';
-import { Search, X, ChevronRight, SlidersHorizontal, Sparkles, Map as MapIcon, ArrowLeft, Target } from 'lucide-react';
+import { Search, X, ChevronRight, SlidersHorizontal, Sparkles, Map as MapIcon, ArrowLeft, Check, RotateCcw } from 'lucide-react';
 import { getExploreList } from '../lib/analysis.js';
-import { loadProfile } from '../lib/persona.js';
 import { MAP_ENABLED } from '../lib/kakaoMap.js';
-import { evaluateAdmission, admissionChance, gedFit } from '../lib/scoreEngine.js';
-import { TOP_TIER_EXCLUDE } from '../data/topTierExclude.js';
-import ChanceGauge from './ChanceGauge.jsx';
+import { gedFit } from '../lib/scoreEngine.js';
 
 // 한 번에 보여줄 대학 수 ('더 보기'로 증가)
 const PAGE_SIZE = 20;
@@ -15,21 +12,50 @@ const GEOJEOM = new Set([
   '강원대학교', '제주대학교', '충북대학교', '경상국립대학교', '국립강릉원주대학교',
 ]);
 
-const FILTERS = ['전체', '서울', '수도권', '지방거점', '전문대학'];
-const SORTS = [
-  { key: 'reco', label: '추천순' },
-  { key: 'name', label: '가나다순' },
+// 대학 탐색 = 점수와 무관한 둘러보기 (2026-09-17 동근님).
+// 기본 가나다순, 체크박스 필터 6종. 같은 묶음 안은 '하나라도', 묶음끼리는 '모두' 맞아야 보인다.
+// 점수로 본 합격 가능성은 '내 점수' 화면에서 본다.
+const REGIONS = ['서울', '경기', '인천', '강원', '대전', '세종', '충북', '충남', '광주', '전북', '전남',
+  '대구', '경북', '부산', '울산', '경남', '제주'];
+const ESTAB = { '국립·공립': ['국립', '공립'], '사립': ['사립'], '특별법인': ['특별법법인'] };
+// 키는 데이터의 admissionType 값 그대로, 라벨만 짧게
+const TYPES = [
+  ['학생부교과', '교과'], ['학생부종합', '종합'], ['논술', '논술'], ['실기', '실기'],
+  ['수능위주', '수능'], ['일반(서류)', '일반(서류)'], ['특별전형', '특별'],
+];
+const TRI = [
+  { key: 'none', label: '없는 전형 있음' },
+  { key: 'has', label: '있는 전형 있음' },
+  { key: 'unknown', label: '확인 필요' },
 ];
 
-// 점수는 있는데 칸수가 안 뜨는 이유(왜 어떤 카드는 칸수, 어떤 카드는 적합도만 뜨는지 설명).
-const NO_CHANCE_REASON = {
-  csat: '수능 기준',
-  cutline: '합격선 자료 없음',
-  // 대학이 검정고시 환산 기준을 공개하지 않아 계산 자체가 불가한 경우(2026-09).
-  conversion: '환산 기준 미공개',
-  // 농어촌·기초생활·재직자처럼 지원자격이 따로 있는 전형(2026-09).
-  special: '자격 확인 필요',
-};
+const GROUPS = [
+  { key: 'region', title: '지역', options: REGIONS.map((r) => ({ key: r, label: r })) },
+  { key: 'kind', title: '학교 종류', options: [{ key: '대학교', label: '4년제' }, { key: '전문대학', label: '전문대' }] },
+  { key: 'estab', title: '설립', options: Object.keys(ESTAB).map((k) => ({ key: k, label: k })) },
+  { key: 'type', title: '전형 (검정고시 지원 가능)', options: TYPES.map(([key, label]) => ({ key, label })) },
+  { key: 'csat', title: '수능최저', options: TRI, note: '대학별로 확인된 값이 아직 적어요. 대부분 \'확인 필요\'예요.' },
+  { key: 'interview', title: '면접', options: TRI, note: '대학별로 확인된 값이 아직 적어요. 대부분 \'확인 필요\'예요.' },
+  { key: 'geojeom', title: '지방거점', options: [{ key: 'yes', label: '지방거점 국립대만' }] },
+];
+const EMPTY = Object.fromEntries(GROUPS.map((g) => [g.key, []]));
+
+function triOf(facets) {
+  return facets.length ? facets : ['unknown'];
+}
+
+function matches(s, sel) {
+  const any = (picked, values) => picked.length === 0 || picked.some((p) => values.includes(p));
+  return (
+    any(sel.region, [s.region]) &&
+    any(sel.kind, [s.kind]) &&
+    any(sel.estab, Object.keys(ESTAB).filter((k) => ESTAB[k].includes(s.establishment))) &&
+    any(sel.type, s.availableTypes) &&
+    any(sel.csat, triOf(s.csatFacets)) &&
+    any(sel.interview, triOf(s.interviewFacets)) &&
+    any(sel.geojeom, GEOJEOM.has(s.name) ? ['yes'] : [])
+  );
+}
 
 // 약칭(로고용 2글자)
 function shortName(name) {
@@ -37,91 +63,41 @@ function shortName(name) {
   return base.slice(0, 2) || name.slice(0, 2);
 }
 
-function matchFilter(s, filter) {
-  if (filter === '전체') return true;
-  if (filter === '전문대학') return s.kind === '전문대학';
-  if (filter === '서울') return s.region === '서울' && s.kind === '대학교';
-  if (filter === '수도권') return ['경기', '인천'].includes(s.region) && s.kind === '대학교';
-  if (filter === '지방거점') return GEOJEOM.has(s.name) && s.kind === '대학교';
-  return true;
-}
-
 export default function ExploreScreen({ goTo = () => {}, goBack = () => {}, canGoBack = false }) {
   const [query, setQuery] = useState('');
-  const [filter, setFilter] = useState('전체');
-  const [sort, setSort] = useState('reco');
+  const [sel, setSel] = useState(EMPTY);
+  const [open, setOpen] = useState(false);
   const [visible, setVisible] = useState(PAGE_SIZE); // '더 보기'로 노출 개수 증가
 
-  const profile = useMemo(loadProfile, []);
   const all = useMemo(getExploreList, []);
-  const hasScore = !!(profile && profile.gedScores && profile.gedAvg != null);
-  const isTarget = hasScore && profile.scoreMode === 'target'; // 공부 중 = 목표 점수 기준
-
   const isSearching = query.trim() !== '';
+  const activeCount = Object.values(sel).reduce((n, v) => n + v.length, 0);
 
-  // 추천순·합격가능순 정렬일 때만 상위권 대학을 추천 후보에서 제외한다.
-  // 가나다순·검색 경로에는 그대로 노출(전체 보기 유지) — 동근님 지시.
-  const excludeTopTier = !isSearching && sort === 'reco';
+  function toggle(group, key) {
+    setSel((cur) => {
+      const on = cur[group].includes(key);
+      return { ...cur, [group]: on ? cur[group].filter((k) => k !== key) : [...cur[group], key] };
+    });
+  }
 
   const list = useMemo(() => {
     const q = query.trim();
-    let rows = all.filter((s) => {
-      if (isSearching) return s.name.includes(q);
-      if (!matchFilter(s, filter)) return false;
-      if (excludeTopTier && TOP_TIER_EXCLUDE.has(s.univId)) return false;
-      return true;
-    });
-    rows = rows.map((s) => {
-      // 프로필 점수 있으면 best 전형에 대해 합격 판정 → 칸수 게이지.
-      // 칸수가 안 나오면(수능 기준/합격선 없음) 그 '이유'를 같이 담아 자격만 뜨는 카드를 설명.
-      let chance = null;
-      let noChanceReason = null;
-      if (hasScore && s.bestType) {
-        const ev = evaluateAdmission(profile, {
-          univId: s.univId,
-          admissionType: s.bestType,
-          admissionName: s.bestName,
-          gedEligible: s.bestGedEligible,
-        });
-        if (ev.applicable) chance = admissionChance(ev);
-        if (!chance) noChanceReason = NO_CHANCE_REASON[ev.dataGap] || null;
-      }
-      // 비확률적 '적합도' — 칸수가 없을 때(또는 점수 없을 때)도 항상 주는 힌트.
-      const fit = gedFit(
-        { admissionType: s.bestType, gedEligible: s.bestGedEligible },
-        s.comparativeType
-      );
-      const status = s.bestGedEligible === '가능' ? 'ok' : 'cond';
-      return { ...s, chance, noChanceReason, status, fit };
-    });
-    const FIT_RANK = { good: 3, ok: 2, check: 1, no: 0 };
-    rows.sort((a, b) => {
-      if (sort === 'name') return a.name.localeCompare(b.name);
-
-      // 추천순:
-      //  - 점수가 있으면 '합격 가능성(칸수)' 높은 순을 최우선 → 위에서부터 유리한 대학.
-      //    칸수를 낼 자료가 없는 대학(level 0)은 아래로 내려, "더 유리한 순"이 명확해지게.
-      //  - 그 다음은 지원 가능 우선 → 데이터 충실도 → 가나다.
-      if (hasScore) {
-        const al = a.chance ? a.chance.level : 0;
-        const bl = b.chance ? b.chance.level : 0;
-        if (al !== bl) return bl - al;
-      }
-      const e = (b.status === 'ok') - (a.status === 'ok');
-      if (e) return e;
-      const fa = FIT_RANK[a.fit?.level] ?? 2;
-      const fb = FIT_RANK[b.fit?.level] ?? 2;
-      if (fa !== fb) return fb - fa;
-      if (b.dataScore !== a.dataScore) return b.dataScore - a.dataScore;
-      return a.name.localeCompare(b.name);
-    });
+    const rows = all
+      .filter((s) => (isSearching ? s.name.includes(q) : matches(s, sel)))
+      .map((s) => ({
+        ...s,
+        status: s.bestGedEligible === '가능' ? 'ok' : 'cond',
+        // 점수와 무관한 '지원 수월' 힌트
+        fit: gedFit({ admissionType: s.bestType, gedEligible: s.bestGedEligible }, s.comparativeType),
+      }));
+    rows.sort((a, b) => a.name.localeCompare(b.name, 'ko'));
     return rows;
-  }, [all, query, filter, sort, isSearching, hasScore, profile, excludeTopTier]);
+  }, [all, query, sel, isSearching]);
 
-  // 필터/정렬/검색이 바뀌면 노출 개수를 처음으로 되돌린다.
+  // 필터/검색이 바뀌면 노출 개수를 처음으로 되돌린다.
   useEffect(() => {
     setVisible(PAGE_SIZE);
-  }, [query, filter, sort]);
+  }, [query, sel]);
 
   const shown = list.slice(0, visible);
   const hasMore = list.length > visible;
@@ -168,60 +144,49 @@ export default function ExploreScreen({ goTo = () => {}, goBack = () => {}, canG
 
       {!isSearching && (
         <>
-          <div className="filter-row">
-            {FILTERS.map((f) => (
-              <button
-                key={f}
-                className={`fchip ${filter === f ? 'active' : ''}`}
-                onClick={() => setFilter(f)}
-              >
-                {f}
-              </button>
-            ))}
-          </div>
-
           <div className="explore-toolbar">
+            <button className={`xf-toggle ${activeCount ? 'on' : ''}`} onClick={() => setOpen((o) => !o)} aria-expanded={open}>
+              <SlidersHorizontal size={15} /> 필터{activeCount ? ` ${activeCount}` : ''}
+            </button>
             <span className="explore-count">
-              <b>{list.length}</b>개 대학
-              {list.length > visible && <span className="explore-count-shown"> · {shown.length}개 표시 중</span>}
+              <b>{list.length}</b>개 대학 · 가나다순
             </span>
-            <div className="sort-group">
-              <SlidersHorizontal size={14} />
-              {SORTS.map((s) => (
-                <button
-                  key={s.key}
-                  className={`sort-chip ${sort === s.key ? 'on' : ''}`}
-                  onClick={() => setSort(s.key)}
-                >
-                  {s.key === 'reco' && hasScore ? '가능성순' : s.label}
-                </button>
-              ))}
-            </div>
           </div>
+
+          {open && (
+            <div className="xf-panel">
+              {GROUPS.map((g) => (
+                <div key={g.key} className="xf-group">
+                  <p className="xf-title">{g.title}</p>
+                  <div className="xf-options">
+                    {g.options.map((o) => {
+                      const on = sel[g.key].includes(o.key);
+                      return (
+                        <button
+                          key={o.key}
+                          className={`xf-opt ${on ? 'on' : ''}`}
+                          role="checkbox"
+                          aria-checked={on}
+                          onClick={() => toggle(g.key, o.key)}
+                        >
+                          <span className="xf-box">{on && <Check size={12} strokeWidth={3} />}</span>
+                          {o.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {g.note && <p className="xf-note">{g.note}</p>}
+                </div>
+              ))}
+              <div className="xf-actions">
+                <button className="xf-reset" onClick={() => setSel(EMPTY)} disabled={!activeCount}>
+                  <RotateCcw size={14} /> 초기화
+                </button>
+                <button className="xf-done" onClick={() => setOpen(false)}>{list.length}개 대학 보기</button>
+              </div>
+            </div>
+          )}
         </>
-      )}
-
-      {isTarget && !isSearching && (
-        <div className="explore-target-note">
-          <Target size={14} />
-          <span><b>목표 점수 기준</b> 합격 가능성이에요. 실제 점수가 나오면 다시 확인해요.</span>
-        </div>
-      )}
-
-      {excludeTopTier && (
-        <p className="explore-exclude-hint">
-          추천순에는 검정고시 합격 사례가 드문 상위권 대학(SKY·서성한 등)을 빼고 보여줘요.
-          <button className="explore-exclude-link" onClick={() => setSort('name')}>전체 보기</button>
-        </p>
-      )}
-
-      {!hasScore && !isSearching && (
-        <button className="explore-banner" onClick={() => goTo('profile')}>
-          <span className="explore-banner-body">
-            <b>내 검정고시 점수</b>를 넣으면<br />각 대학 합격 가능성을 볼 수 있어요
-          </span>
-          <ChevronRight size={18} />
-        </button>
       )}
 
       <div className="uni-list" style={{ marginTop: 12 }}>
@@ -235,20 +200,15 @@ export default function ExploreScreen({ goTo = () => {}, goBack = () => {}, canG
             <span className="uni-body">
               <span className="uni-name-row">
                 <span className="uni-name">{s.name}</span>
-                {s.chance ? (
-                  <ChanceGauge chance={s.chance} compact />
-                ) : (
-                  <span className={`fit-tag fit-${s.fit?.level || 'ok'}`}>
-                    <Sparkles size={11} /> {s.fit?.label || '지원 가능'}
-                  </span>
-                )}
+                <span className={`fit-tag fit-${s.fit?.level || 'ok'}`}>
+                  <Sparkles size={11} /> {s.fit?.label || '지원 가능'}
+                </span>
               </span>
               <span className="uni-sub">
                 {s.region}
                 {s.establishment ? ` · ${s.establishment}` : ''}
                 {s.kind === '전문대학' ? ' · 전문대학' : ''}
                 {s.eligibleCount > 0 ? ` · 검정고시 ${s.eligibleCount}전형` : ''}
-                {hasScore && !s.chance && s.noChanceReason ? ` · ${s.noChanceReason}` : ''}
                 {/* 최신 학년도 자료면 굳이 안 밝힌다 — 다른 해 자료일 때만 알린다 */}
                 {!s.is2027 ? ` · ${s.dataYear}학년도 기준` : ''}
               </span>
@@ -258,7 +218,7 @@ export default function ExploreScreen({ goTo = () => {}, goBack = () => {}, canG
         ))}
         {list.length === 0 && (
           <p className="empty-line">
-            {isSearching ? `"${query.trim()}"에 해당하는 대학이 없어요.` : '해당 대학이 없어요.'}
+            {isSearching ? `"${query.trim()}"에 해당하는 대학이 없어요.` : '조건에 맞는 대학이 없어요. 필터를 줄여 보세요.'}
           </p>
         )}
       </div>
@@ -276,7 +236,7 @@ export default function ExploreScreen({ goTo = () => {}, goBack = () => {}, canG
         <span className="explore-help-emoji" aria-hidden="true">💡</span>
         <span className="explore-help-text">
           <b>이 목록 읽는 법</b>
-          <span>칸수 게이지 · 지원 수월 · 어느 해 자료인지</span>
+          <span>지원 수월 · 어느 해 자료인지 · 필터 기준</span>
         </span>
         <ChevronRight size={18} />
       </button>

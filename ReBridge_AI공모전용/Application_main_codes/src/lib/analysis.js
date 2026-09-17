@@ -27,7 +27,7 @@ import { ADMISSION_DATA_YEAR, PLAN_YEAR } from '../data/meta.js';
 // 상위권 제외 목록(src/data/topTierExclude.js)은 남겨두되 여기서는 쓰지 않는다.
 // 목록에서 통째로 빼면 "왜 이 대학이 안 보이지?"가 되기 때문에, 목록에는 넣고
 // 합격선 자료가 없으면 행에서 '자료 없음'으로 정직하게 표시한다.
-// (ExploreScreen의 추천순 정렬은 여전히 그 파일을 직접 쓴다)
+// (대학 탐색은 2026-09-18부터 점수와 무관한 가나다순이라 이 목록을 쓰지 않는다)
 
 const METRO = new Set(['서울', '경기', '인천']);
 
@@ -369,6 +369,30 @@ export function getUniversityDetailByName(name) {
 
 // 탐색(둘러보기)용 전체 대학 목록 — 유웨이식 입시정보 요약 카드.
 // 프로필 없이도 동작하며, 각 대학의 검정고시 관점 데이터 충실도를 함께 반환.
+// ── 대학 탐색 필터용: 수능최저·면접 (2026-09-18) ──────────────────────
+// 2028 시행계획 행(admissions.json)에서 '대학별로 확인된 값'만 쓴다.
+// 틀 행(baseline)과, 여러 대학에 똑같이 복사된 안내 문구는 확인된 값이 아니다 → '확인 필요'.
+// 모르는 곳을 '없음'으로 채우지 않는다(동근님: 포장하지 말 것).
+const TEMPLATE_EVAL = new Set(['서류 종합평가 중심, 일부 단계별 면접(대학별 상이)', '학생부교과 중심(추천 필요)', '']);
+
+function csatOf(v) {
+  const s = (v || '').trim();
+  if (/^(없음|미적용)/.test(s)) return 'none';
+  if (/적용|있음/.test(s) && !/적용하는 경우 많음|가능|추정/.test(s)) return 'has';
+  return null;
+}
+
+// univId → { csat: Set('has'|'none'), interview: Set('has'|'none') } — 수시 행 기준
+const PLAN_FACETS = new Map();
+for (const r of admissions) {
+  if (r.status === 'baseline' || r.phase === '정시') continue;
+  if (!PLAN_FACETS.has(r.univId)) PLAN_FACETS.set(r.univId, { csat: new Set(), interview: new Set() });
+  const f = PLAN_FACETS.get(r.univId);
+  const c = csatOf(r.csatMinimum);
+  if (c) f.csat.add(c);
+  if (!TEMPLATE_EVAL.has((r.evalMethod || '').trim())) f.interview.add(r.interview ? 'has' : 'none');
+}
+
 export function getExploreList() {
   const out = [];
   for (const u of universities) {
@@ -409,6 +433,9 @@ export function getExploreList() {
       availableTypes: [...new Set(
         eligible.map((r) => r.admissionType).filter(Boolean)
       )],
+      // 필터용 — 확인된 값이 없으면 빈 배열(화면에서 '확인 필요'로 묶는다)
+      csatFacets: [...(PLAN_FACETS.get(u.univId)?.csat || [])],
+      interviewFacets: [...(PLAN_FACETS.get(u.univId)?.interview || [])],
       // 프로필 점수 비교용(best 전형)
       bestType: best?.admissionType || null,
       bestName: best?.admissionName || null,

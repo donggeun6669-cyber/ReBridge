@@ -5718,3 +5718,45 @@ button {
   background: var(--accent); color: var(--accent-ink);
   display: grid; place-items: center;
 }
+
+/* ── 대학 탐색 체크박스 필터 (2026-09-18) ── */
+.xf-toggle {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 14px; border-radius: var(--r-pill);
+  border: 1.5px solid var(--border); background: var(--card);
+  font-size: 13px; font-weight: 700; color: var(--text);
+}
+.xf-toggle.on { border-color: var(--brand); background: var(--brand-tint); color: var(--brand-deep); }
+.xf-panel {
+  margin: 10px 0 4px; padding: 14px 14px 12px;
+  border: 1px solid var(--border); border-radius: var(--r-md);
+  background: var(--card); box-shadow: var(--shadow-md);
+}
+.xf-group + .xf-group { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border); }
+.xf-title { font-size: 13px; font-weight: 800; color: var(--text); margin: 0 0 8px; }
+.xf-options { display: flex; flex-wrap: wrap; gap: 6px; }
+.xf-opt {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 10px; border-radius: 8px;
+  border: 1px solid var(--border); background: var(--card);
+  font-size: 13px; font-weight: 600; color: var(--text);
+}
+.xf-opt.on { border-color: var(--brand); background: var(--brand-tint); color: var(--brand-deep); }
+.xf-box {
+  width: 16px; height: 16px; border-radius: 4px; flex: 0 0 auto;
+  border: 1.5px solid var(--border); display: inline-flex; align-items: center; justify-content: center;
+  background: var(--card); color: #fff;
+}
+.xf-opt.on .xf-box { background: var(--brand); border-color: var(--brand); }
+.xf-note { margin: 6px 0 0; font-size: 12px; color: var(--text-sub); }
+.xf-actions { display: flex; gap: 8px; margin-top: 14px; }
+.xf-reset {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border);
+  background: var(--card); font-size: 13px; font-weight: 700; color: var(--text-sub);
+}
+.xf-reset:disabled { opacity: .45; }
+.xf-done {
+  flex: 1; padding: 10px 14px; border-radius: 10px; border: 0;
+  background: var(--brand); color: #fff; font-size: 14px; font-weight: 800;
+}
