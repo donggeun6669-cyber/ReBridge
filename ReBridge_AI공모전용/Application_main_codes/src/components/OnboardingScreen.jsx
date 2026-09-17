@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ChevronLeft } from 'lucide-react';
 import LogoMark from './LogoMark.jsx';
-import { savePersona, getNav, AGE_OPTIONS } from '../lib/persona.js';
+import { savePersona, getNav, AGE_OPTIONS, V1_UNIV_ONLY } from '../lib/persona.js';
 import '../styles.onboarding.css';
 
 // 2026-09 서연님 UI 개선안으로 다시 씀.
@@ -11,6 +11,7 @@ import '../styles.onboarding.css';
 // 한 화면에 다 몰아넣지 않고 한 번에 하나씩만 묻는다(같은 개선안의 "한 페이지에 모든 정보 X").
 //
 // 진로 허브에서 '대학 진학'으로 들어오면(presetTrack) 트랙 질문은 건너뛴다.
+// v1(V1_UNIV_ONLY)은 길이 대입 하나뿐이라 트랙 질문 자체를 묻지 않는다.
 
 const STAGE_OPTS = [
   {
@@ -58,9 +59,9 @@ export default function OnboardingScreen({ goTo = () => {}, presetTrack = null }
   // 0 인사 → 1 나이 → 2 상황. 트랙이 안 정해졌으면 나이 다음에 트랙을 묻는다.
   const [step, setStep] = useState(0);
   const [age, setAge] = useState(null);
-  const [track, setTrack] = useState(presetTrack);
+  const [track, setTrack] = useState(presetTrack || (V1_UNIV_ONLY ? 'university' : null));
 
-  const needTrack = !presetTrack;
+  const needTrack = !presetTrack && !V1_UNIV_ONLY;
   // 화면 순서를 배열로 들고 다닌다 — 조건이 늘어도 인덱스 계산이 안 꼬이게.
   const FLOW = needTrack ? ['hello', 'age', 'track', 'stage'] : ['hello', 'age', 'stage'];
   const cur = FLOW[step];

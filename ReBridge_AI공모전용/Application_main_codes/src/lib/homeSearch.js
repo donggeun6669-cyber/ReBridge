@@ -4,14 +4,17 @@ import kkumdrim from '../data/kkumdrim.json';
 import { JOB_CATALOG } from '../data/careerData.js';
 import { ADMISSION_TERMS, CAREER_TERMS } from '../data/glossary.js';
 import { COMMON_SUPPORT } from '../data/commonSupport.js';
+import { V1_UNIV_ONLY, isHiddenScreen } from './persona.js';
 
-const JOBS = Object.entries(JOB_CATALOG).flatMap(([field, arr]) =>
+// v1(V1_UNIV_ONLY)에서는 직업 목록과 진로 용어를 검색 대상에서 뺀다.
+const JOBS = V1_UNIV_ONLY ? [] : Object.entries(JOB_CATALOG).flatMap(([field, arr]) =>
   (arr || []).map((j) => ({ name: j.name, q: j.q || j.name, field })),
 );
-const TERMS = [...ADMISSION_TERMS, ...CAREER_TERMS];
+const TERMS = V1_UNIV_ONLY ? ADMISSION_TERMS : [...ADMISSION_TERMS, ...CAREER_TERMS];
 
 // 앱 메뉴 목록 — label + keywords(띄어쓰기로 구분) + 이동할 screen
-const MENUS = [
+// (숨긴 화면으로 가는 메뉴는 아래에서 걸러진다)
+const ALL_MENUS = [
   { label: '꿈드림센터 찾기',   keywords: '꿈드림 센터 지원센터 학교밖 청소년 위치 지도', screen: 'dreamdrive' },
   { label: '공부 플래너',       keywords: '공부 플래너 학습 계획 스터디 오늘 할일',       screen: 'study-planner' },
   { label: '학습 로드맵',       keywords: '로드맵 학습 계획 공부 검정고시 준비',          screen: 'study-roadmap' },
@@ -29,6 +32,8 @@ const MENUS = [
   { label: '내 로드맵',         keywords: '로드맵 내 계획 목표 대학 입시',               screen: 'roadmap' },
   { label: '도움말',            keywords: '도움말 질문 담임 문의 막힘',                  screen: 'help' },
 ];
+
+const MENUS = ALL_MENUS.filter((m) => !isHiddenScreen(m.screen));
 
 // 다중 토큰 매칭: 띄어쓰기로 분리된 각 단어가 모두 포함될 때 매칭
 function matchTokens(haystack, qLower) {
