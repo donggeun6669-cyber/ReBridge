@@ -42,3 +42,6 @@ ReBridge_AI공모전용/data-pipeline/v2/out/
 # 재생성 가능한 산출물
 ReBridge_AI공모전용/data-pipeline/inventory/cache/
 ReBridge_AI공모전용/data-pipeline/reports/
+
+# 원본 수집 창고 (2026-09-17~, 수 GB — 로컬 보관, 깃에 올리지 않음)
+ReBridge_AI공모전용/RAW/
