@@ -1,10 +1,9 @@
 import { useMemo, useState } from 'react';
 import {
-  ChevronDown, ExternalLink, CalendarClock, FileText,
+  ArrowLeft, ChevronDown, ExternalLink, CalendarClock, FileText,
   ClipboardList, Award, CheckCircle2, BookOpen, Calculator, Languages,
   Globe2, FlaskConical, Landmark, Info, Target, ListChecks, AlertTriangle,
 } from 'lucide-react';
-import LogoMark from './LogoMark.jsx';
 import '../styles.study.css';
 import {
   GED_LINKS, PASS_RULE, GED_SUBJECT_GUIDE, GED_ELECTIVE_NOTE,
@@ -19,7 +18,7 @@ const ICONS = {
   BookOpen, Calculator, Languages, Globe2, FlaskConical, Landmark,
 };
 
-export default function GedGuideScreen({ goTo = () => {} }) {
+export default function GedGuideScreen({ goTo = () => {}, goBack = () => {} }) {
   const [openSubject, setOpenSubject] = useState(null);
 
   const profile = useMemo(loadProfile, []);
@@ -71,11 +70,13 @@ export default function GedGuideScreen({ goTo = () => {} }) {
 
   return (
     <div className="screen">
-      <header className="topbar">
-        <span className="brand-lockup">
-          <LogoMark size={24} />
-          <span className="wordmark">검고담임</span>
-        </span>
+      {/* 원래 학습 트랙의 탭 화면이라 로고만 있고 뒤로 버튼이 없었다.
+          2026-09-17부터 '담임에게 물어보기'에서 들어오므로 뒤로 버튼을 단다. */}
+      <header className="topbar center">
+        <button className="icon-btn" aria-label="뒤로" onClick={goBack}>
+          <ArrowLeft size={22} />
+        </button>
+        <span className="page-title">검정고시 안내</span>
       </header>
 
       <section className="home-hero" style={{ marginBottom: 18 }}>

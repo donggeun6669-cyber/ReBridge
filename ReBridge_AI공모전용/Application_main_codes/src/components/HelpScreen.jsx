@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowLeft, Search, ChevronRight, Sparkles, ExternalLink, MessageCircleHeart, Compass,
-  ShieldQuestion, X,
+  ShieldQuestion, X, BookOpen,
 } from 'lucide-react';
 import { searchFaq, FAQ_TOPICS } from '../lib/faq.js';
 import { buildRoadmap } from '../lib/roadmap.js';
@@ -89,6 +89,16 @@ export default function HelpScreen({ goTo = () => {}, goBack = () => {}, termId 
           <ChevronRight size={18} />
         </button>
       )}
+
+      {/* 검정고시 안내(일정·과목·합격 기준) — 홈 검색을 없애며 입구가 사라져 여기로 옮겼다(2026-09-17) */}
+      <button className="help-faq-card help-ged-card" onClick={() => goTo('ged-guide')}>
+        <span className="help-ged-ico"><BookOpen size={18} /></span>
+        <span className="help-faq-body">
+          <span className="help-faq-title">검정고시 안내</span>
+          <span className="help-faq-desc">시험 일정 · 과목 · 합격 기준 · 응시 자격</span>
+        </span>
+        <ChevronRight size={18} className="help-arrow" />
+      </button>
 
       <div className="search-bar">
         <Search size={18} color="var(--text-sub)" />

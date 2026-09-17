@@ -75,6 +75,23 @@ npm run verify         # 배포 캐시 우회 검증 (node verify-deploy.mjs)
 - **이 스위치를 `false`로 바꾸거나 지우는 건 동근님 승인 사항이다.** "진로 탭이 안 보인다"는 보고는 버그가 아니다.
 - 새 화면에서 V2 화면으로 가는 버튼(`goTo('community')` 등)을 만들면 v1에서 "준비 중"으로 떨어진다. 버튼도 같이 가릴 것.
 
+### ⚠️ `v2` 브랜치를 `main`에 합칠 때 — 충돌 예상 지점 (2026-09-17 메모)
+
+`v2` 브랜치는 `04e6f95`(09-17 오전)에서 갈라졌다. 그 뒤 `main`에서 화면 구조를 크게 바꿨다
+(커밋 `25976d5` 이후 — 하단 탭 제거·화면 합치기). **`v2`가 아래 파일을 고쳤다면 반드시 충돌한다.**
+
+| `main`에서 한 일 | 파일 | `v2` 쪽 수정을 어디로 옮기나 |
+|---|---|---|
+| 삭제 | `components/BottomNav.jsx` | 하단 탭은 없다. 입구는 홈(`TrackHome`) 카드나 우측 상단 아이콘으로 |
+| 삭제 | `components/SupportScreen.jsx` | `DreamdriveScreen.jsx` (공통 지원·나이 안내가 옮겨 가 있음). 커뮤니티 '후기' 버튼도 여기로 |
+| 삭제 | `components/GlossaryScreen.jsx` | `HelpScreen.jsx` (용어 목록이 들어가 있음. 진로 용어는 트랙으로 분기) |
+| 삭제 | `lib/homeSearch.js` | 홈 검색은 뺐다. 되살릴지 동근님께 먼저 확인 |
+| 이름 변경 | `ChecklistScreen.jsx` → `ChecklistSection.jsx` | 화면이 아니라 `RoadmapScreen` 안의 구역이 됐다 |
+| 크게 수정 | `TrackHome.jsx`, `App.jsx`, `RoadmapScreen.jsx`, `HelpScreen.jsx`, `MyPageScreen.jsx`, `lib/persona.js`(`getNav`·`activeTabId`) | `main` 구조를 기준으로 두고 `v2` 기능만 얹는다 |
+
+합칠 때 원칙: **`main`의 구조(탭 없음·같은 기능은 한 화면)를 기준으로 하고, `v2`의 새 기능만 옮겨 심는다.**
+충돌을 `v2` 쪽으로 밀면 위 정리가 통째로 되돌아간다. `git merge` 전에 동근님께 먼저 알릴 것.
+
 ## 아키텍처
 
 - **React 18 + Vite 6**, JS/JSX (TypeScript 아님, `"type":"module"`).

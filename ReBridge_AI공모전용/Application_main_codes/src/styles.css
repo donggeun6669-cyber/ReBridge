@@ -5701,3 +5701,20 @@ button {
   font-size: 15px; font-weight: 800; color: var(--text);
   margin: 16px 0 8px;
 }
+/* 합본 화면 정렬 — 원래 kdream·spt 부품은 여백 없는 화면에 맞춰 좌우 16~20px를 스스로 줬다.
+   .screen이 이미 20px를 주므로 이중 들여쓰기가 됐다(2026-09-17 동근님 지적). 이 화면에서만 걷어낸다. */
+.kdream-screen .kdream-top-bar,
+.kdream-screen .kdream-region-scroll,
+.kdream-screen .kdream-result-count,
+.kdream-screen .kdream-list-wrap,
+.kdream-screen .kdream-pagination,
+.kdream-screen .spt-comm-bar { padding-left: 0; padding-right: 0; }
+.kdream-screen .kdream-map-wrap,
+.kdream-screen .kdream-footer-note,
+.kdream-screen .spt-common-detail { margin-left: 0; margin-right: 0; }
+.help-ged-card { margin-bottom: 12px; gap: 12px; }
+.help-ged-ico {
+  width: 38px; height: 38px; flex-shrink: 0; border-radius: 12px;
+  background: var(--accent); color: var(--accent-ink);
+  display: grid; place-items: center;
+}
