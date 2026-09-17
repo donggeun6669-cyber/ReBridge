@@ -1,0 +1,277 @@
+/* =====================================================================
+   대입 홈 '대학으로 가는 길' — JourneyHome.jsx
+   2026-09-17 동근님 전달 시안(디자인/2026-09-17_메인_전달시안)의 값을 그대로 옮겼다.
+   · 이 화면에서만 쓰는 색이라 .jh-screen 안에 가둔다. 다른 화면의 크림 배경은 그대로다.
+   · 노랑(--jh-accent)은 추천 정거장 글 영역 한 곳에만 쓴다.
+     바탕·길·다른 정거장·큰 카드로 넓히지 말 것. 그라데이션·노란 그림자도 쓰지 않는다.
+   ===================================================================== */
+.jh-screen {
+  --jh-bg: #F7F8FA;
+  --jh-paper: #FFFFFF;
+  --jh-ink: #28343F;
+  --jh-sub: #626D78;
+  --jh-line: #E1E5E9;
+  --jh-road: #DCE2E7;
+  --jh-soft: #ECEFF2;
+  --jh-accent: #F1D36B;
+  --jh-accent-ink: #493D1C;
+  --jh-blue: #276CA2;
+
+  padding: 0;
+  background: var(--jh-bg);
+  color: var(--jh-ink);
+  letter-spacing: -0.025em;
+}
+.jh-screen button:focus-visible {
+  outline: 3px solid var(--jh-blue);
+  outline-offset: 3px;
+}
+
+/* 상단 — 작은 문구 + MY */
+.jh-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 64px;
+  padding: 17px 20px 9px;
+}
+.jh-crumb {
+  font-size: 12px;
+  color: var(--jh-sub);
+  letter-spacing: 0.06em;
+}
+.jh-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--jh-ink);
+}
+
+.jh-main {
+  padding: 12px 24px 28px;
+}
+
+/* 제목 + 깃발 장식 */
+.jh-intro {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.jh-title {
+  font-size: 29px;
+  line-height: 1.3;
+  font-weight: 750;
+  letter-spacing: -0.05em;
+  margin: 0 0 12px;
+}
+.jh-lead {
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--jh-sub);
+  margin: 0 0 12px;
+}
+.jh-landmark {
+  width: 60px;
+  height: 60px;
+  margin-top: 20px;
+  border-radius: 50% 50% 38% 38%;
+  background: var(--jh-soft);
+  color: var(--jh-ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.jh-landmark svg {
+  width: 28px;
+  height: 28px;
+}
+
+/* 곡선 길 — 기본 높이 584px (8 + 114×4 + 76 + 끝 지점 44).
+   정거장은 흐름 배치라 글자가 커지면 줄 간격이 늘고, 길은 원 좌표를 다시 재서 따라간다. */
+.jh-map {
+  position: relative;
+  margin: 10px -4px 0;
+  padding-top: 8px;
+}
+.jh-route {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  overflow: visible;
+}
+.jh-route path {
+  stroke: var(--jh-road);
+  stroke-width: 12;
+  stroke-linecap: round;
+  fill: none;
+}
+.jh-stops {
+  position: relative;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.jh-stops > li {
+  min-height: 114px;
+  padding-bottom: 16px;
+}
+.jh-stops > li:last-child {
+  min-height: 76px;
+  padding-bottom: 0;
+}
+
+/* 정거장 — 번호·제목·설명이 한 클릭 영역 */
+.jh-stop {
+  position: relative;
+  display: block;
+  width: 100%;
+  min-height: 76px;
+  padding: 2px 0 0;
+  text-align: left;
+  border-radius: 15px;
+}
+.jh-dot {
+  position: absolute;
+  top: 20px;
+  z-index: 2;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--jh-paper);
+  border: 2px solid var(--jh-road);
+  font-size: 13px;
+  font-weight: 650;
+}
+.jh-stop.is-right .jh-dot { left: 12%; }
+.jh-stop.is-left .jh-dot { right: 10%; }
+
+.jh-copy {
+  position: relative;
+  display: block;
+  width: 67%;
+  padding: 11px 13px;
+  border-radius: 15px;
+  background: var(--jh-bg);
+}
+.jh-stop.is-right .jh-copy { margin-left: 26%; }
+.jh-stop.is-left .jh-copy { margin-left: 8%; }
+
+.jh-stop-title {
+  display: block;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+.jh-stop-desc {
+  display: block;
+  margin-top: 3px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--jh-sub);
+}
+.jh-now {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+/* 지금 추천하는 곳 — 노랑은 여기 한 곳 */
+.jh-stop.is-current .jh-dot {
+  background: var(--jh-ink);
+  color: var(--jh-bg);
+  border-color: var(--jh-ink);
+  box-shadow: 0 0 0 6px var(--jh-bg);
+}
+.jh-stop.is-current .jh-copy {
+  background: var(--jh-accent);
+  color: var(--jh-accent-ink);
+}
+.jh-stop.is-current .jh-stop-desc {
+  color: var(--jh-accent-ink);
+}
+
+/* 끝 지점 — 누르는 곳이 아니다 */
+.jh-finish {
+  position: relative;
+  margin: 24px 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 12px;
+  line-height: 20px;
+  color: var(--jh-sub);
+}
+
+/* 길 아래 도움 두 줄 */
+.jh-helpers {
+  margin-top: 18px;
+  padding-top: 7px;
+  border-top: 1px solid var(--jh-line);
+}
+.jh-row {
+  width: 100%;
+  min-height: 68px;
+  padding: 14px 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--jh-line);
+}
+.jh-row > svg {
+  flex-shrink: 0;
+  color: var(--jh-blue);
+}
+.jh-row-text {
+  flex: 1;
+  min-width: 0;
+}
+.jh-row b {
+  display: block;
+  font-size: 15px;
+  font-weight: 650;
+  line-height: 1.45;
+}
+.jh-row small {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--jh-sub);
+}
+.jh-chevron {
+  flex: 0;
+  font-size: 23px;
+  color: var(--jh-sub);
+}
+
+.jh-end {
+  margin: 0;
+  padding-top: 24px;
+  font-size: 12px;
+  line-height: 1.65;
+  color: var(--jh-sub);
+}
+
+@media (max-width: 380px) {
+  .jh-top { padding-left: 14px; padding-right: 14px; }
+  .jh-main { padding-left: 18px; padding-right: 18px; }
+  .jh-title { font-size: 26px; }
+  .jh-stop-title { font-size: 16px; }
+  .jh-copy { padding: 10px; }
+  .jh-landmark { width: 48px; height: 48px; }
+}
