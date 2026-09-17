@@ -226,7 +226,11 @@ def cell_for(rows):
             parts.setdefault(r["형식"], [])
             if label not in parts[r["형식"]]:
                 parts[r["형식"]].append(label)
-        return " / ".join(f"{fmt}({', '.join(v)})" for fmt, v in parts.items())
+        text = " / ".join(f"{fmt}({', '.join(v)})" for fmt, v in parts.items())
+        # 대학 원문이 하나도 없고 대체 자료뿐이면 칸 맨 앞에 밝힌다 (동근님 2026-09-17)
+        if all(r["원문여부"] == "대체" for r in got):
+            text = "【대체】 " + text
+        return text
     if rows:
         return miss_label(rows)
     return "미확인"
@@ -306,7 +310,7 @@ def status_xlsx():
                   sum(v.values())])
     s.append([])
     s.append([f"기준: 대상 {len(T)}곳 (universities.json 351 − 제외 6). 만든 날: {dt.datetime.now():%Y-%m-%d %H:%M}"])
-    s.append(["칸 읽는 법: 형식(문서종류). 예) PDF(수시요강, 정시요강). '·대체' = 대학 원문이 아닌 합본·포털 자료, '·가공' = 원문을 이어붙이는 등 손댄 사본. "
+    s.append(["칸 읽는 법: 형식(문서종류). 예) PDF(수시요강, 정시요강). '【대체】' = 대학 원문을 못 구해 어디가·전문대학포털 등 대체 자료만 있음(노랑). '·가공' = 원문을 이어붙이는 등 손댄 사본. "
               "미확인·게시 전·해당 없음은 회색, 못 구함은 빨강"])
 
     f = wb.create_sheet("파일목록")
