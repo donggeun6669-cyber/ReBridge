@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import {
-  User, Pencil, Bookmark, BookOpen, ChevronRight,
+  ArrowLeft, User, Pencil, Bookmark, BookOpen, ChevronRight,
   MapPin, GraduationCap, ClipboardCheck, Heart,
   RefreshCw, Target, Briefcase, HelpCircle, RotateCcw, Route,
   Award, FileText, ShieldCheck, ScrollText,
@@ -118,8 +118,6 @@ export default function MyPageScreen({ goTo = () => {}, goBack = () => {} }) {
   const isJob = track === 'job';
   const isStudy = track === 'study';
   const isUniv = track === 'univ';
-  // 대학 전용 메뉴(관심 대학/대학 지도/입시 용어 등)는 취업 트랙에서 숨긴다.
-  const showUnivMenus = !isJob; // univ/study/미정에서 노출
 
   const stage = persona?.stage;
   // v1은 목표가 대학 하나뿐 — 예전에 '취업'을 골라 둔 기기라도 대학 진학으로 보여준다.
@@ -131,7 +129,10 @@ export default function MyPageScreen({ goTo = () => {}, goBack = () => {} }) {
 
   return (
     <div className="screen">
-      <header className="topbar">
+      <header className="topbar center">
+        <button className="icon-btn" aria-label="뒤로" onClick={goBack}>
+          <ArrowLeft size={22} />
+        </button>
         <span className="page-title">프로필</span>
       </header>
 
@@ -325,9 +326,8 @@ export default function MyPageScreen({ goTo = () => {}, goBack = () => {} }) {
           <>
             <MenuRow ico={Bookmark} icoClass="ico-brand" title="관심 대학"
               onClick={() => goTo('saved')} />
-            <div className="mp-row-divider" />
-            <MenuRow ico={ClipboardCheck} icoClass="ico-coral" title="서류 체크리스트"
-              onClick={() => goTo('checklist')} />
+            {/* 서류 체크리스트·입시 용어·꿈드림센터는 홈 바로가기와 겹쳐서 여기서 뺐다
+                (2026-09-17 동근님: 같은 기능은 한 곳에서만). MY에는 '나만의 것'만 둔다. */}
             {/* 대학 지도 — 카카오맵 스위치가 꺼져 있으면 메뉴도 숨긴다(빈 지도로 보내지 않기) */}
             {MAP_ENABLED && (
               <>
@@ -340,20 +340,20 @@ export default function MyPageScreen({ goTo = () => {}, goBack = () => {} }) {
         ) : null}
       </div>
 
-      {/* 공통: 용어 가이드 + 지원 기관 */}
-      <p className="mp-section-label">알아두면 좋아요</p>
-      <div className="mp-menu-group">
-        {showUnivMenus ? (
-          <MenuRow ico={BookOpen} icoClass="ico-gold" title="입시 용어 풀이"
-            sub="수시·정시·비교내신 쉬운 말로" onClick={() => goTo('glossary', { track: isStudy ? 'study' : 'univ' })} />
-        ) : (
-          <MenuRow ico={BookOpen} icoClass="ico-gold" title="진로·취업 용어 풀이"
-            sub="국비지원·자격증·근로계약 쉬운 말로" onClick={() => goTo('glossary', { track: 'job' })} />
-        )}
-        <div className="mp-row-divider" />
-        <MenuRow ico={Heart} icoClass="ico-coral" title="꿈드림센터 찾기"
-          sub="검정고시·자립 무료 지원 기관" onClick={() => goTo('dreamdrive')} />
-      </div>
+      {/* 용어·지원 기관 — 대입 쪽은 홈 바로가기('담임에게 물어보기'·'꿈드림센터')와 겹쳐서 뺐다.
+          취업 트랙(v2)에는 홈에 같은 입구가 없어서 남겨 둔다. */}
+      {isJob && (
+        <>
+          <p className="mp-section-label">알아두면 좋아요</p>
+          <div className="mp-menu-group">
+            <MenuRow ico={BookOpen} icoClass="ico-gold" title="진로·취업 용어 풀이"
+              sub="국비지원·자격증·근로계약 쉬운 말로" onClick={() => goTo('glossary', { track: 'job' })} />
+            <div className="mp-row-divider" />
+            <MenuRow ico={Heart} icoClass="ico-coral" title="꿈드림센터 찾기"
+              sub="검정고시·자립 무료 지원 기관" onClick={() => goTo('dreamdrive')} />
+          </div>
+        </>
+      )}
 
       {/* 약관·정책 — 청소년 대상 서비스 필수 고지 */}
       <p className="mp-section-label">약관·정책</p>

@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useEffect, useRef } from 'react';
 import {
   ArrowLeft, ChevronRight, ClipboardList, FileText, Scale,
   CalendarDays, Target, MessageCircle, CheckCircle2,
@@ -9,6 +9,7 @@ import { getUniversityDetail } from '../lib/analysis.js';
 import { evaluateAdmission, admissionChance } from '../lib/scoreEngine.js';
 import { getBookmarks } from '../lib/bookmarks.js';
 import { loadProfile } from '../lib/persona.js';
+import ChecklistSection from './ChecklistSection.jsx';
 import {
   CUTLINE_GAP_NOTE, CUTLINE_NO_DATA_SHORT,
   ADMISSION_DATA_YEAR, GED_2027_SOURCE_LABEL, applyDeadline,
@@ -48,26 +49,66 @@ const ICONS = {
   ClipboardList, FileText, Scale, CalendarDays, Target, MessageCircle, CheckCircle2,
 };
 
-export default function RoadmapScreen({ goTo = () => {}, goBack = () => {} }) {
+// '지금 시기에 할 일' — 2026-09-17 동근님: '내 로드맵'과 '서류 체크리스트'를 한 화면으로 합쳤다.
+//   위: 일정 순서(마감 알림 · 다음 할 일 · 단계별 타임라인)
+//   아래: 챙길 서류(체크리스트 — 체크 기능 그대로) · 목표 대학까지
+// focus='docs' 로 열리면(예전 '체크리스트' 링크) 서류 구역으로 바로 내려간다.
+export default function RoadmapScreen({ goTo = () => {}, goBack = () => {}, focus = null }) {
   const profile = useMemo(loadProfile, []);
   const data = useMemo(() => (profile ? buildRoadmap(profile) : null), [profile]);
+  const docsRef = useRef(null);
+  const planRef = useRef(null);
+
+  useEffect(() => {
+    if (focus !== 'docs') return;
+    const t = setTimeout(() => docsRef.current?.scrollIntoView({ block: 'start' }), 60);
+    return () => clearTimeout(t);
+  }, [focus]);
+
+  const jump = (ref) => ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  const header = (
+    <>
+      <header className="topbar center">
+        <button className="icon-btn" aria-label="뒤로" onClick={goBack}><ArrowLeft size={22} /></button>
+        <span className="page-title">지금 시기에 할 일</span>
+      </header>
+      <div className="intro-line">지금 나는 여기 있어요</div>
+      <div className="intro-sub">
+        검정고시부터 대학 등록까지, 언제 뭘 하고 어떤 서류를 챙길지 한 곳에서 볼 수 있어요.
+      </div>
+      <div className="rm-jump">
+        <button className="rm-jump-chip" onClick={() => jump(planRef)}>🗓️ 일정 순서</button>
+        <button className="rm-jump-chip" onClick={() => jump(docsRef)}>📄 챙길 서류</button>
+      </div>
+    </>
+  );
+
+  const docsBlock = (
+    <section className="rm-docs" ref={docsRef}>
+      <p className="rm-sec-title">챙길 서류</p>
+      <ChecklistSection goTo={goTo} />
+    </section>
+  );
 
   if (!profile) {
+    // 정보가 없어도 서류 체크리스트는 쓸 수 있다 — 일정만 입력을 요청한다.
     return (
       <div className="screen">
-        <header className="topbar center">
-          <button className="icon-btn" aria-label="뒤로" onClick={goBack}><ArrowLeft size={22} /></button>
-          <span className="page-title">내 로드맵</span>
-        </header>
-        <div className="profile-card" style={{ marginTop: 40 }}>
-          <span className="profile-name">먼저 내 정보를 알려주세요</span>
-          <span className="profile-summary">
-            몇 가지만 입력하면 검정고시부터 대학 등록까지 나만의 일정표를 만들어 드려요.
-          </span>
-          <button className="btn-outline" onClick={() => goTo('profile')}>
-            정보 입력하기
-          </button>
-        </div>
+        {header}
+        <section ref={planRef}>
+          <p className="rm-sec-title">일정 순서</p>
+          <div className="profile-card">
+            <span className="profile-name">먼저 내 정보를 알려주세요</span>
+            <span className="profile-summary">
+              몇 가지만 입력하면 검정고시부터 대학 등록까지 나만의 일정표를 만들어 드려요.
+            </span>
+            <button className="btn-outline" onClick={() => goTo('profile')}>
+              정보 입력하기
+            </button>
+          </div>
+        </section>
+        {docsBlock}
       </div>
     );
   }
@@ -130,14 +171,10 @@ export default function RoadmapScreen({ goTo = () => {}, goBack = () => {} }) {
 
   return (
     <div className="screen">
-      <header className="topbar center">
-        <span className="page-title">내 로드맵</span>
-      </header>
+      {header}
 
-      <div className="intro-line">지금 나는 여기 있어요</div>
-      <div className="intro-sub">
-        검정고시부터 대학 등록까지, 다음에 뭘 언제 해야 하는지 같이 챙길게요.
-      </div>
+      <section ref={planRef}>
+      <p className="rm-sec-title">일정 순서</p>
 
       {/* 관심 대학 원서 접수 마감 — 코앞인 것부터 */}
       {deadlineAlerts.length > 0 && (
@@ -226,6 +263,9 @@ export default function RoadmapScreen({ goTo = () => {}, goBack = () => {} }) {
           );
         })}
       </div>
+      </section>
+
+      {docsBlock}
 
       {/* 목표 대학까지 — 관심 대학을 등록하면 합격선까지 몇 점 더 필요한지 */}
       <div className="rm-targets">

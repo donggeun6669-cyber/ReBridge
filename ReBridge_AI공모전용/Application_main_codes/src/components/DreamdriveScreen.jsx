@@ -3,12 +3,26 @@ import {
   ArrowLeft, Phone, MapPin, Search, Navigation, X,
   Wallet, HeartHandshake, Compass, Users, GraduationCap, Lock, Activity,
   CheckCircle, Map as MapIcon, Copy, ChevronLeft, ChevronRight,
+  ShieldCheck, AlertCircle, BookOpen,
 } from 'lucide-react';
 import centersRaw from '../data/kkumdrim.json';
+import { COMMON_SUPPORT } from '../data/commonSupport';
 import { getCenterBenefits } from '../lib/benefits';
 import { useKakaoMap, MAP_ENABLED } from '../lib/kakaoMap.js';
+import {
+  ageOption, dreamdrimEligibility, DREAMDRIM_MIN_AGE, DREAMDRIM_MAX_AGE,
+} from '../lib/persona.js';
+import '../styles.support.css';
 
-const BENEFIT_ICONS = { Wallet, HeartHandshake, Compass, Users, GraduationCap, Activity };
+// 꿈드림센터 · 지원 혜택 — 2026-09-17 동근님: 따로 있던 '지원 혜택' 화면(SupportScreen)과 합쳤다.
+// 두 화면이 같은 센터 목록·지역 칩·혜택 칩을 각자 그리고 있었다. 이제 여기 한 곳이다.
+//   ① 공통 지원 — 대부분의 학교 밖 청소년이 받을 수 있는 제도 (지원 혜택 화면에서 옮겨 옴)
+//   ② 나이 안내 — 시작 화면에서 나이를 고른 사람에게만
+//   ③ 내 지역 센터 — 검색·거리순·지역 필터·센터별 혜택 (원래 이 화면)
+// 정직성 원칙은 그대로: 정리 안 된 센터는 자물쇠/문의 폴백, 지자체마다 다른 건 '확인 필요'.
+// 'support' 로 들어와도 이 화면이 열린다(App.jsx). params.supportId 면 그 공통 지원을 펼친다.
+
+const BENEFIT_ICONS = { Wallet, HeartHandshake, Compass, Users, GraduationCap, Activity, Phone, BookOpen };
 
 function BenefitChips({ center }) {
   const { categories, note, known } = getCenterBenefits(center);
@@ -149,6 +163,7 @@ export default function DreamdriveScreen({ goBack = () => {}, params = {} }) {
   const [selected, setSelected] = useState(null);
   const [page, setPage] = useState(1);
   const [copied, setCopied] = useState(null);
+  const [openCommon, setOpenCommon] = useState(params.supportId || null);
   const listRef = useRef(null);
   const PAGE_SIZE = 10;
 
@@ -250,8 +265,7 @@ export default function DreamdriveScreen({ goBack = () => {}, params = {} }) {
         <button className="icon-btn" aria-label="뒤로" onClick={goBack}>
           <ArrowLeft size={22} />
         </button>
-        <span className="page-title">꿈드림센터 찾기</span>
-        <div style={{ width: 44 }} />
+        <span className="page-title">꿈드림센터 · 지원 혜택</span>
       </header>
 
       {/* 위치 동의 모달 */}
@@ -276,6 +290,80 @@ export default function DreamdriveScreen({ goBack = () => {}, params = {} }) {
           </div>
         </div>
       )}
+
+      {/* ① 공통 지원 — 칩을 누르면 아래에 설명이 펼쳐진다 */}
+      <p className="kdream-sec-title">누구나 받을 수 있는 지원</p>
+      <div className="spt-comm-bar">
+        <span className="spt-comm-bar-label"><ShieldCheck size={12} /> 공통 지원</span>
+        <div className="spt-comm-chips">
+          {COMMON_SUPPORT.map((item) => {
+            const Icon = BENEFIT_ICONS[item.icon];
+            return (
+              <button
+                key={item.id}
+                className={`spt-comm-chip${openCommon === item.id ? ' active' : ''}`}
+                onClick={() => setOpenCommon(openCommon === item.id ? null : item.id)}
+              >
+                {Icon && <Icon size={12} />} {item.title}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+      {openCommon && (() => {
+        const item = COMMON_SUPPORT.find((i) => i.id === openCommon);
+        if (!item) return null;
+        const Icon = BENEFIT_ICONS[item.icon];
+        return (
+          <div className="spt-common-detail">
+            <div className="spt-common-detail-head">
+              {Icon && <Icon size={15} />}
+              <span>{item.title}</span>
+              <span className={`spt-common-card-badge${item.status === 'check' ? ' check' : ''}`}>
+                {item.status === 'check' ? '확인 필요' : '공통'}
+              </span>
+            </div>
+            <p className="spt-common-detail-summary">{item.summary}</p>
+            <p className="spt-common-detail-body">{item.detail}</p>
+            {item.action?.tel && (
+              <a className="support-action-btn call" href={`tel:${item.action.tel}`}>
+                <Phone size={14} /> {item.action.label}
+              </a>
+            )}
+            <p className="spt-honest-note" style={{ marginTop: 8 }}>
+              <AlertCircle size={11} /> 지자체·시기별로 달라요. 거주지 센터 확인이 가장 정확해요.
+            </p>
+          </div>
+        );
+      })()}
+
+      {/* ② 나이 맞춤 안내 — 시작 화면에서 나이를 고른 사람에게만 뜬다.
+          ⚠️ 기준(만 9~24세)을 먼저 말하고 그 다음에 내 경우를 말한다.
+          "17세면 무료" 식으로 쓰면 17세만 되는 것처럼 읽힌다(2026-09 서연님 지적).
+          근거는 data/commonSupport.js. */}
+      {ageOption() && (() => {
+        const state = dreamdrimEligibility();
+        const RULE = <>꿈드림센터는 <b>만 {DREAMDRIM_MIN_AGE}~{DREAMDRIM_MAX_AGE}세</b>면 무료로 이용할 수 있어요.</>;
+        return (
+          <div className={`support-age-note${state === 'yes' ? '' : ' off'}`}>
+            <span className="support-age-emoji" aria-hidden="true">
+              {state === 'yes' ? '✅' : '💡'}
+            </span>
+            <span>
+              {state === 'yes' && <>{RULE} 지금 나이({ageOption().label})면 해당돼요.</>}
+              {/* '15세 이하'처럼 구간이 기준선에 걸치면 단정하지 않는다 */}
+              {state === 'partial' && <>{RULE} 만 {DREAMDRIM_MIN_AGE}세부터예요.</>}
+              {state === 'no' && (
+                <>꿈드림센터는 <b>만 {DREAMDRIM_MIN_AGE}~{DREAMDRIM_MAX_AGE}세</b>가 대상이에요.
+                  위 공통 지원과 센터 상담은 그대로 문의할 수 있어요.</>
+              )}
+            </span>
+          </div>
+        );
+      })()}
+
+      {/* ③ 내 지역 센터 */}
+      <p className="kdream-sec-title">내 지역 꿈드림센터</p>
 
       {/* 검색 + 위치 상태 */}
       <div className="kdream-top-bar">

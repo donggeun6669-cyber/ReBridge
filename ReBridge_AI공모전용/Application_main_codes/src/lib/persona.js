@@ -198,32 +198,10 @@ export function setActiveTrack(track) {
   return next;
 }
 
-// 하단 탭은 트랙과 무관하게 항상 고정(홈·지원·커뮤니티·MY).
-// v1(V1_UNIV_ONLY)에서는 커뮤니티를 빼서 3탭이 된다.
-// 트랙별 화면(학습/대입/직업)은 홈 안의 상단 서브탭(TrackHome)으로 들어간다.
+// 온보딩을 마친 뒤 도착할 화면. 하단 탭은 2026-09-17에 없앴다(동근님) —
+// 모든 화면은 홈에서 들어가고, 마이페이지는 홈 우측 상단 아이콘으로 연다.
 export function getNav() {
-  const tabs = [
-    { id: 'home',      label: '홈',      icon: 'Home',          screen: 'home' },
-    { id: 'support',   label: '지원',    icon: 'Gift',          screen: 'support' },
-    { id: 'community', label: '커뮤니티', icon: 'MessageCircle', screen: 'community' },
-    { id: 'mypage',    label: 'MY',      icon: 'User',          screen: 'mypage' },
-  ];
-  return {
-    tabs: tabs.filter((t) => !isHiddenScreen(t.screen)),
-    landing: 'home',
-  };
-}
-
-// 현재 화면이 어느 글로벌 탭(홈·지원·커뮤니티·MY)에 속하는지 → 활성 탭 id.
-// 트랙 서브화면(학습/대입/직업 관련)은 모두 '홈'에 속한다.
-export function activeTabId(screen) {
-  // v1에서는 커뮤니티 탭 자체가 없으므로 '홈'으로 떨어뜨린다(활성 탭 없음 방지).
-  if (['community', 'community-post', 'community-write', 'community-auth'].includes(screen)) {
-    return V1_UNIV_ONLY ? 'home' : 'community';
-  }
-  if (['support', 'dreamdrive', 'map'].includes(screen)) return 'support';
-  if (['mypage', 'saved', 'help', 'profile'].includes(screen)) return 'mypage';
-  return 'home'; // home + 모든 트랙 화면·서브화면
+  return { landing: 'home' };
 }
 
 // persona가 진로 허브에서 어떤 카드를 보여줄지

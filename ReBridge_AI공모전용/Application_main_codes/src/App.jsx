@@ -1,10 +1,9 @@
 import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import { ArrowLeft } from 'lucide-react';
-// 스플래시·하단탭만 즉시 로드하고, 화면들은 lazy로 쪼개 첫 로딩 번들을 가볍게 한다.
+// 스플래시만 즉시 로드하고, 화면들은 lazy로 쪼개 첫 로딩 번들을 가볍게 한다.
 // (대형 JSON을 물고 있는 대입 관련 화면들이 초기 번들에서 빠지는 효과)
-import BottomNav from './components/BottomNav.jsx';
 import SplashScreen from './components/SplashScreen.jsx';
-import { getPersona, getNav, activeTabId, loadProfile, V1_UNIV_ONLY, isHiddenScreen } from './lib/persona.js';
+import { getPersona, loadProfile, V1_UNIV_ONLY, isHiddenScreen } from './lib/persona.js';
 
 const HomeScreen = lazy(() => import('./components/HomeScreen.jsx'));
 const ExploreScreen = lazy(() => import('./components/ExploreScreen.jsx'));
@@ -13,7 +12,6 @@ const AdmissionMatrixScreen = lazy(() => import('./components/AdmissionMatrixScr
 const ProfileScreen = lazy(() => import('./components/ProfileScreen.jsx'));
 const MyPageScreen = lazy(() => import('./components/MyPageScreen.jsx'));
 const GuideScreen = lazy(() => import('./components/GuideScreen.jsx'));
-const GlossaryScreen = lazy(() => import('./components/GlossaryScreen.jsx'));
 const ResultsScreen = lazy(() => import('./components/ResultsScreen.jsx'));
 const DetailScreen = lazy(() => import('./components/DetailScreen.jsx'));
 const RoadmapScreen = lazy(() => import('./components/RoadmapScreen.jsx'));
@@ -21,7 +19,6 @@ const DocumentsScreen = lazy(() => import('./components/DocumentsScreen.jsx'));
 const SavedScreen = lazy(() => import('./components/SavedScreen.jsx'));
 const MapScreen = lazy(() => import('./components/MapScreen.jsx'));
 const HelpScreen = lazy(() => import('./components/HelpScreen.jsx'));
-const ChecklistScreen = lazy(() => import('./components/ChecklistScreen.jsx'));
 const FormsGuideScreen = lazy(() => import('./components/FormsGuideScreen.jsx'));
 const DreamdriveScreen = lazy(() => import('./components/DreamdriveScreen.jsx'));
 const GedGuideScreen = lazy(() => import('./components/GedGuideScreen.jsx'));
@@ -43,15 +40,16 @@ const CommunityScreen = /* #__PURE__ */ lazy(() => import('./components/Communit
 const CommunityPostScreen = /* #__PURE__ */ lazy(() => import('./components/CommunityPostScreen.jsx'));
 const CommunityWriteScreen = /* #__PURE__ */ lazy(() => import('./components/CommunityWriteScreen.jsx'));
 const AuthScreen = /* #__PURE__ */ lazy(() => import('./components/AuthScreen.jsx'));
-const SupportScreen = lazy(() => import('./components/SupportScreen.jsx'));
 const PolicyScreen = lazy(() => import('./components/PolicyScreen.jsx'));
 // 팀 내부용 데이터 원본 화면 — 서비스 동선에 링크가 없고 주소 뒤 #data 로만 열린다.
 const RawDataScreen = /* #__PURE__ */ lazy(() => import('./components/RawDataScreen.jsx'));
 
-// 하단 글로벌 탭의 루트 화면들(여기로 가면 스택 리셋).
-// v1(V1_UNIV_ONLY)에서는 커뮤니티가 빠져 3개가 된다.
-// 트랙 화면(학습/대입/직업)은 홈 안의 TrackHome이 그리므로 여기 없음.
-const TAB_ROOTS = ['home', 'support', 'community', 'mypage'].filter((s) => !isHiddenScreen(s));
+// 하단 탭은 없앴다(2026-09-17 동근님). 홈이 유일한 뿌리이고, 나머지는 전부 홈에서 들어가서
+// 뒤로가기로 나온다. 그래서 홈으로 갈 때만 스택을 비운다.
+// (마이페이지는 홈 우측 상단 아이콘, 지원 혜택은 꿈드림센터 화면에 합쳤다)
+const ROOT_SCREEN = 'home';
+// KNOWN_SCREENS 밖이지만 '준비 중'으로 떨어뜨리면 안 되는 화면들
+const MAIN_SCREENS = ['home', 'support', 'mypage', 'community', 'profile', 'onboarding'];
 
 // 주소 뒤 #data 로 들어오면 데이터 원본 화면부터 연다(스플래시도 건너뛴다).
 // UI를 고치는 사람이 실제 데이터를 보려고 쓰는 통로다. 일반 사용자 동선에는 링크가 없다.
@@ -61,6 +59,8 @@ const isRawHash = () => typeof window !== 'undefined' && window.location.hash ==
 // v1에서 숨긴 화면(커뮤니티/인증·직업·학습)은 이 목록에서도 빠진다.
 // → 어딘가에 링크가 남아 있어도 아래 "준비 중" 폴백으로 떨어진다.
 const KNOWN_SCREENS = [
+  // 'glossary'는 help(담임에게 물어보기), 'checklist'는 roadmap(지금 시기에 할 일),
+  // 'support'는 dreamdrive(꿈드림센터)에 합쳤다. 예전 링크가 살아 있게 이름은 남겨 둔다.
   'guide', 'glossary', 'results', 'detail', 'admission-matrix', 'documents', 'saved', 'map', 'help',
   'checklist', 'forms-guide', 'dreamdrive', 'ged-guide', 'univ-explore', 'explore-help', 'path',
   'onboarding', 'study-roadmap', 'study-planner', 'support', 'roadmap',
@@ -111,7 +111,7 @@ export default function App() {
 
   const goTo = useCallback((next, options = {}) => {
     setStack((s) => {
-      if (TAB_ROOTS.includes(next)) return [{ screen: next, params: options }];
+      if (next === ROOT_SCREEN) return [{ screen: next, params: options }];
       const top = s[s.length - 1];
       if (top.screen === next && JSON.stringify(top.params) === JSON.stringify(options)) return s;
       return [...s, { screen: next, params: options }];
@@ -121,12 +121,6 @@ export default function App() {
 
   const goBack = useCallback(() => {
     setStack((s) => (s.length > 1 ? s.slice(0, -1) : s));
-    window.scrollTo(0, 0);
-  }, []);
-
-  // 하단 탭 전용 — 항상 스택을 해당 화면으로 리셋(콘텐츠 이동인 goTo와 분리)
-  const goToTab = useCallback((screen) => {
-    setStack([{ screen, params: {} }]);
     window.scrollTo(0, 0);
   }, []);
 
@@ -152,13 +146,8 @@ export default function App() {
     window.scrollTo(0, 0);
   }, []);
 
-  const isMainScreen = [...TAB_ROOTS, 'profile', 'onboarding'].includes(screen);
-
-  // 하단 탭은 항상 고정(홈·지원·커뮤니티·MY). 온보딩/프로필 화면에서만 숨김.
+  const isMainScreen = MAIN_SCREENS.includes(screen);
   const persona = getPersona();
-  const nav = getNav();
-  // 데이터 원본은 팀 내부용 전체화면이라 하단 탭을 띄우지 않는다.
-  const showNav = !splash && !['onboarding', 'profile', 'data-raw'].includes(screen);
 
   return (
     <div className="app-shell">
@@ -171,7 +160,10 @@ export default function App() {
         {!splash && screen === 'onboarding'  && <OnboardingScreen goTo={goTo} presetTrack={params.presetTrack} />}
 
         {!splash && screen === 'home'        && <HomeScreen goTo={goTo} goBack={goBack} />}
-        {!splash && screen === 'support'     && <SupportScreen goTo={goTo} goBack={goBack} params={params} />}
+        {/* 지원 혜택은 꿈드림센터 화면에 합쳤다 — 'support'로 와도 같은 화면 */}
+        {!splash && (screen === 'support' || screen === 'dreamdrive') && (
+          <DreamdriveScreen goTo={goTo} goBack={goBack} params={params} />
+        )}
         {/* 진로 허브 — v1에서 숨김. (숨기면 'explore'가 KNOWN_SCREENS에 없어
             CareerHub와 '준비 중'이 같이 그려지던 이중 렌더도 함께 사라진다) */}
         {!splash && !V1_UNIV_ONLY && screen === 'explore'     && <CareerHubScreen goTo={goTo} persona={persona} />}
@@ -181,15 +173,15 @@ export default function App() {
           <PathGuideScreen pathKey={params.key} goBack={goBack} />
         )}
         {!splash && screen === 'mypage'      && <MyPageScreen goTo={goTo} goBack={goBack} />}
-        {!splash && screen === 'roadmap'     && <RoadmapScreen goTo={goTo} goBack={goBack} />}
+        {/* 내 로드맵 + 서류 체크리스트 = '지금 시기에 할 일' 한 화면 */}
+        {!splash && (screen === 'roadmap' || screen === 'checklist') && (
+          <RoadmapScreen goTo={goTo} goBack={goBack} focus={screen === 'checklist' ? 'docs' : null} />
+        )}
         {!splash && screen === 'profile'     && (
           <ProfileScreen goTo={goTo} goBack={goBack} onComplete={handleProfileComplete} />
         )}
         {!splash && screen === 'guide'       && (
           <GuideScreen topic={params.topic} goTo={goTo} goBack={goBack} />
-        )}
-        {!splash && screen === 'glossary'    && (
-          <GlossaryScreen track={params.track} params={params} goTo={goTo} goBack={goBack} />
         )}
         {!splash && screen === 'results'     && <ResultsScreen goTo={goTo} goBack={goBack} />}
         {!splash && screen === 'detail'      && (
@@ -209,10 +201,11 @@ export default function App() {
         )}
         {!splash && screen === 'saved'       && <SavedScreen goTo={goTo} goBack={goBack} />}
         {!splash && screen === 'map'         && <MapScreen goTo={goTo} goBack={goBack} />}
-        {!splash && screen === 'help'        && <HelpScreen goTo={goTo} goBack={goBack} />}
-        {!splash && screen === 'checklist'   && <ChecklistScreen goTo={goTo} goBack={goBack} />}
+        {/* 담임에게 물어보기 = 자주 묻는 질문 + 입시 용어. 'glossary'로 와도 같은 화면 */}
+        {!splash && (screen === 'help' || screen === 'glossary') && (
+          <HelpScreen goTo={goTo} goBack={goBack} termId={params.termId} />
+        )}
         {!splash && screen === 'forms-guide' && <FormsGuideScreen goTo={goTo} goBack={goBack} />}
-        {!splash && screen === 'dreamdrive'  && <DreamdriveScreen goTo={goTo} goBack={goBack} params={params} />}
         {!splash && screen === 'ged-guide'   && <GedGuideScreen goTo={goTo} goBack={goBack} />}
         {/* ▼ v1(V1_UNIV_ONLY)에서 숨기는 화면들 — 학습·직업 트랙, 커뮤니티·인증.
             남은 링크로 들어와도 KNOWN_SCREENS에서 빠져 '준비 중'으로 떨어진다. */}
@@ -259,10 +252,6 @@ export default function App() {
           </div>
         )}
         </Suspense>
-
-        {showNav && (
-          <BottomNav tabs={nav.tabs} active={activeTabId(screen)} goTo={goToTab} />
-        )}
       </div>
     </div>
   );

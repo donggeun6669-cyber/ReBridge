@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
-  ArrowLeft, AlertTriangle, CheckCircle2, Circle,
+  AlertTriangle, CheckCircle2, Circle,
   ExternalLink, ChevronRight, Info, FileText,
 } from 'lucide-react';
-import { getActiveTrack } from '../lib/persona.js';
+import { getActiveTrack, V1_UNIV_ONLY } from '../lib/persona.js';
 import { buildChecklist, CHECKLIST_META } from '../data/checklists.js';
 import { currentYear } from '../data/meta.js';
 
@@ -12,14 +12,17 @@ const CHECK_KEY     = 'rebridge_checklist';
 const CURRENT_YEAR  = currentYear();
 
 /* ─────────────────────────────────────────────
-   화면 컴포넌트 — 트랙(학습/입시/취업)별로 다른 목록
+   서류 체크리스트 구역 — 트랙(학습/입시/취업)별로 다른 목록.
+   2026-09-17 동근님: 따로 있던 '서류 체크리스트' 화면을 '지금 시기에 할 일'(RoadmapScreen)
+   안으로 넣었다. 체크 기능·저장 위치(localStorage rebridge_checklist)는 그대로다.
 ───────────────────────────────────────────── */
-export default function ChecklistScreen({ goTo = () => {}, goBack = () => {} }) {
+export default function ChecklistSection({ goTo = () => {} }) {
   const profile = useMemo(() => {
     try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || null; } catch { return null; }
   }, []);
 
-  const track = useMemo(() => getActiveTrack(), []);
+  // v1은 대입 트랙뿐 — 예전에 다른 트랙을 골라 둔 기기라도 대입 서류를 보여준다.
+  const track = useMemo(() => (V1_UNIV_ONLY ? 'univ' : getActiveTrack()), []);
   const meta = CHECKLIST_META[track] || CHECKLIST_META.null;
   const items = useMemo(() => buildChecklist(track, profile), [track, profile]);
 
@@ -54,15 +57,8 @@ export default function ChecklistScreen({ goTo = () => {}, goBack = () => {} }) 
     && round === '2회차' && year === String(CURRENT_YEAR);
 
   return (
-    <div className="screen">
-      <header className="topbar center">
-        <button className="icon-btn" aria-label="뒤로" onClick={goBack}>
-          <ArrowLeft size={22} />
-        </button>
-        <span className="page-title">서류 체크리스트</span>
-      </header>
-
-      <div className="intro-line">{meta.title}</div>
+    <>
+      <div className="cl-merged-title">{meta.title}</div>
       <div className="intro-sub">
         {meta.sub}
         {!profile && track !== 'job' && track !== 'study' && (
@@ -209,6 +205,6 @@ export default function ChecklistScreen({ goTo = () => {}, goBack = () => {} }) 
           </button>
         )}
       </div>
-    </div>
+    </>
   );
 }

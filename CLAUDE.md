@@ -78,12 +78,20 @@ npm run verify         # 배포 캐시 우회 검증 (node verify-deploy.mjs)
 ## 아키텍처
 
 - **React 18 + Vite 6**, JS/JSX (TypeScript 아님, `"type":"module"`).
-- **커스텀 라우터** — react-router 아님. `src/App.jsx`가 `{screen, params}` 스택을 들고 `goTo()`/`goBack()`을 모든 화면에 prop으로 넘긴다. 새 화면은 `KNOWN_SCREENS`(+ 탭 루트면 `TAB_ROOTS`)에 등록해야 함. 안 하면 "준비 중" placeholder.
+- **커스텀 라우터** — react-router 아님. `src/App.jsx`가 `{screen, params}` 스택을 들고 `goTo()`/`goBack()`을 모든 화면에 prop으로 넘긴다. 새 화면은 `KNOWN_SCREENS`에 등록해야 함. `goTo('home')`만 스택을 비운다(하단 탭이 없어서 나머지는 전부 뒤로가기로 나온다 — 새 화면엔 뒤로 버튼 필수). 안 하면 "준비 중" placeholder.
 - **페르소나 기반 UI** (`src/lib/persona.js`) — `{stage, goal}`에 따라 노출 기능이 달라짐. 상태는 localStorage `rebridge_profile`. 모든 사용자에게 모든 기능을 한꺼번에 보여주지 않는 게 원칙.
 - **트랙 3개** (v1에서는 `univ` 하나만 노출 — 위 절 참고) — 홈에서 고른 길(`activeTrack`)에 따라 `TrackHome`이 다른 대시보드를 그린다.
   `study`(검정고시) · `univ`(대입) · `job`(일·진로). 카드·문구·바로가기는 전부
   `src/components/TrackHome.jsx` 위쪽 `TRACK_DATA` 한 곳에 있다.
-  하단 탭은 트랙과 무관하게 항상 4개(홈·지원·커뮤니티·MY).
+  **하단 탭은 없다** (2026-09-17 동근님). 마이페이지는 홈 우측 상단 아이콘.
+- **같은 기능은 한 화면에만** (2026-09-17 동근님). 합친 화면과, 예전 이름으로 와도 열리게 남긴 별칭:
+  | 화면 | 합친 것 | 별칭(screen 이름) |
+  |---|---|---|
+  | `RoadmapScreen` "지금 시기에 할 일" | 내 로드맵 + 서류 체크리스트(`ChecklistSection`) | `checklist` → 서류 구역으로 스크롤 |
+  | `HelpScreen` "담임에게 물어보기" | 자주 묻는 질문 + 입시 용어 | `glossary` (`termId`로 해당 용어 펼침) |
+  | `DreamdriveScreen` "꿈드림센터 · 지원 혜택" | 꿈드림센터 찾기 + 지원 혜택(공통 지원·나이 안내) | `support` (`supportId`로 해당 지원 펼침) |
+  홈(대입)은 바로가기 3개(대학 찾기·내 점수·꿈드림센터) + 지금 바로 2개뿐. 홈 검색창은 뺐다.
+  같은 기능의 입구를 새로 만들지 말 것. MY에는 '나만의 것'(관심 대학 등)만 둔다.
 - **점수 엔진은 규칙 기반, AI 아님** (`src/lib/scoreEngine.js`).
   **연도는 전부 `src/data/meta.js` 한 곳에서 읽는다** — 화면에 연도를 하드코딩하지 말 것.
   현재: 지원 학년도 2027 · 합격선 기준 2026(비교용 2025) · 시행계획 2028.
@@ -102,7 +110,7 @@ npm run verify         # 배포 캐시 우회 검증 (node verify-deploy.mjs)
 
 ## 디렉터리 (`Application_main_codes/`)
 
-- `src/components/` — `*Screen.jsx` 화면들 + `BottomNav`, `SplashScreen`, `TrackHome`
+- `src/components/` — `*Screen.jsx` 화면들 + `SplashScreen`, `TrackHome`(홈 본문), `ChecklistSection`
 - `src/lib/` — 로직 (persona, scoreEngine, careernet, community, auth, youthVerify …)
 - `src/data/` — 정적 데이터셋 26개. 크게 두 갈래다.
   - **수집 데이터(JSON 12개)** — universities · admissions_2027(.min) · admissions(2028시행계획) ·
