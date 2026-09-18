@@ -105,6 +105,15 @@ export const FIVE_GRADE_NO_CHANCE =
   `${TARGET_ADMISSION_YEAR}학년도 환산표로 계산한 값이에요. ` +
   `${FIVE_GRADE_FROM}학년도에 지원한다면 이 칸수를 그대로 쓰면 안 돼요.`;
 
+// 한 줄 요약 (2026-09-19 동근님: 박스가 빽빽해 안 읽힌다 → 한 줄을 먼저 보이고 누르면 위 원문을 펼친다)
+//   위 원문을 바꾸면 여기 한 줄도 같이 맞출 것. 한 줄은 원문에 없는 말을 새로 하지 않는다.
+export const FIVE_GRADE_SHORT = {
+  summary: `${FIVE_GRADE_FROM}학년도 입학부터 내신이 9등급 → 5등급`,
+  harsh: '5등급 표는 구간이 좁아 한 등급 차이가 더 커요',
+  unknown: '어느 표를 적용할지는 입학처에 물어봐야 해요',
+  noChance: `${FIVE_GRADE_FROM}학년도 지원이면 앱 칸수를 그대로 쓰면 안 돼요`,
+};
+
 // ── 파생 문구 ─────────────────────────────────────────────
 // 합격선 블록 제목
 export const CUTLINE_LABEL = `${CUTLINE_YEAR}학년도 합격선`;

@@ -5760,3 +5760,49 @@ button {
   flex: 1; padding: 10px 14px; border-radius: 10px; border: 0;
   background: var(--brand); color: #fff; font-size: 14px; font-weight: 800;
 }
+
+/* ── 5등급제 블록 v2 (2026-09-19) — 한 줄 요약 + 눌러서 펼침, 여백 넉넉히 ── */
+.five-grade.fg-v2 { gap: 0; padding: 18px 16px 14px; border-radius: 18px; }
+.fg-v2 .fg-title { font-size: 15px; font-weight: 800; gap: 6px; }
+.fg-hint { margin: 4px 0 10px; font-size: 12px; color: var(--text-sub); }
+.fg-points { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.fg-point { background: var(--card); border-radius: 14px; }
+.fg-point.mine { box-shadow: inset 0 0 0 1.5px var(--caution); }
+.fg-point-head {
+  width: 100%;
+  min-height: 50px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  text-align: left;
+}
+.fg-point-text { flex: 1; min-width: 0; font-size: 14.5px; line-height: 1.45; font-weight: 700; color: var(--text); word-break: keep-all; }
+.fg-point-chev { flex-shrink: 0; color: var(--chevron); transition: transform 0.15s; }
+.fg-point.open .fg-point-chev { transform: rotate(180deg); }
+.fg-point-full {
+  padding: 0 14px 14px;
+  font-size: 13.5px;
+  line-height: 1.7;
+  color: var(--text-sub);
+  word-break: keep-all;
+}
+.fg-v2 .ged-raw-toggle { margin-top: 12px; }
+.plan-sub-list {
+  list-style: none;
+  margin: 0 0 12px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.plan-sub-list li {
+  position: relative;
+  padding-left: 12px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-sub);
+  word-break: keep-all;
+}
+.plan-sub-list li::before { content: '·'; position: absolute; left: 2px; font-weight: 800; }
+.plan-sub-list b { color: var(--text); }

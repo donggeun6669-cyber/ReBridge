@@ -30,7 +30,7 @@ import {
   PHASE_ESTIMATED_NOTICE, QUOTA_OUTSIDE_TITLE, QUOTA_OUTSIDE_NOTICE,
   YEAR_SPLIT_NOTICE, ADMISSION_DATA_YEAR, PLAN_YEAR,
   FIVE_GRADE_FROM, FIVE_GRADE_TITLE, FIVE_GRADE_SUMMARY,
-  FIVE_GRADE_UNKNOWN, FIVE_GRADE_NO_CHANCE, FIVE_GRADE_HARSH,
+  FIVE_GRADE_UNKNOWN, FIVE_GRADE_NO_CHANCE, FIVE_GRADE_HARSH, FIVE_GRADE_SHORT,
   CUTLINE_YEAR, cutlineFallbackNotice, cutlineVolatilityNotice,
   applyDeadline,
 } from '../data/meta.js';
@@ -294,61 +294,101 @@ function RequirementText({ univId, row }) {
 //   ③ 우리가 계산하지 않는다는 것 — 2026학년도 9등급 입결과는 견줄 수 없으니까
 //
 // ⚠️ 여기에 '아마 이럴 것'을 쓰지 말 것. 시행계획에 없는 건 없다고 말한다.
+// 2026-09-19 동근님: 박스 안이 빽빽해 안 읽힌다 → 한 줄 요약 5개를 먼저 보이고,
+//   줄을 누르면 원래 문장이 그 자리에서 펼쳐진다. 환산표·원문은 각각 따로 접어 둔다.
+//   문장은 하나도 지우지 않았다(meta.js의 원문 + FIVE_GRADE_SHORT 한 줄).
 function FiveGradeBlock({ univId, univName }) {
   const [open, setOpen] = useState(false);
+  const [openPoint, setOpenPoint] = useState(null);
+  const [showTable, setShowTable] = useState(false);
   const info = scale2028(univId);
+  const who = univName || '이 대학';
 
-  // 그 대학이 시행계획에 뭘 적어 뒀는지 한 줄로 정리한다.
+  // 그 대학이 시행계획에 뭘 적어 뒀는지 — 한 줄(short) + 원래 문장(stance).
   let stance;
+  let stanceShort;
   if (!info) {
-    stance = `${univName || '이 대학'}의 ${FIVE_GRADE_FROM}학년도 시행계획은 아직 자료에 없어요.`;
+    stance = `${who}의 ${FIVE_GRADE_FROM}학년도 시행계획은 아직 자료에 없어요.`;
+    stanceShort = `이 대학 ${FIVE_GRADE_FROM} 시행계획은 아직 자료에 없어요`;
   } else if (info.mentionsFive && info.mentionsNine) {
-    stance = `${univName || '이 대학'}${eunNeun(univName || '이 대학')} 시행계획에 5등급 표와 9등급 표를 둘 다 적어 뒀어요. ` +
+    stance = `${who}${eunNeun(who)} 시행계획에 5등급 표와 9등급 표를 둘 다 적어 뒀어요. ` +
       `보통 5등급은 ${FIVE_GRADE_FROM}년 이후 졸업자, 9등급은 ${FIVE_GRADE_FROM - 1}년 이전 졸업자에게 적용해요.`;
+    stanceShort = '이 대학은 5등급·9등급 표를 둘 다 적었어요';
   } else if (info.mentionsFive) {
-    stance = `${univName || '이 대학'}${eunNeun(univName || '이 대학')} 시행계획에 5등급 체계를 적어 뒀어요.`;
+    stance = `${who}${eunNeun(who)} 시행계획에 5등급 체계를 적어 뒀어요.`;
+    stanceShort = '이 대학은 5등급 체계를 적었어요';
   } else if (info.mentionsNine) {
-    stance = `${univName || '이 대학'}${eunNeun(univName || '이 대학')} 시행계획에 9등급 표만 적어 뒀어요.`;
+    stance = `${who}${eunNeun(who)} 시행계획에 9등급 표만 적어 뒀어요.`;
+    stanceShort = '이 대학은 9등급 표만 적었어요';
   } else {
-    stance = `${univName || '이 대학'}의 시행계획에서는 등급 체계를 어떻게 적용하는지 찾지 못했어요.`;
+    stance = `${who}의 시행계획에서는 등급 체계를 어떻게 적용하는지 찾지 못했어요.`;
+    stanceShort = '이 대학 시행계획엔 등급 적용 방법이 안 보여요';
   }
 
+  const points = [
+    { id: 'summary', short: FIVE_GRADE_SHORT.summary, full: FIVE_GRADE_SUMMARY },
+    { id: 'harsh', short: FIVE_GRADE_SHORT.harsh, full: FIVE_GRADE_HARSH },
+    { id: 'stance', short: stanceShort, full: stance, mine: true },
+    { id: 'unknown', short: FIVE_GRADE_SHORT.unknown, full: FIVE_GRADE_UNKNOWN },
+    { id: 'noChance', short: FIVE_GRADE_SHORT.noChance, full: FIVE_GRADE_NO_CHANCE },
+  ];
+
   return (
-    <div className="adm-block five-grade">
-      <div className="adm-block-title">
-        <AlertCircle size={13} /> {FIVE_GRADE_TITLE}
+    <div className="adm-block five-grade fg-v2">
+      <div className="adm-block-title fg-title">
+        <AlertCircle size={15} /> {FIVE_GRADE_TITLE}
       </div>
-      <p className="adm-block-desc">{FIVE_GRADE_SUMMARY}</p>
-      <p className="adm-block-desc">{FIVE_GRADE_HARSH}</p>
-      <p className="adm-block-desc">{stance}</p>
+      <p className="fg-hint">줄을 누르면 자세한 설명이 펼쳐져요</p>
+
+      <ul className="fg-points">
+        {points.map((pt) => {
+          const on = openPoint === pt.id;
+          return (
+            <li key={pt.id} className={`fg-point${on ? ' open' : ''}${pt.mine ? ' mine' : ''}`}>
+              <button type="button" className="fg-point-head" aria-expanded={on}
+                onClick={() => setOpenPoint(on ? null : pt.id)}>
+                <span className="fg-point-text">{pt.short}</span>
+                <ChevronDown size={16} className="fg-point-chev" />
+              </button>
+              {on && <p className="fg-point-full">{pt.full}</p>}
+            </li>
+          );
+        })}
+      </ul>
 
       {info?.table && (
         <>
-          <div className="fg-table-title">
-            시행계획에 실린 검정고시 환산표
-            <span className="fg-scale">{info.tableScale}등급 체계</span>
-          </div>
-          <table className="fg-table">
-            <thead>
-              <tr><th>검정고시 평균</th><th>등급</th></tr>
-            </thead>
-            <tbody>
-              {info.table.map((r, i) => (
-                <tr key={i}>
-                  <td>
-                    {r.minAvg}
-                    {r.maxAvg != null ? `~${r.maxAvg}` : ''}점
-                  </td>
-                  <td>{r.grade != null ? `${r.grade}등급` : '등급 없음'}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <button className="ged-raw-toggle" onClick={() => setShowTable((v) => !v)} aria-expanded={showTable}>
+            <Table2 size={13} />
+            {showTable ? '환산표 접기' : `시행계획에 실린 검정고시 환산표 보기 (${info.tableScale}등급 체계)`}
+            <ChevronDown size={14} className={`ged-raw-chev${showTable ? ' on' : ''}`} />
+          </button>
+          {showTable && (
+            <>
+              <div className="fg-table-title">
+                시행계획에 실린 검정고시 환산표
+                <span className="fg-scale">{info.tableScale}등급 체계</span>
+              </div>
+              <table className="fg-table">
+                <thead>
+                  <tr><th>검정고시 평균</th><th>등급</th></tr>
+                </thead>
+                <tbody>
+                  {info.table.map((r, i) => (
+                    <tr key={i}>
+                      <td>
+                        {r.minAvg}
+                        {r.maxAvg != null ? `~${r.maxAvg}` : ''}점
+                      </td>
+                      <td>{r.grade != null ? `${r.grade}등급` : '등급 없음'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </>
+          )}
         </>
       )}
-
-      <p className="adm-disclaimer">{FIVE_GRADE_UNKNOWN}</p>
-      <p className="adm-disclaimer">{FIVE_GRADE_NO_CHANCE}</p>
 
       {info?.raw && (
         <>
@@ -663,7 +703,12 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
                 : PLAN_SECTION_TITLE}
             <span className="count-pill">{okRows.length}</span>
           </div>
-          {is2027 && <p className="section-sub">{YEAR_SPLIT_NOTICE}</p>}
+          {/* 한 문단 → 문장마다 한 줄(2026-09-19, 문구 그대로) */}
+          {is2027 && (
+            <ul className="plan-sub-list">
+              {YEAR_SPLIT_NOTICE.split(/(?<=요\.)\s+/).map((t) => <li key={t}>{t}</li>)}
+            </ul>
+          )}
           {/* 전문대는 대교협 2027 자료에도, 2028 시행계획에도 전형이 안 실려 있다.
               전문대교협이 낸 전형결과에서 실제로 뽑은 전형을 읽어 만든 목록이라
               근거가 무엇인지 여기서 밝힌다. */}
@@ -1064,11 +1109,12 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
           <div className="detail-section-title muted">
             {PLAN_SECTION_TITLE} <span className="count-pill">{planRows.length}</span>
           </div>
-          <p className="section-sub">
-            {PLAN_YEAR}학년도 대학입학전형 시행계획이에요. 전형 방법·수능최저처럼
-            {' '}{ADMISSION_DATA_YEAR}학년도 자료에 없는 <b>구조</b>를 참고하려고 남겨 둔 것이고,
-            지원 가능 여부는 위 {ADMISSION_DATA_YEAR}학년도 목록이 기준이에요.
-          </p>
+          {/* 한 문단 → 세 줄로 나눴다(2026-09-19, 문구 그대로) */}
+          <ul className="plan-sub-list">
+            <li>{PLAN_YEAR}학년도 대학입학전형 시행계획이에요.</li>
+            <li>전형 방법·수능최저처럼 {ADMISSION_DATA_YEAR}학년도 자료에 없는 <b>구조</b>를 참고하려고 남겨 뒀어요.</li>
+            <li><b>지원 가능 여부는 위 {ADMISSION_DATA_YEAR}학년도 목록이 기준</b>이에요.</li>
+          </ul>
           <FiveGradeBlock univId={realUnivId} univName={univ.name} />
           <div className="result-list">
             {planRows.map((r, i) => {
