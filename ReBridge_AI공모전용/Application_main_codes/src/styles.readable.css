@@ -161,3 +161,47 @@
   font-weight: 700;
   color: var(--brand-deep);
 }
+
+/* ── 이 목록 읽는 법 (ExploreHelpScreen, 2026-09-19) — 질문 카드 ── */
+.ehelp-lead { margin: 4px 2px 12px; font-size: 13.5px; color: var(--text-sub); }
+.ehelp-sec.ehelp-card {
+  background: var(--card);
+  border-radius: 20px;
+  border-bottom: none;
+  padding: 4px 16px 4px;
+  margin-bottom: 10px;
+  box-shadow: var(--shadow-sm);
+}
+.ehelp-head {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 0;
+  text-align: left;
+}
+.ehelp-card .ehelp-emoji { margin: 2px 0 0; font-size: 24px; }
+.ehelp-head-text { flex: 1; min-width: 0; }
+.ehelp-card .ehelp-title { display: block; margin: 0; font-size: 14px; color: var(--text-sub); font-weight: 700; }
+.ehelp-answer {
+  display: block;
+  margin-top: 4px;
+  font-size: 17px;
+  line-height: 1.4;
+  font-weight: 800;
+  color: var(--text);
+  word-break: keep-all;
+}
+.ehelp-card .rd-chev { margin-top: 4px; }
+.ehelp-card.open .rd-chev { transform: rotate(180deg); }
+.ehelp-card .ehelp-callout { margin: 0 0 14px; }
+.ehelp-more { padding: 0 0 12px; }
+
+/* ── 대체서식 안내 (FormsGuideScreen, 2026-09-19) — 대학 카드 접기 ── */
+.fg-row-btn { width: 100%; text-align: left; margin-bottom: 0; flex-wrap: wrap; }
+.fg-brief { margin-left: auto; font-size: 12.5px; font-weight: 600; color: var(--text-sub); }
+.fg-chev { flex-shrink: 0; color: var(--chevron); }
+.fg-row.open .fg-chev { transform: rotate(180deg); }
+.fg-row .fg-special-note { margin-top: 10px; }
+.fg-row.open .fg-row-body { margin-top: 12px; }
+.fg-warn-card .fold-toggle { margin-top: 4px; }

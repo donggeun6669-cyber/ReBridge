@@ -1,4 +1,5 @@
-import { ArrowLeft, AlertTriangle, Info, ExternalLink, ChevronRight } from 'lucide-react';
+import { useState } from 'react';
+import { ArrowLeft, AlertTriangle, Info, ExternalLink, ChevronRight, ChevronDown } from 'lucide-react';
 import { FORMS_BASIS_LABEL } from '../data/meta.js';
 
 const UNIV_FORMS = [
@@ -76,7 +77,14 @@ const COMMON_WARNINGS = [
   '대학별 서식은 매년 달라질 수 있으니 해당 연도 모집요강에서 반드시 확인하세요.',
 ];
 
+// 2026-09-19 동근님: 빽빽한 곳은 '핵심 먼저, 자세히는 펼쳐서'.
+//   주의사항은 앞 2개만 보이고 나머지는 펼침, 대학 카드는 '항목 수·글자 수·주의'만 보이고 눌러서 전체 규격.
+//   문구는 지우지 않았다.
+const WARN_VISIBLE = 2;
+
 export default function FormsGuideScreen({ goTo = () => {}, goBack = () => {} }) {
+  const [showAllWarn, setShowAllWarn] = useState(false);
+  const [openUniv, setOpenUniv] = useState(null);
   return (
     <div className="screen">
       <header className="topbar center">
@@ -99,10 +107,17 @@ export default function FormsGuideScreen({ goTo = () => {}, goBack = () => {} })
           <AlertTriangle size={15} /> 작성 전 꼭 확인하세요
         </div>
         <ul className="fg-warn-list">
-          {COMMON_WARNINGS.map((w, i) => (
+          {(showAllWarn ? COMMON_WARNINGS : COMMON_WARNINGS.slice(0, WARN_VISIBLE)).map((w, i) => (
             <li key={i}>{w}</li>
           ))}
         </ul>
+        {COMMON_WARNINGS.length > WARN_VISIBLE && (
+          <button type="button" className={`fold-toggle${showAllWarn ? ' on' : ''}`} aria-expanded={showAllWarn}
+            onClick={() => setShowAllWarn((v) => !v)}>
+            {showAllWarn ? '접기' : `주의사항 ${COMMON_WARNINGS.length - WARN_VISIBLE}개 더 보기`}
+            <ChevronDown size={14} className="fold-chev" />
+          </button>
+        )}
       </div>
 
       {/* 청소년생활기록부 안내 */}
@@ -130,39 +145,50 @@ export default function FormsGuideScreen({ goTo = () => {}, goBack = () => {} })
       <div className="fg-note">매년 달라지므로 해당 연도 모집요강 필수 확인</div>
 
       <div className="fg-table-wrap">
-        {UNIV_FORMS.map((u) => (
-          <div className="fg-row" key={u.name}>
-            <div className="fg-row-head">
-              <span className="fg-univ-name">{u.name}</span>
-              {u.special && (
-                <span className="fg-special-badge">주의</span>
-              )}
-            </div>
-            <div className="fg-row-body">
-              <div className="fg-stat">
-                <span className="fg-stat-label">항목 수</span>
-                <span className="fg-stat-val">{u.maxItems != null ? `최대 ${u.maxItems}개` : '제한 없음'}</span>
-              </div>
-              <div className="fg-stat">
-                <span className="fg-stat-label">항목당 글자</span>
-                <span className="fg-stat-val">{u.charsPerItem != null ? `${u.charsPerItem}자` : '—'}</span>
-              </div>
-              <div className="fg-stat">
-                <span className="fg-stat-label">첨부 한도</span>
-                <span className="fg-stat-val">{u.attachLimit}</span>
-              </div>
-              <div className="fg-stat fg-stat-full">
-                <span className="fg-stat-label">외부 성적 기재</span>
-                <span className="fg-stat-val">{u.externalScore}</span>
-              </div>
+        {UNIV_FORMS.map((u) => {
+          const open = openUniv === u.name;
+          const brief = [
+            u.maxItems != null ? `최대 ${u.maxItems}개` : '항목 수 제한 없음',
+            u.charsPerItem != null ? `항목당 ${u.charsPerItem}자` : null,
+          ].filter(Boolean).join(' · ');
+          return (
+            <div className={`fg-row${open ? ' open' : ''}`} key={u.name}>
+              <button type="button" className="fg-row-head fg-row-btn" aria-expanded={open}
+                onClick={() => setOpenUniv(open ? null : u.name)}>
+                <span className="fg-univ-name">{u.name}</span>
+                {u.special && <span className="fg-special-badge">주의</span>}
+                <span className="fg-brief">{brief}</span>
+                <ChevronDown size={16} className="fold-chev fg-chev" />
+              </button>
+              {/* 대학별 특이사항(주의)은 접지 않는다 — 놓치면 지원이 무효가 될 수 있는 내용 */}
               {u.special && (
                 <div className="fg-special-note">
                   <AlertTriangle size={12} /> {u.special}
                 </div>
               )}
+              {open && (
+                <div className="fg-row-body">
+                  <div className="fg-stat">
+                    <span className="fg-stat-label">항목 수</span>
+                    <span className="fg-stat-val">{u.maxItems != null ? `최대 ${u.maxItems}개` : '제한 없음'}</span>
+                  </div>
+                  <div className="fg-stat">
+                    <span className="fg-stat-label">항목당 글자</span>
+                    <span className="fg-stat-val">{u.charsPerItem != null ? `${u.charsPerItem}자` : '—'}</span>
+                  </div>
+                  <div className="fg-stat">
+                    <span className="fg-stat-label">첨부 한도</span>
+                    <span className="fg-stat-val">{u.attachLimit}</span>
+                  </div>
+                  <div className="fg-stat fg-stat-full">
+                    <span className="fg-stat-label">외부 성적 기재</span>
+                    <span className="fg-stat-val">{u.externalScore}</span>
+                  </div>
+                </div>
+              )}
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       <div className="fg-footer">

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
   AlertTriangle, CheckCircle2, Circle,
-  ExternalLink, ChevronRight, Info, FileText,
+  ExternalLink, ChevronRight, Info, FileText, ChevronDown,
 } from 'lucide-react';
 import { getActiveTrack, V1_UNIV_ONLY } from '../lib/persona.js';
 import { buildChecklist, CHECKLIST_META } from '../data/checklists.js';
@@ -26,6 +26,7 @@ export default function ChecklistSection({ goTo = () => {} }) {
   const meta = CHECKLIST_META[track] || CHECKLIST_META.null;
   const items = useMemo(() => buildChecklist(track, profile), [track, profile]);
 
+  const [openTips, setOpenTips] = useState({});   // 참고 팁 펼친 항목
   const [checked, setChecked] = useState(() => {
     try { return JSON.parse(localStorage.getItem(CHECK_KEY)) || {}; } catch { return {}; }
   });
@@ -131,16 +132,26 @@ export default function ChecklistSection({ goTo = () => {} }) {
                   <span>발급처: {item.issuer}</span>
                   {item.days && <span>· {item.days}</span>}
                 </div>
-                {item.warn && (
+                {/* 2026-09-19: 주의(critical·caution)는 늘 보이고, 참고 팁(info)은 '팁 보기'로 접는다 */}
+                {item.warn && (item.warnLevel && item.warnLevel !== 'info' || openTips[item.id]) && (
                   <div className={`cl-warn cl-warn-${item.warnLevel || 'info'}`}>
                     {(item.warnLevel === 'critical' || item.warnLevel === 'caution') && (
                       <AlertTriangle size={12} />
                     )}
-                    {item.warnLevel === 'info' && <Info size={12} />}
+                    {(!item.warnLevel || item.warnLevel === 'info') && <Info size={12} />}
                     <span>{item.warn}</span>
                   </div>
                 )}
                 <div className="cl-item-actions">
+                  {item.warn && (!item.warnLevel || item.warnLevel === 'info') && (
+                    <button
+                      className="cl-link"
+                      aria-expanded={!!openTips[item.id]}
+                      onClick={(e) => { e.stopPropagation(); setOpenTips((m) => ({ ...m, [item.id]: !m[item.id] })); }}
+                    >
+                      {openTips[item.id] ? '팁 접기' : '팁 보기'} <ChevronDown size={12} />
+                    </button>
+                  )}
                   {item.url && (
                     <a
                       className="cl-link"

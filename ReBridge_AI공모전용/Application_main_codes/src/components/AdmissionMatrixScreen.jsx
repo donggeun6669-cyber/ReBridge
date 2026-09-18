@@ -1,8 +1,9 @@
 import { useMemo, useState } from 'react';
-import { ArrowLeft, Check, AlertTriangle, X as XIcon, Info } from 'lucide-react';
+import { ArrowLeft, Check, AlertTriangle, X as XIcon, Info, ChevronDown } from 'lucide-react';
 import { getAdmissionInventory } from '../lib/analysis.js';
 import { hasSpecialEligibility } from '../lib/scoreEngine.js';
 import { ADMISSION_DATA_YEAR, PLAN_YEAR, GED_2027_SOURCE_LABEL } from '../data/meta.js';
+import '../styles.readable.css';
 
 // ── 전형별 지원 가능 여부 (2026-09) ──────────────────────────────────────
 //
@@ -40,6 +41,8 @@ function EligBadge({ value }) {
 }
 
 function Row({ r, year }) {
+  // 2026-09-19: '검정고시 반영' 설명은 길어서 접는다(불가·조건 이유는 지원 여부를 가르므로 늘 보인다)
+  const [showReflect, setShowReflect] = useState(false);
   const special = hasSpecialEligibility(r);
   // 전문대 행은 2028 시행계획이 아니라 전문대교협 전형결과에서 뽑은 것이다.
   // 학년도를 2028로 적으면 근거를 잘못 알려주게 된다.
@@ -62,7 +65,18 @@ function Row({ r, year }) {
       {/* 지원이 안 되는 전형에 "검정고시 반영: …"을 붙이면 말이 어긋난다.
           그 문구는 2028 자료의 유형별 기본 설명이라 불가 행에도 붙어 있다. */}
       {r.gedReflection && r.gedEligible !== '불가' && (
-        <p className="mx-reflect">검정고시 반영: {r.gedReflection}</p>
+        showReflect ? (
+          <>
+            <p className="mx-reflect">검정고시 반영: {r.gedReflection}</p>
+            <button type="button" className="fold-toggle on" onClick={() => setShowReflect(false)}>
+              접기 <ChevronDown size={14} className="fold-chev" />
+            </button>
+          </>
+        ) : (
+          <button type="button" className="fold-toggle" onClick={() => setShowReflect(true)}>
+            검정고시 성적 반영 방법 보기 <ChevronDown size={14} className="fold-chev" />
+          </button>
+        )
       )}
     </li>
   );
@@ -71,6 +85,7 @@ function Row({ r, year }) {
 export default function AdmissionMatrixScreen({ goBack = () => {}, univId, univName }) {
   const [filter, setFilter] = useState('all');
   const [phase, setPhase] = useState('전체');
+  const [showNote, setShowNote] = useState(false);
   const inv = useMemo(() => getAdmissionInventory(univId), [univId]);
 
   if (!inv) {
@@ -200,26 +215,40 @@ export default function AdmissionMatrixScreen({ goBack = () => {}, univId, univN
         </section>
       ))}
 
+      {/* 2026-09-19: 문단 네 개 → 한 줄 세 개 + 경고는 늘 보이고, 원래 문단은 '자세히'로 */}
       <section className="mx-note">
         <div className="mx-note-title"><Info size={14} /> 두 학년도가 같이 나오는 이유</div>
-        <p>
-          <b>{ADMISSION_DATA_YEAR}학년도</b> 자료는 대교협이 모은 <b>‘검정고시로 지원할 수 있는 전형’ 목록</b>이에요.
-          지원 가능한 것만 실려 있어서 여기엔 ‘불가’가 나오지 않아요.
-          <b> 목록에 없다고 지원이 안 된다는 뜻은 아니에요.</b>
-        </p>
-        <p>
-          <b>{PLAN_YEAR}학년도</b> 자료는 대학이 낸 시행계획이라 <b>전형 전체</b>가 들어 있어요.
-          그래서 ‘불가’와 그 이유도 같이 볼 수 있어요. 대신 지금 원서를 쓰는 학년도와는 달라요.
-        </p>
-        <p>
-          <b>전문대학</b>은 위 두 자료에 전형이 실려 있지 않아, 전문대교협이 낸
-          <b> 전형결과</b>에서 그 대학이 실제로 어떤 전형으로 뽑았는지를 읽어 만들었어요.
-          지난 학년도 결과라 올해도 같은 전형으로 뽑는지는 모집요강에서 확인해야 해요.
-        </p>
+        <ul className="plan-sub-list">
+          <li><b>{ADMISSION_DATA_YEAR}학년도</b> 목록엔 지원 가능한 전형만 있어요 — <b>없다고 불가는 아니에요</b></li>
+          <li><b>{PLAN_YEAR}학년도</b> 시행계획엔 전형 전체와 불가 이유가 있어요</li>
+          <li><b>전문대학</b>은 지난 학년도 전형결과로 만들었어요</li>
+        </ul>
         <p className="mx-note-warn">
           두 해가 다르게 적혀 있으면 합치지 않고 그대로 보여드려요.
           최종 확인은 그 대학 모집요강에서 하세요.
         </p>
+        <button type="button" className={`fold-toggle${showNote ? ' on' : ''}`} aria-expanded={showNote}
+          onClick={() => setShowNote((v) => !v)}>
+          {showNote ? '접기' : '자세한 설명 보기'} <ChevronDown size={14} className="fold-chev" />
+        </button>
+        {showNote && (
+          <div className="fold-body">
+            <p>
+          <b>{ADMISSION_DATA_YEAR}학년도</b> 자료는 대교협이 모은 <b>‘검정고시로 지원할 수 있는 전형’ 목록</b>이에요.
+          지원 가능한 것만 실려 있어서 여기엔 ‘불가’가 나오지 않아요.
+          <b> 목록에 없다고 지원이 안 된다는 뜻은 아니에요.</b>
+        </p>
+            <p>
+          <b>{PLAN_YEAR}학년도</b> 자료는 대학이 낸 시행계획이라 <b>전형 전체</b>가 들어 있어요.
+          그래서 ‘불가’와 그 이유도 같이 볼 수 있어요. 대신 지금 원서를 쓰는 학년도와는 달라요.
+        </p>
+            <p>
+          <b>전문대학</b>은 위 두 자료에 전형이 실려 있지 않아, 전문대교협이 낸
+          <b> 전형결과</b>에서 그 대학이 실제로 어떤 전형으로 뽑았는지를 읽어 만들었어요.
+          지난 학년도 결과라 올해도 같은 전형으로 뽑는지는 모집요강에서 확인해야 해요.
+        </p>
+          </div>
+        )}
       </section>
     </div>
   );

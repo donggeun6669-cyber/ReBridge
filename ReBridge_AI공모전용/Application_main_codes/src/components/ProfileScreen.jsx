@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { AlertTriangle, ExternalLink } from 'lucide-react';
+import { ArrowLeft, AlertTriangle, ExternalLink } from 'lucide-react';
 import { GED_SUBJECTS, gedAverage, estimateGrade } from '../lib/scoreEngine';
 import { getPersona } from '../lib/persona';
 import { currentYear, examYearOptions } from '../data/meta.js';
@@ -143,7 +143,11 @@ export default function ProfileScreen({ goTo = () => {}, goBack = () => {}, onCo
 
   return (
     <div className="screen">
+      {/* 하단 탭이 없어서(2026-09-17) 뒤로 버튼이 없으면 이 화면에서 나갈 수 없다 (2026-09-19 추가) */}
       <header className="topbar center">
+        <button className="icon-btn" aria-label="뒤로" onClick={goBack}>
+          <ArrowLeft size={22} />
+        </button>
         <span className="page-title">내 정보</span>
       </header>
 
