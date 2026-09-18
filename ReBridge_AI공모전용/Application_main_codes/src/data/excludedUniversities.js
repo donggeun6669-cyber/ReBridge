@@ -34,12 +34,30 @@ export const CORPORATE_UNIVERSITY = {
   uA0000288: { name: '정석대학', restrictedTo: '한진그룹 임직원' },
   uA0000289: { name: '삼성전자공과대학교', restrictedTo: '삼성전자 임직원' },
   uA0002699: { name: 'LH토지주택대학교', restrictedTo: '한국토지주택공사 임직원 및 협력업체 직원' },
+  // 2026-09-18 동근님 결정으로 추가 (RAW 수집 중 확인: RAW/_work/진행기록.md)
+  uA0000389: { name: 'SPC식품과학대학', restrictedTo: 'SPC그룹 계열사 임직원' },
+  uA0002696: { name: '대우조선해양공과대학', restrictedTo: '한화오션(옛 대우조선해양) 임직원' },
+  uA0000388: { name: '삼성중공업공과대학', restrictedTo: '삼성중공업 임직원' },
+  uA0002746: { name: '포스코기술대학', restrictedTo: 'POSCO 재직자' },
+  uA0002697: { name: '현대중공업공과대학', restrictedTo: '현대중공업 재직자(2021년 운영 중단)' },
+};
+
+// ── 통합되어 없어졌거나 폐교한 곳 (2026-09-18 동근님 결정) ─────────────
+// 지금 남아 있는 대학을 기준으로 한다. 통합 뒤 남은 캠퍼스(국립창원대 남해·거창캠퍼스,
+// 국립목포대 담양캠퍼스)는 목록에 그대로 둔다.
+export const MERGED_OR_CLOSED = {
+  uA0000403: { name: '경남도립남해대학', reason: '국립창원대학교에 통합(2026-03), 지금은 국립창원대 남해캠퍼스' },
+  uA0000402: { name: '경남도립거창대학', reason: '국립창원대학교에 통합(2026-03), 지금은 국립창원대 거창캠퍼스' },
+  uA0000562: { name: '전남도립대학교', reason: '국립목포대학교에 통합(2026-03-01), 지금은 국립목포대 담양캠퍼스' },
+  uA0000523: { name: '원광보건대학교', reason: '원광대학교에 통합(2026학년도부터 원광대가 모집)' },
+  uA0000428: { name: '광양보건대학교', reason: '학교법인 파산으로 폐교(2026-08-31)' },
 };
 
 // 화면에 내보내지 않을 univId 전체
 export const EXCLUDED_UNIV_IDS = new Set([
   ...Object.keys(NOT_A_UNIVERSITY),
   ...Object.keys(CORPORATE_UNIVERSITY),
+  ...Object.keys(MERGED_OR_CLOSED),
 ]);
 
 /** 이 대학을 일반 대입 목록에 넣어도 되는가 */
@@ -59,6 +77,9 @@ export function exclusionOf(univId) {
       ...it,
       reason: `평생교육법상 사내대학이라 ${it.restrictedTo}만 지원할 수 있어요.`,
     };
+  }
+  if (MERGED_OR_CLOSED[univId]) {
+    return { kind: 'merged_or_closed', ...MERGED_OR_CLOSED[univId] };
   }
   return null;
 }
