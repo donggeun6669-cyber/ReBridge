@@ -48,6 +48,7 @@ const RawDataScreen = /* #__PURE__ */ lazy(() => import('./components/RawDataScr
 // 뒤로가기로 나온다. 그래서 홈으로 갈 때만 스택을 비운다.
 // (마이페이지는 홈 우측 상단 아이콘, 지원 혜택은 꿈드림센터 화면에 합쳤다)
 const ROOT_SCREEN = 'home';
+const COMMUNITY_ON = !isHiddenScreen('community');
 // KNOWN_SCREENS 밖이지만 '준비 중'으로 떨어뜨리면 안 되는 화면들
 const MAIN_SCREENS = ['home', 'support', 'mypage', 'community', 'profile', 'onboarding'];
 
@@ -207,7 +208,7 @@ export default function App() {
         )}
         {!splash && screen === 'forms-guide' && <FormsGuideScreen goTo={goTo} goBack={goBack} />}
         {!splash && screen === 'ged-guide'   && <GedGuideScreen goTo={goTo} goBack={goBack} />}
-        {/* ▼ v1(V1_UNIV_ONLY)에서 숨기는 화면들 — 학습·직업 트랙, 커뮤니티·인증.
+        {/* ▼ v1(V1_UNIV_ONLY)에서 숨기는 화면들 — 학습·직업 트랙.
             남은 링크로 들어와도 KNOWN_SCREENS에서 빠져 '준비 중'으로 떨어진다. */}
         {!splash && !V1_UNIV_ONLY && screen === 'study-roadmap' && <StudyRoadmapScreen goTo={goTo} />}
         {!splash && !V1_UNIV_ONLY && screen === 'study-planner' && <StudyPlannerScreen goTo={goTo} />}
@@ -220,10 +221,11 @@ export default function App() {
         {!splash && !V1_UNIV_ONLY && screen === 'job-psych'     && <JobPsychScreen goBack={goBack} />}
         {!splash && !V1_UNIV_ONLY && screen === 'job-training'  && <JobTrainingScreen goBack={goBack} goTo={goTo} />}
         {!splash && !V1_UNIV_ONLY && screen === 'job-apply'     && <JobApplyScreen goBack={goBack} goTo={goTo} />}
-        {!splash && !V1_UNIV_ONLY && screen === 'community'       && <CommunityScreen goTo={goTo} goBack={goBack} params={params} />}
-        {!splash && !V1_UNIV_ONLY && screen === 'community-post'  && <CommunityPostScreen goTo={goTo} goBack={goBack} id={params.id} />}
-        {!splash && !V1_UNIV_ONLY && screen === 'community-write' && <CommunityWriteScreen goTo={goTo} goBack={goBack} board={params.board} initialTitle={params.initialTitle || ''} />}
-        {!splash && !V1_UNIV_ONLY && screen === 'community-auth'  && <AuthScreen goTo={goTo} goBack={goBack} />}
+        {/* 커뮤니티 — 2026-09-18 v1에 넣었다(COMMUNITY_IN_V1). 출시 때 뺄지는 다시 정한다. */}
+        {!splash && COMMUNITY_ON && screen === 'community'       && <CommunityScreen goTo={goTo} goBack={goBack} params={params} />}
+        {!splash && COMMUNITY_ON && screen === 'community-post'  && <CommunityPostScreen goTo={goTo} goBack={goBack} id={params.id} />}
+        {!splash && COMMUNITY_ON && screen === 'community-write' && <CommunityWriteScreen goTo={goTo} goBack={goBack} board={params.board} tag={params.tag} initialTitle={params.initialTitle || ''} />}
+        {!splash && COMMUNITY_ON && screen === 'community-auth'  && <AuthScreen goTo={goTo} goBack={goBack} />}
 
         {/* 법적 고지 — 청소년 대상 서비스 필수 + 스토어 심사 요건 */}
         {!splash && screen === 'privacy'         && <PolicyScreen doc="privacy" goBack={goBack} />}

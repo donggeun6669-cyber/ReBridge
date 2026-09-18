@@ -6,13 +6,14 @@
 // props: goTo(screen, params), goBack()
 import { useState, useEffect, useCallback, useRef } from 'react';
 import {
-  PenSquare, Heart, MessageCircle, Users, LogIn, Search, X,
+  PenSquare, Heart, MessageCircle, LogIn, Search, X, ArrowLeft,
   Bookmark, MoreHorizontal, Bell, ChevronLeft, SlidersHorizontal,
 } from 'lucide-react';
 import {
-  boardsFor, TAGS, tagLabel, listPosts, listBookmarks, toggleReaction, toggleBookmark,
-  getNotifications, markPostSeen, timeAgo, DEFAULT_PAGE_SIZE,
+  boardsFor, TAGS, TAG_BOARDS, tagLabel, boardLabel, listPosts, listBookmarks, toggleReaction, toggleBookmark,
+  getNotifications, markPostSeen, timeAgo, DEFAULT_PAGE_SIZE, DEFAULT_BOARD, HOT_MIN_SCORE,
 } from '../lib/community.js';
+import { BACKEND } from '../lib/supabaseClient.js';
 import { AuthorLine } from './CommunityBadge.jsx';
 import CommunityNotice from './CommunityNotice.jsx';
 import CommunityActionSheet from './CommunityActionSheet.jsx';
@@ -24,7 +25,7 @@ export default function CommunityScreen({ goTo = () => {}, goBack = () => {}, pa
   const boards = boardsFor(user);
 
   const [view, setView] = useState('list');      // 'list' | 'saved' | 'noti'
-  const [board, setBoard] = useState(params.board || 'review');
+  const [board, setBoard] = useState(params.board || DEFAULT_BOARD);
   const [tag, setTag] = useState(null);          // 이야기 보드 주제 필터
   const [sort, setSort] = useState('latest');    // 'latest' | 'popular'
   const [searchOpen, setSearchOpen] = useState(false);
@@ -56,7 +57,7 @@ export default function CommunityScreen({ goTo = () => {}, goBack = () => {}, pa
     setPosts(null);
     offsetRef.current = 0;
     const res = await listPosts({
-      board, tag: board === 'talk' ? tag : null, q, sort,
+      board, tag: TAG_BOARDS.has(board) ? tag : null, q, sort,
       offset: 0, limit: DEFAULT_PAGE_SIZE, scope: scopeAll ? 'all' : 'board',
     });
     setPosts(res.items);
@@ -70,7 +71,7 @@ export default function CommunityScreen({ goTo = () => {}, goBack = () => {}, pa
     if (loadingMore || !hasMore) return;
     setLoadingMore(true);
     const res = await listPosts({
-      board, tag: board === 'talk' ? tag : null, q, sort,
+      board, tag: TAG_BOARDS.has(board) ? tag : null, q, sort,
       offset: offsetRef.current, limit: DEFAULT_PAGE_SIZE, scope: scopeAll ? 'all' : 'board',
     });
     setPosts((prev) => [...(prev || []), ...res.items]);
@@ -98,8 +99,9 @@ export default function CommunityScreen({ goTo = () => {}, goBack = () => {}, pa
   }, []);
   useEffect(() => { if (view === 'saved') loadSaved(); }, [view, loadSaved]);
 
+  // HOT은 모음 게시판이라 글을 직접 쓸 수 없다 → 자유 게시판으로 쓴다.
   const goWrite = useCallback(() => {
-    goTo('community-write', { board: board === 'center' ? 'center' : board, tag });
+    goTo('community-write', { board: board === 'hot' ? 'free' : board, tag });
   }, [board, tag, goTo]);
 
   const onWrite = useCallback(() => {
@@ -167,7 +169,9 @@ export default function CommunityScreen({ goTo = () => {}, goBack = () => {}, pa
       <div className="cm-card-top">
         <span>
           <AuthorLine author={p.author} when={timeAgo(p.createdAt)} />
-          {p.tag && <span className="cm-tag-pill">{tagLabel(p.tag)}</span>}
+          {board === 'hot' && <span className="cm-tag-pill">{boardLabel(p.board)}</span>}
+          {p.tag && tagLabel(p.tag) && <span className="cm-tag-pill">{tagLabel(p.tag)}</span>}
+          {p.board === 'qna' && p.answered && <span className="cm-answered-pill">답변 완료</span>}
         </span>
         <button className="cm-more-btn" aria-label="더보기" onClick={(e) => openSheet(e, p)}>
           <MoreHorizontal size={18} />
@@ -200,9 +204,10 @@ export default function CommunityScreen({ goTo = () => {}, goBack = () => {}, pa
   // ── 헤더(공통) ──
   const header = (
     <header className="topbar between">
+      {/* 하단 탭이 없어서(2026-09-17) 뒤로 버튼으로 나간다 */}
       <div className="cm-head-title">
-        <Users size={20} />
-        <span className="page-title">학교밖 커뮤니티</span>
+        <button className="icon-btn" aria-label="뒤로" onClick={goBack}><ArrowLeft size={22} /></button>
+        <span className="page-title">커뮤니티</span>
       </div>
       <div className="cm-head-actions">
         {user && (
@@ -277,14 +282,19 @@ export default function CommunityScreen({ goTo = () => {}, goBack = () => {}, pa
   }
 
   // ── 목록 뷰(기본) ──
-  const showTags = board === 'talk' && !scopeAll;
+  const showTags = TAG_BOARDS.has(board) && !scopeAll;
+  const boardDesc = board === 'hot'
+    ? `공감과 댓글을 합쳐 ${HOT_MIN_SCORE}개 이상인 글을 모아요 (고민 게시판 제외)`
+    : boards.find((b) => b.id === board)?.desc || '';
   return (
     <div className="screen cm-screen">
       {header}
 
-      <p className="cm-board-hint">
-        같은 학교밖끼리 공감하고, 후기를 나눠요. 읽기는 로그인 없이 자유롭게.
-      </p>
+      {BACKEND === 'mock' && (
+        <p className="cm-demo-banner">
+          🧪 시연 모드 · 예시 글은 시연용으로 만든 가상의 글이고, 쓴 글은 이 기기에만 저장돼요.
+        </p>
+      )}
 
       {/* 검색 */}
       {searchOpen ? (
@@ -341,11 +351,13 @@ export default function CommunityScreen({ goTo = () => {}, goBack = () => {}, pa
             ))}
           </>
         )}
-        <div className="cm-sort">
+        {board !== 'hot' && <div className="cm-sort">
           <button className={`cm-sort-btn ${sort === 'latest' ? 'sel' : ''}`} onClick={() => setSort('latest')}>최신</button>
           <button className={`cm-sort-btn ${sort === 'popular' ? 'sel' : ''}`} onClick={() => setSort('popular')}>인기</button>
-        </div>
+        </div>}
       </div>
+
+      {boardDesc && <p className="cm-board-hint">{boardDesc}</p>}
 
       <CommunityNotice verified={!!user?.verified} />
 

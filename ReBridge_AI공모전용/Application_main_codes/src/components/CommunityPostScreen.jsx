@@ -6,7 +6,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { ArrowLeft, Heart, Send, Trash2, Bookmark, MoreHorizontal, CornerDownRight } from 'lucide-react';
 import {
   getPost, listComments, addComment, toggleReaction, toggleCommentReaction,
-  toggleBookmark, deletePost, markPostSeen, tagLabel, timeAgo,
+  toggleBookmark, deletePost, markPostSeen, tagLabel, timeAgo, boardLabel as boardLabelOf,
 } from '../lib/community.js';
 import { AuthorLine } from './CommunityBadge.jsx';
 import CommunityActionSheet from './CommunityActionSheet.jsx';
@@ -146,14 +146,16 @@ export default function CommunityPostScreen({ goTo = () => {}, goBack = () => {}
     );
   }
 
-  const boardLabel = post.board === 'review' ? '꿈드림 후기'
-    : post.board === 'center' ? '우리 센터' : '이야기';
+  const boardLabel = boardLabelOf(post.board);
+  // 질문 게시판 — 선생님·멘토 답변은 따로 맨 위에 모은다(2026-09-18). 답글도 원댓글을 따라간다.
+  const answers = post.board === 'qna' ? comments.filter((c) => c.isAnswer) : [];
+  const others = post.board === 'qna' ? comments.filter((c) => !c.isAnswer) : comments;
 
   // 댓글 수(원댓글 + 답글) 합산 표시.
   const totalComments = comments.reduce((n, c) => n + 1 + (c.replies?.length || 0), 0);
 
   const renderComment = (c, isReply) => (
-    <div key={c.id} className={`cm-comment ${isReply ? 'cm-comment-reply' : ''}`}>
+    <div key={c.id} className={`cm-comment ${isReply ? 'cm-comment-reply' : ''} ${c.isAnswer && !isReply ? 'cm-answer' : ''}`}>
       {isReply && <CornerDownRight size={14} className="cm-reply-arrow" aria-hidden="true" />}
       <div className="cm-comment-main">
         <div className="cm-comment-head">
@@ -196,7 +198,8 @@ export default function CommunityPostScreen({ goTo = () => {}, goBack = () => {}
         <div className="cm-card-top">
           <span>
             <AuthorLine author={post.author} when={timeAgo(post.createdAt)} />
-            {post.tag && <span className="cm-tag-pill">{tagLabel(post.tag)}</span>}
+            {post.tag && tagLabel(post.tag) && <span className="cm-tag-pill">{tagLabel(post.tag)}</span>}
+            {post.demo && <span className="cm-demo-pill">시연용 예시</span>}
           </span>
         </div>
         <h2 className="cm-post-title">{post.title}</h2>
@@ -214,12 +217,26 @@ export default function CommunityPostScreen({ goTo = () => {}, goBack = () => {}
         </div>
       </article>
 
+      {post.board === 'qna' && (
+        <section className="cm-answers" aria-label="선생님·멘토 답변">
+          <h3 className="cm-comments-title">🧑‍🏫 선생님·멘토 답변 {answers.length}</h3>
+          {answers.length === 0 ? (
+            <p className="cm-empty sm">아직 답변 전이에요. 꿈드림 선생님·합격 멘토가 확인하면 여기에 달려요.</p>
+          ) : answers.map((c) => (
+            <div key={c.id} className="cm-comment-group">
+              {renderComment(c, false)}
+              {(c.replies || []).map((r) => renderComment(r, true))}
+            </div>
+          ))}
+        </section>
+      )}
+
       <section className="cm-comments">
-        <h3 className="cm-comments-title">댓글 {totalComments}</h3>
-        {comments.length === 0 ? (
+        <h3 className="cm-comments-title">댓글 {post.board === 'qna' ? totalComments - answers.reduce((n, c) => n + 1 + (c.replies?.length || 0), 0) : totalComments}</h3>
+        {others.length === 0 ? (
           <p className="cm-empty sm">첫 댓글을 남겨보세요.</p>
         ) : (
-          comments.map((c) => (
+          others.map((c) => (
             <div key={c.id} className="cm-comment-group">
               {renderComment(c, false)}
               {(c.replies || []).map((r) => renderComment(r, true))}

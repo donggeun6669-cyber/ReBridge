@@ -1,277 +1,362 @@
 /* =====================================================================
-   대입 홈 '대학으로 가는 길' — JourneyHome.jsx
-   2026-09-17 동근님 전달 시안(디자인/2026-09-17_메인_전달시안)의 값을 그대로 옮겼다.
-   · 이 화면에서만 쓰는 색이라 .jh-screen 안에 가둔다. 다른 화면의 크림 배경은 그대로다.
-   · 노랑(--jh-accent)은 추천 정거장 글 영역 한 곳에만 쓴다.
-     바탕·길·다른 정거장·큰 카드로 넓히지 말 것. 그라데이션·노란 그림자도 쓰지 않는다.
+   대입 홈 — JourneyHome.jsx (2026-09-18 재구성)
+   회백색 바탕 + 큰 흰 카드(필라이즈) + 큰 3D 아이콘(여기어때).
+   노랑 = 지금 단계·D-day, 파랑 = 버튼·완료. 다른 색을 늘리지 말 것.
    ===================================================================== */
-.jh-screen {
-  --jh-bg: #F7F8FA;
-  --jh-paper: #FFFFFF;
-  --jh-ink: #28343F;
-  --jh-sub: #626D78;
-  --jh-line: #E1E5E9;
-  --jh-road: #DCE2E7;
-  --jh-soft: #ECEFF2;
-  --jh-accent: #F1D36B;
-  --jh-accent-ink: #493D1C;
-  --jh-blue: #276CA2;
+.hm-screen {
+  --hm-ink: #1F2A37;
+  --hm-sub: #5B6572;
+  --hm-card: #FFFFFF;
+  --hm-line: #E6E9ED;
+  --hm-yellow: #F7D55C;
+  --hm-yellow-soft: #FFF4CC;
+  --hm-yellow-ink: #4A3A06;
+  --hm-blue: #1C6FB2;
+  --hm-blue-soft: #EAF3FB;
 
-  padding: 0;
-  background: var(--jh-bg);
-  color: var(--jh-ink);
-  letter-spacing: -0.025em;
+  padding: 0 18px 32px;
+  background: var(--bg);
+  color: var(--hm-ink);
+  letter-spacing: -0.02em;
 }
-.jh-screen button:focus-visible {
-  outline: 3px solid var(--jh-blue);
+.hm-screen button:focus-visible {
+  outline: 3px solid var(--hm-blue);
   outline-offset: 3px;
 }
 
-/* 상단 — 작은 문구 + MY */
-.jh-top {
+.hm-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
-  min-height: 64px;
-  padding: 17px 20px 9px;
+  min-height: 60px;
+  padding-top: 10px;
 }
-.jh-crumb {
+.hm-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.hm-chip {
   font-size: 12px;
-  color: var(--jh-sub);
-  letter-spacing: 0.06em;
+  font-weight: 600;
+  color: var(--hm-sub);
+  background: var(--hm-card);
+  border: 1px solid var(--hm-line);
+  border-radius: 999px;
+  padding: 5px 10px;
 }
-.jh-icon {
+.hm-icon {
   width: 44px;
   height: 44px;
+  margin-right: -8px;
   border-radius: 50%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
-  color: var(--jh-ink);
+  color: var(--hm-ink);
 }
 
-.jh-main {
-  padding: 12px 24px 28px;
+.hm-title {
+  margin: 14px 2px 20px;
+  font-size: 27px;
+  line-height: 1.32;
+  font-weight: 800;
+  letter-spacing: -0.04em;
 }
 
-/* 제목 + 깃발 장식 */
-.jh-intro {
+/* ── 로드맵 카드 ── */
+.hm-road {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: var(--hm-card);
+  border-radius: 24px;
+  padding: 20px 20px 18px;
+  box-shadow: 0 1px 2px rgba(20, 30, 45, 0.04);
+}
+.hm-road-head {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  gap: 12px;
-}
-.jh-title {
-  font-size: 29px;
-  line-height: 1.3;
-  font-weight: 750;
-  letter-spacing: -0.05em;
-  margin: 0 0 12px;
-}
-.jh-lead {
-  font-size: 14px;
-  line-height: 1.65;
-  color: var(--jh-sub);
-  margin: 0 0 12px;
-}
-.jh-landmark {
-  width: 60px;
-  height: 60px;
-  margin-top: 20px;
-  border-radius: 50% 50% 38% 38%;
-  background: var(--jh-soft);
-  color: var(--jh-ink);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-.jh-landmark svg {
-  width: 28px;
-  height: 28px;
-}
-
-/* 곡선 길 — 기본 높이 584px (8 + 114×4 + 76 + 끝 지점 44).
-   정거장은 흐름 배치라 글자가 커지면 줄 간격이 늘고, 길은 원 좌표를 다시 재서 따라간다. */
-.jh-map {
-  position: relative;
-  margin: 10px -4px 0;
-  padding-top: 8px;
-}
-.jh-route {
-  position: absolute;
-  top: 0;
-  left: 0;
-  pointer-events: none;
-  overflow: visible;
-}
-.jh-route path {
-  stroke: var(--jh-road);
-  stroke-width: 12;
-  stroke-linecap: round;
-  fill: none;
-}
-.jh-stops {
-  position: relative;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-.jh-stops > li {
-  min-height: 114px;
-  padding-bottom: 16px;
-}
-.jh-stops > li:last-child {
-  min-height: 76px;
-  padding-bottom: 0;
-}
-
-/* 정거장 — 번호·제목·설명이 한 클릭 영역 */
-.jh-stop {
-  position: relative;
-  display: block;
-  width: 100%;
-  min-height: 76px;
-  padding: 2px 0 0;
-  text-align: left;
-  border-radius: 15px;
-}
-.jh-dot {
-  position: absolute;
-  top: 20px;
-  z-index: 2;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--jh-paper);
-  border: 2px solid var(--jh-road);
-  font-size: 13px;
-  font-weight: 650;
-}
-.jh-stop.is-right .jh-dot { left: 12%; }
-.jh-stop.is-left .jh-dot { right: 10%; }
-
-.jh-copy {
-  position: relative;
-  display: block;
-  width: 67%;
-  padding: 11px 13px;
-  border-radius: 15px;
-  background: var(--jh-bg);
-}
-.jh-stop.is-right .jh-copy { margin-left: 26%; }
-.jh-stop.is-left .jh-copy { margin-left: 8%; }
-
-.jh-stop-title {
-  display: block;
-  font-size: 17px;
-  font-weight: 700;
-  line-height: 1.5;
-}
-.jh-stop-desc {
-  display: block;
-  margin-top: 3px;
-  font-size: 12px;
-  line-height: 1.5;
-  color: var(--jh-sub);
-}
-.jh-now {
-  display: block;
-  margin-bottom: 2px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-}
-
-/* 지금 추천하는 곳 — 노랑은 여기 한 곳 */
-.jh-stop.is-current .jh-dot {
-  background: var(--jh-ink);
-  color: var(--jh-bg);
-  border-color: var(--jh-ink);
-  box-shadow: 0 0 0 6px var(--jh-bg);
-}
-.jh-stop.is-current .jh-copy {
-  background: var(--jh-accent);
-  color: var(--jh-accent-ink);
-}
-.jh-stop.is-current .jh-stop-desc {
-  color: var(--jh-accent-ink);
-}
-
-/* 끝 지점 — 누르는 곳이 아니다 */
-.jh-finish {
-  position: relative;
-  margin: 24px 0 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   gap: 8px;
+}
+.hm-road-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--hm-sub);
+}
+.hm-dday {
   font-size: 12px;
-  line-height: 20px;
-  color: var(--jh-sub);
+  font-weight: 700;
+  color: var(--hm-yellow-ink);
+  background: var(--hm-yellow);
+  border-radius: 999px;
+  padding: 4px 10px;
+  white-space: nowrap;
+}
+.hm-road-body {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+.hm-road-text { flex: 1; min-width: 0; }
+.hm-road-title {
+  display: block;
+  font-size: 20px;
+  line-height: 1.38;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+.hm-road-note {
+  display: block;
+  margin-top: 6px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--hm-sub);
+}
+.hm-road-img { flex-shrink: 0; width: 76px; height: 76px; }
+
+/* 4단계 진행 표시 — 누르는 곳이 아니다(단계 입구는 로드맵 화면 안) */
+.hm-steps {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  margin: 18px 0 16px;
+}
+.hm-steps::before {
+  content: '';
+  position: absolute;
+  left: 12.5%;
+  right: 12.5%;
+  top: 10px;
+  height: 2px;
+  background: var(--hm-line);
+}
+.hm-step {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.hm-step-dot {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--hm-card);
+  border: 2px solid var(--hm-line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+.hm-step-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--hm-sub);
+  text-align: center;
+  line-height: 1.3;
+}
+.hm-step.is-done .hm-step-dot { background: var(--hm-blue); border-color: var(--hm-blue); }
+.hm-step.is-current .hm-step-dot {
+  background: var(--hm-yellow);
+  border-color: var(--hm-yellow);
+  box-shadow: 0 0 0 5px var(--hm-yellow-soft);
+}
+.hm-step.is-current .hm-step-label { color: var(--hm-ink); font-weight: 800; }
+
+.hm-cta {
+  display: block;
+  text-align: center;
+  background: var(--hm-blue);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  border-radius: 14px;
+  padding: 14px 12px;
 }
 
-/* 길 아래 도움 두 줄 */
-.jh-helpers {
-  margin-top: 18px;
-  padding-top: 7px;
-  border-top: 1px solid var(--jh-line);
+/* ── 큰 아이콘 타일 ── */
+.hm-tiles {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
 }
-.jh-row {
+.hm-tiles.cols-3 { grid-template-columns: repeat(3, 1fr); }
+.hm-tiles.cols-2 { grid-template-columns: repeat(2, 1fr); }
+.hm-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 18px 6px 16px;
+  background: var(--hm-card);
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 1px 2px rgba(20, 30, 45, 0.04);
+}
+.hm-tile:active { transform: scale(0.97); }
+.hm-tile-art {
+  width: 72px;
+  height: 72px;
+  margin-bottom: 6px;
+  border-radius: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.hm-tile-art.tone-blue { background: var(--hm-blue-soft); }
+.hm-tile-art.tone-yellow { background: var(--hm-yellow-soft); }
+.hm-tile-art img { width: 56px; height: 56px; }
+.hm-tile-title {
+  font-size: 14.5px;
+  font-weight: 700;
+  line-height: 1.35;
+  word-break: keep-all;
+}
+.hm-tile-sub {
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: var(--hm-sub);
+  word-break: keep-all;
+}
+
+@media (max-width: 360px) {
+  .hm-screen { padding-left: 14px; padding-right: 14px; }
+  .hm-title { font-size: 24px; }
+  .hm-road-img { width: 60px; height: 60px; }
+  .hm-tile-art { width: 60px; height: 60px; }
+  .hm-tile-art img { width: 46px; height: 46px; }
+  .hm-tile-title { font-size: 13.5px; }
+}
+
+/* =====================================================================
+   로드맵 화면 맨 위 — 나의 단계 카드 + 주요 일정 (RoadmapScreen.jsx, 2026-09-18)
+   ===================================================================== */
+.rj-card {
+  background: #fff;
+  border-radius: 24px;
+  padding: 20px 16px 10px;
+  margin: 6px 0 12px;
+  box-shadow: var(--shadow-sm);
+}
+.rj-kicker {
+  display: block;
+  padding: 0 4px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-sub);
+}
+.rj-title {
+  padding: 0 4px;
+  margin-top: 6px;
+  font-size: 21px;
+  line-height: 1.38;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--text);
+}
+.rj-sub {
+  padding: 0 4px;
+  margin-top: 6px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--text-sub);
+}
+.rj-steps { list-style: none; margin: 14px 0 0; padding: 0; }
+.rj-steps li + li { border-top: 1px solid var(--border); }
+.rj-step {
   width: 100%;
-  min-height: 68px;
-  padding: 14px 0;
   display: flex;
   align-items: center;
   gap: 12px;
+  min-height: 72px;
+  padding: 12px 4px;
   text-align: left;
-  border-bottom: 1px solid var(--jh-line);
+  border-radius: 14px;
 }
-.jh-row > svg {
+.rj-step.is-current {
+  background: #FFF4CC;
+  margin: 4px 0;
+  padding-left: 10px;
+  padding-right: 8px;
+}
+.rj-step-img { width: 44px; height: 44px; flex-shrink: 0; }
+.rj-step-text { flex: 1; min-width: 0; }
+.rj-step-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+}
+.rj-step-no {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-sub);
+}
+.rj-step-sub {
+  display: block;
+  margin-top: 2px;
+  font-size: 12.5px;
+  color: var(--text-sub);
+}
+.rj-badge {
   flex-shrink: 0;
-  color: var(--jh-blue);
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 11.5px;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 4px 8px;
 }
-.jh-row-text {
-  flex: 1;
-  min-width: 0;
+.rj-badge.now { background: #F7D55C; color: #4A3A06; }
+.rj-badge.done { background: var(--brand-tint); color: var(--brand-deep); }
+.rj-step-arrow { flex-shrink: 0; color: var(--chevron); }
+
+.rj-dates {
+  background: #fff;
+  border-radius: 20px;
+  padding: 16px 18px 12px;
+  margin-bottom: 14px;
+  box-shadow: var(--shadow-sm);
 }
-.jh-row b {
-  display: block;
-  font-size: 15px;
-  font-weight: 650;
-  line-height: 1.45;
+.rj-dates-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
 }
-.jh-row small {
-  display: block;
-  margin-top: 4px;
-  font-size: 12px;
+.rj-dates ul { list-style: none; margin: 0; padding: 0; }
+.rj-date {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.rj-date:last-child { border-bottom: 0; }
+.rj-date-label { flex: 1; min-width: 0; font-size: 14.5px; font-weight: 600; color: var(--text); }
+.rj-date-when { font-size: 12.5px; color: var(--text-sub); white-space: nowrap; }
+.rj-dday {
+  min-width: 52px;
+  text-align: center;
+  font-size: 12.5px;
+  font-weight: 800;
+  color: #4A3A06;
+  background: #F7D55C;
+  border-radius: 999px;
+  padding: 4px 8px;
+}
+.rj-dday.approx { background: var(--bg-soft); color: var(--text-sub); font-weight: 600; }
+.rj-dates-note {
+  display: flex;
+  gap: 4px;
+  margin-top: 8px;
+  font-size: 11.5px;
   line-height: 1.5;
-  color: var(--jh-sub);
+  color: var(--text-sub);
 }
-.jh-chevron {
-  flex: 0;
-  font-size: 23px;
-  color: var(--jh-sub);
-}
-
-.jh-end {
-  margin: 0;
-  padding-top: 24px;
-  font-size: 12px;
-  line-height: 1.65;
-  color: var(--jh-sub);
-}
-
-@media (max-width: 380px) {
-  .jh-top { padding-left: 14px; padding-right: 14px; }
-  .jh-main { padding-left: 18px; padding-right: 18px; }
-  .jh-title { font-size: 26px; }
-  .jh-stop-title { font-size: 16px; }
-  .jh-copy { padding: 10px; }
-  .jh-landmark { width: 48px; height: 48px; }
-}
+.rj-dates-note svg { flex-shrink: 0; margin-top: 3px; }

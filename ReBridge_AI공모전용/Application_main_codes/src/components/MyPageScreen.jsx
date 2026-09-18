@@ -5,8 +5,7 @@ import {
   RefreshCw, Target, Briefcase, HelpCircle, RotateCcw, Route,
   Award, FileText, ShieldCheck, ScrollText,
 } from 'lucide-react';
-import { getPersona, loadProfile, getActiveTrack, ageOption, V1_UNIV_ONLY } from '../lib/persona';
-import { MAP_ENABLED } from '../lib/kakaoMap.js';
+import { getPersona, loadProfile, getActiveTrack, ageOption, getHomeRegion, V1_UNIV_ONLY } from '../lib/persona';
 import '../styles.mypage.css';
 
 // 테스트/초기화용 — 저장된 모든 정보 지우고 첫 화면(스플래시→온보딩)부터 다시.
@@ -221,13 +220,7 @@ export default function MyPageScreen({ goTo = () => {}, goBack = () => {} }) {
                 <span className="pchip" key={c}>{c}</span>
               ))}
             </div>
-            {!isStudy && (
-              <button className="mp-setup-cta" onClick={() => goTo('univ-explore')}>
-                <Target size={16} />
-                목표로 갈 수 있는 대학 보기
-                <ChevronRight size={15} />
-              </button>
-            )}
+            {/* '목표로 갈 수 있는 대학 보기'는 뺐다(2026-09-18) — 대학 찾기 입구는 로드맵 3단계 하나 */}
           </>
         )}
 
@@ -277,10 +270,15 @@ export default function MyPageScreen({ goTo = () => {}, goBack = () => {} }) {
               <GoalIcon goal={goal} />
               {GOAL_LABEL[goal] || goal}
             </span>
-            {/* 시작 화면에서 고른 나이. '말하고 싶지 않아요'를 고르면 칩 자체가 안 뜬다. */}
+            {/* 시작 화면에서 고른 학년(예전 사용자는 나이)·사는 지역. '말하고 싶지 않아요'면 칩이 안 뜬다. */}
             {ageOption() && (
               <span className="mp-persona-chip mp-persona-chip--stage">
-                🎂 {ageOption().label}
+                🎒 {ageOption().label}
+              </span>
+            )}
+            {getHomeRegion() && (
+              <span className="mp-persona-chip mp-persona-chip--stage">
+                📍 {getHomeRegion()}
               </span>
             )}
           </div>
@@ -328,14 +326,7 @@ export default function MyPageScreen({ goTo = () => {}, goBack = () => {} }) {
               onClick={() => goTo('saved')} />
             {/* 서류 체크리스트·입시 용어·꿈드림센터는 홈 바로가기와 겹쳐서 여기서 뺐다
                 (2026-09-17 동근님: 같은 기능은 한 곳에서만). MY에는 '나만의 것'만 둔다. */}
-            {/* 대학 지도 — 카카오맵 스위치가 꺼져 있으면 메뉴도 숨긴다(빈 지도로 보내지 않기) */}
-            {MAP_ENABLED && (
-              <>
-                <div className="mp-row-divider" />
-                <MenuRow ico={MapPin} icoClass="ico-green" title="대학 지도"
-                  sub="내 주변 검정고시 지원 대학" onClick={() => goTo('map')} />
-              </>
-            )}
+            {/* 대학 지도는 대학 찾기 화면 안에서 연다(2026-09-18 — 같은 화면 입구는 한 곳) */}
           </>
         ) : null}
       </div>

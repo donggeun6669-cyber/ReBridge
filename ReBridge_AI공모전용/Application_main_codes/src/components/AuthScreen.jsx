@@ -7,7 +7,7 @@ import { ArrowLeft, LogOut, ShieldCheck, Sparkles } from 'lucide-react';
 import {
   getCachedUser, subscribe, refreshUser, signUp, signOut, applyVerifiedUser,
 } from '../lib/auth.js';
-import { redeemCode, isVerified } from '../lib/youthVerify.js';
+import { redeemCode, isVerified, getBadge } from '../lib/youthVerify.js';
 import { BACKEND } from '../lib/supabaseClient.js';
 import { VerifiedBadge } from './CommunityBadge.jsx';
 import '../styles.community.css';
@@ -100,7 +100,8 @@ export default function AuthScreen({ goTo = () => {}, goBack = () => {} }) {
     if (!res.ok) { setErr(res.error); return; }
     applyVerifiedUser(res.user);   // 캐시 갱신 → 구독한 화면 배지 즉시 반영
     setCode('');
-    setMsg('인증됐어요! 이제 글·댓글에 🎖️ 배지가 표시돼요.');
+    const badge = getBadge(res.user);
+    setMsg(`인증됐어요! 이제 글·댓글에 ${badge?.emoji || '🎖️'} ${badge?.label || ''} 배지가 표시돼요.`);
   }, [code, user]);
 
   return (
@@ -163,7 +164,7 @@ export default function AuthScreen({ goTo = () => {}, goBack = () => {} }) {
             </div>
             <p className="cm-me-sub">
               {isVerified(user)
-                ? `꿈드림 인증 완료${user.verifiedCenter ? ` · ${user.verifiedCenter}` : ''}`
+                ? `${getBadge(user)?.label || '꿈드림'} 인증 완료${user.verifiedCenter ? ` · ${user.verifiedCenter}` : ''}`
                 : '아직 미인증이에요. 활동은 가능하지만 배지는 없어요.'}
             </p>
             <button className="cm-btn ghost sm" onClick={() => signOut()}>
@@ -175,12 +176,13 @@ export default function AuthScreen({ goTo = () => {}, goBack = () => {} }) {
             <form className="cm-form cm-verify" onSubmit={onRedeem}>
               <div className="cm-verify-head">
                 <ShieldCheck size={18} />
-                <span>학교밖청소년 인증코드</span>
+                <span>인증코드</span>
               </div>
               <p className="cm-verify-desc">
-                꿈드림 센터에서 받은 인증코드를 입력하면 글·댓글에 🎖️ 배지가 붙어요.
+                꿈드림 센터나 운영팀에게 받은 인증코드를 넣으면 글·댓글에 배지가 붙어요.
+                학교밖청소년은 🎖️, 꿈드림 선생님은 🧑‍🏫, 합격 멘토는 🎓 배지예요.
                 {BACKEND === 'mock' && (
-                  <> 데모 코드: <b>DREAM-TEST</b></>
+                  <> 시연 코드: <b>DREAM-TEST</b> · <b>TEACHER-DEMO</b> · <b>MENTOR-DEMO</b></>
                 )}
               </p>
               <input

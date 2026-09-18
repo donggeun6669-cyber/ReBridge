@@ -1,11 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
-  ArrowLeft, Search, ChevronRight, Sparkles, ExternalLink, MessageCircleHeart, Compass,
-  ShieldQuestion, X, BookOpen,
+  ArrowLeft, Search, ChevronRight, Sparkles, ExternalLink, MessageCircleHeart,
+  ShieldQuestion, X,
 } from 'lucide-react';
 import { searchFaq, FAQ_TOPICS } from '../lib/faq.js';
-import { buildRoadmap } from '../lib/roadmap.js';
-import { loadProfile, getActiveTrack, V1_UNIV_ONLY } from '../lib/persona.js';
+import { getActiveTrack, V1_UNIV_ONLY, isHiddenScreen } from '../lib/persona.js';
 import { getGlossary } from '../data/glossary.js';
 
 // 멘토 Q&A 접수용 구글폼 URL. 폼을 만들면 여기에 주소를 넣으면 바로 활성화돼요.
@@ -23,15 +22,6 @@ export default function HelpScreen({ goTo = () => {}, goBack = () => {}, termId 
   const [mentorNote, setMentorNote] = useState(false);
   const [openTerm, setOpenTerm] = useState(termId);
   const termRef = useRef(null);
-
-  const profile = useMemo(loadProfile, []);
-  const nudge = useMemo(() => {
-    try {
-      return profile ? buildRoadmap(profile).nextStage : null;
-    } catch {
-      return null;
-    }
-  }, [profile]);
 
   // v1은 대입 용어만. (v2 트랙에서는 그 트랙의 용어집)
   const glossary = useMemo(
@@ -55,8 +45,13 @@ export default function HelpScreen({ goTo = () => {}, goBack = () => {}, termId 
   }, [q, glossary]);
   const nothing = q && faqs.length === 0 && terms.length === 0;
 
+  // 2026-09-18: 커뮤니티 '질문' 게시판에 꿈드림 선생님·멘토 답변이 달린다 → 거기로 보낸다.
+  // (검색으로 답을 못 찾았을 때의 다음 단계 안내다. 커뮤니티의 메뉴 입구는 홈 타일 하나.)
+  const communityOn = !isHiddenScreen('community');
   function askMentor() {
-    if (MENTOR_FORM_URL) {
+    if (communityOn) {
+      goTo('community', { board: 'qna' });
+    } else if (MENTOR_FORM_URL) {
       window.open(MENTOR_FORM_URL, '_blank', 'noopener,noreferrer');
     } else {
       setMentorNote(true);
@@ -77,28 +72,8 @@ export default function HelpScreen({ goTo = () => {}, goBack = () => {}, termId 
         궁금한 질문이나 모르는 입시 용어를 검색해 보세요. 답이 없으면 멘토에게 바로 물어볼 수 있어요.
       </div>
 
-      {/* 능동 안내 — 점수/일정 기반 '지금 할 일' */}
-      {nudge && (
-        <button className="help-nudge" onClick={() => goTo('roadmap')}>
-          <span className="help-nudge-ico"><Compass size={18} /></span>
-          <span className="help-nudge-body">
-            <span className="help-nudge-kicker">지금 너에게</span>
-            <span className="help-nudge-title">{nudge.title}</span>
-            <span className="help-nudge-todo">{nudge.todo}</span>
-          </span>
-          <ChevronRight size={18} />
-        </button>
-      )}
-
-      {/* 검정고시 안내(일정·과목·합격 기준) — 홈 검색을 없애며 입구가 사라져 여기로 옮겼다(2026-09-17) */}
-      <button className="help-faq-card help-ged-card" onClick={() => goTo('ged-guide')}>
-        <span className="help-ged-ico"><BookOpen size={18} /></span>
-        <span className="help-faq-body">
-          <span className="help-faq-title">검정고시 안내</span>
-          <span className="help-faq-desc">시험 일정 · 과목 · 합격 기준 · 응시 자격</span>
-        </span>
-        <ChevronRight size={18} className="help-arrow" />
-      </button>
+      {/* 2026-09-18: '지금 할 일' 안내와 '검정고시 안내' 카드는 뺐다.
+          둘 다 로드맵(홈 로드맵 카드 → 1단계 검정고시)에서 들어간다 — 같은 화면 입구를 두 곳에 두지 않는다. */}
 
       <div className="search-bar">
         <Search size={18} color="var(--text-sub)" />
@@ -193,12 +168,15 @@ export default function HelpScreen({ goTo = () => {}, goBack = () => {}, termId 
         <div className="mentor-body">
           <span className="mentor-title">원하는 답이 없나요?</span>
           <p className="mentor-desc">
-            검정고시로 대학 간 <b>선배·멘토</b>가 직접 답해드려요.
+            {communityOn ? <>꿈드림 선생님과 검정고시로 대학 간 <b>선배 멘토</b>가 직접 답해드려요.</>
+              : <>검정고시로 대학 간 <b>선배·멘토</b>가 직접 답해드려요.</>}
             <br />
             <b>모르면 지어내지 않고, 진짜 사람에게 연결</b>해드릴게요.
           </p>
           <button className="mentor-cta" onClick={askMentor}>
-            멘토에게 직접 물어보기 <ExternalLink size={15} />
+            {communityOn
+              ? <>질문 게시판에 물어보기 <ChevronRight size={15} /></>
+              : <>멘토에게 직접 물어보기 <ExternalLink size={15} /></>}
           </button>
           {mentorNote && (
             <p className="mentor-note">

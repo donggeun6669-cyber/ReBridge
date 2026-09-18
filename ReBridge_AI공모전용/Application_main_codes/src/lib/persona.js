@@ -7,18 +7,21 @@
 // }
 
 // ⚙️ v1 출시 범위 스위치.
-//   true  → 대입(univ) 트랙 + 검정고시 안내 + 지원(꿈드림) 탭만 노출.
-//           커뮤니티·인증, 학습(study) 트랙, 직업(job) 트랙을 전부 숨긴다.
+//   true  → 대입(univ) 트랙 + 검정고시 안내 + 지원(꿈드림) + 커뮤니티만 노출.
+//           학습(study) 트랙, 직업(job) 트랙, 진로 허브를 숨긴다.
 //   false → 원래대로 전부 노출 (v1.1에서 되돌릴 때 이 값만 false로).
 //   ※ 기능을 지운 게 아니라 가린 것이다. 화면·데이터·로직은 그대로 남아 있다.
+//   ※ 커뮤니티는 2026-09-18 동근님 지시로 v1에 넣었다(킨텍스 EXPO 시연).
+//     앱 출시 때 뺄지는 다시 정한다 → 빼려면 COMMUNITY_IN_V1 만 false로.
 export const V1_UNIV_ONLY = true;
+export const COMMUNITY_IN_V1 = true;
 
-// v1에서 가려야 하는 화면인지 판단. (커뮤니티/인증 · 직업 · 학습 · 진로허브)
+// v1에서 가려야 하는 화면인지 판단. (직업 · 학습 · 진로허브, 그리고 COMMUNITY_IN_V1=false면 커뮤니티)
 export function isHiddenScreen(screen) {
   if (!V1_UNIV_ONLY) return false;
   const s = String(screen || '');
-  return s === 'community' || s.startsWith('community-')
-    || s === 'explore'                      // CareerHubScreen(진로 허브)
+  if (s === 'community' || s.startsWith('community-')) return !COMMUNITY_IN_V1;
+  return s === 'explore'                    // CareerHubScreen(진로 허브)
     || s.startsWith('job-')
     || s.startsWith('study-');
 }
@@ -40,12 +43,45 @@ export function getPersona(profile) {
   return { stage: p.stage, goal: p.goal || 'undecided' };
 }
 
-export function savePersona({ stage, goal, age }) {
+export function savePersona({ stage, goal, age, grade, homeRegion }) {
   const prev = loadProfile() || {};
   const next = { ...prev, stage, goal };
   if (age !== undefined) next.age = age;
+  if (grade !== undefined) next.grade = grade;
+  if (homeRegion !== undefined) next.homeRegion = homeRegion;
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(next)); } catch { /* 무시 */ }
   return next;
+}
+
+// ── 학년 (2026-09-18 동근님: 시작 질문에 학년·지역) ──────────────────────────
+// 학교 밖이라 '재학 학년'이 없다. "학교에 다녔다면 지금 몇 학년일 나이인지"를 받는다.
+// 로드맵은 이 값으로 사람마다 다르게 그린다(lib/roadmap.js의 gradeRoadmap).
+// min/max는 만 나이·한국 나이 차이를 감안해 넉넉히 잡은 범위다 — 꿈드림 대상(9~24세) 판단에만 쓴다.
+export const GRADE_OPTIONS = [
+  { key: 'm',   label: '중학생 나이', short: '중학생', min: 13, max: 16 },
+  { key: 'h1',  label: '고1 나이',    short: '고1',    min: 15, max: 17 },
+  { key: 'h2',  label: '고2 나이',    short: '고2',    min: 16, max: 18 },
+  { key: 'h3',  label: '고3 나이',    short: '고3',    min: 17, max: 19 },
+  { key: 'a20', label: '20~24세',     short: '20대 초반', min: 20, max: 24 },
+  { key: 'a25', label: '25세 이상',   short: '25세 이상', min: 25, max: 200 },
+];
+
+export function getGrade(p = loadProfile()) {
+  return p?.grade || null;
+}
+export function gradeOption(key = getGrade()) {
+  return GRADE_OPTIONS.find((o) => o.key === key) || null;
+}
+
+// ── 사는 지역 — 꿈드림센터 목록의 기본 지역으로 쓴다 ─────────────────────────
+// ⚠️ profile.region 은 ProfileScreen의 '가고 싶은 대학 지역'이다. 다른 값이라 키를 따로 둔다.
+// 이름은 kkumdrim.json·대학 탐색 필터와 같은 짧은 표기.
+export const HOME_REGIONS = [
+  '서울', '경기', '인천', '부산', '대구', '광주', '대전', '울산', '세종',
+  '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주',
+];
+export function getHomeRegion(p = loadProfile()) {
+  return p?.homeRegion || null;
 }
 
 // ── 나이 (2026-09 서연님 UI 개선안: 시작 화면에서 나이를 묻고 맞춤 안내) ─────────
@@ -72,7 +108,14 @@ export function getAge() {
   return loadProfile()?.age || null;
 }
 
-export function ageOption(ageKey = getAge()) {
+// 학년을 고른 사람(2026-09-18 이후 온보딩)은 학년 선택지가 나이 범위를 대신한다.
+// 인자 없이 부르면 학년 → 예전 나이대 순으로 찾는다.
+export function ageOption(ageKey) {
+  if (ageKey === undefined) {
+    const g = gradeOption();
+    if (g) return g;
+    ageKey = getAge();
+  }
   return AGE_OPTIONS.find((o) => o.key === ageKey) || null;
 }
 
@@ -88,7 +131,7 @@ export function ageOption(ageKey = getAge()) {
 export const DREAMDRIM_MIN_AGE = 9;
 export const DREAMDRIM_MAX_AGE = 24;
 
-export function dreamdrimEligibility(ageKey = getAge()) {
+export function dreamdrimEligibility(ageKey) {
   const o = ageOption(ageKey);
   if (!o) return null;
   const inside = o.min >= DREAMDRIM_MIN_AGE && o.max <= DREAMDRIM_MAX_AGE;

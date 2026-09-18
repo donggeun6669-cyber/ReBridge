@@ -24,7 +24,17 @@
 import { supabase, isSupabase } from './supabaseClient.js';
 import { mockStore } from './communityStore.js';
 
-const BADGE = { emoji: '🎖️', label: '학교밖 인증' };
+// 배지 세 가지 (2026-09-18) — role 로 구분. 예전 사용자(role 없음 + verified)는 학교밖 인증으로 본다.
+export const BADGES = {
+  youth:  { emoji: '🎖️', label: '학교밖 인증', short: '인증' },
+  staff:  { emoji: '🧑‍🏫', label: '꿈드림 선생님', short: '꿈드림 선생님' },
+  mentor: { emoji: '🎓', label: '합격 멘토', short: '합격 멘토' },
+};
+export function roleOf(user) {
+  if (!user) return null;
+  if (user.role && BADGES[user.role]) return user.role;
+  return user.verified ? 'youth' : null;
+}
 
 // 사람이 부르기 쉬운 코드 생성: 센터접두 + 혼동없는 6자리.
 // (4자리는 조합이 32⁴≈100만뿐이라 대입 공격에 약함 — 6자리 32⁶≈10억 + RPC 레이트리밋으로 방어)
@@ -84,7 +94,7 @@ export async function redeemCode(code, user) {
           : '코드가 올바르지 않거나 이미 사용됐어요.',
       };
     }
-    const next = { ...(user || {}), verified: true,
+    const next = { ...(user || {}), verified: true, role: data?.role || 'youth',
       verifiedCenter: data?.center || null, verifiedAt: new Date().toISOString() };
     return { ok: true, user: next };
   }
@@ -97,7 +107,7 @@ export async function redeemCode(code, user) {
   row.used_by = user?.id || 'mock-user';
   row.used_at = Date.now();
   mockStore.setCodes(list);
-  const next = { ...(user || {}), verified: true,
+  const next = { ...(user || {}), verified: true, role: row.role || 'youth',
     verifiedCenter: row.centerId, verifiedAt: new Date().toISOString() };
   return { ok: true, user: next };
 }
@@ -108,5 +118,6 @@ export function isVerified(user) {
 }
 
 export function getBadge(user) {
-  return isVerified(user) ? { ...BADGE } : null;
+  const r = roleOf(user);
+  return r ? { ...BADGES[r], role: r } : null;
 }

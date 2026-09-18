@@ -1,13 +1,15 @@
 import { useState } from 'react';
 import { ChevronLeft } from 'lucide-react';
 import LogoMark from './LogoMark.jsx';
-import { savePersona, getNav, AGE_OPTIONS, V1_UNIV_ONLY } from '../lib/persona.js';
+import { savePersona, getNav, GRADE_OPTIONS, HOME_REGIONS, V1_UNIV_ONLY } from '../lib/persona.js';
 import '../styles.onboarding.css';
 
 // 2026-09 서연님 UI 개선안으로 다시 씀.
 //   0) 인사 — 로고 + 큰 글씨로 "어서 와요", 기기 저장 안내를 여기서 먼저 못박는다
-//   1) 나이 — 나이대만. 생년월일·이름 같은 개인정보는 묻지 않는다
-//   2) 상황 — 검정고시 어느 단계인지
+//   1) 학년 — '학교에 다녔다면 몇 학년일 나이'. 로드맵이 이걸로 사람마다 달라진다 (2026-09-18 동근님)
+//   2) 지역 — 사는 시·도. 꿈드림센터 목록이 이 지역부터 보인다 (2026-09-18 동근님)
+//   3) 상황 — 검정고시 어느 단계인지
+//   (예전 '나이' 질문은 학년으로 바꿨다. 생년월일·이름 같은 개인정보는 여전히 묻지 않는다)
 // 한 화면에 다 몰아넣지 않고 한 번에 하나씩만 묻는다(같은 개선안의 "한 페이지에 모든 정보 X").
 //
 // 진로 허브에서 '대학 진학'으로 들어오면(presetTrack) 트랙 질문은 건너뛴다.
@@ -58,16 +60,19 @@ function hasScores() {
 export default function OnboardingScreen({ goTo = () => {}, presetTrack = null }) {
   // 0 인사 → 1 나이 → 2 상황. 트랙이 안 정해졌으면 나이 다음에 트랙을 묻는다.
   const [step, setStep] = useState(0);
-  const [age, setAge] = useState(null);
+  const [grade, setGrade] = useState(null);
+  const [homeRegion, setHomeRegion] = useState(null);
   const [track, setTrack] = useState(presetTrack || (V1_UNIV_ONLY ? 'university' : null));
 
   const needTrack = !presetTrack && !V1_UNIV_ONLY;
   // 화면 순서를 배열로 들고 다닌다 — 조건이 늘어도 인덱스 계산이 안 꼬이게.
-  const FLOW = needTrack ? ['hello', 'age', 'track', 'stage'] : ['hello', 'age', 'stage'];
+  const FLOW = needTrack
+    ? ['hello', 'grade', 'region', 'track', 'stage']
+    : ['hello', 'grade', 'region', 'stage'];
   const cur = FLOW[step];
 
   function finish(goal, stage) {
-    savePersona({ goal, stage, age });
+    savePersona({ goal, stage, grade, homeRegion });
     if (goal === 'university' && stage === 'tested' && !hasScores()) {
       goTo('profile'); // 점수 입력부터
     } else if (goal === 'job') {
@@ -77,8 +82,13 @@ export default function OnboardingScreen({ goTo = () => {}, presetTrack = null }
     }
   }
 
-  function pickAge(key) {
-    setAge(key);
+  function pickGrade(key) {
+    setGrade(key);
+    setStep(step + 1);
+  }
+
+  function pickRegion(r) {
+    setHomeRegion(r);
     setStep(step + 1);
   }
 
@@ -132,7 +142,7 @@ export default function OnboardingScreen({ goTo = () => {}, presetTrack = null }
             <span className="onb-privacy-emoji">🔒</span>
             <span className="onb-privacy-text">
               <b>로그인 없어요.</b><br />
-              앞으로 물어볼 건 나이와 지금 상황 두 가지뿐이고,
+              앞으로 물어볼 건 학년·지역·지금 상황 세 가지뿐이고,
               그것도 <b>이 기기에만</b> 저장돼요. 서버로 보내지 않아요.
             </span>
           </div>
@@ -141,22 +151,43 @@ export default function OnboardingScreen({ goTo = () => {}, presetTrack = null }
         </div>
       )}
 
-      {cur === 'age' && (
+      {cur === 'grade' && (
         <>
-          <h1 className="onb-q">몇 살이에요?</h1>
-          <p className="onb-sub">나이에 따라 받을 수 있는 지원이 달라서 물어봐요. 만 나이로 골라주세요.</p>
+          <h1 className="onb-q">학교에 다녔다면<br /><span className="accent">지금 몇 학년이에요?</span></h1>
+          <p className="onb-sub">학년에 맞춰 대입 로드맵을 따로 그려 드려요. 또래 친구들 학년으로 골라주세요.</p>
           <div className="onb-age-grid">
-            {AGE_OPTIONS.map((o) => (
+            {GRADE_OPTIONS.map((o) => (
               <button
                 key={o.key}
-                className={`onb-age-chip${age === o.key ? ' on' : ''}`}
-                onClick={() => pickAge(o.key)}
+                className={`onb-age-chip${grade === o.key ? ' on' : ''}`}
+                onClick={() => pickGrade(o.key)}
               >
                 {o.label}
               </button>
             ))}
           </div>
-          <button className="onb-skip" onClick={() => pickAge(null)}>
+          <button className="onb-skip" onClick={() => pickGrade(null)}>
+            말하고 싶지 않아요
+          </button>
+        </>
+      )}
+
+      {cur === 'region' && (
+        <>
+          <h1 className="onb-q">어느 지역에<br /><span className="accent">살고 있어요?</span></h1>
+          <p className="onb-sub">가까운 꿈드림센터부터 보여드릴게요. 시·도까지만 골라주세요.</p>
+          <div className="onb-region-grid">
+            {HOME_REGIONS.map((r) => (
+              <button
+                key={r}
+                className={`onb-age-chip${homeRegion === r ? ' on' : ''}`}
+                onClick={() => pickRegion(r)}
+              >
+                {r}
+              </button>
+            ))}
+          </div>
+          <button className="onb-skip" onClick={() => pickRegion(null)}>
             말하고 싶지 않아요
           </button>
         </>

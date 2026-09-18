@@ -10,7 +10,7 @@ import { COMMON_SUPPORT } from '../data/commonSupport';
 import { getCenterBenefits } from '../lib/benefits';
 import { useKakaoMap, MAP_ENABLED } from '../lib/kakaoMap.js';
 import {
-  ageOption, dreamdrimEligibility, DREAMDRIM_MIN_AGE, DREAMDRIM_MAX_AGE,
+  ageOption, dreamdrimEligibility, DREAMDRIM_MIN_AGE, DREAMDRIM_MAX_AGE, getHomeRegion,
 } from '../lib/persona.js';
 import '../styles.support.css';
 
@@ -155,7 +155,11 @@ function KakaoMapView({ centers, userPos, onSelectCenter, selectedId }) {
 
 // ── 메인 화면 ─────────────────────────────────────────────────────────
 export default function DreamdriveScreen({ goBack = () => {}, params = {} }) {
-  const [region, setRegion] = useState('전체');
+  // 시작 질문에서 고른 사는 지역이 있으면 그 지역부터 보여준다(2026-09-18). 언제든 '전체'로 바꿀 수 있다.
+  const [region, setRegion] = useState(() => {
+    const r = getHomeRegion();
+    return r && REGIONS.includes(r) ? r : '전체';
+  });
   const [query, setQuery] = useState('');
   const [userPos, setUserPos] = useState(null);
   const [locConsent, setLocConsent] = useState('idle');

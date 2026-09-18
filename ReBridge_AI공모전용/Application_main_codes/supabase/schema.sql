@@ -335,3 +335,20 @@ $$;
 -- 익명/로그인 사용자가 redeem_code 만 호출하도록 권한을 명시(코드 테이블은 직접 못 봄).
 revoke all on function redeem_code(text) from public;
 grant execute on function redeem_code(text) to anon, authenticated;
+
+-- ============================================================================
+-- 2026-09-18 — 커뮤니티 v1 게시판 재구성 · 배지 역할(role)
+-- ⚠️ 아직 운영 DB에 적용하지 않았다. 지금 앱은 COMMUNITY_DEMO_MODE=true(src/lib/supabaseClient.js)라
+--    Supabase에 붙지 않고 기기 저장(목)으로만 돈다. 운영으로 돌릴 때 이 블록을 적용하고,
+--    redeem_code()가 코드의 role을 profiles.role에 넣도록 함께 고쳐야 한다(아래는 컬럼만).
+-- 게시판: hot(가상, 저장 안 함) · free · worry(익명) · qna · info(tag ged/univ) · pass · review · center
+-- ============================================================================
+do $$ begin
+  alter table posts drop constraint if exists posts_board_check;
+  alter table posts add  constraint posts_board_check
+    check (board in ('free', 'worry', 'qna', 'info', 'pass', 'review', 'center', 'talk'));
+exception when others then null; end $$;
+alter table profiles add column if not exists role text
+  check (role in ('youth', 'staff', 'mentor'));
+alter table verification_codes add column if not exists role text not null default 'youth'
+  check (role in ('youth', 'staff', 'mentor'));

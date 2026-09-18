@@ -423,3 +423,38 @@
   cursor: pointer;
 }
 
+
+/* ── 2026-09-18 커뮤니티 v1 — 시연 표시 · 배지 역할 · 답변 ── */
+.cm-demo-banner {
+  margin: 4px 0 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--bg-soft);
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--text-sub);
+}
+.cm-demo-pill,
+.cm-answered-pill {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  vertical-align: 1px;
+}
+.cm-demo-pill { background: var(--bg-soft); color: var(--text-sub); }
+.cm-answered-pill { background: #F7D55C; color: #4A3A06; }
+.cm-badge.role-staff,
+.cm-badge.role-mentor { background: var(--brand-tint); color: var(--brand-deep); }
+.cm-answers {
+  margin-top: 14px;
+  padding: 12px 14px 4px;
+  border-radius: 16px;
+  background: #FFF8DB;
+  border: 1px solid #F3E3A0;
+}
+.cm-answers .cm-comments-title { margin-top: 0; }
+.cm-answer .cm-comment-body { color: var(--text); }
+.cm-answers + .cm-comments { margin-top: 18px; }

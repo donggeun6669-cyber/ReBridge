@@ -96,7 +96,7 @@
   font-weight: 500;
 }
 
-/* ── 1단계: 나이 칩 ── */
+/* ── 1단계: 학년 칩 (예전 나이 칩) ── */
 .onb-age-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -119,8 +119,19 @@
   background: var(--brand-tint);
   color: var(--brand-deep);
 }
-/* 홀수 개라 마지막 칩이 한 칸만 차지하면 허전해서 가로로 채운다 */
-.onb-age-grid .onb-age-chip:last-child { grid-column: 1 / -1; }
+/* 홀수 개일 때만 마지막 칩이 한 칸만 차지하면 허전해서 가로로 채운다 */
+.onb-age-grid .onb-age-chip:last-child:nth-child(odd) { grid-column: 1 / -1; }
+
+/* ── 지역 칩 (2026-09-18) — 17개라 3열, 칩을 조금 작게 ── */
+.onb-region-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.onb-region-grid .onb-age-chip {
+  padding: 14px 6px;
+  font-size: 15px;
+}
 
 .onb-skip {
   margin-top: var(--gap-lg);

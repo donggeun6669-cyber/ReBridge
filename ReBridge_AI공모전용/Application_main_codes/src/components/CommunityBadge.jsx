@@ -1,16 +1,20 @@
 // 작성자 줄에 붙는 표식 모음.
-//   · VerifiedBadge: 꿈드림 인증 사용자에게만 🎖️ (미인증은 아무것도 안 그림 — 차별 아닌 신뢰 표식).
-//   · AuthorLine: 닉네임 + (인증 시) 배지 한 줄.
-import { getBadge } from '../lib/youthVerify.js';
+//   · VerifiedBadge: 인증된 사람에게만 배지 (미인증은 아무것도 안 그림 — 차별 아닌 신뢰 표식).
+//     🎖️ 학교밖 인증 · 🧑‍🏫 꿈드림 선생님 · 🎓 합격 멘토 (2026-09-18 — 선생님·멘토 추가)
+//   · AuthorLine: 닉네임 + 배지 한 줄.
+import { getBadge, BADGES } from '../lib/youthVerify.js';
 
 export function VerifiedBadge({ user, author }) {
-  // user 형태({verified}) 또는 author 형태({verified}) 둘 다 허용.
-  const verified = user ? getBadge(user) : (author?.verified ? { emoji: '🎖️', label: '학교밖 인증' } : null);
-  if (!verified) return null;
+  // user 형태 또는 author 형태({ role, verified }) 둘 다 허용.
+  const b = user
+    ? getBadge(user)
+    : (author?.role && BADGES[author.role]) ? { ...BADGES[author.role], role: author.role }
+      : author?.verified ? { ...BADGES.youth, role: 'youth' } : null;
+  if (!b) return null;
   return (
-    <span className="cm-badge" title="꿈드림에서 인증한 학교밖청소년">
-      <span className="cm-badge-emoji" aria-hidden="true">{verified.emoji}</span>
-      <span className="cm-badge-label">인증</span>
+    <span className={`cm-badge role-${b.role}`} title={b.label}>
+      <span className="cm-badge-emoji" aria-hidden="true">{b.emoji}</span>
+      <span className="cm-badge-label">{b.short}</span>
     </span>
   );
 }

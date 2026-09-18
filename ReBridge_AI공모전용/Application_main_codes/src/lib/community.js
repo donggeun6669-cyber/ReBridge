@@ -3,13 +3,16 @@
 //   P1: 검색·태그·센터보드·신고/차단·스크랩·무한스크롤·알림.
 //   읽기는 로그인 없이 가능(익명 열람). 쓰기/공감/스크랩/신고/차단은 로그인 필요.
 //
-//   board(게시판):
-//     'review'(꿈드림 후기) | 'talk'(이야기) | 'center'(우리 센터 — 인증 사용자 전용)
-//   tag(주제 태그, talk 보드 안에서 분류): 'ged'(검정고시)·'career'(진로)·'free'(자유)·'worry'(고민)
+//   board(게시판) — 2026-09-18 에브리타임 구성을 참고해 다시 나눴다:
+//     'hot'(HOT — 공감·댓글 많은 글 자동 모음, 글쓰기 없음) · 'free'(자유) · 'worry'(고민 — 익명)
+//     'qna'(질문 — 꿈드림 선생님·합격 멘토 답변) · 'info'(정보 — 태그 ged 검정고시 / univ 입시)
+//     'pass'(합격 후기) · 'review'(꿈드림 후기) · 'center'(우리 센터 — 인증 사용자 전용)
+//   장터·홍보 게시판은 두지 않는다(청소년 대상 — 거래 사기·광고 위험).
+//   예전 'talk'(이야기) 글은 태그에 따라 free/worry/info 로 옮겨 보인다(legacyBoard).
 //
 // 반환 글 형태(정규화):
 //   { id, board, tag, title, body, createdAt,
-//     author: { id, nickname, verified, center },
+//     author: { id, nickname, verified, center, role, anonymous },
 //     likeCount, commentCount, likedByMe, mine, bookmarkedByMe }
 import { supabase, isSupabase } from './supabaseClient.js';
 import { mockStore, rid } from './communityStore.js';
@@ -17,17 +20,46 @@ import { getCachedUser } from './auth.js';
 
 // 기본 게시판(누구나 보임). 'center'는 인증 사용자에게만 동적으로 덧붙인다(boardsFor 참고).
 export const BOARDS = [
-  { id: 'review', label: '꿈드림 후기' },
-  { id: 'talk', label: '이야기' },
+  { id: 'hot',    label: '🔥 HOT',     desc: '공감·댓글이 많은 글을 모아요', virtual: true },
+  { id: 'free',   label: '자유',       desc: '일상·잡담 무엇이든' },
+  { id: 'worry',  label: '고민',       desc: '닉네임 대신 "익명"으로 보여요', anonymous: true },
+  { id: 'qna',    label: '질문',       desc: '꿈드림 선생님·합격 멘토가 답해요' },
+  { id: 'info',   label: '정보',       desc: '검정고시·입시 정보 나눔' },
+  { id: 'pass',   label: '합격 후기',  desc: '검정고시·대학 합격 이야기' },
+  { id: 'review', label: '꿈드림 후기', desc: '센터 다녀온 이야기' },
 ];
+export const WRITABLE_BOARDS = BOARDS.filter((b) => !b.virtual);
+export const DEFAULT_BOARD = 'hot';
+// HOT 게시판 기준 — (공감 + 댓글) 이 값 이상. 고민·우리 센터 글은 HOT에 올리지 않는다(익명·비공개 성격).
+export const HOT_MIN_SCORE = 10;
+const HOT_EXCLUDE = new Set(['worry', 'center']);
 
-// 'talk' 보드 안에서 쓰는 주제 태그. (review/center 보드 글은 tag 없이 board로 분류)
+// 정보 게시판 안의 주제 태그.
 export const TAGS = [
   { id: 'ged', label: '검정고시' },
-  { id: 'career', label: '진로' },
-  { id: 'free', label: '자유' },
-  { id: 'worry', label: '고민' },
+  { id: 'univ', label: '입시' },
 ];
+export const TAG_BOARDS = new Set(['info']);
+
+// 예전(2026-09-18 전) 'talk' 보드 글을 새 게시판으로 옮겨 보인다.
+const LEGACY_TALK = { ged: 'info', career: 'free', free: 'free', worry: 'worry' };
+function legacyBoard(p) {
+  if (p.board !== 'talk') return { board: p.board, tag: p.tag || null };
+  const board = LEGACY_TALK[p.tag] || 'free';
+  return { board, tag: board === 'info' ? 'ged' : null };
+}
+
+export function boardLabel(id) {
+  if (id === 'center') return '우리 센터';
+  return BOARDS.find((b) => b.id === id)?.label?.replace('🔥 ', '') || '게시판';
+}
+export function isAnonymousBoard(id) {
+  return BOARDS.some((b) => b.id === id && b.anonymous);
+}
+// 답변 자격 — 꿈드림 선생님·합격 멘토
+export function isAnswerRole(role) {
+  return role === 'staff' || role === 'mentor';
+}
 
 export const DEFAULT_PAGE_SIZE = 10;
 
@@ -36,25 +68,34 @@ export const DEFAULT_PAGE_SIZE = 10;
 // 데모 코드 안내는 목(mock) 백엔드일 때만 노출한다 — 실백엔드(Supabase)에선 데모 코드가 없다.
 export const PINNED_NOTICE = {
   badge: '📌 고정 공지',
-  title: '학교밖 인증 배지 받는 법 · 활동 등급 안내',
+  title: '인증 배지 · 선생님·멘토 답변 안내',
   sections: [
     {
-      icon: '🎖️',
-      heading: '학교밖청소년 인증 배지 받는 법',
+      icon: '🏷️',
+      heading: '배지는 세 가지예요',
       lines: [
-        '꿈드림 센터에서 받은 인증코드를 [로그인 / 내 정보]의 ‘인증코드 입력’ 칸에 넣으면, 닉네임 옆에 🎖️ 인증 배지가 붙어요.',
-        ...(isSupabase ? [] : ['아직 코드가 없어도 괜찮아요. 지금은 데모 코드 DREAM-TEST 로 배지를 체험해 볼 수 있어요.']),
+        '🎖️ 학교밖 인증 — 꿈드림센터에서 받은 인증코드를 넣은 학교밖청소년',
+        '🧑‍🏫 꿈드림 선생님 — 센터 선생님 인증을 받은 분',
+        '🎓 합격 멘토 — 검정고시로 대학에 간 선배로 확인된 분',
+        '배지는 자랑이 아니라, 누구의 말인지 알고 믿고 이야기하기 위한 표식이에요.',
       ],
     },
     {
-      icon: '🌱',
-      heading: '활동 등급 안내',
+      icon: '💬',
+      heading: '질문 게시판엔 선생님·멘토가 답해요',
       lines: [
-        '등급은 자랑이 아니라, 서로 믿고 편하게 이야기 나누기 위한 작은 표식이에요.',
-        '미인증(닉네임만) → 🎖️ 인증(센터 인증 완료) → 활동 등급(새싹 → 이웃 → 단골)으로 이어져요.',
-        '활동 등급은 글·댓글·공감 같은 참여로 천천히 올라가요. 자동 계산은 곧 제공할 예정이라, 지금은 인증 여부까지만 배지로 보여 드려요.',
+        '선생님·멘토 답변은 댓글 맨 위에 따로 모여 보여요.',
+        '제도·기준은 바뀔 수 있어요. 중요한 건 모집요강·교육청 공고로 한 번 더 확인해요.',
       ],
     },
+    ...(isSupabase ? [] : [{
+      icon: '🧪',
+      heading: '지금은 시연 모드예요',
+      lines: [
+        '예시 글은 시연을 위해 만든 가상의 글이에요. 쓴 글은 이 기기에만 저장돼요.',
+        '배지 체험 코드: DREAM-TEST(학교밖 인증) · TEACHER-DEMO(선생님) · MENTOR-DEMO(멘토)',
+      ],
+    }]),
   ],
 };
 
@@ -108,12 +149,12 @@ export async function listPosts(opts = {}) {
       .select('id, board, tag, title, body, created_at, author, ' +
         'profiles:author (nickname, verified, verified_center), ' +
         'reactions (user_id), comments (id)');
-    if (scope !== 'all') {
+    if (scope !== 'all' && board !== 'hot') {
       query = query.eq('board', board);
       if (board === 'center' && me?.verifiedCenter) {
         query = query.eq('center_id', me.verifiedCenter);
       }
-      if (board === 'talk' && tag) query = query.eq('tag', tag);
+      if (TAG_BOARDS.has(board) && tag) query = query.eq('tag', tag);
     }
     if (q && q.trim()) {
       const term = `%${q.trim()}%`;
@@ -124,7 +165,8 @@ export async function listPosts(opts = {}) {
     if (error) return { items: [], hasMore: false, total: 0 };
     const bm = bookmarkedIdSet(me?.id);
     let items = (data || []).map((p) => normalize(p, me, bm));
-    items = applyClientFilters(items, me, sort);
+    if (scope !== 'all' && board === 'hot') items = items.filter(isHot);
+    items = applyClientFilters(items, me, board === 'hot' ? 'popular' : sort);
     return { items, hasMore: (data || []).length === limit, total: items.length + offset };
   }
 
@@ -135,22 +177,30 @@ export async function listPosts(opts = {}) {
   const term = (q || '').trim().toLowerCase();
 
   let all = mockStore.getPosts()
+    .map((p) => normalizeMock(p, idx, me, bookmarks))
     .filter((p) => {
       if (scope !== 'all') {
-        if (p.board !== board) return false;
-        if (board === 'center' && me?.verifiedCenter && p.author_center !== me.verifiedCenter) return false;
-        if (board === 'talk' && tag && (p.tag || 'free') !== tag) return false;
+        if (board === 'hot') {
+          if (!isHot(p)) return false;
+        } else {
+          if (p.board !== board) return false;
+          if (board === 'center' && me?.verifiedCenter && p.author.center !== me.verifiedCenter) return false;
+          if (TAG_BOARDS.has(board) && tag && p.tag !== tag) return false;
+        }
       }
       if (term && !(`${p.title} ${p.body}`.toLowerCase().includes(term))) return false;
-      if (blocked.has(p.author_id) && p.author_id !== me?.id) return false;
+      if (blocked.has(p.author.id) && !p.mine) return false;
       return true;
-    })
-    .map((p) => normalizeMock(p, idx, me, bookmarks));
+    });
 
-  all = sortItems(all, sort);
+  all = sortItems(all, board === 'hot' ? 'popular' : sort);
   const total = all.length;
   const items = all.slice(offset, offset + limit);
   return { items, hasMore: offset + limit < total, total };
+}
+
+function isHot(p) {
+  return !HOT_EXCLUDE.has(p.board) && (p.likeCount + p.commentCount) >= HOT_MIN_SCORE;
 }
 
 function sortItems(items, sort) {
@@ -220,6 +270,8 @@ export async function listComments(postId) {
       });
   } else {
     const cr = mockStore.getCommentReactions();
+    const parent = mockStore.getPosts().find((x) => x.id === postId);
+    const anon = parent ? isAnonymousBoard(legacyBoard(parent).board) : false;
     flat = mockStore.getComments()
       .filter((c) => c.post_id === postId)
       .filter((c) => !blocked.has(c.author_id) || c.author_id === me?.id)
@@ -228,8 +280,9 @@ export async function listComments(postId) {
         const rs = cr.filter((r) => r.comment_id === c.id);
         return {
           id: c.id, body: c.body, createdAt: c.created_at,
-          author: { id: c.author_id, nickname: c.author_nickname, verified: c.author_verified, center: c.author_center },
-          mine: me?.id === c.author_id,
+          author: mockAuthor(c, anon, parent && c.author_id && c.author_id === parent.author_id),
+          mine: !!me && me.id === c.author_id,
+          isAnswer: isAnswerRole(c.author_role),
           parentId: c.parent_id || null,
           likeCount: rs.length,
           likedByMe: me ? rs.some((r) => r.user_id === me.id) : false,
@@ -263,7 +316,10 @@ export async function createPost({ board, tag, title, body }) {
   if (board === 'center' && !me.verified) {
     return { ok: false, error: '우리 센터 보드는 인증된 사용자만 쓸 수 있어요.' };
   }
-  const theTag = board === 'talk' ? (tag || 'free') : null;
+  if (!WRITABLE_BOARDS.some((x) => x.id === board) && board !== 'center') {
+    return { ok: false, error: '글을 쓸 게시판을 골라 주세요.' };
+  }
+  const theTag = TAG_BOARDS.has(board) ? (tag || TAGS[0].id) : null;
 
   if (isSupabase) {
     const { data, error } = await supabase
@@ -283,6 +339,7 @@ export async function createPost({ board, tag, title, body }) {
     id, board, tag: theTag, title: t, body: b, created_at: Date.now(),
     author_id: me.id, author_nickname: me.nickname,
     author_verified: !!me.verified, author_center: me.verifiedCenter || null,
+    author_role: me.role || (me.verified ? 'youth' : null),
   });
   mockStore.setPosts(posts);
   return { ok: true, id };
@@ -308,6 +365,7 @@ export async function addComment(postId, body, parentId = null) {
     parent_id: parentId || null,
     author_id: me.id, author_nickname: me.nickname,
     author_verified: !!me.verified, author_center: me.verifiedCenter || null,
+    author_role: me.role || (me.verified ? 'youth' : null),
   });
   mockStore.setComments(comments);
   return { ok: true };
@@ -562,21 +620,35 @@ function mockIndexes(reactions, comments, me) {
     if (me && r.user_id === me.id) likedByMe.add(r.post_id);
   }
   const commentCount = new Map();
+  const answered = new Set();   // 선생님·멘토 댓글이 달린 글
   for (const c of comments) {
     commentCount.set(c.post_id, (commentCount.get(c.post_id) || 0) + 1);
+    if (isAnswerRole(c.author_role)) answered.add(c.post_id);
   }
-  return { likeCount, commentCount, likedByMe };
+  return { likeCount, commentCount, likedByMe, answered };
 }
+// 작성자 표시 — 익명 게시판이면 닉네임을 가린다. 선생님·멘토는 익명 게시판에서도 드러낸다(답변 신뢰).
+function mockAuthor(x, anon, isPoster = false) {
+  const role = x.author_role || (x.author_verified ? 'youth' : null);
+  if (anon && !isAnswerRole(role)) {
+    return { id: x.author_id, nickname: isPoster ? '익명(글쓴이)' : '익명', verified: false, center: null, role: null, anonymous: true };
+  }
+  return { id: x.author_id, nickname: x.author_nickname, verified: !!x.author_verified, center: x.author_center, role };
+}
+
 function normalizeMock(p, idx, me, bookmarks) {
+  const { board, tag } = legacyBoard(p);
   return {
-    id: p.id, board: p.board, tag: p.tag || null, title: p.title, body: p.body, createdAt: p.created_at,
+    id: p.id, board, tag, title: p.title, body: p.body, createdAt: p.created_at,
     rating: p.rating ?? null,
-    author: { id: p.author_id, nickname: p.author_nickname, verified: !!p.author_verified, center: p.author_center },
-    likeCount: idx.likeCount.get(p.id) || 0,
+    demo: !!p.demo,
+    author: mockAuthor(p, isAnonymousBoard(board)),
+    likeCount: (idx.likeCount.get(p.id) || 0) + (p.seed_likes || 0),
     commentCount: idx.commentCount.get(p.id) || 0,
+    answered: idx.answered.has(p.id),
     likedByMe: idx.likedByMe.has(p.id),
     bookmarkedByMe: me && bookmarks ? bookmarks.has(p.id) : false,
-    mine: me?.id === p.author_id,
+    mine: !!me && me.id === p.author_id,
   };
 }
 

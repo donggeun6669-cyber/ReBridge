@@ -1,5 +1,6 @@
 import {
   GED_SESSIONS, ADMISSION, isGedYearConfirmed, GED_TYPICAL_HINT, admissionEvent,
+  isAdmissionYearConfirmed, ADMISSION_CONFIRMED,
 } from '../data/schedule.js';
 
 // [월, 일] → 해당 연도의 Date (자정)
@@ -216,4 +217,157 @@ export function buildRoadmap(profile, today = new Date()) {
 
   const nextStage = stages.find((s) => s.status === 'current') || null;
   return { stages, nextStage };
+}
+
+// ─────────────────────────────────────────────────────────────
+// 학년별 나의 대입 로드맵 (2026-09-18 동근님: 로드맵은 사람마다, 학년별로 달라야 한다)
+//
+// 홈의 로드맵 카드와 로드맵 화면 맨 위가 이 결과 하나를 같이 쓴다.
+// 네 단계의 '입구'는 여기 한 곳뿐이다 — 홈·MY 메뉴에 같은 화면으로 가는 버튼을 또 두지 않는다.
+//   검정고시 → ged-guide · 내 점수 → results · 대학 찾기 → univ-explore · 원서·서류 → 이 화면 안
+//
+// 원칙
+//   · 날짜가 지났다고 단계를 완료 처리하지 않는다. 사용자가 고른 상황·입력한 것만 본다.
+//   · 공부 중인 사람이 넣은 점수는 '목표 점수'라 점수 단계 완료로 보지 않는다.
+//   · D-day는 공고로 확정된 일정에만 붙인다(schedule.js의 CONFIRMED 연도). 나머지는 '예년 ○월'.
+//   · '또래 대입 학년도'는 또래 친구들 기준 참고값이다. 지원 자격 규칙이 아니다.
+// ─────────────────────────────────────────────────────────────
+
+export const JOURNEY_STEPS = [
+  { id: 'ged',   title: '검정고시',  sub: '일정·응시 조건',     screen: 'ged-guide' },
+  { id: 'score', title: '내 점수',   sub: '대학별 환산 결과',   screen: 'results' },
+  { id: 'univ',  title: '대학 찾기', sub: '지역·전형으로 찾기', screen: 'univ-explore' },
+  { id: 'apply', title: '원서·서류', sub: '일정과 챙길 서류',   screen: null }, // 로드맵 화면 안
+];
+
+const GRADE_OFFSET = { h3: 1, h2: 2, h1: 3, m: 4, a20: 1, a25: 1 };
+
+// 학교 학년은 3월에 바뀐다. 1~2월은 아직 지난 학년도다.
+function schoolYearBase(today) {
+  return today.getMonth() >= 2 ? today.getFullYear() : today.getFullYear() - 1;
+}
+
+function ddayOf(date, today) {
+  const diff = daysBetween(today, date);
+  return diff > 0 ? `D-${diff}` : diff === 0 ? 'D-DAY' : null;
+}
+
+const KEY_EVENT_LABELS = [
+  ['susiApply', '수시 원서 접수'],
+  ['csat', '수능'],
+  ['csatResult', '수능 성적 발표'],
+  ['susiResult', '수시 합격 발표'],
+  ['susiRegister', '수시 합격자 등록'],
+  ['jeongsiApply', '정시 원서 접수'],
+  ['jeongsiResult', '정시 합격 발표'],
+  ['extraApply', '추가 모집'],
+];
+
+// 주요 일정 — 오늘 이후 가까운 것부터 max개.
+function keyDates(admissionYear, today, { pinGed = false, max = 4 } = {}) {
+  const out = [];
+  const susiYear = admissionYear - 1;
+  const base = startOfDay(today);
+
+  // 검정고시 다음 회차 (학년·상황과 상관없이 참고용으로 하나)
+  const s = nextGedSession(today);
+  if (s) {
+    out.push({
+      id: 'ged', label: `검정고시 ${s.year}년 ${s.label}`,
+      date: s.examDate, confirmed: s.confirmed,
+      text: s.confirmed ? `${s.examDate.getMonth() + 1}월 ${s.examDate.getDate()}일`
+        : `예년 ${s.hint?.exam || '공고 전'}`,
+    });
+  }
+
+  if (isAdmissionYearConfirmed(admissionYear)) {
+    for (const [key, label] of KEY_EVENT_LABELS) {
+      const conf = ADMISSION_CONFIRMED[admissionYear]?.[key];
+      if (!conf) continue;
+      const iso = conf.start ?? conf.date ?? conf.end;
+      const [y, m, d] = iso.split('-').map(Number);
+      const date = new Date(y, m - 1, d);
+      if (date < base) continue;
+      out.push({ id: key, label, date, confirmed: true, text: `${m}월 ${d}일${conf.start && conf.end ? `~${Number(conf.end.slice(8))}일` : ''}` });
+    }
+  } else {
+    // 공고 전 학년도는 수시 원서 하나만 '예년 ○월'로 알려준다.
+    const e = admissionEvent(susiYear, 'susiApply');
+    out.push({ id: 'susiApply', label: '수시 원서 접수', date: e.date, confirmed: false,
+      text: `${susiYear}년 · ${e.hint}` });
+  }
+
+  // 검정고시 공부 중이면 다음 시험을 맨 앞에 고정한다(날짜가 멀어도 가장 중요한 일정이라서).
+  const upcoming = out.filter((e) => e.date >= base).sort((a, b) => a.date - b.date);
+  const ged = pinGed ? upcoming.find((e) => e.id === 'ged') : null;
+  const list = ged ? [ged, ...upcoming.filter((e) => e !== ged)] : upcoming;
+  return list
+    .slice(0, max)
+    .map((e) => ({ ...e, dday: e.confirmed ? ddayOf(e.date, today) : null }));
+}
+
+/**
+ * profile + 관심 대학 수 → 나의 로드맵 요약
+ * 반환: { grade, gradeLabel, admissionYear, peerNote, steps:[{...JOURNEY_STEPS, status}],
+ *         currentId, headline, nextTodo, keyDates, nearest }
+ */
+export function gradeRoadmap(profile, bookmarkCount = 0, today = new Date()) {
+  const grade = profile?.grade || null;
+  const stage = profile?.stage || null;           // 'studying' | 'tested'
+  const hasRealScore = stage === 'tested' && profile?.gedAvg != null;
+  const base = schoolYearBase(today);
+  const admissionYear = base + (GRADE_OFFSET[grade] ?? 1);
+
+  // 지금 단계 — 입력한 것만 근거로 한다.
+  let currentId = null;
+  if (stage === 'studying') currentId = 'ged';
+  else if (stage === 'tested') {
+    if (!hasRealScore) currentId = 'score';
+    else currentId = bookmarkCount > 0 ? 'apply' : 'univ';
+  }
+  const order = JOURNEY_STEPS.map((s) => s.id);
+  const curIdx = currentId ? order.indexOf(currentId) : -1;
+  const steps = JOURNEY_STEPS.map((s, i) => ({
+    ...s,
+    status: curIdx < 0 ? 'open' : i < curIdx ? 'done' : i === curIdx ? 'current' : 'next',
+  }));
+
+  const HEAD = {
+    ged: '검정고시부터 차근차근',
+    score: '이제 내 점수를 넣어 볼 차례',
+    univ: '갈 수 있는 대학을 찾아볼 차례',
+    apply: '원서와 서류를 챙길 차례',
+  };
+  const TODO = {
+    ged: '응시 조건과 다음 시험 일정을 먼저 확인해요.',
+    score: '검정고시 점수를 넣으면 대학마다 몇 등급으로 환산되는지 보여드려요.',
+    univ: '지역·전형으로 대학을 찾아 관심 대학으로 담아요.',
+    apply: '원서 일정과 챙길 서류를 순서대로 확인해요.',
+  };
+
+  let peerNote;
+  if (grade === 'a20' || grade === 'a25') {
+    peerNote = `가장 가까운 대입은 ${admissionYear}학년도예요`;
+  } else if (grade === 'm') {
+    peerNote = `또래 친구들은 ${admissionYear}학년도 이후에 대학에 가요`;
+  } else if (grade) {
+    peerNote = `또래 친구들은 ${admissionYear}학년도 대입을 준비해요`;
+  } else {
+    peerNote = `이번 대입은 ${admissionYear}학년도예요`;
+  }
+
+  const dates = keyDates(admissionYear, today, { pinGed: stage === 'studying' });
+  const nearest = dates.find((d) => d.dday) || null;
+
+  return {
+    grade,
+    admissionYear,
+    peerNote,
+    steps,
+    currentId,
+    headline: currentId ? HEAD[currentId] : '필요한 곳부터 시작해요',
+    nextTodo: currentId ? TODO[currentId] : '어느 단계든 바로 열어볼 수 있어요.',
+    keyDates: dates,
+    nearest,
+  };
 }

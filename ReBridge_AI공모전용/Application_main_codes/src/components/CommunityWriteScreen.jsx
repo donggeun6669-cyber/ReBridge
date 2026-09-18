@@ -1,18 +1,18 @@
-// CommunityWriteScreen — 글 작성(로그인 필요). P1: 보드 선택(인증자 '우리 센터' 포함) + 이야기 주제 태그.
+// CommunityWriteScreen — 글 작성(로그인 필요). 게시판 선택(HOT 제외, 인증자 '우리 센터' 포함) + 정보 게시판 주제 태그.
 // props: goTo(screen, params), goBack(), board(기본 게시판), tag(기본 태그)
 import { useState, useCallback } from 'react';
 import { ArrowLeft } from 'lucide-react';
-import { boardsFor, TAGS, createPost } from '../lib/community.js';
+import { boardsFor, TAGS, TAG_BOARDS, createPost, isAnonymousBoard } from '../lib/community.js';
 import { useAuthUser } from './AuthScreen.jsx';
 import { VerifiedBadge } from './CommunityBadge.jsx';
 import '../styles.community.css';
 
-export default function CommunityWriteScreen({ goTo = () => {}, goBack = () => {}, board = 'review', tag = null, initialTitle = '' }) {
+export default function CommunityWriteScreen({ goTo = () => {}, goBack = () => {}, board = 'free', tag = null, initialTitle = '' }) {
   const user = useAuthUser();
-  const boards = boardsFor(user);
-  const initial = boards.some((x) => x.id === board) ? board : 'review';
+  const boards = boardsFor(user).filter((x) => !x.virtual);   // HOT은 모음이라 쓸 수 없다
+  const initial = boards.some((x) => x.id === board) ? board : 'free';
   const [b, setB] = useState(initial);
-  const [t, setT] = useState(tag || 'free');
+  const [t, setT] = useState(TAGS.some((x) => x.id === tag) ? tag : TAGS[0].id);
   const [title, setTitle] = useState(initialTitle);
   const [body, setBody] = useState('');
   const [busy, setBusy] = useState(false);
@@ -21,7 +21,7 @@ export default function CommunityWriteScreen({ goTo = () => {}, goBack = () => {
   const submit = useCallback(async (e) => {
     e.preventDefault();
     setErr(''); setBusy(true);
-    const res = await createPost({ board: b, tag: b === 'talk' ? t : null, title, body });
+    const res = await createPost({ board: b, tag: TAG_BOARDS.has(b) ? t : null, title, body });
     setBusy(false);
     if (!res.ok) { setErr(res.error); return; }
     goTo('community-post', { id: res.id });
@@ -54,8 +54,9 @@ export default function CommunityWriteScreen({ goTo = () => {}, goBack = () => {
       <div className="cm-write-as">
         <span className="cm-write-as-label">작성자</span>
         <span className="cm-author">
-          <span className="cm-author-nick">{user.nickname}</span>
-          <VerifiedBadge user={user} />
+          {isAnonymousBoard(b)
+            ? <span className="cm-author-nick">익명 <small>(고민 게시판은 닉네임이 보이지 않아요)</small></span>
+            : <><span className="cm-author-nick">{user.nickname}</span><VerifiedBadge user={user} /></>}
         </span>
       </div>
 
@@ -70,7 +71,7 @@ export default function CommunityWriteScreen({ goTo = () => {}, goBack = () => {
           ))}
         </div>
 
-        {b === 'talk' && (
+        {TAG_BOARDS.has(b) && (
           <div className="cm-toolbar" style={{ marginTop: -2 }}>
             {TAGS.map((x) => (
               <button type="button" key={x.id}

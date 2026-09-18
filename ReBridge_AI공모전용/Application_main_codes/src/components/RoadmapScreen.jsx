@@ -2,14 +2,21 @@ import { useMemo, useEffect, useRef } from 'react';
 import {
   ArrowLeft, ChevronRight, ClipboardList, FileText, Scale,
   CalendarDays, Target, MessageCircle, CheckCircle2,
-  Info, Search, Bookmark, Flag, CalendarClock,
+  Info, Search, Flag, CalendarClock, Check,
 } from 'lucide-react';
-import { buildRoadmap } from '../lib/roadmap.js';
+import { buildRoadmap, gradeRoadmap } from '../lib/roadmap.js';
 import { getUniversityDetail } from '../lib/analysis.js';
 import { evaluateAdmission, admissionChance } from '../lib/scoreEngine.js';
 import { getBookmarks } from '../lib/bookmarks.js';
-import { loadProfile } from '../lib/persona.js';
+import { loadProfile, gradeOption } from '../lib/persona.js';
 import ChecklistSection from './ChecklistSection.jsx';
+import imgGed from '../assets/icons3d/step-ged.png';
+import imgScore from '../assets/icons3d/step-score.png';
+import imgUniv from '../assets/icons3d/step-univ.png';
+import imgApply from '../assets/icons3d/step-apply.png';
+import '../styles.home.css';
+
+const STEP_IMG = { ged: imgGed, score: imgScore, univ: imgUniv, apply: imgApply };
 import {
   CUTLINE_GAP_NOTE, CUTLINE_NO_DATA_SHORT,
   ADMISSION_DATA_YEAR, GED_2027_SOURCE_LABEL, applyDeadline,
@@ -49,13 +56,18 @@ const ICONS = {
   ClipboardList, FileText, Scale, CalendarDays, Target, MessageCircle, CheckCircle2,
 };
 
-// '지금 시기에 할 일' — 2026-09-17 동근님: '내 로드맵'과 '서류 체크리스트'를 한 화면으로 합쳤다.
+// '나의 대입 로드맵' — 2026-09-17 동근님: '내 로드맵'과 '서류 체크리스트'를 한 화면으로 합쳤다.
+//   2026-09-18: 맨 위에 학년별 4단계(검정고시·내 점수·대학 찾기·원서·서류)와 주요 일정 D-day를 얹었다.
+//     네 단계의 입구는 여기뿐이다. 홈·MY 메뉴에 같은 화면 버튼을 두지 않는다.
+//     그래서 아래 타임라인의 단계별 버튼(대학 둘러보기·관심 대학 보기)은 뺐다 — 위 단계와 겹쳐서.
 //   위: 일정 순서(마감 알림 · 다음 할 일 · 단계별 타임라인)
 //   아래: 챙길 서류(체크리스트 — 체크 기능 그대로) · 목표 대학까지
 // focus='docs' 로 열리면(예전 '체크리스트' 링크) 서류 구역으로 바로 내려간다.
 export default function RoadmapScreen({ goTo = () => {}, goBack = () => {}, focus = null }) {
   const profile = useMemo(loadProfile, []);
   const data = useMemo(() => (profile ? buildRoadmap(profile) : null), [profile]);
+  const journey = useMemo(() => gradeRoadmap(profile, getBookmarks().length), [profile]);
+  const grade = gradeOption(profile?.grade);
   const docsRef = useRef(null);
   const planRef = useRef(null);
 
@@ -71,12 +83,65 @@ export default function RoadmapScreen({ goTo = () => {}, goBack = () => {}, focu
     <>
       <header className="topbar center">
         <button className="icon-btn" aria-label="뒤로" onClick={goBack}><ArrowLeft size={22} /></button>
-        <span className="page-title">지금 시기에 할 일</span>
+        <span className="page-title">나의 대입 로드맵</span>
       </header>
-      <div className="intro-line">지금 나는 여기 있어요</div>
-      <div className="intro-sub">
-        검정고시부터 대학 등록까지, 언제 뭘 하고 어떤 서류를 챙길지 한 곳에서 볼 수 있어요.
-      </div>
+
+      <section className="rj-card" aria-label="나의 단계">
+        <span className="rj-kicker">
+          {grade ? `${grade.label} · ` : ''}{journey.peerNote}
+        </span>
+        <h2 className="rj-title">{journey.headline}</h2>
+        <p className="rj-sub">{journey.nextTodo}</p>
+        <ol className="rj-steps">
+          {journey.steps.map((st, i) => {
+            const inner = (
+              <>
+                <img className="rj-step-img" src={STEP_IMG[st.id]} alt="" width="44" height="44" />
+                <span className="rj-step-text">
+                  <span className="rj-step-title">
+                    <span className="rj-step-no">{i + 1}</span>{st.title}
+                  </span>
+                  <span className="rj-step-sub">{st.sub}</span>
+                </span>
+                {st.status === 'current' && <span className="rj-badge now">지금 여기</span>}
+                {st.status === 'done' && <span className="rj-badge done"><Check size={12} strokeWidth={3} /> 완료</span>}
+                <ChevronRight size={18} className="rj-step-arrow" aria-hidden="true" />
+              </>
+            );
+            // 원서·서류는 이 화면 안 — 일정 순서로 내려간다
+            const onClick = st.screen ? () => goTo(st.screen) : () => jump(planRef);
+            return (
+              <li key={st.id}>
+                <button type="button" className={`rj-step is-${st.status}`} onClick={onClick}
+                  aria-current={st.status === 'current' ? 'step' : undefined}>
+                  {inner}
+                </button>
+              </li>
+            );
+          })}
+        </ol>
+      </section>
+
+      {journey.keyDates.length > 0 && (
+        <section className="rj-dates" aria-label="주요 일정">
+          <p className="rj-dates-title"><CalendarClock size={14} /> 주요 일정</p>
+          <ul>
+            {journey.keyDates.map((d) => (
+              <li key={d.id} className="rj-date">
+                <span className="rj-date-label">{d.label}</span>
+                <span className="rj-date-when">{d.text}</span>
+                {d.dday
+                  ? <span className="rj-dday">{d.dday}</span>
+                  : <span className="rj-dday approx">공고 전</span>}
+              </li>
+            ))}
+          </ul>
+          <p className="rj-dates-note">
+            <Info size={11} /> D-day는 공고로 확정된 일정에만 붙여요. 나머지는 예년 기준이라 공고로 꼭 확인해요.
+          </p>
+        </section>
+      )}
+
       <div className="rm-jump">
         <button className="rm-jump-chip" onClick={() => jump(planRef)}>🗓️ 일정 순서</button>
         <button className="rm-jump-chip" onClick={() => jump(docsRef)}>📄 챙길 서류</button>
@@ -117,28 +182,12 @@ export default function RoadmapScreen({ goTo = () => {}, goBack = () => {}, focu
 
   // 개인 맞춤 — 점수가 있으면 칸수 분포, 관심 대학 수.
   const hasScore = !!(profile.gedScores && profile.gedAvg != null);
-  const bookmarkCount = useMemo(() => getBookmarks().length, []);
 
   // 관심 대학 원서 접수 마감 알림 — 자료가 있는 대학만 뜬다
   const deadlineAlerts = useMemo(
     () => upcomingDeadlines(getBookmarks(), new Date()),
     []
   );
-
-  // 단계별 개인 맞춤 액션(버튼) — id로 매칭.
-  function stageAction(id) {
-    if (id === 'target') {
-      return hasScore
-        ? { label: '내 점수로 가능성순 보기', icon: Search, onClick: () => goTo('univ-explore') }
-        : { label: '대학 둘러보기', icon: Search, onClick: () => goTo('univ-explore') };
-    }
-    if (id === 'susi') {
-      return bookmarkCount > 0
-        ? { label: `관심 대학 ${bookmarkCount}곳 보기`, icon: Bookmark, onClick: () => goTo('saved') }
-        : { label: '관심 대학 담으러 가기', icon: Bookmark, onClick: () => goTo('univ-explore') };
-    }
-    return null;
-  }
 
   // 목표 대학(=관심 대학)까지 몇 점 더 필요한지 — 점수가 있을 때.
   const targets = useMemo(() => {
@@ -242,14 +291,6 @@ export default function RoadmapScreen({ goTo = () => {}, goBack = () => {}, focu
                     <Info size={12} /> {s.term}
                   </p>
                 )}
-                {(() => {
-                  const act = stageAction(s.id);
-                  return act ? (
-                    <button className="rm-stage-action" onClick={act.onClick}>
-                      <act.icon size={14} /> {act.label}
-                    </button>
-                  ) : null;
-                })()}
                 {s.guideTopic && (
                   <button
                     className="rm-guide-link"
