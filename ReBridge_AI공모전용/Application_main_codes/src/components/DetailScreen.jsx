@@ -284,6 +284,22 @@ function RequirementText({ univId, row }) {
   );
 }
 
+// ── 접는 안내 (2026-09-19 동근님: 전형 카드 안도 빽빽하다) ─────────────────
+// 제목·핵심 결과(배지·숫자·마감)는 늘 보이고, 설명·주의사항·출처·원문은 '자세히'로 접는다.
+// 내용은 지우지 않는다 — 접힌 안에 그대로 있다.
+function Fold({ label = '자세히', children }) {
+  const [on, setOn] = useState(false);
+  return (
+    <>
+      <button type="button" className={`fold-toggle${on ? ' on' : ''}`} aria-expanded={on}
+        onClick={() => setOn((v) => !v)}>
+        {on ? '접기' : label} <ChevronDown size={14} className="fold-chev" />
+      </button>
+      {on && <div className="fold-body">{children}</div>}
+    </>
+  );
+}
+
 // ── 2028학년도 5등급제 전환 (2026-09) ─────────────────────────────────
 // 동근님 지적: "내년부터 입시제도가 바뀌어서 5등급제가 되는 거랑, 내신을 반영하는
 // 거랑 등등 변수가 정말 많을 거야." 그 변수를 앱이 감추지 않고 그대로 보여주는 블록.
@@ -783,11 +799,7 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
                               {r.gedEligible}
                             </span>
                           </div>
-                          <p className="adm-block-desc">
-                            {r.gedEligible === '가능'
-                              ? `${ADMISSION_DATA_YEAR}학년도 대교협 자료에 검정고시 지원 가능 전형으로 실려 있어요.`
-                              : '검정고시 지원에 별도 조건이 붙는 전형이에요. 아래 원문을 꼭 확인하세요.'}
-                          </p>
+                          {/* 조건부면 조건은 접지 않는다 — 지원 여부를 가르는 내용이라서 */}
                           {r.gedEligible === '조건부' && r.gedIneligibleReason && (
                             <div className="adm-reason">{r.gedIneligibleReason}</div>
                           )}
@@ -800,11 +812,18 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
                               </span>
                             </div>
                           )}
-                          {r.phaseBasis === 'type' && (
-                            <div className="adm-disclaimer">{PHASE_ESTIMATED_NOTICE}</div>
-                          )}
-                          <RequirementText univId={realUnivId} row={r} />
-                          {r.source && <p className="adm-src">출처: {r.source}</p>}
+                          <Fold label="근거·지원자격 원문 보기">
+                            <p className="adm-block-desc">
+                              {r.gedEligible === '가능'
+                                ? `${ADMISSION_DATA_YEAR}학년도 대교협 자료에 검정고시 지원 가능 전형으로 실려 있어요.`
+                                : '검정고시 지원에 별도 조건이 붙는 전형이에요. 아래 원문을 꼭 확인하세요.'}
+                            </p>
+                            {r.phaseBasis === 'type' && (
+                              <div className="adm-disclaimer">{PHASE_ESTIMATED_NOTICE}</div>
+                            )}
+                            <RequirementText univId={realUnivId} row={r} />
+                            {r.source && <p className="adm-src">출처: {r.source}</p>}
+                          </Fold>
                         </div>
                       )}
 
@@ -816,14 +835,20 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
                             {fit.label}
                           </span>
                         </div>
-                        <ul className="fit-reasons">
-                          {fit.reasons.map((rs, ri) => (
-                            <li key={ri}>{rs}</li>
-                          ))}
-                        </ul>
-                        <p className="fit-disclaim">
-                          ※ 합격 확률이 아니라, 검정고시생이 <b>지원하기 좋은 정도</b>예요.
-                        </p>
+                        {/* 첫 이유만 보이고 나머지는 접는다 */}
+                        {fit.reasons.length > 0 && <p className="fold-lead">{fit.reasons[0]}</p>}
+                        <Fold label={fit.reasons.length > 1 ? `이유 ${fit.reasons.length - 1}개 더 보기` : '자세히'}>
+                          {fit.reasons.length > 1 && (
+                            <ul className="fit-reasons">
+                              {fit.reasons.slice(1).map((rs, ri) => (
+                                <li key={ri}>{rs}</li>
+                              ))}
+                            </ul>
+                          )}
+                          <p className="fit-disclaim">
+                            ※ 합격 확률이 아니라, 검정고시생이 <b>지원하기 좋은 정도</b>예요.
+                          </p>
+                        </Fold>
                       </div>
 
                       {/* 합격선 블록 */}
@@ -835,51 +860,7 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
                           <div className="adm-block-title">{ev.cutlineYear ?? CUTLINE_YEAR}학년도 합격선</div>
                           <div className="adm-cut">
                             약 <b>{ev.cutGrade}등급</b>
-                            {/* 컷 종류·집계 근거·신뢰도. 하나도 없으면 괄호 자체를 생략한다. */}
-                            {(() => {
-                              const cutType = ev.cutGradeType ?? ev.cutScoreType ?? null;
-                              const parts = [];
-                              if (cutType) parts.push(cutType);
-                              // cutN은 '학생 수'가 아니라 집계에 쓴 모집단위 행 수다.
-                              if (ev.cutN) parts.push(`모집단위 ${ev.cutN}개 기준(전체 중앙값)`);
-                              if (ev.cutConfidence === 'high') parts.push('신뢰도 높음');
-                              else if (ev.cutConfidence === 'mid') parts.push('신뢰도 보통');
-                              if (parts.length === 0) return null;
-                              return (
-                                <span className="adm-cut-meta"> ({parts.join(' · ')})</span>
-                              );
-                            })()}
                           </div>
-                          {/* 이 합격선을 몇 개 전형이 나눠 쓰는지 / 학과 몇 개로 낸 값인지.
-                              어디가 입결은 '대학 × 전형유형' 단위 집계라, 성격이 다른 전형들이
-                              같은 숫자를 쓰게 된다(충남대 학생부종합 6개 전형이 전부 3.39등급).
-                              자료를 더 잘 구해서 고칠 수 있는 게 아니라 원천의 해상도 문제다.
-                              고칠 수 없으면 말이라도 해야 한다. */}
-                          {(ev.cutSpread > 2 || ev.cutNarrow) && (
-                            <div className="adm-cut-caveat">
-                              {ev.cutSpread > 2 && (
-                                <span>
-                                  이 합격선은 {univ.name} <b>{r.admissionType} 전형 {ev.cutSpread}개를 통틀어</b>{' '}
-                                  집계한 값이에요. 전형마다 실제 합격선은 달라요.{' '}
-                                </span>
-                              )}
-                              {ev.cutNarrow && (
-                                <span>
-                                  게다가 <b>학과 {ev.cutN}개</b>만으로 낸 값이라 대학 전체를 대표한다고 보기 어려워요.{' '}
-                                </span>
-                              )}
-                              모집요강과 입학처 발표 입시결과를 꼭 같이 보세요.
-                            </div>
-                          )}
-                          {/* 합격자 최저 등급 — 전문대 자료에만 있다.
-                              평균은 "보통 이 정도로 붙는다"이고, 최저는 "이 등급까지도 붙었다"라
-                              지원을 망설이는 사람에게는 이쪽이 더 중요한 정보다. */}
-                          {ev.cutGradeLowest != null && (
-                            <div className="adm-cut-lowest">
-                              합격자 중 가장 낮은 등급은 <b>{ev.cutGradeLowest}등급</b>이었어요
-                              {ev.cutGrade != null && ' (평균은 위 숫자예요)'}.
-                            </div>
-                          )}
                           {/* 몇 점 맞아야 하는지 글로 풀어주기 —
                               판정 문구는 반드시 ev.verdict와 같은 기준으로만 말한다.
                               (예전엔 평균만 비교해서 verdict가 '도전'인데 "충분해요"라고 하는 모순이 있었다) */}
@@ -912,6 +893,55 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
                               </div>
                             );
                           })()}
+                          {/* 여러 전형·적은 학과로 낸 값이면 짧게라도 늘 보이게 둔다(자세한 문장은 아래 접힘 안) */}
+                          {ev.cutSpread > 2 ? (
+                            <p className="fold-warn">⚠️ 이 전형만의 합격선이 아니에요 — 전형 {ev.cutSpread}개를 합친 값</p>
+                          ) : ev.cutNarrow ? (
+                            <p className="fold-warn">⚠️ 학과 {ev.cutN}개로만 낸 값이에요</p>
+                          ) : null}
+                          <Fold label="근거·주의사항 보기">
+                            {/* 컷 종류·집계 근거·신뢰도. 하나도 없으면 줄 자체를 생략한다. */}
+                            {(() => {
+                              const cutType = ev.cutGradeType ?? ev.cutScoreType ?? null;
+                              const parts = [];
+                              if (cutType) parts.push(cutType);
+                              // cutN은 '학생 수'가 아니라 집계에 쓴 모집단위 행 수다.
+                              if (ev.cutN) parts.push(`모집단위 ${ev.cutN}개 기준(전체 중앙값)`);
+                              if (ev.cutConfidence === 'high') parts.push('신뢰도 높음');
+                              else if (ev.cutConfidence === 'mid') parts.push('신뢰도 보통');
+                              if (parts.length === 0) return null;
+                              return <p className="adm-block-desc">합격선 기준: {parts.join(' · ')}</p>;
+                            })()}
+                          {/* 이 합격선을 몇 개 전형이 나눠 쓰는지 / 학과 몇 개로 낸 값인지.
+                              어디가 입결은 '대학 × 전형유형' 단위 집계라, 성격이 다른 전형들이
+                              같은 숫자를 쓰게 된다(충남대 학생부종합 6개 전형이 전부 3.39등급).
+                              자료를 더 잘 구해서 고칠 수 있는 게 아니라 원천의 해상도 문제다.
+                              고칠 수 없으면 말이라도 해야 한다. */}
+                          {(ev.cutSpread > 2 || ev.cutNarrow) && (
+                            <div className="adm-cut-caveat">
+                              {ev.cutSpread > 2 && (
+                                <span>
+                                  이 합격선은 {univ.name} <b>{r.admissionType} 전형 {ev.cutSpread}개를 통틀어</b>{' '}
+                                  집계한 값이에요. 전형마다 실제 합격선은 달라요.{' '}
+                                </span>
+                              )}
+                              {ev.cutNarrow && (
+                                <span>
+                                  게다가 <b>학과 {ev.cutN}개</b>만으로 낸 값이라 대학 전체를 대표한다고 보기 어려워요.{' '}
+                                </span>
+                              )}
+                              모집요강과 입학처 발표 입시결과를 꼭 같이 보세요.
+                            </div>
+                          )}
+                          {/* 합격자 최저 등급 — 전문대 자료에만 있다.
+                              평균은 "보통 이 정도로 붙는다"이고, 최저는 "이 등급까지도 붙었다"라
+                              지원을 망설이는 사람에게는 이쪽이 더 중요한 정보다. */}
+                          {ev.cutGradeLowest != null && (
+                            <div className="adm-cut-lowest">
+                              합격자 중 가장 낮은 등급은 <b>{ev.cutGradeLowest}등급</b>이었어요
+                              {ev.cutGrade != null && ' (평균은 위 숫자예요)'}.
+                            </div>
+                          )}
                           {ev.conversionMethod === 'standard' && (
                             <div className="adm-disclaimer">{STANDARD_CONVERSION_NOTICE}</div>
                           )}
@@ -937,6 +967,7 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
                             출처: {isCollege ? '전문대교협 전문대학포털' : '대교협 어디가'}{' '}
                             {ev.cutlineYear ?? CUTLINE_YEAR}학년도 전형결과
                           </p>
+                          </Fold>
                         </div>
                       ) : (
                         <div className="adm-block adm-block-empty">
@@ -950,10 +981,12 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
                                 : ev?.dataGap === 'special'
                                 ? '지원자격이 따로 있는 전형이에요'
                                 : CUTLINE_NO_DATA_LABEL}</b>
-                              <p>{ev?.reason || '점수를 입력하면 비교해드릴게요.'}</p>
-                              {(r.admissionType === '논술' || r.admissionType === '실기') && (
-                                <p>{CUTLINE_TYPE_NOTICE}</p>
-                              )}
+                              <Fold label="왜 그런지 보기">
+                                <p>{ev?.reason || '점수를 입력하면 비교해드릴게요.'}</p>
+                                {(r.admissionType === '논술' || r.admissionType === '실기') && (
+                                  <p>{CUTLINE_TYPE_NOTICE}</p>
+                                )}
+                              </Fold>
                             </div>
                           </div>
                         </div>
@@ -978,8 +1011,6 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
                             {compAvail.title}
                           </span>
                         </div>
-                        <p className="adm-block-desc">{compAvail.desc}</p>
-
                         {/* 계산 근거 보기 — 내 점수 있을 때만 */}
                         {calcBasis && (
                           <>
@@ -1021,20 +1052,24 @@ export default function DetailScreen({ goTo = () => {}, goBack = () => {}, univI
                           </>
                         )}
 
-                        {rowComp && (
-                          <details className="adm-raw" style={{ marginTop: 8 }}>
-                            <summary>공개된 환산 원문 보기</summary>
-                            <pre>{rowComp}</pre>
-                          </details>
-                        )}
-
-                        <CompRawText univId={realUnivId} phase={r.phase} />
+                        <Fold label="설명·환산 원문 보기">
+                          <p className="adm-block-desc">{compAvail.desc}</p>
+                          {rowComp && (
+                            <details className="adm-raw" style={{ marginTop: 8 }}>
+                              <summary>공개된 환산 원문 보기</summary>
+                              <pre>{rowComp}</pre>
+                            </details>
+                          )}
+                          <CompRawText univId={realUnivId} phase={r.phase} />
+                        </Fold>
                       </div>
 
                       {r.evalMethod && (
                         <div className="adm-block">
                           <div className="adm-block-title">전형 방법</div>
-                          <p className="adm-block-desc">{r.evalMethod}</p>
+                          <Fold label="전형 방법 보기">
+                            <p className="adm-block-desc">{r.evalMethod}</p>
+                          </Fold>
                         </div>
                       )}
                       {!is2027Row && r.gedEligible === '조건부' && r.gedIneligibleReason && (
