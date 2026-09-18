@@ -18,8 +18,40 @@ const ICONS = {
   BookOpen, Calculator, Languages, Globe2, FlaskConical, Landmark,
 };
 
+// 질문 카드 — 답 한 줄을 크게, 설명은 '자세히 보기'로 펼친다(2026-09-18).
+function FactCard({ id, open, onToggle, icon: Icon, tone = 'blue', q, a, sub, alert, chips, more = '자세히 보기', children }) {
+  const isOpen = open === id;
+  return (
+    <section className={`gq-card ${isOpen ? 'open' : ''}`}>
+      <button type="button" className="gq-head" onClick={() => onToggle(id)} aria-expanded={isOpen}>
+        <span className={`gq-ico tone-${tone}`}><Icon size={22} /></span>
+        <span className="gq-text">
+          <span className="gq-q">{q}</span>
+          <span className="gq-a">{a}</span>
+          {sub && <span className="gq-sub">{sub}</span>}
+        </span>
+      </button>
+      {chips && (
+        <div className="gq-chips">
+          {chips.map((c) => <span key={c} className="gq-chip">{c}</span>)}
+          <span className="gq-chip gq-chip--more">+ 선택 1</span>
+        </div>
+      )}
+      {alert && (
+        <p className="gq-alert"><AlertTriangle size={14} /> {alert}</p>
+      )}
+      <button type="button" className="gq-more" onClick={() => onToggle(id)} aria-expanded={isOpen}>
+        {isOpen ? '접기' : more} <ChevronDown size={16} className="gq-more-chev" />
+      </button>
+      {isOpen && <div className="gq-detail">{children}</div>}
+    </section>
+  );
+}
+
 export default function GedGuideScreen({ goTo = () => {}, goBack = () => {} }) {
   const [openSubject, setOpenSubject] = useState(null);
+  const [open, setOpen] = useState(null);   // 펼친 질문 카드 id (한 번에 하나)
+  const toggle = (id) => setOpen((cur) => (cur === id ? null : id));
 
   const profile = useMemo(loadProfile, []);
   const targetAvg = profile?.scoreMode === 'target' ? profile.gedAvg : null;
@@ -79,54 +111,13 @@ export default function GedGuideScreen({ goTo = () => {}, goBack = () => {} }) {
         <span className="page-title">검정고시 안내</span>
       </header>
 
-      <section className="home-hero" style={{ marginBottom: 18 }}>
-        <p className="home-kicker">검정고시 준비 도우미</p>
-        <h1 className="home-title">
-          시험부터 합격까지,<br />
-          <span className="accent">같이 준비해요</span>
-        </h1>
+      {/* 2026-09-18 서연님 피드백: 글이 너무 많아 학생들이 안 읽고 넘긴다.
+          → 질문 카드마다 '답 한 줄'을 크게 먼저 보여주고, 설명은 '자세히 보기'로 펼친다.
+          정보는 하나도 지우지 않았다. 결시=불합격 경고만은 접혀 있어도 보이게 둔다. */}
+      <section className="gq-hero">
+        <h1 className="gq-hero-title">검정고시,<br />이것만 알면 돼요</h1>
+        <p className="gq-hero-sub">궁금한 카드를 눌러 자세히 봐요</p>
       </section>
-
-      {/* ── D-day 히어로 ── */}
-      {/* 공고된 회차만 D-day를 띄운다. 공고 전이면 날짜를 지어내지 않는다. */}
-      {session && session.confirmed && (
-        <div className="gedh-hero">
-          <div className="gedh-hero-top">
-            <CalendarClock size={16} />
-            <span>다음 검정고시까지</span>
-          </div>
-          <div className="gedh-hero-dday">
-            {dday > 0 ? `D-${dday}` : dday === 0 ? 'D-DAY' : '접수 진행 중'}
-          </div>
-          <div className="gedh-hero-date">
-            {session.year}년 {session.label} · 시험 {formatKDate(session.examDate)}
-          </div>
-        </div>
-      )}
-
-      {/* 아직 공고 전 — 예년 패턴만 알려주고 공식 공고로 보낸다 */}
-      {session && !session.confirmed && (
-        <div className="gedh-hero gedh-hero--pending">
-          <div className="gedh-hero-top">
-            <CalendarClock size={16} />
-            <span>{session.year}년 일정은 아직 공고 전이에요</span>
-          </div>
-          <div className="gedh-hero-pending">
-            예년엔 {session.label} 시험을 <b>{session.hint?.exam}</b>에 봤어요
-          </div>
-          <div className="gedh-hero-date">
-            접수는 보통 {session.hint?.apply} · 발표는 {session.hint?.result}
-          </div>
-          <a
-            className="gedh-hero-link"
-            href={GED_LINKS.examSchedule.url}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            공고 확인하러 가기
-          </a>
-        </div>
-      )}
 
       {/* ── 원서접수 임박/진행 배너 ── */}
       {applyOpen && (
@@ -151,6 +142,18 @@ export default function GedGuideScreen({ goTo = () => {}, goBack = () => {} }) {
         </a>
       )}
 
+      <div className="gq-list">
+        <FactCard
+          id="when" open={open} onToggle={toggle}
+          icon={CalendarClock} tone="yellow"
+          q="다음 시험은 언제예요?"
+          a={session
+            ? (session.confirmed
+                ? (dday > 0 ? `D-${dday}` : dday === 0 ? 'D-DAY' : '접수 진행 중')
+                : `예년 ${session.hint?.exam}`)
+            : '공고 확인 필요'}
+          sub={session ? `${session.year}년 ${session.label}${session.confirmed ? ` · 시험 ${formatKDate(session.examDate)}` : ' · 아직 공고 전'}` : null}
+        >
       {/* ── 일정 타임라인 ── */}
       {milestones.length > 0 && (
         <div className="gedh-timeline">
@@ -184,61 +187,113 @@ export default function GedGuideScreen({ goTo = () => {}, goBack = () => {} }) {
           </p>
         </div>
       )}
+          {session && !session.confirmed && (
+            <a className="gq-link" href={GED_LINKS.examSchedule.url} target="_blank" rel="noopener noreferrer">
+              공고 확인하러 가기 <ExternalLink size={14} />
+            </a>
+          )}
+        </FactCard>
 
-      {/* ── 합격 기준 ── */}
-      <div className="gedh-passbox">
-        <div className="gedh-pass-big">
-          평균 <b>{PASS_RULE.passAverage}점</b>이면 합격
-        </div>
-        <p className="gedh-pass-sub">{PASS_RULE.note}</p>
-        {/* 학생이 가장 자주 오해하는 지점 — 결시는 0점이 아니라 불합격이다 */}
-        <p className="gedh-pass-warn">
-          <AlertTriangle size={14} />
-          <span>{PASS_RULE.absentWarning}</span>
-        </p>
-      </div>
+        <FactCard
+          id="pass" open={open} onToggle={toggle}
+          icon={Target} tone="blue"
+          q="몇 점이면 합격이에요?"
+          a={`평균 ${PASS_RULE.passAverage}점`}
+          sub="과목별 과락은 없어요"
+          alert="접수한 과목을 하나라도 안 보면 불합격"
+        >
+          <p className="gq-detail-text">{PASS_RULE.note}</p>
+          <p className="gedh-pass-warn">
+            <AlertTriangle size={14} />
+            <span>{PASS_RULE.absentWarning}</span>
+          </p>
+        </FactCard>
 
-      {/* ── 과목합격제(부분합격) ── */}
-      <div className="home-section">
-        <p className="home-section-label">{SUBJECT_PASS_RULE.title}</p>
-        <div className="gedh-partial">
+        <FactCard
+          id="partial" open={open} onToggle={toggle}
+          icon={CheckCircle2} tone="blue"
+          q="떨어지면 처음부터 다시 봐요?"
+          a="아니요, 60점 넘은 과목은 남아요"
+          sub="과목합격제 — 두 번에 나눠 끝내도 돼요"
+        >
           <ul className="gedh-partial-list">
-            {SUBJECT_PASS_RULE.points.map((t) => (
-              <li key={t}>{t}</li>
-            ))}
+            {SUBJECT_PASS_RULE.points.map((t) => <li key={t}>{t}</li>)}
           </ul>
           <p className="gedh-partial-caution">{SUBJECT_PASS_RULE.caution}</p>
-        </div>
-      </div>
+        </FactCard>
 
-      {/* ── 응시 자격 ── */}
-      <div className="home-section">
-        <p className="home-section-label">나는 볼 수 있을까?</p>
-        <div className="gedh-elig">
+        <FactCard
+          id="elig" open={open} onToggle={toggle}
+          icon={Info} tone="yellow"
+          q="나도 볼 수 있어요?"
+          a="자퇴했다면 6개월 뒤부터"
+          sub="제적일부터 공고일까지 6개월이 지나야 해요"
+        >
           <p className="gedh-elig-head">볼 수 있어요</p>
           <ul className="gedh-elig-list">
             {ELIGIBILITY.can.map((t) => <li key={t}>{t}</li>)}
           </ul>
           <p className="gedh-elig-head gedh-elig-head--no">볼 수 없어요</p>
           <ul className="gedh-elig-list">
-            {ELIGIBILITY.cannot.map((t) => (
-              <li key={t}>{t.replace(/\*\*/g, '')}</li>
-            ))}
+            {ELIGIBILITY.cannot.map((t) => <li key={t}>{t.replace(/\*\*/g, '')}</li>)}
           </ul>
           <p className="gedh-elig-rule">
             <AlertTriangle size={14} />
             <span>{ELIGIBILITY.sixMonthRule}</span>
           </p>
           <p className="gedh-elig-note">{ELIGIBILITY.note}</p>
-        </div>
-      </div>
+        </FactCard>
 
-      {/* ── 내 점수 체크 (모의/기출 점수 → 합격선 비교) ── */}
-      <div className="home-section">
-        <p className="home-section-label">
-          <Target size={15} style={{ verticalAlign: '-2px', marginRight: 5 }} />
-          내 점수 체크
-        </p>
+        <FactCard
+          id="subjects" open={open} onToggle={toggle}
+          icon={BookOpen} tone="blue"
+          q="무슨 과목을 봐요?"
+          a="7과목 (필수 6 + 선택 1)"
+          chips={GED_SUBJECT_GUIDE.map((x) => x.key)}
+          more="과목별 공부 팁 보기"
+        >
+        <div className="gedh-subjects">
+          {GED_SUBJECT_GUIDE.map((s) => {
+            const Icon = ICONS[s.icon] || BookOpen;
+            const open = openSubject === s.key;
+            return (
+              <div key={s.key} className={`gedh-subj ${open ? 'open' : ''}`}>
+                <button
+                  className="gedh-subj-head"
+                  onClick={() => setOpenSubject(open ? null : s.key)}
+                  aria-expanded={open}
+                >
+                  <span className={`gedh-subj-ico ico-${s.color}`}>
+                    <Icon size={18} />
+                  </span>
+                  <span className="gedh-subj-text">
+                    <span className="gedh-subj-name">{s.key}</span>
+                    <span className="gedh-subj-sum">{s.summary}</span>
+                  </span>
+                  <ChevronDown size={18} className="gedh-subj-chev" />
+                </button>
+                {open && (
+                  <ul className="gedh-subj-tips">
+                    {s.tips.map((t, i) => (
+                      <li key={i}>{t}</li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            );
+          })}
+        </div>
+          <p className="gedh-elective">{GED_ELECTIVE_NOTE}</p>
+        </FactCard>
+
+        <FactCard
+          id="mock" open={open} onToggle={toggle}
+          icon={Calculator} tone="yellow"
+          q="내 점수로 합격할 수 있을까?"
+          a={avg == null ? '점수 넣고 확인하기' : `지금 평균 ${avg}점`}
+          sub={avg == null ? '기출·모의고사 점수로 가늠해요' : (avg >= passLine ? '합격선을 넘었어요' : `합격선까지 ${passLine - avg}점`)}
+          more="점수 넣기"
+        >
         <div className="gedh-mock">
           <div className="gedh-mock-grid">
             {GED_SUBJECT_GUIDE.map((s) => (
@@ -302,48 +357,12 @@ export default function GedGuideScreen({ goTo = () => {}, goBack = () => {} }) {
             </button>
           )}
         </div>
-      </div>
-
-      {/* ── 과목별 공부 가이드 ── */}
-      <div className="home-section">
-        <p className="home-section-label">과목별 공부 가이드</p>
-        <div className="gedh-subjects">
-          {GED_SUBJECT_GUIDE.map((s) => {
-            const Icon = ICONS[s.icon] || BookOpen;
-            const open = openSubject === s.key;
-            return (
-              <div key={s.key} className={`gedh-subj ${open ? 'open' : ''}`}>
-                <button
-                  className="gedh-subj-head"
-                  onClick={() => setOpenSubject(open ? null : s.key)}
-                  aria-expanded={open}
-                >
-                  <span className={`gedh-subj-ico ico-${s.color}`}>
-                    <Icon size={18} />
-                  </span>
-                  <span className="gedh-subj-text">
-                    <span className="gedh-subj-name">{s.key}</span>
-                    <span className="gedh-subj-sum">{s.summary}</span>
-                  </span>
-                  <ChevronDown size={18} className="gedh-subj-chev" />
-                </button>
-                {open && (
-                  <ul className="gedh-subj-tips">
-                    {s.tips.map((t, i) => (
-                      <li key={i}>{t}</li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            );
-          })}
-        </div>
-        <p className="gedh-elective">{GED_ELECTIVE_NOTE}</p>
+        </FactCard>
       </div>
 
       {/* ── 공식 링크 ── */}
       <div className="home-section">
-        <p className="home-section-label">공식 자료 바로가기</p>
+        <p className="home-section-label">공식 자료</p>
         <div className="gedh-links">
           {Object.values(GED_LINKS).map((l) => (
             <a
