@@ -11,7 +11,15 @@ import { EXCLUDED_UNIV_IDS } from '../data/excludedUniversities.js';
 /** 마스터 전체 — 데이터 점검·통계용. 화면 목록에는 쓰지 않는다. */
 export const ALL_UNIVERSITIES = all;
 
+// 통합 등으로 이름이 바뀐 대학 — 마스터는 그대로 두고 화면 이름만 지금 이름으로 (2026-09-19 동근님)
+export const NAME_OVERRIDES = {
+  // 2026-03 강원대에 통합. 강릉·원주캠퍼스가 모집요강·시행계획을 따로 낸다.
+  uA0000001: '강원대학교(강릉·원주캠퍼스)',
+};
+
 /** 일반 대입 대상 대학. 추천·검색·지도는 전부 이걸 쓴다. */
-const universities = all.filter((u) => !EXCLUDED_UNIV_IDS.has(u.univId));
+const universities = all
+  .filter((u) => !EXCLUDED_UNIV_IDS.has(u.univId))
+  .map((u) => (NAME_OVERRIDES[u.univId] ? { ...u, name: NAME_OVERRIDES[u.univId], formerName: u.name } : u));
 
 export default universities;

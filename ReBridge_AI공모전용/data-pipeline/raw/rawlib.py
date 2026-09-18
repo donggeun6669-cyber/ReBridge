@@ -58,6 +58,9 @@ EXCLUDED = {"uA0000639", "uA0002698", "uA0002749", "uA0000288", "uA0000289", "uA
             "uA0000403", "uA0000402", "uA0000562", "uA0000523", "uA0000428"}
 
 
+NAME_OVERRIDES = {"uA0000001": "강원대학교(강릉·원주캠퍼스)"}   # 2026-03 강원대 통합, 옛 이름 국립강릉원주대학교
+
+
 def nfc(s):
     return unicodedata.normalize("NFC", str(s or ""))
 
@@ -73,6 +76,8 @@ def targets():
         sys.exit(f"제외 목록이 excludedUniversities.js 와 다르다: {sorted(ids_in_js ^ EXCLUDED)}")
     unis = json.loads((APP_DATA / "universities.json").read_text(encoding="utf-8"))
     out = [u for u in unis if u["univId"] not in EXCLUDED]
+    for u in out:   # 앱 universityList.js NAME_OVERRIDES 와 같게 (지금 이름)
+        u["name"] = NAME_OVERRIDES.get(u["univId"], u["name"])
     # 번호: 분류(대학교 → 전문대학) 안에서 가나다순
     out.sort(key=lambda u: (u.get("kind") != "대학교", nfc(u["name"])))
     for i, u in enumerate(out, 1):
@@ -86,7 +91,9 @@ def by_id():
 
 
 def univ_dir(year, u):
-    d = RAW / year / f"{u['univId']}_{safe(u['name'])}"
+    # 이름이 바뀌어도 이미 있는 폴더(univId로 시작)를 그대로 쓴다
+    old = sorted((RAW / year).glob(f"{u['univId']}_*"))
+    d = old[0] if old else RAW / year / f"{u['univId']}_{safe(u['name'])}"
     d.mkdir(parents=True, exist_ok=True)
     return d
 
