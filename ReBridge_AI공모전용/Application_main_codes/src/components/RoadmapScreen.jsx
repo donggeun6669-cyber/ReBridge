@@ -1,8 +1,8 @@
-import { useMemo, useEffect, useRef } from 'react';
+import { useMemo, useEffect, useRef, useState } from 'react';
 import {
   ArrowLeft, ChevronRight, ClipboardList, FileText, Scale,
   CalendarDays, Target, MessageCircle, CheckCircle2,
-  Info, Search, Flag, CalendarClock, Check,
+  Info, Search, Flag, CalendarClock, Check, ChevronDown,
 } from 'lucide-react';
 import { buildRoadmap, gradeRoadmap } from '../lib/roadmap.js';
 import { getUniversityDetail } from '../lib/analysis.js';
@@ -15,6 +15,7 @@ import imgScore from '../assets/icons3d/step-score.png';
 import imgUniv from '../assets/icons3d/step-univ.png';
 import imgApply from '../assets/icons3d/step-apply.png';
 import '../styles.home.css';
+import '../styles.readable.css';
 
 const STEP_IMG = { ged: imgGed, score: imgScore, univ: imgUniv, apply: imgApply };
 import {
@@ -179,6 +180,7 @@ export default function RoadmapScreen({ goTo = () => {}, goBack = () => {}, focu
   }
 
   const { stages, nextStage } = data;
+  const [openStage, setOpenStage] = useState(() => stages.find((x) => x.status === 'current')?.id || null);
 
   // 개인 맞춤 — 점수가 있으면 칸수 분포, 관심 대학 수.
   const hasScore = !!(profile.gedScores && profile.gedAvg != null);
@@ -266,37 +268,51 @@ export default function RoadmapScreen({ goTo = () => {}, goBack = () => {}, focu
         </div>
       )}
 
+      {/* 2026-09-18 서연님 피드백(글이 너무 많다): 단계마다 제목·날짜만 보이고,
+          할 일·용어·자세히 링크는 눌러서 펼친다. '지금 여기' 단계는 처음부터 펼쳐 둔다. */}
       <div className="rm-timeline">
         {stages.map((s) => {
           const Icon = ICONS[s.icon] || CheckCircle2;
+          const open = openStage === s.id;
           return (
             <div className={`rm-stage rm-${s.status}`} key={s.id}>
               <span className="rm-dot">
                 <Icon size={16} />
               </span>
               <div className="rm-stage-body">
-                <div className="rm-stage-head">
-                  <span className="rm-stage-title">{s.title}</span>
-                  {s.status === 'current' && <span className="rm-badge-now">지금 여기</span>}
-                  {s.status === 'done' && <span className="rm-badge-done">완료</span>}
-                  {s.optional && <span className="rm-badge-opt">선택</span>}
-                </div>
+                <button type="button" className="rd-stage-head" aria-expanded={open}
+                  onClick={() => setOpenStage(open ? null : s.id)}>
+                  <span className="rm-stage-head">
+                    <span className="rm-stage-title">{s.title}</span>
+                    {s.status === 'current' && <span className="rm-badge-now">지금 여기</span>}
+                    {s.status === 'done' && <span className="rm-badge-done">완료</span>}
+                    {s.optional && <span className="rm-badge-opt">선택</span>}
+                  </span>
+                </button>
                 <div className="rm-stage-when">
                   {s.dateLabel}
                   {s.dday && s.status !== 'done' && <b> · {s.dday}</b>}
                 </div>
-                <p className="rm-stage-todo">{s.todo}</p>
-                {s.term && (
-                  <p className="rm-stage-term">
-                    <Info size={12} /> {s.term}
-                  </p>
-                )}
-                {s.guideTopic && (
-                  <button
-                    className="rm-guide-link"
-                    onClick={() => goTo('guide', { topic: s.guideTopic })}
-                  >
-                    자세히 알아보기 <ChevronRight size={16} />
+                {open ? (
+                  <>
+                    <p className="rm-stage-todo">{s.todo}</p>
+                    {s.term && (
+                      <p className="rm-stage-term">
+                        <Info size={12} /> {s.term}
+                      </p>
+                    )}
+                    {s.guideTopic && (
+                      <button
+                        className="rm-guide-link"
+                        onClick={() => goTo('guide', { topic: s.guideTopic })}
+                      >
+                        자세히 알아보기 <ChevronRight size={16} />
+                      </button>
+                    )}
+                  </>
+                ) : (
+                  <button type="button" className="rd-stage-more" onClick={() => setOpenStage(s.id)}>
+                    할 일 보기 <ChevronDown size={14} />
                   </button>
                 )}
               </div>

@@ -3,7 +3,7 @@ import {
   ArrowLeft, Phone, MapPin, Search, Navigation, X,
   Wallet, HeartHandshake, Compass, Users, GraduationCap, Lock, Activity,
   CheckCircle, Map as MapIcon, Copy, ChevronLeft, ChevronRight,
-  ShieldCheck, AlertCircle, BookOpen,
+  AlertCircle, BookOpen,
 } from 'lucide-react';
 import centersRaw from '../data/kkumdrim.json';
 import { COMMON_SUPPORT } from '../data/commonSupport';
@@ -13,6 +13,7 @@ import {
   ageOption, dreamdrimEligibility, DREAMDRIM_MIN_AGE, DREAMDRIM_MAX_AGE, getHomeRegion,
 } from '../lib/persona.js';
 import '../styles.support.css';
+import '../styles.readable.css';
 
 // 꿈드림센터 · 지원 혜택 — 2026-09-17 동근님: 따로 있던 '지원 혜택' 화면(SupportScreen)과 합쳤다.
 // 두 화면이 같은 센터 목록·지역 칩·혜택 칩을 각자 그리고 있었다. 이제 여기 한 곳이다.
@@ -295,24 +296,30 @@ export default function DreamdriveScreen({ goBack = () => {}, params = {} }) {
         </div>
       )}
 
-      {/* ① 공통 지원 — 칩을 누르면 아래에 설명이 펼쳐진다 */}
+      {/* ① 공통 지원 — 2026-09-18 서연님 피드백: 작은 칩이라 눈에 안 띄었다.
+          큰 타일(제목 + 한 줄 + 공통/확인 필요)로 보여주고, 누르면 아래에 설명이 펼쳐진다. */}
       <p className="kdream-sec-title">누구나 받을 수 있는 지원</p>
-      <div className="spt-comm-bar">
-        <span className="spt-comm-bar-label"><ShieldCheck size={12} /> 공통 지원</span>
-        <div className="spt-comm-chips">
-          {COMMON_SUPPORT.map((item) => {
-            const Icon = BENEFIT_ICONS[item.icon];
-            return (
-              <button
-                key={item.id}
-                className={`spt-comm-chip${openCommon === item.id ? ' active' : ''}`}
-                onClick={() => setOpenCommon(openCommon === item.id ? null : item.id)}
-              >
-                {Icon && <Icon size={12} />} {item.title}
-              </button>
-            );
-          })}
-        </div>
+      <div className="rd-tiles">
+        {COMMON_SUPPORT.map((item) => {
+          const Icon = BENEFIT_ICONS[item.icon];
+          const on = openCommon === item.id;
+          return (
+            <button
+              key={item.id}
+              type="button"
+              className={`rd-tile${on ? ' active' : ''}`}
+              aria-expanded={on}
+              onClick={() => setOpenCommon(on ? null : item.id)}
+            >
+              <span className="rd-tile-ico">{Icon && <Icon size={20} />}</span>
+              <span className="rd-tile-title">{item.title}</span>
+              <span className="rd-tile-short">{item.short}</span>
+              <span className={`rd-badge${item.status === 'check' ? ' check' : ''}`}>
+                {item.status === 'check' ? '확인 필요' : '공통'}
+              </span>
+            </button>
+          );
+        })}
       </div>
       {openCommon && (() => {
         const item = COMMON_SUPPORT.find((i) => i.id === openCommon);

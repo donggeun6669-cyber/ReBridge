@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import {
   ArrowLeft,
+  ChevronDown,
   ArrowLeftRight,
   BarChart3,
   BookOpen,
@@ -17,6 +19,7 @@ import {
   Target,
 } from 'lucide-react';
 import { currentYear } from '../data/meta.js';
+import '../styles.readable.css';
 
 const GUIDES = {
   types: {
@@ -459,6 +462,12 @@ export default function GuideScreen({ topic = 'types', goTo = () => {}, goBack =
   const HeroIcon = guide.icon;
   const color = TOPIC_COLOR[topic] || 'brand';
 
+  // 2026-09-18 서연님 피드백(글이 너무 많다) → 답 한 줄을 크게 먼저,
+  //   카드는 제목만 보이고 눌러서 펼친다, '쉽게 말하면' 긴 설명은 맨 아래 '자세히'로.
+  //   문구는 하나도 지우지 않았다.
+  const [openCard, setOpenCard] = useState(null);
+  const [showEasy, setShowEasy] = useState(false);
+
   return (
     <div className={`screen guide-screen guide-theme-${color}`}>
       <header className="topbar center">
@@ -468,42 +477,53 @@ export default function GuideScreen({ topic = 'types', goTo = () => {}, goBack =
         <span className="page-title">자주 하는 질문</span>
       </header>
 
-      <section className="guide-hero">
+      <section className="rd-hero">
         <span className={`guide-hero-icon ico-${color}`}>
-          <HeroIcon size={28} />
+          <HeroIcon size={26} />
         </span>
-        <h1>{guide.title}</h1>
-        <p>{guide.subtitle}</p>
+        <p className="rd-q">{guide.title}</p>
+        <h1 className="rd-a">{guide.subtitle}</h1>
       </section>
 
-      <section className="explain-box">
-        <span className="mini-label">쉽게 말하면</span>
-        <p>{guide.easy}</p>
-      </section>
-
-      <section className="guide-key">
-        <CheckCircle2 size={18} />
+      <section className="rd-key">
+        <span className="rd-label">핵심</span>
         <p>{guide.key}</p>
       </section>
 
-      <div className="guide-card-list">
-        {guide.cards.map(({ icon: Icon, title, body }, i) => (
-          <article className="guide-card" key={title}>
-            <span className={`guide-card-icon ico-${CARD_ICON_COLORS[i % CARD_ICON_COLORS.length]}`}>
-              <Icon size={20} />
-            </span>
-            <div>
-              <h2>{title}</h2>
-              <p>{body}</p>
+      <p className="rd-sec">하나씩 눌러 보세요</p>
+      <div className="rd-rows">
+        {guide.cards.map(({ icon: Icon, title, body }, i) => {
+          const open = openCard === i;
+          return (
+            <div key={title} className={`rd-row ${open ? 'open' : ''}`}>
+              <button type="button" className="rd-row-head" aria-expanded={open}
+                onClick={() => setOpenCard(open ? null : i)}>
+                <span className={`guide-card-icon ico-${CARD_ICON_COLORS[i % CARD_ICON_COLORS.length]}`}>
+                  <Icon size={20} />
+                </span>
+                <span className="rd-row-title">{title}</span>
+                <ChevronDown size={18} className="rd-chev" />
+              </button>
+              {open && <p className="rd-row-body">{body}</p>}
             </div>
-          </article>
-        ))}
+          );
+        })}
       </div>
 
-      <section className="next-action">
-        <span className="mini-label">지금은 이렇게 해봐요</span>
+      <section className="rd-next">
+        <span className="rd-label">지금 할 일</span>
         <p>{guide.next}</p>
       </section>
+
+      <button type="button" className="rd-more" aria-expanded={showEasy} onClick={() => setShowEasy((v) => !v)}>
+        {showEasy ? '설명 접기' : '처음부터 쉽게 설명 보기'} <ChevronDown size={16} className="rd-chev" />
+      </button>
+      {showEasy && (
+        <section className="explain-box">
+          <span className="mini-label">쉽게 말하면</span>
+          <p>{guide.easy}</p>
+        </section>
+      )}
     </div>
   );
 }

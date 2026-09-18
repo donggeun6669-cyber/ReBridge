@@ -15,6 +15,7 @@
 export const COMMON_SUPPORT = [
   {
     id: 'counsel-1388',
+    short: '24시간 무료 상담', // 타일에 보이는 한 줄 (summary에서 뽑음, 2026-09-18)
     icon: 'Phone',
     title: '청소년상담 1388',
     status: 'available',
@@ -26,6 +27,7 @@ export const COMMON_SUPPORT = [
   },
   {
     id: 'kkumdrim-base',
+    short: '9~24세면 무료 이용', // 타일에 보이는 한 줄 (summary에서 뽑음, 2026-09-18)
     icon: 'GraduationCap',
     title: '꿈드림센터 기본 지원',
     status: 'available',
@@ -37,6 +39,7 @@ export const COMMON_SUPPORT = [
   },
   {
     id: 'ged-fee',
+    short: '지역마다 달라요', // 타일에 보이는 한 줄 (summary에서 뽑음, 2026-09-18)
     icon: 'BookOpen',
     title: '검정고시 응시료 · 교재 지원',
     status: 'check',
@@ -47,6 +50,7 @@ export const COMMON_SUPPORT = [
   },
   {
     id: 'edu-allowance',
+    short: '지역마다 달라요', // 타일에 보이는 한 줄 (summary에서 뽑음, 2026-09-18)
     icon: 'Wallet',
     title: '교육참여수당 · 자립지원',
     status: 'check',
@@ -58,6 +62,7 @@ export const COMMON_SUPPORT = [
   },
   {
     id: 'psy-link',
+    short: '전문 상담 무료 연결', // 타일에 보이는 한 줄 (summary에서 뽑음, 2026-09-18)
     icon: 'HeartHandshake',
     title: '무료 심리상담 연계',
     status: 'available',
