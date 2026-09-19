@@ -1,0 +1,225 @@
+/* 검고담임 광고 — 색·글꼴은 앱(styles.css · styles.home.css)과 같은 값을 쓴다 */
+:root {
+  --bg: #F7F8FA;       /* 앱 화면 배경 */
+  --ink: #1E2A3A;      /* 앱 본문 글자 */
+  --ink-2: #1F2A37;    /* 홈 글자 */
+  --sub: #5B6572;
+  --line: #E6E9ED;
+  --blue: #1C6FB2;
+  --blue-soft: #EAF3FB;
+  --yellow: #F7D55C;
+  --yellow-soft: #FFF4CC;
+  --yellow-ink: #4A3A06;
+  --font: 'Wanted Sans Variable', 'Wanted Sans', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; overflow: hidden; }
+body { background: #DDE1E7; font-family: var(--font); }
+.is-capture body { background: var(--bg); cursor: none; }
+
+#viewport { position: fixed; inset: 0; }
+#stage {
+  position: absolute; left: 0; top: 0;
+  width: 1920px; height: 1080px;
+  transform-origin: 0 0;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font);
+  -webkit-font-smoothing: antialiased;
+  font-kerning: normal;
+  word-break: keep-all;
+  opacity: 0;
+}
+.is-ready #stage { opacity: 1; }
+
+.layer { position: absolute; inset: 0; pointer-events: none; }
+.abs { position: absolute; left: 0; top: 0; }
+
+/* ── 배경 ── */
+.s1-floor { background: linear-gradient(180deg, #FFFFFF 0%, #F7F8FA 52%, #EDF0F4 100%); }
+.floor3d { background: linear-gradient(180deg, #F3F5F8 0%, #EBEEF2 100%); }
+.fog { background: linear-gradient(180deg, rgba(247, 248, 250, 0.8) 0%, rgba(247, 248, 250, 0.5) 12%, rgba(247, 248, 250, 0) 36%); }
+.glow { background: radial-gradient(60% 55% at 62% 58%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0) 70%); }
+
+/* ── 3D 공간 (로드맵) ── */
+.view3d { perspective: 1800px; perspective-origin: 960px 540px; }
+.cam { position: absolute; left: 960px; top: 540px; width: 0; height: 0; transform-style: preserve-3d; }
+.cam > * { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+
+/* ── 휴대폰 ── */
+.phone { position: absolute; width: 422px; height: 876px; }
+.cam > .phone { left: -211px; top: -438px; transform-origin: 50% 50%; }
+.ph-body {
+  position: absolute; inset: 0; border-radius: 66px;
+  background: #15181D;
+  box-shadow:
+    0 0 0 2px #C9CED6,
+    0 0 0 3.5px #E9ECF0,
+    inset 0 0 0 2px #2A2F37,
+    0 60px 90px -30px rgba(30, 42, 58, 0.35),
+    0 24px 40px -18px rgba(30, 42, 58, 0.25);
+}
+.ph-screen {
+  position: absolute; left: 16px; top: 16px; width: 390px; height: 844px;
+  border-radius: 50px; overflow: hidden; background: var(--bg);
+  transform: translateZ(0);
+}
+.ph-app { position: absolute; left: 0; top: 44px; width: 390px; height: 800px; overflow: hidden; }
+.ph-status {
+  position: absolute; left: 0; top: 0; width: 390px; height: 44px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 4px 30px 0 40px; background: var(--bg);
+}
+.ph-time { font-size: 15px; font-weight: 700; letter-spacing: -0.01em; color: var(--ink); }
+.ph-island { position: absolute; left: 50%; top: 10px; width: 118px; height: 33px; margin-left: -59px; border-radius: 20px; background: #0B0D10; }
+.ph-icons { display: flex; align-items: center; gap: 6px; }
+.scr { position: absolute; left: 0; top: 0; width: 390px; background-size: 100% 100%; background-repeat: no-repeat; }
+.crop { position: absolute; left: 0; top: 0; background-repeat: no-repeat; }
+.patch { position: absolute; background: #fff; }
+.dim { position: absolute; inset: 0; background: #0B1320; }
+
+/* 로드맵 복제(앱 홈 .hm-steps 와 같은 모양) */
+.bdot {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: #fff; border: 2px solid var(--line);
+  display: flex; align-items: center; justify-content: center;
+}
+.bdot.is-done { background: var(--blue); border-color: var(--blue); }
+.bdot.is-current { background: var(--yellow); border-color: var(--yellow); box-shadow: 0 0 0 5px var(--yellow-soft); }
+.bdot svg { display: block; }
+.blabel { font-size: 12px; font-weight: 600; line-height: 1.3; color: var(--sub); white-space: nowrap; }
+.blabel.is-current { color: var(--ink-2); font-weight: 800; }
+.bshadow {
+  width: 380px; height: 130px; border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(30, 42, 58, 0.20), rgba(30, 42, 58, 0.07) 55%, rgba(30, 42, 58, 0));
+}
+
+/* 정거장 카드 */
+.bill {
+  width: 340px; height: 262px; padding: 26px 28px;
+  border-radius: 30px; background: #fff;
+  box-shadow: 0 2px 4px rgba(20, 30, 45, 0.05), inset 0 0 0 1px rgba(230, 233, 237, 0.9);
+  transform-origin: 50% 100%;
+}
+.bill-ico { width: 92px; height: 92px; display: block; }
+.bill-title { margin-top: 18px; font-size: 40px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.1; color: var(--ink-2); white-space: nowrap; }
+.bill-no { font-size: 26px; font-weight: 800; color: #8A93A0; margin-right: 12px; }
+.bill-sub { margin-top: 10px; font-size: 23px; font-weight: 500; color: var(--sub); letter-spacing: -0.02em; white-space: nowrap; }
+.bill-chip {
+  position: absolute; top: 28px; right: 26px;
+  padding: 7px 14px; border-radius: 999px;
+  font-size: 19px; font-weight: 800; letter-spacing: -0.02em; white-space: nowrap;
+}
+.bill.is-done .bill-chip { background: var(--blue-soft); color: var(--blue); }
+.bill.is-current .bill-chip { background: var(--yellow); color: var(--yellow-ink); }
+.bill.is-current { box-shadow: 0 2px 4px rgba(20, 30, 45, 0.05), inset 0 0 0 3px var(--yellow); }
+
+/* ── 평면 장면 ── */
+.flatcam { transform-origin: 0 0; }
+.flatcam > .phone { transform-origin: 50% 50%; left: -211px; top: -438px; }
+.morph { position: absolute; left: 0; top: 0; overflow: hidden; }
+.morph > .bill { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+.morph .mscreen { position: absolute; left: 0; top: 0; width: 390px; height: 844px; transform-origin: 0 0; background: var(--bg); overflow: hidden; }
+
+/* 폰 밖으로 들어 올린 앱 화면 조각 */
+.panel {
+  position: absolute; left: 0; top: 0; overflow: hidden;
+  background: var(--bg);
+}
+.panel > .crop { transform-origin: 0 0; }
+.panel-shadow { position: absolute; left: 0; top: 0; }
+.ring {
+  position: absolute; left: 0; top: 0;
+  border: 3px solid var(--blue); border-radius: 18px;
+  box-shadow: 0 0 0 7px rgba(28, 111, 178, 0.12);
+}
+.sticker { position: absolute; left: 0; top: 0; width: 132px; height: 132px; filter: drop-shadow(0 14px 18px rgba(30, 42, 58, 0.18)); }
+
+/* ── 첫 장면 종이 카드 ── */
+.pcard {
+  position: absolute; left: 0; top: 0;
+  padding: 26px 46px 30px; border-radius: 26px; background: #fff;
+  font-size: 56px; font-weight: 800; letter-spacing: -0.04em; color: var(--ink);
+  white-space: nowrap;
+  box-shadow: 0 1px 2px rgba(20, 30, 45, 0.05), 0 22px 44px -16px rgba(30, 42, 58, 0.18);
+}
+.psheet {
+  position: absolute; left: 0; top: 0; width: 150px; height: 196px; padding: 34px 26px;
+  border-radius: 18px; background: #fff;
+  box-shadow: 0 1px 2px rgba(20, 30, 45, 0.05), 0 22px 44px -16px rgba(30, 42, 58, 0.16);
+}
+.psheet i { display: block; height: 9px; border-radius: 5px; background: #ECEFF3; margin-bottom: 18px; }
+.psheet i:nth-child(2) { width: 78%; }
+.psheet i:nth-child(4) { width: 56%; }
+.cshadow {
+  position: absolute; left: 0; top: 0; width: 260px; height: 46px; border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(30, 42, 58, 0.16), rgba(30, 42, 58, 0));
+}
+
+/* ── 카피 ── */
+.copy { position: absolute; left: 0; top: 0; font-weight: 800; letter-spacing: -0.04em; color: var(--ink); }
+.cl-mask { overflow: hidden; padding: 0 0.08em 0.12em; margin-bottom: -0.06em; }
+.cl-line { white-space: nowrap; }
+.copy.c-center { width: 1920px; text-align: center; font-size: 100px; line-height: 1.16; }
+.copy.c-left { font-size: 84px; line-height: 1.2; }
+.copy.c-top { font-size: 66px; line-height: 1.22; }
+.copy.c-right { font-size: 60px; line-height: 1.24; }
+
+/* ── 작은 표시 ── */
+.pill {
+  position: absolute; left: 0; top: 0;
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 10px 20px 11px; border-radius: 999px;
+  font-size: 22px; font-weight: 700; letter-spacing: -0.02em; white-space: nowrap;
+  background: #fff; color: var(--sub);
+  box-shadow: 0 0 0 1px var(--line), 0 6px 16px -8px rgba(30, 42, 58, 0.2);
+}
+.pill::before { content: ''; width: 9px; height: 9px; border-radius: 50%; background: var(--blue); }
+.pill.is-example { background: var(--yellow-soft); color: var(--yellow-ink); box-shadow: 0 0 0 1px #F3E3A6; }
+.pill.is-example::before { background: #D9A800; }
+
+.tap { position: absolute; left: 0; top: 0; width: 0; height: 0; }
+.tap-dot, .tap-ring { position: absolute; left: -32px; top: -32px; width: 64px; height: 64px; border-radius: 50%; }
+.tap-dot { background: rgba(30, 42, 58, 0.22); box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.85); }
+.tap-ring { border: 3px solid rgba(28, 111, 178, 0.55); }
+
+/* ── 마지막 장면 ── */
+.end-line1 { position: absolute; left: 0; top: 0; font-size: 60px; font-weight: 700; letter-spacing: -0.04em; color: var(--ink); white-space: nowrap; }
+.end-brand { position: absolute; left: 0; top: 0; display: flex; align-items: center; gap: 26px; }
+.end-brand img { width: 146px; height: auto; display: block; }
+.end-brand b { font-size: 124px; font-weight: 900; letter-spacing: -0.05em; color: var(--ink); line-height: 1; white-space: nowrap; }
+.qr-card {
+  position: absolute; left: 0; top: 0; display: flex; align-items: center; gap: 34px;
+  padding: 24px 40px 24px 24px; border-radius: 30px; background: #fff;
+  box-shadow: 0 0 0 1px var(--line), 0 26px 50px -24px rgba(30, 42, 58, 0.25);
+}
+.qr-card .qr { width: 196px; height: 196px; padding: 10px; background: #fff; display: block; }
+.qr-cta { font-size: 42px; font-weight: 800; letter-spacing: -0.04em; color: var(--ink); white-space: nowrap; }
+.qr-url { margin-top: 12px; font-size: 28px; font-weight: 700; color: var(--blue); letter-spacing: -0.01em; }
+.qr-hint { margin-top: 16px; font-size: 22px; font-weight: 500; color: var(--sub); }
+.fadeout { background: var(--bg); }
+
+/* ── 미리보기 조작부 (광고 화면 밖) ── */
+#controls {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px;
+  padding: 12px 18px 14px; background: #12161C; color: #E8ECF1;
+  font: 600 14px/1.2 var(--font);
+}
+#controls[hidden], .is-capture #controls { display: none !important; }
+#controls button {
+  font: inherit; color: inherit; background: #242B35; border: 0; border-radius: 9px;
+  padding: 9px 14px; cursor: pointer;
+}
+#controls button:hover { background: #2F3845; }
+#controls button:focus-visible, #controls input:focus-visible { outline: 2px solid #6FB4EA; outline-offset: 2px; }
+#controls [data-a=play] { min-width: 88px; background: #1C6FB2; }
+#controls [data-a=range] { flex: 1 1 320px; accent-color: #57B0E6; }
+#controls [data-a=time] { font-variant-numeric: tabular-nums; min-width: 128px; color: #AAB4C0; }
+#controls .scenes { display: flex; flex-wrap: wrap; gap: 6px; width: 100%; }
+#controls .scene-btn small { margin-left: 6px; color: #8994A2; font-weight: 500; }
+#controls .scene-btn.on { background: #F7D55C; color: #3A2E05; }
+#controls .scene-btn.on small { color: #6B5610; }
+#controls label { display: inline-flex; align-items: center; gap: 6px; color: #AAB4C0; }

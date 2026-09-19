@@ -1,0 +1,7 @@
+Wanted Sans Variable
+Copyright (c) 2024 Wanted Lab, Inc., with Reserved Font Name Wanted Sans Variable.
+https://github.com/wanteddev/wanted-sans
+
+This Font Software is licensed under the SIL Open Font License, Version 1.1.
+http://scripts.sil.org/OFL
+(앱이 쓰는 npm 패키지 wanted-sans 1.0.x 에서 복사)
