@@ -90,6 +90,39 @@ const frames = (page, n = 2) => page.evaluate((n) => new Promise((r) => { let i 
   ok('반복 끄면 끝에서 멈춤', !nl.p && nl.t === 50, `${nl.t.toFixed(2)}초`);
   await page.evaluate(() => window.AD.setLoop(true));
 
+  // ── 소리 (미리보기) ──
+  {
+    const inStage = await page.evaluate(() => {
+      const st = document.getElementById('stage');
+      return [...document.querySelectorAll('[data-a=sound], [data-a=vol]')].some((e) => st.contains(e));
+    });
+    ok('소리 버튼·음량이 광고 화면 밖에 있음', !inStage);
+
+    await page.evaluate(() => { window.AD.pause(); window.AD.seek(0); });
+    await page.click('[data-a=sound]');                       // 사용자 클릭으로만 소리를 켠다
+    await page.waitForTimeout(500);
+    ok('클릭하면 소리가 켜짐', await page.evaluate(() => window.AD.sound));
+
+    await page.evaluate(() => { window.AD.seek(20); });
+    const atSeek = await page.evaluate(() => document.querySelector('audio').currentTime);
+    ok('구간 이동에 소리도 따라감', Math.abs(atSeek - 20) < 0.06, `오디오 ${atSeek.toFixed(2)}초`);
+
+    await page.evaluate(() => window.AD.play());
+    await page.waitForTimeout(1200);
+    const sync = await page.evaluate(() => ({ t: window.AD.time, a: document.querySelector('audio').currentTime }));
+    ok('재생 중 화면과 소리가 같은 시계로 감', Math.abs(sync.t - sync.a) < 0.06 && sync.t > 20.3,
+      `화면 ${sync.t.toFixed(2)}초 · 소리 ${sync.a.toFixed(2)}초`);
+
+    await page.evaluate(() => { window.AD.pause(); });
+    ok('일시정지에 소리도 멈춤', await page.evaluate(() => document.querySelector('audio').paused));
+
+    await page.evaluate(() => { window.AD.seek(49.3); window.AD.play(); });
+    await page.waitForTimeout(1600);
+    const looped = await page.evaluate(() => ({ t: window.AD.time, n: document.querySelectorAll('audio').length, p: document.querySelector('audio').paused }));
+    ok('반복해도 소리가 겹치지 않음', looped.n === 1 && looped.t < 2.5 && !looped.p, `오디오 요소 ${looped.n}개, ${looped.t.toFixed(2)}초`);
+    await page.evaluate(() => { window.AD.pause(); window.AD.disableSound(); window.AD.seek(0); });
+  }
+
   // 화면 비율: 여러 창 크기에서 16:9 유지
   const ratios = [];
   for (const [w, h] of [[1600, 1000], [1280, 900], [900, 1200], [2560, 1300]]) {
@@ -117,6 +150,8 @@ const frames = (page, n = 2) => page.evaluate((n) => new Promise((r) => { let i 
     return { display: cs.display, hidden: c.hidden, h: c.getBoundingClientRect().height, time: /\d+\.\d\d\s*\/\s*\d/.test(txt), cursor: getComputedStyle(document.body).cursor };
   });
   ok('촬영 모드: 조작부·시간 표시 없음', ui.display === 'none' && ui.h === 0 && !ui.time, `controls display=${ui.display}, 커서 ${ui.cursor}`);
+  const noAudio = await page.evaluate(() => ({ els: document.querySelectorAll('audio').length, on: window.AD.sound }));
+  ok('촬영 모드에서는 오디오를 만들지 않음', noAudio.els === 0 && noAudio.on === false, `<audio> ${noAudio.els}개`);
   const b = await page.locator('#stage').boundingBox();
   ok('촬영 모드: 1920×1080 꽉 채움', Math.round(b.width) === 1920 && Math.round(b.height) === 1080 && Math.round(b.x) === 0 && Math.round(b.y) === 0, `${b.width}×${b.height} @${b.x},${b.y}`);
 

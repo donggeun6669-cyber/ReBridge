@@ -115,18 +115,62 @@
     build(stage);
 
     let t = startT, playing = false, loop = true, last = 0, raf = 0;
+
+    // ── 소리 ──
+    // 영상(MP4)에 들어간 것과 '같은 파일'을 쓴다. 큐를 두 벌로 관리하지 않는다.
+    // 브라우저는 클릭 없이 소리를 못 내므로(자동재생 정책), 버튼을 눌러야 켜진다.
+    // 촬영 모드·프레임 저장에서는 오디오를 아예 만들지 않는다.
+    const AUDIO_SRC = 'assets/audio/ad-mix-50s.m4a';
+    const audio = {
+      el: null, on: false, vol: 0.85,
+      make() {
+        if (this.el || capture) return this.el;
+        const a = new Audio(AUDIO_SRC);
+        a.preload = 'auto';
+        a.volume = this.vol;
+        a.addEventListener('ended', () => {            // 반복 재생: 같은 요소를 되감아 쓴다(중복 생성 금지)
+          if (loop && playing) { a.currentTime = 0; a.play().catch(() => {}); t = 0; }
+          else { api.pause(); }
+        });
+        a.addEventListener('error', () => {
+          console.error('[광고] 소리 파일을 못 불러옴:', AUDIO_SRC, '— python3 tools/make-audio.py 로 만든다');
+          this.on = false; if (ui) ui.sync();
+        });
+        bar.appendChild(a);   // 조작부(광고 화면 밖)에 둔다 — 보이지는 않지만 점검 때 찾을 수 있다
+        this.el = a;
+        return a;
+      },
+      async enable() {
+        const a = this.make();
+        if (!a) return false;
+        a.currentTime = Math.min(t, duration - 0.05);
+        try { await a.play(); } catch (e) { console.warn('[광고] 소리 재생이 막혔다:', e.message); return false; }
+        if (!playing) a.pause();
+        this.on = true;
+        return true;
+      },
+      disable() { this.on = false; if (this.el) this.el.pause(); },
+      sync() { if (this.on && this.el) this.el.currentTime = Math.min(t, duration - 0.05); },
+      setVol(v) { this.vol = v; if (this.el) this.el.volume = v; },
+    };
+
     const ui = capture ? null : makeUI();
     fit(); // 장면 버튼이 들어가 조작부 높이가 바뀌었으니 다시 맞춘다
 
     function draw() { render(t); if (ui) ui.sync(); }
     function frame(now) {
       if (!playing) return;
-      const dt = Math.min(0.1, (now - last) / 1000); // 탭이 멈췄다 돌아와도 크게 건너뛰지 않게
+      const a = audio.on && audio.el && !audio.el.paused && audio.el.readyState >= 2 ? audio.el : null;
+      if (a) {
+        t = Math.min(a.currentTime, duration);        // 소리를 기준 시계로 → 그림이 밀리지 않는다
+      } else {
+        const dt = Math.min(0.1, (now - last) / 1000); // 탭이 멈췄다 돌아와도 크게 건너뛰지 않게
+        t += dt;
+      }
       last = now;
-      t += dt;
       if (t >= duration) {
-        if (loop) t %= duration;
-        else { t = duration; playing = false; }
+        if (loop) { t %= duration; audio.sync(); }
+        else { t = duration; playing = false; if (audio.el) audio.el.pause(); }
       }
       draw();
       if (playing) raf = requestAnimationFrame(frame);
@@ -136,12 +180,23 @@
       get time() { return t; },
       get playing() { return playing; },
       get loop() { return loop; },
-      play() { if (playing) return; if (t >= duration) t = 0; playing = true; last = performance.now(); raf = requestAnimationFrame(frame); draw(); },
-      pause() { playing = false; cancelAnimationFrame(raf); draw(); },
+      play() {
+        if (playing) return;
+        if (t >= duration) t = 0;
+        playing = true; last = performance.now();
+        if (audio.on && audio.el) { audio.sync(); audio.el.play().catch(() => {}); }
+        raf = requestAnimationFrame(frame); draw();
+      },
+      pause() { playing = false; cancelAnimationFrame(raf); if (audio.el) audio.el.pause(); draw(); },
       toggle() { if (playing) api.pause(); else api.play(); },
-      seek(v) { t = clamp(v, 0, duration); draw(); return t; },
-      restart() { t = 0; draw(); if (!playing) api.play(); },
+      seek(v) { t = clamp(v, 0, duration); audio.sync(); draw(); return t; },
+      restart() { t = 0; audio.sync(); draw(); if (!playing) api.play(); },
       setLoop(v) { loop = !!v; if (ui) ui.sync(); },
+      // 소리: 버튼(사용자 클릭)으로만 켠다
+      get sound() { return audio.on; },
+      async enableSound() { const okk = await audio.enable(); if (ui) ui.sync(); return okk; },
+      disableSound() { audio.disable(); if (ui) ui.sync(); },
+      setVolume(v) { audio.setVol(clamp(v, 0, 1)); if (ui) ui.sync(); },
     };
     window.AD = api;
     draw();
@@ -161,6 +216,12 @@
         b.addEventListener('click', () => { api.seek(s.start); });
         b.dataset.start = s.start; b.dataset.end = s.end;
       });
+      const soundBtn = $('[data-a=sound]'), vol = $('[data-a=vol]');
+      soundBtn.addEventListener('click', async () => {
+        if (api.sound) api.disableSound();
+        else { const okk = await api.enableSound(); if (!okk) soundBtn.textContent = '소리를 켤 수 없음'; }
+      });
+      vol.addEventListener('input', () => api.setVolume(parseFloat(vol.value)));
       play.addEventListener('click', () => api.toggle());
       $('[data-a=restart]').addEventListener('click', () => api.restart());
       range.addEventListener('input', () => { api.pause(); api.seek(parseFloat(range.value)); });
@@ -177,6 +238,9 @@
       return {
         sync() {
           play.textContent = playing ? '일시정지' : '재생';
+          soundBtn.textContent = api.sound ? '🔊 소리 켜짐' : '🔇 소리와 함께 재생';
+          soundBtn.classList.toggle('on', api.sound);
+          vol.value = audio.vol;
           play.setAttribute('aria-pressed', String(playing));
           if (document.activeElement !== range) range.value = t;
           time.textContent = `${t.toFixed(2)} / ${duration.toFixed(2)}초`;
