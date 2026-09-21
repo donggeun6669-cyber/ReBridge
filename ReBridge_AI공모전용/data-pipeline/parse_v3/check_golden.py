@@ -61,7 +61,10 @@ def from_db():
 
 
 def norm(s):
-    return "".join((s or "").split())
+    """대조용 정규화. 원문에 붙는 각주 표시(*, ※)와 가운뎃점 모양 차이는 같은 이름으로 본다.
+    (성균관대 요강의 모집단위는 '인문과학계열*' 처럼 별표가 붙어 있다)"""
+    import re
+    return re.sub(r"[\s*※·‧・]", "", s or "")
 
 
 def main():
