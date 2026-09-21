@@ -1,4 +1,4 @@
-# 검증 보고 (parse_v3) — 2026-09-20T23:35:05
+# 검증 보고 (parse_v3) — 2026-09-21T19:39:19
 
 > 이 보고는 **기계 검사** 결과다. 통과가 곧 원문 내용 검수 완료를 뜻하지 않는다(시험 대조는 `trial_report.md`).
 
@@ -90,12 +90,42 @@
 - 수능최저 yes / approved: 123
 - 수능최저 yes / pending: 43
 
+## 7-2. 정본 행의 출처
+
+정본 DB 에 값을 넣는 길은 `merge_agent.py` **하나뿐**이다(2026-09-21 결정).
+merge_log 에 기록이 없는 행은 그 길을 거치지 않고 들어온 것이므로 **검사를 받지 않은 값**이다.
+
+| 표 | 전체 | 출처 기록 있음 | 출처 없음 |
+|---|---|---|---|
+| offering | 4598 | 4598 | 0 |
+| eligibility_rule | 533 | 533 | 0 |
+| evaluation_component | 466 | 466 | 0 |
+| conversion_rule | 74 | 74 | 0 |
+| csat_minimum | 358 | 358 | 0 |
+| schedule_event | 319 | 319 | 0 |
+| document_requirement | 137 | 137 | 0 |
+| outcome | 681113 | 0 | 681113 |
+
+- **출처 기록이 없는 행: 681113**
+
+| 넣은 쪽 | 행 수 |
+|---|---|
+| T2 | 3873 |
+| E2 | 932 |
+| E1 | 843 |
+| A1 | 679 |
+| T1 | 651 |
+| E3 | 540 |
+| E4 | 468 |
+| E5 | 152 |
+| MAIN | 5 |
+
 ## 8. 문서별 처리 상태
 
 | 단계 | 상태 | 문서 수 |
 |---|---|---|
-| auto_offerings | done | 33 |
-| auto_offerings | partial | 95 |
+| auto_offerings | done | 584 |
+| auto_offerings | partial | 288 |
 | candidates | done | 874 |
 | candidates | partial | 11 |
 | ocr | done | 339 |
@@ -117,3 +147,4 @@
 | 분리 | 0 |
 | 승인 | 0 |
 | 구간 | 2 |
+| 출처 | 681113 |

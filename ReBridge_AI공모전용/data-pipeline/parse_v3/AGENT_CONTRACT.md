@@ -2,6 +2,27 @@
 
 너는 대학 입시 원문에서 **규칙·조건**을 구조화하는 추출 작업자다. 결과는 메인이 원문 대조로 검증한 뒤 정본 DB에 합친다.
 
+## 정본 DB 에 쓰는 길은 둘뿐이다 (2026-09-21 결정)
+
+`work/parse_v3.sqlite` 에 값을 넣는 것은 아래 두 길뿐이다.
+어느 도구로 작업하든(Claude Code · Antigravity · 사람) 마찬가지다. **다른 길은 없다.**
+
+```
+① 규칙·조건 계열 (모집전형·자격·평가·환산·수능최저·일정·서류)
+   추출 도구(에이전트·Python) → work/agent_out/<ID>/<univId>/*.jsonl → merge_agent.py → 정본 DB
+                                                                        출처: merge_log
+
+② 입시결과 표
+   parse_results.py / parse_results_ocr.py → 정본 DB
+                                             출처: outcome.document_id + processing_log(stage=results)
+```
+
+왜: ① 의 병합기는 **필드 이름 검사·행 수 대조·같은 열쇠 충돌 보존·근거 원문 대조**를 한다.
+이 길을 건너뛰고 DB 에 직접 쓰면 그 검사를 아무도 안 한 값이 정본에 섞이고,
+나중에 어느 값이 어디서 왔는지 되짚을 수 없다.
+
+확인 방법: `python3 validate.py` 의 「7-2. 정본 행의 출처」에서 **출처 기록이 없는 행이 0** 이어야 한다.
+
 ## 절대 규칙
 - **읽기만**: RAW, `_manifests`, 앱(`Application_main_codes`), 정본 DB(`work/parse_v3.sqlite`)·텍스트 캐시를 고치지 않는다. 쓰는 곳은 `work/agent_out/<너의ID>/` 하나뿐.
 - 하위 에이전트 금지. 브라우저·웹 검색 금지(RAW에 있는 원문만). 유료 API·OCR 서비스 금지.

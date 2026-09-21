@@ -67,6 +67,14 @@ def norm(s):
     return re.sub(r"[\s*※·‧・]", "", s or "")
 
 
+def prog_match(got, want):
+    """모집단위 이름이 같은가. 원문은 '기독교학부(신학·기독교상담교육학)' 처럼 뒤에 전공 목록이
+    붙는 일이 흔하므로, **정답 이름으로 시작하면** 같은 모집단위로 본다.
+    ('경영학과' 가 '글로벌경영학과' 에 걸리지 않게 뒤가 아니라 앞을 본다)"""
+    a, b = norm(got), norm(want)
+    return bool(b) and (a == b or a.startswith(b))
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--db", action="store_true", help="정본 DB 와 대조(기본은 기계 추출 결과)")
@@ -80,7 +88,7 @@ def main():
         cand = [r for r in rows
                 if r.get("univId") == g["univId"]
                 and (r.get("academic_year") in (None, g["academic_year"]))
-                and norm(r.get("program_name_raw")) == norm(g["program_name_raw"])
+                and prog_match(r.get("program_name_raw"), g["program_name_raw"])
                 and norm(g["admission_contains"]) in norm(r.get("admission_name_raw"))]
         label = f"{g['univ']} {g['academic_year']} {g['program_name_raw']} · {g['admission_contains']}"
         if not cand:

@@ -148,6 +148,40 @@ def main():
     for r in con.execute("SELECT minimum_exists, calc_approval, count(*) FROM csat_minimum GROUP BY 1,2"):
         out.append(f"- 수능최저 {r[0]} / {r[1]}: {r[2]}")
 
+    # 7-2. 출처(어느 도구가 넣었는가) — 정본에 쓰는 길은 merge_agent.py 하나뿐이어야 한다
+    sec("7-2. 정본 행의 출처")
+    out.append("정본 DB 에 값을 넣는 길은 **둘뿐**이다(2026-09-21 결정). 다른 경로로 들어온 값은 아무 검사도 받지 않은 값이다.")
+    out.append("")
+    out.append("| 길 | 무엇을 넣나 | 출처가 남는 곳 |")
+    out.append("|---|---|---|")
+    out.append("| `merge_agent.py` | 규칙·조건 계열(모집전형·자격·평가·환산·수능최저·일정·서류) | `merge_log` |")
+    out.append("| `parse_results.py` · `parse_results_ocr.py` | 입시결과 표(`outcome`) | `outcome.document_id` + `processing_log(stage=results)` |")
+    out.append("")
+    no_src = 0
+    out.append("| 표 | 전체 | 출처 기록 있음 | 출처 없음 |"); out.append("|---|---|---|---|")
+    for tbl, idc in FACTS.items():
+        try:
+            total = con.execute(f"SELECT count(*) FROM {tbl}").fetchone()[0]
+        except Exception:  # noqa: BLE001
+            continue
+        if tbl == "outcome":
+            # 입시결과는 병합기가 아니라 표 파서가 직접 넣는다. 출처는 '어느 문서에서 나왔나'로 남는다.
+            miss = con.execute("SELECT count(*) FROM outcome o LEFT JOIN document d USING(document_id) "
+                               "WHERE d.document_id IS NULL").fetchone()[0]
+        else:
+            miss = con.execute(
+                f"SELECT count(*) FROM {tbl} t WHERE NOT EXISTS "
+                f"(SELECT 1 FROM merge_log m WHERE m.record_table=? AND m.record_id=t.{idc})", (tbl,)).fetchone()[0]
+        out.append(f"| {tbl} | {total} | {total - miss} | {miss} |")
+        no_src += miss
+    out.append("")
+    out.append(f"- **출처 기록이 없는 행: {no_src}**" + ("" if no_src else " ✔ 모든 값이 병합기를 거쳤다"))
+    issues["출처"] += no_src
+    out.append("")
+    out.append("| 넣은 쪽 | 행 수 |"); out.append("|---|---|")
+    for r in con.execute("SELECT agent, count(*) FROM merge_log GROUP BY 1 ORDER BY 2 DESC"):
+        out.append(f"| {r[0]} | {r[1]} |")
+
     # 8. 문서 처리 상태
     sec("8. 문서별 처리 상태")
     out.append("| 단계 | 상태 | 문서 수 |"); out.append("|---|---|---|")
@@ -156,7 +190,7 @@ def main():
 
     sec("요약")
     out.append("| 분류 | 문제 수 |"); out.append("|---|---|")
-    for k in ("참조", "근거", "열거", "분리", "승인", "구간"):
+    for k in ("참조", "근거", "열거", "분리", "승인", "구간", "출처"):
         out.append(f"| {k} | {issues[k]} |")
     REPORT_DIR.mkdir(exist_ok=True)
     (REPORT_DIR / "validation_report.md").write_text("\n".join(out) + "\n", encoding="utf-8")
