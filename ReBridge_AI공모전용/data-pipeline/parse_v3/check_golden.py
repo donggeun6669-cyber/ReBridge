@@ -68,7 +68,7 @@ def norm(s):
 
 
 # 정답에 적혀 있으면 반드시 같아야 하는 범위 칸들. 숫자가 맞아도 범위가 다르면 다른 사실이다.
-SCOPE = ("phase", "round", "admission_group", "quota_type")
+SCOPE = ("phase", "round", "admission_group", "quota_type", "campus_name")
 
 
 def scope_label(g):

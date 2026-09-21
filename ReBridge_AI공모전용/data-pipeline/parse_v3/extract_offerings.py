@@ -71,20 +71,27 @@ def tighten(s):
     return t
 
 
-# 모집인원 칸에 '40 명' 처럼 단위가 붙어 나오는 요강이 있다(서울교대 2027 수시).
+# 모집인원 칸에 '40 명' 처럼 단위가 붙거나 '15＊' 처럼 각주 표시가 붙는 요강이 있다
+# (서울교대 2027 수시는 '40명', 영진전문대 2027 수시는 면접 실시 표시로 '15＊').
 # 숫자만 인정하면 그런 표는 통째로 버려진다.
+# 다만 '◈'(인원 제한 없음) 처럼 **숫자가 아닌 기호만 있는 칸**은 인원이 아니다.
+SEAT_MARK = "*＊※★☆"
 INT_CELL = re.compile(r"^\d{1,4}\s*(명)?$")
 
 
+def _seat_norm(s):
+    t = (s or "").strip().replace(",", "")
+    return t.strip(SEAT_MARK).strip()
+
+
 def is_int_cell(s):
-    return bool(INT_CELL.fullmatch((s or "").strip().replace(",", "")))
+    return bool(INT_CELL.fullmatch(_seat_norm(s)))
 
 
 def to_int(s):
-    """'40', '1,234', '40 명' → 정수. 숫자가 아니면 None."""
-    t = (s or "").strip().replace(",", "")
-    m = INT_CELL.fullmatch(t)
-    return int(re.sub(r"\D", "", t)) if m else None
+    """'40', '1,234', '40 명', '15＊' → 정수. 숫자가 아니면 None."""
+    t = _seat_norm(s)
+    return int(re.sub(r"\D", "", t)) if INT_CELL.fullmatch(t) else None
 
 
 # 시행계획에는 **행이 전형 이름인 표**가 따로 있다(국립목포대 2028 '다. 전형별 모집인원' —
@@ -172,17 +179,19 @@ SECTION_ADM = re.compile(
 def admission_from_page(text):
     """쪽 제목에서 전형 이름을 찾는다. 원문 표기를 그대로 쓴다. 못 찾으면 None."""
     head = (text or "")[:400]
-    best = None
+    found = []
     for m in SECTION_ADM.finditer(head):
         t = norm(m.group(0))
         if ONLY_SEATS.match(t) or NOT_ADMISSION.match(t):
             continue
         if len(t) < 3 or re.fullmatch(r"[\d\s,.·\-—()]+", t):
             continue
-        # 더 구체적인(긴) 이름을 고른다
-        if best is None or len(t) > len(best):
-            best = t
-    return best
+        if t not in found and not any(t in x for x in found):
+            found = [x for x in found if x not in t] + [t]
+    if not found:
+        return None
+    # 상위 전형 + 하위 전형이 같이 적힌 쪽이 있다. 둘 다 이어 붙여야 어느 전형인지 알 수 있다.
+    return " ".join(found[:2])
 
 
 # ── 글자 좌표로 표 만들기 ──────────────────────────────────────────
@@ -246,6 +255,9 @@ GENERIC_HDR = {"모집단위", "학과", "학부", "전공", "계열", "구분",
                "정원", "계", "합계", "소계", "총계", "전형", "전형명", "모집시기", "비고", "학제", "주야",
                "캠퍼스", "모집구분", "선발모형", "모집", "학년도", "군", "차수", "번호", "연번", "순번"}
 SPECIFIC_PROGRAM = re.compile(r"(학과|학부|전공|계열|대학원|과$|부$)")
+# 전형 이름에 흔한 끝말. '지역교과'·'일반교과' 는 '과' 로 끝나지만 학과가 아니다.
+ADM_SUFFIX = re.compile(r"(교과|종합|전형|인재|균형|선발|우수자|대상자|졸업자|재직자|학습자|배려자"
+                        r"|출신자|수급자|차상위|학생|의사|위주|추천|특기자)$")
 # 제목·안내문에도 '세부'·'(교과)' 처럼 과/부로 끝나는 말이 있어 학과로 오인된다. 이런 말이 있으면 학과가 아니다.
 HEADING_WORDS = re.compile(r"전형|위주|내용|방법|기준|자격|반영|비율|일정|서류|안내|참고|산출|유의|절차|평가|선발"
                            r"|접수|발표|등록|문의|기타|모집인원|지원|합격|제출|면접|논술|실기|수능|학생부")
@@ -267,10 +279,12 @@ def generic_label(t):
 
 def looks_specific_program(s):
     """'인문콘텐츠학부' 처럼 **그 대학의 실제 모집단위 이름**인가. '모집단위'·'학과' 같은 일반 머리글은 아니다."""
-    t = re.sub(r"[\s*※·()\[\]/]", "", norm(s))
+    t = re.sub(r"[\s*※·()\[\]/₩\\~,、ㆍ∙‧・&+|]", "", norm(s))
     if not t or t in GENERIC_HDR or is_int_cell(t) or len(t) < 3:
         return False
     if HEADING_WORDS.search(t) or generic_label(t) or NOT_PROGRAM_VALUE.match(norm(s)):
+        return False
+    if ADM_SUFFIX.search(t):
         return False
     return bool(SPECIFIC_PROGRAM.search(t))
 
@@ -337,6 +351,38 @@ def sane_admission(t):
     return len(re.findall(r"[가-힣A-Za-z]", t)) >= 2
 
 
+def build_headers(head_rows):
+    """머리글 여러 줄을 열별 경로로 만든다.
+
+    빈 칸에는 두 가지가 있다.
+      (가) **가로로 병합된 칸** — '정시모집' 이 여러 열에 걸쳐 있고 첫 열에만 글자가 있다.
+           이때는 왼쪽 값을 물려받아야 한다.
+      (나) **세로로 병합된 칸** — '정시 소계' 가 두 줄에 걸쳐 있어 아랫줄이 비어 있다.
+           이때 왼쪽에서 물려받으면 **'정시 소계' 가 '성인학습자' 전형으로 둔갑한다.**
+           (신구대 2027 정시표에서 소계가 전형이 되어 행 합이 전부 어긋났다)
+
+    둘을 가르는 기준: **그 열이 위쪽 줄에서 이미 자기 글자를 가진 적이 있으면** 세로 병합이다.
+    """
+    if not head_rows:
+        return []
+    ncol = max(len(r) for r in head_rows)
+    paths = [[] for _ in range(ncol)]
+    owned = [False] * ncol
+    for row in head_rows:
+        cur = ""
+        for j in range(ncol):
+            v = norm(PR.cell_str(row[j])) if j < len(row) else ""
+            if v:
+                cur = v
+                paths[j].append(v)
+                owned[j] = True
+            elif owned[j]:
+                continue                      # 세로 병합 — 왼쪽에서 물려받지 않는다
+            elif cur:
+                paths[j].append(cur)          # 가로 병합 — 왼쪽 값을 물려받는다
+    return [" > ".join(dict.fromkeys(p)) for p in paths]
+
+
 def split_headers_seats(grid, max_header=5):
     """(머리글 행 수, 열별 머리글 경로). 자료 행이 하나도 없으면 (None, None)."""
     first = None
@@ -346,8 +392,7 @@ def split_headers_seats(grid, max_header=5):
             break
     if first is None or first == 0:
         return None, None            # 머리글이 없거나, 첫 줄부터 학과 = 모집인원표로 보기 어렵다
-    nh, headers = PR.split_headers(grid[:first] + [["" ] * len(grid[0])])
-    return first, headers
+    return first, build_headers(grid[:first])
 
 
 # 작년 입시결과 표(경쟁률·충원·예비번호·환산점수)는 모집단위와 숫자가 나란히 있어 모집인원표와 모양이 같다.
@@ -358,11 +403,16 @@ RESULT_TABLE = re.compile(r"경쟁률|충\s*원|예\s*비\s*번호|예비순위|
                           r"|반영\s*비율|전형\s*요소|반영\s*교과|총\s*점|배\s*점|만\s*점|백분율|반영\s*방법"
                           r"|후보\s*순위|최대\s*선발|선발\s*가능\s*인원|일괄\s*합산|단계별\s*사정|사정\s*방법", re.I)
 # 쪽 머리말·꼬리말이 머리글 줄로 딸려 들어온다('(단위: 명)', '2027학년도 ○○대학교 정시모집요강')
-PAGE_CHROME = re.compile(r"모집\s*요강|단위\s*[:：]\s*명|^\s*\(\s*단위|[●▶■◆※]|신입생|20\d\d\s*학년도\s*(수시|정시)")
+PAGE_CHROME = re.compile(r"모집\s*요강|단위\s*[:：]\s*명|^\s*\(\s*단위|[●▶■◆※]|신입생|20\d\d\s*학년도\s*(수시|정시)"
+                         r"|세부\s*전형별|전형별\s*안내|^\s*\d+\s*[.．]|및\s*모집\s*인원|모집\s*단위\s*및|^안내$")
 # '정원내 합계', '수시 1차 소계' 처럼 **합계를 뜻하는 머리글 조각**.
 # 맨 끝(잎)이 이것이면 검산용 합계 열이고, 중간에 끼어 있으면 묶음 이름일 뿐이므로 전형 이름에서 뺀다.
 TOTAL_SEG = re.compile(r"^\s*((수시|정시|정원\s*내|정원\s*외|모집|전체|총|[12]\s*차)\s*)*"
                        r"(합\s*계|소\s*계|총\s*계|총\s*합)\s*(\([^)]*\))?\s*$")
+# 머리글 조각 어디에든 이것이 있으면 그 열은 검산용 합계 열이다.
+# 강원대 2027 수시표의 '2027 총 모집 인원' 열(=입학정원)이 전형으로 들어가 행 합이 어긋났다.
+TOTAL_ANY = re.compile(r"^\s*((수시|정시|정원\s*내|정원\s*외|모집|전체|총|[12]\s*차|20\d\d)\s*)*"
+                       r"(합\s*계|소\s*계|총\s*계|총\s*합|총\s*모집\s*인원|모집\s*인원\s*계)\s*(\([^)]*\))?\s*$")
 # 머리글 조각이 '합계'로 **끝나면** 그 열은 전형이 아니라 검산용 합계 열이다('수시모집합계')
 TOTAL_SUFFIX = re.compile(r"(합\s*계|소\s*계|총\s*계|총\s*합)\s*$")
 # 행 이름이 '합계 (정원내 모집단위: 26개)' 처럼 합계로 **시작하면** 그 행은 모집단위가 아니라 합계 행이다
@@ -433,7 +483,10 @@ def pick_program_col(headers, body):
         uniq = distinct / max(prog, 1)
         if uniq < 0.5:                      # 같은 값이 절반 넘게 반복되면 학과 열이 아니다
             continue
-        sc = prog * uniq + (25 if PROGRAM_HDR.search(headers[j] or "") else 0) - j
+        # 왼쪽을 아주 조금만 우대한다. 예전에는 -j 라서 '계열'(왼쪽)과 '학과'(오른쪽)가 비기면
+        # 계열이 뽑혔다. 나사렛대 2027 수시표에서 기독교학부 자리에 '자율 전공 계열' 이 들어갔다.
+        # 계열은 학과를 묶은 것이라 **서로 다른 값이 더 적다.** 그러니 값이 더 다양한 쪽이 모집단위다.
+        sc = prog * uniq + (25 if PROGRAM_HDR.search(headers[j] or "") else 0) - j * 0.1
         if sc > best_score:
             best, best_score = j, sc
     return best
@@ -478,6 +531,26 @@ def admission_of(header_path):
 
 GROUP_HDR = re.compile(r"모집\s*군|군$|^군$")
 GROUP_CELL = re.compile(r"^\s*([가나다라])\s*군?\s*$")
+
+
+CAMPUS_HDR = re.compile(r"캠퍼스|캠\s*퍼\s*스")
+
+
+def find_campus_col(headers, body):
+    """'캠퍼스' 열의 번호. 없으면 None.
+
+    강원대 2027 수시는 표 제목이 '나. 삼척(도계포함)캠퍼스' 인데, 그 안에서 행마다
+    캠퍼스 열 값이 '삼척' 이었다가 '도계' 로 바뀐다. **표 제목만 보면 틀린다.**
+    같은 '간호학과' 가 춘천에도 도계에도 있어서, 캠퍼스를 모르면 두 학과를 구별할 수 없다.
+    """
+    for j in range(len(headers)):
+        if not CAMPUS_HDR.search(headers[j] or ""):
+            continue
+        vals = [norm(PR.cell_str(r[j])) if j < len(r) else "" for r in body]
+        ne = [v for v in vals if v and not is_int_cell(v)]
+        if ne and all(len(v) <= 8 for v in ne):   # 병합된 칸이라 값이 하나뿐일 수 있다
+            return j
+    return None
 
 
 def find_group_col(headers, body):
@@ -578,7 +651,7 @@ def extract_doc(pdf, did, uid, years, doc_scope, doc_status, tdb, exc, fallback_
         #  (1) 선으로 그려진 표들 — **서로 다른 표**다. 전부 살려야 한다.
         #  (2) 쪽 전체를 글자 좌표로 읽은 격자 — 그 쪽을 통째로 다시 읽은 **대안**이다.
         # 예전에는 이 둘을 한 줄로 세워 최고점 하나만 남겨서, 한 쪽에 표가 둘이면 하나를 잃었다.
-        ruled_out, full_out = [], []
+        ruled_out, full_out, low_score = [], [], []
         for ti, table, pregrid in candidates:
             recs, chks = [], []
             grid = pregrid if pregrid is not None else table.extract()
@@ -617,6 +690,7 @@ def extract_doc(pdf, did, uid, years, doc_scope, doc_status, tdb, exc, fallback_
             sc, why = score_table(grid, mh)
             why = f"[{used}] " + why
             if sc < 60:
+                low_score.append((ti, sc, why))
                 continue
             nh, headers = split_headers_seats(grid, mh)
             if nh is None:
@@ -628,15 +702,19 @@ def extract_doc(pdf, did, uid, years, doc_scope, doc_status, tdb, exc, fallback_
                             "failure": "모집단위 열을 못 찾음", "detail": why, "extractor": EXTRACTOR})
                 continue
             gcol = find_group_col(headers, body)     # 중앙대 정시처럼 군이 행 안의 한 칸인 표
+            ccol = find_campus_col(headers, body)    # 강원대처럼 캠퍼스가 행 안의 한 칸인 표
             # 전형 열·합계 열 나누기
             adm_cols, tot_cols = {}, []
             for j in range(len(headers)):
-                if j == pcol or j == gcol:
+                if j in (pcol, gcol, ccol):
                     continue
+                if pcol is not None and headers[j] and headers[j] == headers[pcol]:
+                    continue                  # 모집단위와 같은 머리글(학부·계열 열)은 전형이 아니다
                 hp = headers[j]
                 last = (hp or "").split(" > ")[-1]
                 if TOTAL_WORD.search(last) or TOTAL_SUFFIX.search(last) or any(
-                        TOTAL_WORD.match(x.strip()) for x in (hp or "").split(" > ")):
+                        TOTAL_WORD.match(x.strip()) or TOTAL_ANY.match(tighten(x))
+                        for x in (hp or "").split(" > ")):
                     tot_cols.append(j)
                     continue
                 name, quota = admission_of(hp)
@@ -704,11 +782,39 @@ def extract_doc(pdf, did, uid, years, doc_scope, doc_status, tdb, exc, fallback_
                                 "failure": "전형 열을 못 찾음", "detail": why, "extractor": EXTRACTOR})
                     continue
 
+            # ── 어느 열을 '그 행의 계' 로 볼 것인가 ──
+            # 계 열이 여럿인 표가 있다(신구대 정시: '정시 소계' 와 '수시+정시총계').
+            # 총계는 다른 쪽 값까지 더한 것이라 이 표 안에서는 절대 맞지 않는다.
+            # 그래서 **행 합이 가장 많이 맞는 열**을 고른다.
+            best_tot, best_hit = None, 0
+            if len(tot_cols) > 1:
+                for jt in tot_cols:
+                    hit = 0
+                    for r in body:
+                        ns = [to_int(norm(PR.cell_str(r[j]))) for j in adm_cols
+                              if j < len(r) and is_int_cell(norm(PR.cell_str(r[j])))]
+                        tv = norm(PR.cell_str(r[jt]) if jt < len(r) else "")
+                        if ns and is_int_cell(tv) and sum(ns) == to_int(tv):
+                            hit += 1
+                    if hit > best_hit:
+                        best_tot, best_hit = jt, hit
+            elif tot_cols:
+                best_tot = tot_cols[0]
+
             # ── 검산: 행마다 '각 전형 인원의 합 == 그 행의 계' 인지 본다 ──
             rows_ok, rows_bad, no_total = 0, 0, 0
             cand_rows = []
             for ri, r in enumerate(body):
+                # 모집단위가 **행마다 다른 열**에 있는 표가 있다(나사렛대 2027 수시:
+                # '계열 | 학부 | 세부전공' 3단인데, 학부가 없는 학과는 계열 칸에 바로 학과 이름이 온다).
+                # 그래서 고른 열이 비어 있으면 **바로 왼쪽의 학과 같은 칸**을 쓴다.
                 prog = norm(PR.cell_str(r[pcol]) if pcol < len(r) else "")
+                if not prog:
+                    for j2 in range(pcol - 1, -1, -1):
+                        v2 = norm(PR.cell_str(r[j2]) if j2 < len(r) else "")
+                        if v2 and looks_program(v2):
+                            prog = v2
+                            break
                 if not prog or NOT_PROGRAM_ROW.match(prog):
                     continue
                 # 합계 행의 '합계'가 학과 열이 아니라 다른 열(구분 열 등)에 있을 수 있다
@@ -721,11 +827,16 @@ def extract_doc(pdf, did, uid, years, doc_scope, doc_status, tdb, exc, fallback_
                         cells[j] = v
                 nums = [to_int(v) for v in cells.values() if is_int_cell(v)]
                 tot = None
-                for j in tot_cols:
-                    v = norm(PR.cell_str(r[j]) if j < len(r) else "")
+                if best_tot is not None:
+                    v = norm(PR.cell_str(r[best_tot]) if best_tot < len(r) else "")
                     if is_int_cell(v):
                         tot = to_int(v)
-                        break
+                if tot is None:
+                    for j in tot_cols:
+                        v = norm(PR.cell_str(r[j]) if j < len(r) else "")
+                        if is_int_cell(v):
+                            tot = to_int(v)
+                            break
                 row_tot_ok = None          # 이 행 자신의 가로 검산 결과: True / False / None(검산 불가)
                 if tot is None:
                     no_total += 1
@@ -798,6 +909,7 @@ def extract_doc(pdf, did, uid, years, doc_scope, doc_status, tdb, exc, fallback_
                 continue
 
             made, dropped = 0, 0
+            last_campus = None      # 병합된 캠퍼스 칸을 이어받기 위한 기억
             for ri, r, prog, is_total_row, cells, row_tot_ok in cand_rows:
                 raw = row_text(page, table, ri + nh) if table is not None else " ".join(x for x in r if x)[:400]
                 # 이 행 자신이 검증됐는가. **표 전체가 통과했다고 틀린 행까지 확정하지 않는다.**
@@ -808,6 +920,14 @@ def extract_doc(pdf, did, uid, years, doc_scope, doc_status, tdb, exc, fallback_
                     mg = GROUP_CELL.match(norm(PR.cell_str(r[gcol])))
                     if mg:
                         row_grp = mg.group(1) + "군"
+                # 이 행의 캠퍼스. 같은 학과 이름이 캠퍼스마다 따로 있으므로 반드시 행에서 읽는다.
+                # 칸이 병합돼 있어 첫 행에만 값이 있다. 빈 칸은 바로 위 값을 이어받는다.
+                row_campus = last_campus
+                if ccol is not None and ccol < len(r):
+                    cv = norm(PR.cell_str(r[ccol]))
+                    if cv and not is_int_cell(cv) and len(cv) <= 8:
+                        row_campus = re.sub(r"\s*캠퍼스\s*$", "", cv) or None
+                        last_campus = row_campus
                 if row_tot_ok is False:
                     ok_row, ok_why = False, "이 행의 가로 검산이 맞지 않아 보류."
                 elif row_tot_ok is True:
@@ -856,6 +976,7 @@ def extract_doc(pdf, did, uid, years, doc_scope, doc_status, tdb, exc, fallback_
                         "value_status": cell_status,
                         "note": f"[기계 추출 {EXTRACTOR}] {cell_why} 표 검산 {rows_ok}/{checked}. {why[:80]}",
                         "phase": col_phase, "round": col_round, "admission_group": row_grp,
+                        "campus_name": row_campus,
                         "admission_name_raw": name, "quota_type": quota,
                         "program_name_raw": prog_clean,
                         "seats_planned": seats, "seats_raw": v,
@@ -898,6 +1019,11 @@ def extract_doc(pdf, did, uid, years, doc_scope, doc_status, tdb, exc, fallback_
                 exc.append({"document_id": did, "university_id": uid, "page_index": pi,
                             "failure": "쪽 전체를 여러 방식으로 읽어 덜 정확한 쪽을 버림",
                             "detail": f"채택 {len(best[1])}건, 버림 {버린}건", "extractor": EXTRACTOR})
+        elif low_score:
+            exc.append({"document_id": did, "university_id": uid, "page_index": pi,
+                        "failure": "모집인원표로 보기에 점수가 모자라 건너뜀",
+                        "detail": "; ".join(f"표{t} 점수{sc} {w[:70]}" for t, sc, w in low_score[:3]),
+                        "extractor": EXTRACTOR})
         elif no_ruled:
             exc.append({"document_id": did, "university_id": uid, "page_index": pi,
                         "failure": "표를 못 찾음(선도 없고 글자 좌표로도 표가 안 나옴)", "extractor": EXTRACTOR})

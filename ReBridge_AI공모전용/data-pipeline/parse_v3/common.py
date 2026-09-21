@@ -16,7 +16,9 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 PIPELINE = HERE.parent
 ROOT = PIPELINE.parent                                   # ReBridge_AI공모전용/
-RAW = ROOT / "RAW"
+# 원문 폴더. 평소에는 저장소의 RAW/ 이고, 회귀검사처럼 **가짜 원문으로 시험해야 할 때만**
+# 환경변수 PARSE_V3_RAW 로 임시 폴더를 가리킨다(아래 WORK 과 같은 장치).
+RAW = Path(os.environ["PARSE_V3_RAW"]) if os.environ.get("PARSE_V3_RAW") else ROOT / "RAW"
 APP_DATA = ROOT / "Application_main_codes" / "src" / "data"
 # 작업 폴더. 평소에는 이 폴더의 work/ 이고, 회귀검사처럼 정본을 건드리면 안 될 때만
 # 환경변수 PARSE_V3_WORK 로 임시 폴더를 가리킨다. 정본 경로를 코드에서 바꾸지 않기 위한 장치다.
