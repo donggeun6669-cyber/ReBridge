@@ -67,6 +67,15 @@ def norm(s):
     return re.sub(r"[\s*※·‧・]", "", s or "")
 
 
+# 정답에 적혀 있으면 반드시 같아야 하는 범위 칸들. 숫자가 맞아도 범위가 다르면 다른 사실이다.
+SCOPE = ("phase", "round", "admission_group", "quota_type")
+
+
+def scope_label(g):
+    parts = [str(g[k]) for k in SCOPE if k in g and g[k]]
+    return (" " + "/".join(parts)) if parts else ""
+
+
 def prog_match(got, want):
     """모집단위 이름이 같은가. 원문은 '기독교학부(신학·기독교상담교육학)' 처럼 뒤에 전공 목록이
     붙는 일이 흔하므로, **정답 이름으로 시작하면** 같은 모집단위로 본다.
@@ -90,16 +99,25 @@ def main():
                 and (r.get("academic_year") in (None, g["academic_year"]))
                 and prog_match(r.get("program_name_raw"), g["program_name_raw"])
                 and norm(g["admission_contains"]) in norm(r.get("admission_name_raw"))]
-        label = f"{g['univ']} {g['academic_year']} {g['program_name_raw']} · {g['admission_contains']}"
+        scope = scope_label(g)
+        label = f"{g['univ']} {g['academic_year']}{scope} {g['program_name_raw']} · {g['admission_contains']}"
         if not cand:
             print(f"  없음  {label} → 기대 {g['seats_planned']}명. 이 값이 아예 안 나왔다")
             continue
-        seats = {c.get("seats_planned") for c in cand}
-        if g["seats_planned"] in seats:
-            print(f"  맞음  {label} = {g['seats_planned']}명")
-            ok += 1
-        else:
-            print(f"  다름  {label} → 기대 {g['seats_planned']}명, 나온 값 {sorted(x for x in seats if x is not None)}")
+        # **숫자만 맞으면 통과시키지 않는다.** 정답에 시기·차수·군·정원구분이 적혀 있으면 그것까지 같아야 한다.
+        # (정시 '나군 21명' 을 '수시 다군 21명' 으로 뽑아도 통과하던 문제)
+        right = [c for c in cand if c.get("seats_planned") == g["seats_planned"]]
+        if not right:
+            seats = sorted({x for x in (c.get("seats_planned") for c in cand) if x is not None})
+            print(f"  다름  {label} → 기대 {g['seats_planned']}명, 나온 값 {seats}")
+            continue
+        wrong = [f"{k}={c.get(k)!r}(기대 {g[k]!r})" for c in right for k in SCOPE if k in g
+                 and norm(str(c.get(k))) != norm(str(g[k]))]
+        if len(wrong) == len(right) * sum(1 for k in SCOPE if k in g) and wrong:
+            print(f"  범위틀림  {label} = {g['seats_planned']}명 이지만 " + ", ".join(dict.fromkeys(wrong)))
+            continue
+        print(f"  맞음  {label} = {g['seats_planned']}명")
+        ok += 1
     print(f"\n{ok} / {len(gold)} 일치")
     raise SystemExit(0 if ok == len(gold) else 1)
 
