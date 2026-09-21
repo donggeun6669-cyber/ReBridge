@@ -51,11 +51,16 @@ def from_auto():
 
 
 def from_db():
+    """정본 DB 와 대조할 때도 **범위 칸(시기·차수·군·정원구분·캠퍼스)** 을 함께 읽는다.
+    숫자만 맞고 범위가 다르면 다른 사실이므로 통과시키면 안 된다."""
     from common import connect
     con = connect()
-    return [{"univId": r[0], "academic_year": r[1], "phase": r[2], "admission_name_raw": r[3],
-             "program_name_raw": r[4], "seats_planned": r[5]}
-            for r in con.execute("""SELECT o.university_id, o.academic_year, o.phase, o.admission_name_raw,
+    return [{"univId": r["university_id"], "academic_year": r["academic_year"], "phase": r["phase"],
+             "round": r["round"], "admission_group": r["admission_group"], "quota_type": r["quota_type"],
+             "campus_name": r["campus_id"], "admission_name_raw": r["admission_name_raw"],
+             "program_name_raw": r["program_name_raw"], "seats_planned": r["seats_planned"]}
+            for r in con.execute("""SELECT o.university_id, o.academic_year, o.phase, o.round,
+                                    o.admission_group, o.quota_type, o.campus_id, o.admission_name_raw,
                                     p.program_name_raw, o.seats_planned
                                     FROM offering o LEFT JOIN program p USING(program_id)""")]
 

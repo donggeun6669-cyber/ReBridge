@@ -342,11 +342,18 @@ def sane_program(t):
     return True
 
 
+# 전형 이름 자리에 와서는 안 되는 말. 세로쓰기 머리글은 낱자로 흩어져 들어오므로
+# 띄어쓰기를 지운 것으로도 본다('최 대 선 발 가 능' → '최대선발가능').
+NOT_ADM_TEXT = re.compile(r"최대\s*선발|선발\s*가능|후보\s*순위|https?://|www\.|@|\.ac\.kr|\.com", re.I)
+
+
 def sane_admission(t):
     """전형 이름 자리에 '주요 (1,759명' 같은 본문 토막이 들어오지 않게."""
     if not t or len(t) < 2:
         return False
     if re.search(r"\d[,.]\d|\d\s*명", t):
+        return False
+    if NOT_ADM_TEXT.search(t) or NOT_ADM_TEXT.search(t.replace(" ", "")):
         return False
     return len(re.findall(r"[가-힣A-Za-z]", t)) >= 2
 
@@ -496,7 +503,8 @@ def pick_program_col(headers, body):
 # '입학'·'편제'·'수업 연한'·'2027학년도 총 모집 인원' 은 학과 현황표의 정원 열이지 전형이 아니고,
 # '가군' 하나만 있는 것도 전형 이름이 아니다('가군 > 일반,실기/실적' 처럼 뒤에 붙으면 전형이다).
 NO_ADM_INFO = re.compile(r"^(수시|정시|모집|[가나다라]군|입학|편제|학제|수업|연한|정원|총|인원|명|학년도"
-                         r"|코드|번호|전형별|구분|전체|계열|일괄|합산|기준|학과별|20\d\d|[A-Z]|[\s·,()（）\-–])+$")
+                         r"|코드|번호|전형별|전형|구분|전체|계열|일괄|합산|기준|학과별|단위"
+                         r"|20\d\d|[A-Z]|[\s·,()（）\-–])+$")
 QUOTA_ONLY = re.compile(r"^\s*정원\s*(내|외)\s*$")
 
 
