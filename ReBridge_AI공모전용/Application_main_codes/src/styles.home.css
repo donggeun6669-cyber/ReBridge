@@ -1,232 +1,195 @@
 /* =====================================================================
-   대입 홈 — JourneyHome.jsx (2026-09-18 재구성)
-   회백색 바탕 + 큰 흰 카드(필라이즈) + 큰 3D 아이콘(여기어때).
-   노랑 = 지금 단계·D-day, 파랑 = 버튼·완료. 다른 색을 늘리지 말 것.
+   홈 탭 — JourneyHome.jsx (2026-09 전면 리디자인)
+   기존 hm-* 레이아웃은 폐기하고 새로 짰다. 색만 기존 토큰(--brand·--accent 등)을
+   그대로 쓰고, 카드 구성·타이포·여백은 레퍼런스(큼직한 아이콘·색 있는 히어로 카드·
+   굵은 숫자)에 맞춰 새로 만든 것 — 이전 시안으로 되돌리지 말 것.
    ===================================================================== */
-.hm-screen {
-  --hm-ink: #1F2A37;
-  --hm-sub: #5B6572;
-  --hm-card: #FFFFFF;
-  --hm-line: #E6E9ED;
-  --hm-yellow: #F7D55C;
-  --hm-yellow-soft: #FFF4CC;
-  --hm-yellow-ink: #4A3A06;
-  --hm-blue: #1C6FB2;
-  --hm-blue-soft: #EAF3FB;
-
-  padding: 0 18px 32px;
+.jh-screen {
+  padding: 0 20px 36px;
   background: var(--bg);
-  color: var(--hm-ink);
-  letter-spacing: -0.02em;
 }
-.hm-screen button:focus-visible {
-  outline: 3px solid var(--hm-blue);
+.jh-screen button:focus-visible {
+  outline: 3px solid var(--brand);
   outline-offset: 3px;
 }
 
-.hm-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  min-height: 60px;
-  padding-top: 10px;
+.jh-greet {
+  padding-top: 22px;
 }
-.hm-chips { display: flex; gap: 6px; flex-wrap: wrap; }
-.hm-chip {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--hm-sub);
-  background: var(--hm-card);
-  border: 1px solid var(--hm-line);
+.jh-eyebrow {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--brand-deep);
+  background: var(--brand-tint);
   border-radius: 999px;
-  padding: 5px 10px;
+  padding: 6px 14px;
 }
-
-.hm-title {
-  margin: 16px 2px 22px;
+.jh-title {
+  margin: 16px 0 24px;
   font-size: 32px;
-  line-height: 1.28;
+  line-height: 1.26;
   font-weight: 800;
   letter-spacing: -0.04em;
+  color: var(--text);
 }
 
-/* ── 로드맵 카드 — 입체감(2단 그림자) + 아이콘이 카드 위로 살짝 튀어나옴 ── */
-.hm-road {
+/* ── 오늘의 카드 — 파랑 히어로 카드. 색으로 확실히 강조한다 ── */
+.jh-hero {
   position: relative;
   display: block;
   width: 100%;
   text-align: left;
-  background: var(--hm-card);
-  border-radius: 26px;
-  padding: 22px 22px 20px;
-  box-shadow: 0 1px 3px rgba(20, 30, 45, 0.05), 0 10px 28px rgba(20, 30, 45, 0.07);
+  background: var(--brand);
+  border-radius: 28px;
+  padding: 26px 24px 22px;
   overflow: visible;
+  box-shadow: 0 16px 32px -12px rgba(46, 139, 208, 0.45);
 }
-.hm-road-head {
+/* 아이콘이 카드 오른쪽 위 모서리를 넘어 떠 있는 배지 */
+.jh-hero-badge {
+  position: absolute;
+  top: -22px;
+  right: 14px;
+  width: 104px;
+  height: 104px;
+  filter: drop-shadow(0 10px 14px rgba(20, 30, 45, 0.22));
+}
+.jh-hero-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 8px;
+  max-width: 62%;
 }
-.hm-road-label {
+.jh-hero-kicker {
   font-size: 13px;
-  font-weight: 600;
-  color: var(--hm-sub);
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.85);
 }
-.hm-dday {
+.jh-hero-dday {
   font-size: 12px;
   font-weight: 700;
-  color: var(--hm-yellow-ink);
-  background: var(--hm-yellow);
+  color: var(--accent-text);
+  background: var(--accent);
   border-radius: 999px;
-  padding: 4px 10px;
+  padding: 3px 10px;
   white-space: nowrap;
 }
-.hm-road-body {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  margin-top: 10px;
-}
-.hm-road-text { flex: 1; min-width: 0; }
-.hm-road-title {
+.jh-hero-dday b { font-size: 13px; }
+.jh-hero-headline {
   display: block;
-  font-size: 21px;
-  line-height: 1.36;
+  max-width: 62%;
+  margin-top: 12px;
+  font-size: 23px;
+  line-height: 1.32;
   font-weight: 800;
   letter-spacing: -0.03em;
+  color: #fff;
 }
-.hm-road-note {
+.jh-hero-note {
   display: block;
-  margin-top: 6px;
-  font-size: 13px;
+  max-width: 62%;
+  margin-top: 8px;
+  font-size: 13.5px;
   line-height: 1.5;
-  color: var(--hm-sub);
-}
-/* 카드 위로 살짝 튀어나오게 — 입체감 */
-.hm-road-img {
-  flex-shrink: 0;
-  width: 88px;
-  height: 88px;
-  margin-top: -30px;
-  filter: drop-shadow(0 6px 10px rgba(20, 30, 45, 0.14));
+  color: rgba(255, 255, 255, 0.82);
 }
 
-/* 4단계 진행 표시 — 누르는 곳이 아니다(단계 입구는 로드맵 화면 안) */
-.hm-steps {
-  position: relative;
+/* 4단계 진행 — 굵은 세그먼트 바 */
+.jh-hero-track {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  margin: 18px 0 16px;
-}
-.hm-steps::before {
-  content: '';
-  position: absolute;
-  left: 12.5%;
-  right: 12.5%;
-  top: 10px;
-  height: 2px;
-  background: var(--hm-line);
-}
-.hm-step {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   gap: 6px;
+  margin-top: 22px;
 }
-.hm-step-dot {
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: var(--hm-card);
-  border: 2px solid var(--hm-line);
+.jh-hero-seg {
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.35);
+}
+.jh-hero-seg.fill { background: #fff; }
+.jh-hero-labels {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  margin-top: 8px;
+}
+.jh-hero-step-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.75);
+  word-break: keep-all;
+}
+.jh-hero-step-label.now { color: #fff; font-weight: 800; }
+
+.jh-hero-cta {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
-}
-.hm-step-label {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--hm-sub);
-  text-align: center;
-  line-height: 1.3;
-}
-.hm-step.is-done .hm-step-dot { background: var(--hm-blue); border-color: var(--hm-blue); }
-.hm-step.is-current .hm-step-dot {
-  background: var(--hm-yellow);
-  border-color: var(--hm-yellow);
-  box-shadow: 0 0 0 5px var(--hm-yellow-soft);
-}
-.hm-step.is-current .hm-step-label { color: var(--hm-ink); font-weight: 800; }
-
-.hm-cta {
-  display: block;
-  text-align: center;
-  background: var(--hm-blue);
-  color: #fff;
+  gap: 4px;
+  margin-top: 20px;
+  background: #fff;
+  color: var(--brand-deep);
   font-size: 16px;
-  font-weight: 700;
-  border-radius: 14px;
-  padding: 14px 12px;
+  font-weight: 800;
+  border-radius: 16px;
+  padding: 15px 12px;
 }
 
 /* ── 지금 바로 — 탭에 없는 잔가지만 목록으로 ── */
-.hm-sec-title {
-  margin: 26px 4px 10px;
-  font-size: 15px;
+.jh-sec-title {
+  margin: 28px 2px 12px;
+  font-size: 16px;
   font-weight: 800;
-  color: var(--hm-ink);
+  color: var(--text);
 }
-.hm-shortcut-list {
+.jh-quick-list {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
-.hm-shortcut {
+.jh-quick {
   display: flex;
   align-items: center;
   gap: 14px;
   width: 100%;
   text-align: left;
-  background: var(--hm-card);
-  border-radius: 20px;
-  padding: 14px 16px;
-  box-shadow: 0 1px 2px rgba(20, 30, 45, 0.04);
+  background: var(--card);
+  border-radius: 22px;
+  padding: 16px 18px;
+  box-shadow: var(--shadow-sm);
 }
-.hm-shortcut:active { transform: scale(0.98); }
-.hm-shortcut-ico {
+.jh-quick:active { transform: scale(0.98); }
+.jh-quick-ico {
   flex-shrink: 0;
-  width: 48px;
-  height: 48px;
-  border-radius: 16px;
-  background: var(--hm-blue-soft);
-  color: var(--hm-blue);
+  width: 52px;
+  height: 52px;
+  border-radius: 18px;
+  background: var(--accent-soft);
+  color: var(--accent-ink);
   display: flex;
   align-items: center;
   justify-content: center;
 }
-.hm-shortcut-ico img { width: 32px; height: 32px; }
-.hm-shortcut-text { flex: 1; min-width: 0; }
-.hm-shortcut-title {
+.jh-quick-text { flex: 1; min-width: 0; }
+.jh-quick-title {
   display: block;
-  font-size: 15.5px;
+  font-size: 16px;
   font-weight: 700;
-  color: var(--hm-ink);
+  color: var(--text);
 }
-.hm-shortcut-sub {
+.jh-quick-sub {
   display: block;
   margin-top: 2px;
   font-size: 12.5px;
-  color: var(--hm-sub);
+  color: var(--text-sub);
 }
-.hm-shortcut-arrow { flex-shrink: 0; color: var(--chevron); }
+.jh-quick-arrow { flex-shrink: 0; color: var(--chevron); }
 
 @media (max-width: 360px) {
-  .hm-screen { padding-left: 14px; padding-right: 14px; }
-  .hm-title { font-size: 27px; }
-  .hm-road-img { width: 68px; height: 68px; margin-top: -22px; }
+  .jh-screen { padding-left: 16px; padding-right: 16px; }
+  .jh-title { font-size: 27px; }
+  .jh-hero-badge { width: 84px; height: 84px; top: -16px; }
+  .jh-hero-headline, .jh-hero-row, .jh-hero-note { max-width: 68%; }
 }
 
 /* =====================================================================

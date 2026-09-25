@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Check, ChevronRight } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 
 import { loadProfile, gradeOption, getHomeRegion, isHiddenScreen } from '../lib/persona.js';
 import { getBookmarks } from '../lib/bookmarks.js';
@@ -8,13 +8,12 @@ import imgRoadmap from '../assets/icons3d/roadmap.png';
 import imgAsk from '../assets/icons3d/ask.png';
 import '../styles.home.css';
 
-// 홈 탭 (2026-09 리디자인)
+// 홈 탭 — 2026-09 전면 리디자인(레퍼런스 기반, 기존 hm-* 레이아웃 폐기).
 //   하단 탭(꿈드림센터·진학지원·커뮤니티·마이페이지)이 생기면서 홈은 그 탭들의
 //   입구를 다시 만들지 않는다 — '같은 기능은 한 화면에만' 원칙. 홈은:
-//     ① 오늘 상태 요약 카드(로드맵) — 누르면 진학지원 탭으로
-//     ② 탭에 없는 잔가지 바로가기(담임에게 물어보기·관심 대학)만 목록으로
-//   색: 회백색 바탕, 노랑 = '지금 단계'·D-day, 파랑 = 버튼·완료 표시. 유지.
-//   3D 아이콘: Microsoft Fluent Emoji (MIT) — assets/icons3d/LICENSE-fluentui-emoji.txt
+//     ① 오늘 상태 카드(로드맵) 하나 — 색이 있는 카드로 확실히 강조, 누르면 진학지원 탭으로
+//     ② 탭에 없는 잔가지 바로가기(담임에게 물어보기)만 아래에 목록으로
+//   색은 기존 토큰(--brand·--accent 등) 그대로 쓰되, 레이아웃·타이포·카드 구성은 새로 짬.
 
 // '관심 대학'은 마이페이지에 이미 입구가 있어 여기 또 만들지 않는다(같은 기능은 한 화면에만).
 const SHORTCUTS = [
@@ -28,56 +27,61 @@ export default function JourneyHome({ goTo = () => {} }) {
   const grade = gradeOption(profile?.grade);
   const region = getHomeRegion(profile);
   const shortcuts = SHORTCUTS.filter((s) => !isHiddenScreen(s.screen));
+  const currentIdx = rm.steps.findIndex((s) => s.status === 'current');
 
   return (
-    <div className="screen hm-screen">
-      <header className="hm-top">
-        <span className="hm-chips">
-          {grade && <span className="hm-chip">{grade.label}</span>}
-          {region && <span className="hm-chip">{region}</span>}
+    <div className="screen jh-screen">
+      <header className="jh-greet">
+        <span className="jh-eyebrow">
+          {[grade?.label, region].filter(Boolean).join(' · ') || '검고담임'}
         </span>
+        <h1 className="jh-title">우리, 대학<br />한번 가 볼까요?</h1>
       </header>
 
-      <h1 className="hm-title">우리, 대학 한번<br />가 볼까요?</h1>
+      {/* 오늘의 카드 — 색이 있는 큰 카드 하나로 강조. 진학지원 탭으로 전환된다 */}
+      <button type="button" className="jh-hero" onClick={() => goTo('roadmap')}>
+        <img className="jh-hero-badge" src={imgRoadmap} alt="" width="104" height="104" />
 
-      {/* 로드맵 입구 — 카드 전체가 버튼 하나. 진학지원 탭으로 전환된다 */}
-      <button type="button" className="hm-road" onClick={() => goTo('roadmap')}>
-        <span className="hm-road-head">
-          <span className="hm-road-label">나의 대입 로드맵</span>
+        <span className="jh-hero-row">
+          <span className="jh-hero-kicker">나의 대입 로드맵</span>
           {rm.nearest && (
-            <span className="hm-dday">{rm.nearest.label} {rm.nearest.dday}</span>
+            <span className="jh-hero-dday">
+              <b>{rm.nearest.dday}</b> {rm.nearest.label}
+            </span>
           )}
         </span>
-        <span className="hm-road-body">
-          <span className="hm-road-text">
-            <span className="hm-road-title">{rm.headline}</span>
-            <span className="hm-road-note">{rm.peerNote}</span>
-          </span>
-          <img className="hm-road-img" src={imgRoadmap} alt="" width="88" height="88" />
+
+        <span className="jh-hero-headline">{rm.headline}</span>
+        <span className="jh-hero-note">{rm.peerNote}</span>
+
+        <span className="jh-hero-track" aria-hidden="true">
+          {rm.steps.map((s, i) => (
+            <span key={s.id} className={`jh-hero-seg${i <= currentIdx ? ' fill' : ''}`} />
+          ))}
         </span>
-        <span className="hm-steps" aria-hidden="true">
+        <span className="jh-hero-labels" aria-hidden="true">
           {rm.steps.map((s) => (
-            <span key={s.id} className={`hm-step is-${s.status}`}>
-              <span className="hm-step-dot">{s.status === 'done' ? <Check size={12} strokeWidth={3} /> : null}</span>
-              <span className="hm-step-label">{s.title}</span>
+            <span key={s.id} className={`jh-hero-step-label${s.status === 'current' ? ' now' : ''}`}>
+              {s.title}
             </span>
           ))}
         </span>
-        <span className="hm-cta">내 로드맵 보기</span>
+
+        <span className="jh-hero-cta">내 로드맵 보기<ChevronRight size={18} /></span>
       </button>
 
-      <p className="hm-sec-title">지금 바로</p>
-      <div className="hm-shortcut-list">
+      <p className="jh-sec-title">지금 바로</p>
+      <div className="jh-quick-list">
         {shortcuts.map((s) => (
-          <button key={s.screen} type="button" className="hm-shortcut" onClick={() => goTo(s.screen)}>
-            <span className="hm-shortcut-ico">
-              {s.img ? <img src={s.img} alt="" width="40" height="40" /> : <s.Icon size={22} />}
+          <button key={s.screen} type="button" className="jh-quick" onClick={() => goTo(s.screen)}>
+            <span className="jh-quick-ico">
+              {s.img ? <img src={s.img} alt="" width="34" height="34" /> : <s.Icon size={22} />}
             </span>
-            <span className="hm-shortcut-text">
-              <span className="hm-shortcut-title">{s.title}</span>
-              <span className="hm-shortcut-sub">{s.sub}</span>
+            <span className="jh-quick-text">
+              <span className="jh-quick-title">{s.title}</span>
+              <span className="jh-quick-sub">{s.sub}</span>
             </span>
-            <ChevronRight size={20} className="hm-shortcut-arrow" />
+            <ChevronRight size={20} className="jh-quick-arrow" />
           </button>
         ))}
       </div>
