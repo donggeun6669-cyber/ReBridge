@@ -34,7 +34,49 @@
   color: var(--text);
 }
 
-/* ── 핵심 기능 4개 — 큰 아이콘 그리드. 홈에서 가장 먼저 보이는 것 ── */
+/* ── 가장 중요한 기능(꿈드림센터) — 가로로 긴 배너, 화면 맨 위 ── */
+.jh-feature-wide {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  text-align: left;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 18px 18px 18px 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 6px 16px rgba(20, 30, 45, 0.09);
+}
+.jh-feature-wide:active { transform: scale(0.98); }
+.jh-feature-wide-ico {
+  flex-shrink: 0;
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  background: var(--brand-tint);
+  border: 1px solid rgba(28, 111, 178, 0.14);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.jh-feature-wide-ico img { width: 48px; height: 48px; }
+.jh-feature-wide-text { flex: 1; min-width: 0; }
+.jh-feature-wide-title {
+  display: block;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text);
+}
+.jh-feature-wide-sub {
+  display: block;
+  margin-top: 3px;
+  font-size: 13px;
+  color: var(--text-sub);
+}
+.jh-feature-wide-arrow { flex-shrink: 0; color: var(--chevron); }
+
+/* ── 그 다음 기능(진학지원·커뮤니티) — 2열 아이콘 그리드 ── */
 .jh-feature-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -47,17 +89,20 @@
   gap: 6px;
   text-align: center;
   background: var(--card);
+  border: 1px solid var(--border);
   border-radius: 24px;
   padding: 22px 10px 18px;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 6px 16px rgba(20, 30, 45, 0.07);
 }
 .jh-feature:active { transform: scale(0.97); }
+/* 아이콘 칸에도 옅은 테두리를 줘서 카드 배경과 경계가 뚜렷하게 보이게 한다 */
 .jh-feature-ico {
   width: 76px;
   height: 76px;
   margin-bottom: 4px;
   border-radius: 22px;
   background: var(--brand-tint);
+  border: 1px solid rgba(28, 111, 178, 0.14);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -196,9 +241,10 @@
   width: 100%;
   text-align: left;
   background: var(--card);
+  border: 1px solid var(--border);
   border-radius: 22px;
   padding: 16px 18px;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 6px 16px rgba(20, 30, 45, 0.07);
 }
 .jh-quick:active { transform: scale(0.98); }
 .jh-quick-ico {
@@ -207,6 +253,7 @@
   height: 52px;
   border-radius: 18px;
   background: var(--accent-soft);
+  border: 1px solid rgba(122, 82, 0, 0.14);
   color: var(--accent-ink);
   display: flex;
   align-items: center;
