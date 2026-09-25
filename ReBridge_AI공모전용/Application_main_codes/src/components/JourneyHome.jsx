@@ -1,28 +1,34 @@
 import { useState } from 'react';
-import { UserRound, Check } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 
 import { loadProfile, gradeOption, getHomeRegion, isHiddenScreen } from '../lib/persona.js';
 import { getBookmarks } from '../lib/bookmarks.js';
 import { gradeRoadmap } from '../lib/roadmap.js';
 import imgRoadmap from '../assets/icons3d/roadmap.png';
-import imgCommunity from '../assets/icons3d/community.png';
 import imgAsk from '../assets/icons3d/ask.png';
-import imgDreamdrim from '../assets/icons3d/dreamdrim.png';
+import imgDreamdrive from '../assets/icons3d/dreamdrim.png';
+import imgStudy from '../assets/icons3d/step-ged.png';
+import imgCommunity from '../assets/icons3d/community.png';
 import '../styles.home.css';
 
-// 대입 홈 (2026-09-18 동근님 재구성)
-//   레퍼런스: 필라이즈(회백색 바탕 + 큰 흰 카드 + 3D 그림 + 꽉 찬 버튼) · 여기어때(큰 3D 아이콘)
-//   · 로드맵은 홈 본문이 아니라 '입구 카드' 하나로 둔다. 카드는 학년·상황별로 달라진다.
-//   · 홈에서 가는 곳은 MY + 로드맵 + 아이콘 3개 = 5곳, 각각 버튼 하나.
-//     검정고시·내 점수·대학 찾기는 로드맵 안에서, 관심 대학은 MY에서 들어간다.
-//     여기에 같은 화면으로 가는 버튼을 더 만들지 말 것.
-//   · 색: 회백색 바탕, 노랑 = '지금 단계'·D-day, 파랑 = 버튼·완료 표시.
-//   · 3D 아이콘: Microsoft Fluent Emoji (MIT) — assets/icons3d/LICENSE-fluentui-emoji.txt
+// 홈 탭 — 2026-09 재구성 (동근님 지시).
+//   ① 꿈드림센터 찾기 — 제일 중요한 기능이라 가로로 긴 배너 하나로 따로 뺌
+//   ② 진학지원·커뮤니티 — 그 아래 2열 아이콘 그리드(기존 크기 유지)
+//     마이페이지는 이미 탭에 있으니 홈에서 뺀다(같은 기능은 한 화면에만).
+//   ③ 로드맵 카드 — 스크롤해야 보이는 위치지만 '지금 바로'보다는 위
+//   ④ 지금 바로 — 탭에 없는 잔가지(담임에게 물어보기)
 
-const TILES = [
-  { screen: 'community',  img: imgCommunity, title: '커뮤니티',          sub: '같은 길 가는 친구들', tone: 'blue' },
-  { screen: 'help',       img: imgAsk,       title: '담임에게 물어보기', sub: '용어·자주 묻는 질문', tone: 'yellow' },
-  { screen: 'dreamdrive', img: imgDreamdrim, title: '꿈드림센터',        sub: '가까운 센터·지원 혜택', tone: 'blue' },
+const PRIMARY_FEATURE = { screen: 'dreamdrive', img: imgDreamdrive, title: '꿈드림센터', sub: '가까운 센터 찾기·지원 혜택' };
+// '진학지원' 타일은 로드맵 전체가 아니라 '대학 찾기'만 바로 연다 — 로드맵 카드(검정고시·
+// 서류 등 전체 단계)와는 다른 목적지라 이름도 구분했다(동근님 2026-09).
+const FEATURES = [
+  { screen: 'univ-explore', img: imgStudy,     title: '대학 찾기', sub: '내 점수로 갈 수 있는 대학' },
+  { screen: 'community',    img: imgCommunity, title: '커뮤니티',  sub: '같은 길 가는 친구들' },
+];
+
+// '관심 대학'은 마이페이지 안에 이미 입구가 있어 여기 또 만들지 않는다(같은 기능은 한 화면에만).
+const SHORTCUTS = [
+  { screen: 'help', img: imgAsk, title: '담임에게 물어보기', sub: '용어·자주 묻는 질문' },
 ];
 
 export default function JourneyHome({ goTo = () => {} }) {
@@ -31,56 +37,86 @@ export default function JourneyHome({ goTo = () => {} }) {
   const [rm] = useState(() => gradeRoadmap(profile, getBookmarks().length));
   const grade = gradeOption(profile?.grade);
   const region = getHomeRegion(profile);
-  const tiles = TILES.filter((t) => !isHiddenScreen(t.screen));
+  const showPrimary = !isHiddenScreen(PRIMARY_FEATURE.screen);
+  const features = FEATURES.filter((f) => !isHiddenScreen(f.screen));
+  const shortcuts = SHORTCUTS.filter((s) => !isHiddenScreen(s.screen));
+  const currentIdx = rm.steps.findIndex((s) => s.status === 'current');
 
   return (
-    <div className="screen hm-screen">
-      <header className="hm-top">
-        <span className="hm-chips">
-          {grade && <span className="hm-chip">{grade.label}</span>}
-          {region && <span className="hm-chip">{region}</span>}
+    <div className="screen jh-screen">
+      <header className="jh-greet">
+        <span className="jh-eyebrow">
+          {[grade?.label, region].filter(Boolean).join(' · ') || '검고담임'}
         </span>
-        <button type="button" className="hm-icon" aria-label="마이페이지" onClick={() => goTo('mypage')}>
-          <UserRound size={22} aria-hidden="true" />
-        </button>
+        <h1 className="jh-title">우리, 대학<br />한번 가 볼까요?</h1>
       </header>
 
-      <h1 className="hm-title">우리, 대학 한번<br />가 볼까요?</h1>
+      {/* 가장 중요한 기능 — 가로로 긴 배너 하나로 따로 강조 */}
+      {showPrimary && (
+        <button type="button" className="jh-feature-wide" onClick={() => goTo(PRIMARY_FEATURE.screen)}>
+          <span className="jh-feature-wide-ico"><img src={PRIMARY_FEATURE.img} alt="" width="52" height="52" /></span>
+          <span className="jh-feature-wide-text">
+            <span className="jh-feature-wide-title">{PRIMARY_FEATURE.title}</span>
+            <span className="jh-feature-wide-sub">{PRIMARY_FEATURE.sub}</span>
+          </span>
+          <ChevronRight size={22} className="jh-feature-wide-arrow" />
+        </button>
+      )}
 
-      {/* 로드맵 입구 — 카드 전체가 버튼 하나 */}
-      <button type="button" className="hm-road" onClick={() => goTo('roadmap')}>
-        <span className="hm-road-head">
-          <span className="hm-road-label">나의 대입 로드맵</span>
+      <div className="jh-feature-grid">
+        {features.map((f) => (
+          <button key={f.screen} type="button" className="jh-feature" onClick={() => goTo(f.screen)}>
+            <span className="jh-feature-ico"><img src={f.img} alt="" width="46" height="46" /></span>
+            <span className="jh-feature-title">{f.title}</span>
+            <span className="jh-feature-sub">{f.sub}</span>
+          </button>
+        ))}
+      </div>
+
+      {/* 로드맵 — 담임에게 물어보기보다 위로 */}
+      <button type="button" className="jh-hero" onClick={() => goTo('roadmap')}>
+        <img className="jh-hero-badge" src={imgRoadmap} alt="" width="72" height="72" />
+
+        <span className="jh-hero-row">
+          <span className="jh-hero-kicker">나의 대입 로드맵</span>
           {rm.nearest && (
-            <span className="hm-dday">{rm.nearest.label} {rm.nearest.dday}</span>
+            <span className="jh-hero-dday">
+              <b>{rm.nearest.dday}</b> {rm.nearest.label}
+            </span>
           )}
         </span>
-        <span className="hm-road-body">
-          <span className="hm-road-text">
-            <span className="hm-road-title">{rm.headline}</span>
-            <span className="hm-road-note">{rm.peerNote}</span>
-          </span>
-          <img className="hm-road-img" src={imgRoadmap} alt="" width="76" height="76" />
+
+        <span className="jh-hero-headline">{rm.headline}</span>
+        <span className="jh-hero-note">{rm.peerNote}</span>
+
+        <span className="jh-hero-track" aria-hidden="true">
+          {rm.steps.map((s, i) => (
+            <span key={s.id} className={`jh-hero-seg${i <= currentIdx ? ' fill' : ''}`} />
+          ))}
         </span>
-        <span className="hm-steps" aria-hidden="true">
+        <span className="jh-hero-labels" aria-hidden="true">
           {rm.steps.map((s) => (
-            <span key={s.id} className={`hm-step is-${s.status}`}>
-              <span className="hm-step-dot">{s.status === 'done' ? <Check size={12} strokeWidth={3} /> : null}</span>
-              <span className="hm-step-label">{s.title}</span>
+            <span key={s.id} className={`jh-hero-step-label${s.status === 'current' ? ' now' : ''}`}>
+              {s.title}
             </span>
           ))}
         </span>
-        <span className="hm-cta">내 로드맵 보기</span>
+
+        <span className="jh-hero-cta">내 로드맵 보기<ChevronRight size={18} /></span>
       </button>
 
-      <div className={`hm-tiles cols-${tiles.length}`}>
-        {tiles.map((t) => (
-          <button key={t.screen} type="button" className="hm-tile" onClick={() => goTo(t.screen)}>
-            <span className={`hm-tile-art tone-${t.tone}`}>
-              <img src={t.img} alt="" width="56" height="56" />
+      <p className="jh-sec-title">지금 바로</p>
+      <div className="jh-quick-list">
+        {shortcuts.map((s) => (
+          <button key={s.screen} type="button" className="jh-quick" onClick={() => goTo(s.screen)}>
+            <span className="jh-quick-ico">
+              {s.img ? <img src={s.img} alt="" width="28" height="28" /> : <s.Icon size={20} />}
             </span>
-            <span className="hm-tile-title">{t.title}</span>
-            <span className="hm-tile-sub">{t.sub}</span>
+            <span className="jh-quick-text">
+              <span className="jh-quick-title">{s.title}</span>
+              <span className="jh-quick-sub">{s.sub}</span>
+            </span>
+            <ChevronRight size={20} className="jh-quick-arrow" />
           </button>
         ))}
       </div>

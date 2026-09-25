@@ -62,6 +62,7 @@ function toJobChips(jp) {
 const STAGE_LABEL = {
   studying: '지금 공부 중',
   tested: '검정고시 응시 완료',
+  unspecified: '아직 안 정했어요',
 };
 const GOAL_LABEL = {
   university: '대학 진학 목표',
