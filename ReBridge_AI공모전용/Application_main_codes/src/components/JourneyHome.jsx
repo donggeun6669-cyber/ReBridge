@@ -1,28 +1,24 @@
 import { useState } from 'react';
-import { UserRound, Check } from 'lucide-react';
+import { Check, ChevronRight } from 'lucide-react';
 
 import { loadProfile, gradeOption, getHomeRegion, isHiddenScreen } from '../lib/persona.js';
 import { getBookmarks } from '../lib/bookmarks.js';
 import { gradeRoadmap } from '../lib/roadmap.js';
 import imgRoadmap from '../assets/icons3d/roadmap.png';
-import imgCommunity from '../assets/icons3d/community.png';
 import imgAsk from '../assets/icons3d/ask.png';
-import imgDreamdrim from '../assets/icons3d/dreamdrim.png';
 import '../styles.home.css';
 
-// 대입 홈 (2026-09-18 동근님 재구성)
-//   레퍼런스: 필라이즈(회백색 바탕 + 큰 흰 카드 + 3D 그림 + 꽉 찬 버튼) · 여기어때(큰 3D 아이콘)
-//   · 로드맵은 홈 본문이 아니라 '입구 카드' 하나로 둔다. 카드는 학년·상황별로 달라진다.
-//   · 홈에서 가는 곳은 MY + 로드맵 + 아이콘 3개 = 5곳, 각각 버튼 하나.
-//     검정고시·내 점수·대학 찾기는 로드맵 안에서, 관심 대학은 MY에서 들어간다.
-//     여기에 같은 화면으로 가는 버튼을 더 만들지 말 것.
-//   · 색: 회백색 바탕, 노랑 = '지금 단계'·D-day, 파랑 = 버튼·완료 표시.
-//   · 3D 아이콘: Microsoft Fluent Emoji (MIT) — assets/icons3d/LICENSE-fluentui-emoji.txt
+// 홈 탭 (2026-09 리디자인)
+//   하단 탭(꿈드림센터·진학지원·커뮤니티·마이페이지)이 생기면서 홈은 그 탭들의
+//   입구를 다시 만들지 않는다 — '같은 기능은 한 화면에만' 원칙. 홈은:
+//     ① 오늘 상태 요약 카드(로드맵) — 누르면 진학지원 탭으로
+//     ② 탭에 없는 잔가지 바로가기(담임에게 물어보기·관심 대학)만 목록으로
+//   색: 회백색 바탕, 노랑 = '지금 단계'·D-day, 파랑 = 버튼·완료 표시. 유지.
+//   3D 아이콘: Microsoft Fluent Emoji (MIT) — assets/icons3d/LICENSE-fluentui-emoji.txt
 
-const TILES = [
-  { screen: 'community',  img: imgCommunity, title: '커뮤니티',          sub: '같은 길 가는 친구들', tone: 'blue' },
-  { screen: 'help',       img: imgAsk,       title: '담임에게 물어보기', sub: '용어·자주 묻는 질문', tone: 'yellow' },
-  { screen: 'dreamdrive', img: imgDreamdrim, title: '꿈드림센터',        sub: '가까운 센터·지원 혜택', tone: 'blue' },
+// '관심 대학'은 마이페이지에 이미 입구가 있어 여기 또 만들지 않는다(같은 기능은 한 화면에만).
+const SHORTCUTS = [
+  { screen: 'help', img: imgAsk, title: '담임에게 물어보기', sub: '용어·자주 묻는 질문' },
 ];
 
 export default function JourneyHome({ goTo = () => {} }) {
@@ -31,7 +27,7 @@ export default function JourneyHome({ goTo = () => {} }) {
   const [rm] = useState(() => gradeRoadmap(profile, getBookmarks().length));
   const grade = gradeOption(profile?.grade);
   const region = getHomeRegion(profile);
-  const tiles = TILES.filter((t) => !isHiddenScreen(t.screen));
+  const shortcuts = SHORTCUTS.filter((s) => !isHiddenScreen(s.screen));
 
   return (
     <div className="screen hm-screen">
@@ -40,14 +36,11 @@ export default function JourneyHome({ goTo = () => {} }) {
           {grade && <span className="hm-chip">{grade.label}</span>}
           {region && <span className="hm-chip">{region}</span>}
         </span>
-        <button type="button" className="hm-icon" aria-label="마이페이지" onClick={() => goTo('mypage')}>
-          <UserRound size={22} aria-hidden="true" />
-        </button>
       </header>
 
       <h1 className="hm-title">우리, 대학 한번<br />가 볼까요?</h1>
 
-      {/* 로드맵 입구 — 카드 전체가 버튼 하나 */}
+      {/* 로드맵 입구 — 카드 전체가 버튼 하나. 진학지원 탭으로 전환된다 */}
       <button type="button" className="hm-road" onClick={() => goTo('roadmap')}>
         <span className="hm-road-head">
           <span className="hm-road-label">나의 대입 로드맵</span>
@@ -60,7 +53,7 @@ export default function JourneyHome({ goTo = () => {} }) {
             <span className="hm-road-title">{rm.headline}</span>
             <span className="hm-road-note">{rm.peerNote}</span>
           </span>
-          <img className="hm-road-img" src={imgRoadmap} alt="" width="76" height="76" />
+          <img className="hm-road-img" src={imgRoadmap} alt="" width="88" height="88" />
         </span>
         <span className="hm-steps" aria-hidden="true">
           {rm.steps.map((s) => (
@@ -73,14 +66,18 @@ export default function JourneyHome({ goTo = () => {} }) {
         <span className="hm-cta">내 로드맵 보기</span>
       </button>
 
-      <div className={`hm-tiles cols-${tiles.length}`}>
-        {tiles.map((t) => (
-          <button key={t.screen} type="button" className="hm-tile" onClick={() => goTo(t.screen)}>
-            <span className={`hm-tile-art tone-${t.tone}`}>
-              <img src={t.img} alt="" width="56" height="56" />
+      <p className="hm-sec-title">지금 바로</p>
+      <div className="hm-shortcut-list">
+        {shortcuts.map((s) => (
+          <button key={s.screen} type="button" className="hm-shortcut" onClick={() => goTo(s.screen)}>
+            <span className="hm-shortcut-ico">
+              {s.img ? <img src={s.img} alt="" width="40" height="40" /> : <s.Icon size={22} />}
             </span>
-            <span className="hm-tile-title">{t.title}</span>
-            <span className="hm-tile-sub">{t.sub}</span>
+            <span className="hm-shortcut-text">
+              <span className="hm-shortcut-title">{s.title}</span>
+              <span className="hm-shortcut-sub">{s.sub}</span>
+            </span>
+            <ChevronRight size={20} className="hm-shortcut-arrow" />
           </button>
         ))}
       </div>

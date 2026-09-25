@@ -41,34 +41,26 @@
   border-radius: 999px;
   padding: 5px 10px;
 }
-.hm-icon {
-  width: 44px;
-  height: 44px;
-  margin-right: -8px;
-  border-radius: 50%;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--hm-ink);
-}
 
 .hm-title {
-  margin: 14px 2px 20px;
-  font-size: 27px;
-  line-height: 1.32;
+  margin: 16px 2px 22px;
+  font-size: 32px;
+  line-height: 1.28;
   font-weight: 800;
   letter-spacing: -0.04em;
 }
 
-/* ── 로드맵 카드 ── */
+/* ── 로드맵 카드 — 입체감(2단 그림자) + 아이콘이 카드 위로 살짝 튀어나옴 ── */
 .hm-road {
+  position: relative;
   display: block;
   width: 100%;
   text-align: left;
   background: var(--hm-card);
-  border-radius: 24px;
-  padding: 20px 20px 18px;
-  box-shadow: 0 1px 2px rgba(20, 30, 45, 0.04);
+  border-radius: 26px;
+  padding: 22px 22px 20px;
+  box-shadow: 0 1px 3px rgba(20, 30, 45, 0.05), 0 10px 28px rgba(20, 30, 45, 0.07);
+  overflow: visible;
 }
 .hm-road-head {
   display: flex;
@@ -92,15 +84,15 @@
 }
 .hm-road-body {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 10px;
-  margin-top: 8px;
+  margin-top: 10px;
 }
 .hm-road-text { flex: 1; min-width: 0; }
 .hm-road-title {
   display: block;
-  font-size: 20px;
-  line-height: 1.38;
+  font-size: 21px;
+  line-height: 1.36;
   font-weight: 800;
   letter-spacing: -0.03em;
 }
@@ -111,7 +103,14 @@
   line-height: 1.5;
   color: var(--hm-sub);
 }
-.hm-road-img { flex-shrink: 0; width: 76px; height: 76px; }
+/* 카드 위로 살짝 튀어나오게 — 입체감 */
+.hm-road-img {
+  flex-shrink: 0;
+  width: 88px;
+  height: 88px;
+  margin-top: -30px;
+  filter: drop-shadow(0 6px 10px rgba(20, 30, 45, 0.14));
+}
 
 /* 4단계 진행 표시 — 누르는 곳이 아니다(단계 입구는 로드맵 화면 안) */
 .hm-steps {
@@ -173,58 +172,61 @@
   padding: 14px 12px;
 }
 
-/* ── 큰 아이콘 타일 ── */
-.hm-tiles {
-  display: grid;
-  gap: 10px;
-  margin-top: 14px;
+/* ── 지금 바로 — 탭에 없는 잔가지만 목록으로 ── */
+.hm-sec-title {
+  margin: 26px 4px 10px;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--hm-ink);
 }
-.hm-tiles.cols-3 { grid-template-columns: repeat(3, 1fr); }
-.hm-tiles.cols-2 { grid-template-columns: repeat(2, 1fr); }
-.hm-tile {
+.hm-shortcut-list {
   display: flex;
   flex-direction: column;
+  gap: 10px;
+}
+.hm-shortcut {
+  display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 18px 6px 16px;
+  gap: 14px;
+  width: 100%;
+  text-align: left;
   background: var(--hm-card);
   border-radius: 20px;
-  text-align: center;
+  padding: 14px 16px;
   box-shadow: 0 1px 2px rgba(20, 30, 45, 0.04);
 }
-.hm-tile:active { transform: scale(0.97); }
-.hm-tile-art {
-  width: 72px;
-  height: 72px;
-  margin-bottom: 6px;
-  border-radius: 22px;
+.hm-shortcut:active { transform: scale(0.98); }
+.hm-shortcut-ico {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  background: var(--hm-blue-soft);
+  color: var(--hm-blue);
   display: flex;
   align-items: center;
   justify-content: center;
 }
-.hm-tile-art.tone-blue { background: var(--hm-blue-soft); }
-.hm-tile-art.tone-yellow { background: var(--hm-yellow-soft); }
-.hm-tile-art img { width: 56px; height: 56px; }
-.hm-tile-title {
-  font-size: 14.5px;
+.hm-shortcut-ico img { width: 32px; height: 32px; }
+.hm-shortcut-text { flex: 1; min-width: 0; }
+.hm-shortcut-title {
+  display: block;
+  font-size: 15.5px;
   font-weight: 700;
-  line-height: 1.35;
-  word-break: keep-all;
+  color: var(--hm-ink);
 }
-.hm-tile-sub {
-  font-size: 11.5px;
-  line-height: 1.4;
+.hm-shortcut-sub {
+  display: block;
+  margin-top: 2px;
+  font-size: 12.5px;
   color: var(--hm-sub);
-  word-break: keep-all;
 }
+.hm-shortcut-arrow { flex-shrink: 0; color: var(--chevron); }
 
 @media (max-width: 360px) {
   .hm-screen { padding-left: 14px; padding-right: 14px; }
-  .hm-title { font-size: 24px; }
-  .hm-road-img { width: 60px; height: 60px; }
-  .hm-tile-art { width: 60px; height: 60px; }
-  .hm-tile-art img { width: 46px; height: 46px; }
-  .hm-tile-title { font-size: 13.5px; }
+  .hm-title { font-size: 27px; }
+  .hm-road-img { width: 68px; height: 68px; margin-top: -22px; }
 }
 
 /* =====================================================================
