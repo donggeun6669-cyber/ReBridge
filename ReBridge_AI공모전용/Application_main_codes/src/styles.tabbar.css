@@ -1,6 +1,7 @@
 /* =====================================================================
    하단 탭바 — 2026-09 리디자인
-   5개 고정 탭, 탭마다 독립 스택(App.jsx). 아이콘은 3D(Fluent Emoji, MIT).
+   5개 고정 탭, 탭마다 독립 스택(App.jsx). 아이콘은 lucide 2D 선 아이콘
+   (다른 화면의 3D 아이콘과는 구분되는 가벼운 톤 — 동근님 지시로 3D에서 변경).
    ===================================================================== */
 
 .tabbar {
@@ -36,11 +37,8 @@
 }
 
 .tabbar-icon {
-  width: 28px;
-  height: 28px;
-  object-fit: contain;
-  filter: grayscale(70%) opacity(0.55);
-  transition: filter 0.15s ease;
+  color: var(--text-muted);
+  transition: color 0.15s ease;
 }
 
 .tabbar-label {
@@ -51,10 +49,10 @@
 }
 
 .tabbar-btn.on .tabbar-icon-wrap {
-  transform: translateY(-1px) scale(1.12);
+  transform: translateY(-1px) scale(1.08);
 }
 .tabbar-btn.on .tabbar-icon {
-  filter: none;
+  color: var(--brand);
 }
 .tabbar-btn.on .tabbar-label {
   color: var(--brand);

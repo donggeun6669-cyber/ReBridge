@@ -38,40 +38,40 @@
 .jh-feature-wide {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 18px;
   width: 100%;
   text-align: left;
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: 24px;
-  padding: 18px 18px 18px 16px;
-  margin-bottom: 12px;
-  box-shadow: 0 6px 16px rgba(20, 30, 45, 0.09);
+  border-radius: 26px;
+  padding: 24px 22px;
+  margin-bottom: 14px;
+  box-shadow: 0 8px 20px rgba(20, 30, 45, 0.1);
 }
 .jh-feature-wide:active { transform: scale(0.98); }
 .jh-feature-wide-ico {
   flex-shrink: 0;
-  width: 64px;
-  height: 64px;
-  border-radius: 18px;
+  width: 84px;
+  height: 84px;
+  border-radius: 22px;
   background: var(--brand-tint);
   border: 1px solid rgba(28, 111, 178, 0.14);
   display: flex;
   align-items: center;
   justify-content: center;
 }
-.jh-feature-wide-ico img { width: 48px; height: 48px; }
+.jh-feature-wide-ico img { width: 64px; height: 64px; }
 .jh-feature-wide-text { flex: 1; min-width: 0; }
 .jh-feature-wide-title {
   display: block;
-  font-size: 18px;
+  font-size: 21px;
   font-weight: 800;
   color: var(--text);
 }
 .jh-feature-wide-sub {
   display: block;
-  margin-top: 3px;
-  font-size: 13px;
+  margin-top: 4px;
+  font-size: 13.5px;
   color: var(--text-sub);
 }
 .jh-feature-wide-arrow { flex-shrink: 0; color: var(--chevron); }

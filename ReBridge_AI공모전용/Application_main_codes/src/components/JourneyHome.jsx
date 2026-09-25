@@ -52,7 +52,7 @@ export default function JourneyHome({ goTo = () => {} }) {
       {/* 가장 중요한 기능 — 가로로 긴 배너 하나로 따로 강조 */}
       {showPrimary && (
         <button type="button" className="jh-feature-wide" onClick={() => goTo(PRIMARY_FEATURE.screen)}>
-          <span className="jh-feature-wide-ico"><img src={PRIMARY_FEATURE.img} alt="" width="48" height="48" /></span>
+          <span className="jh-feature-wide-ico"><img src={PRIMARY_FEATURE.img} alt="" width="64" height="64" /></span>
           <span className="jh-feature-wide-text">
             <span className="jh-feature-wide-title">{PRIMARY_FEATURE.title}</span>
             <span className="jh-feature-wide-sub">{PRIMARY_FEATURE.sub}</span>
