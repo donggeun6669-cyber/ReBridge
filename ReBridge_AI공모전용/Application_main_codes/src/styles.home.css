@@ -26,7 +26,7 @@
   padding: 6px 14px;
 }
 .jh-title {
-  margin: 16px 0 24px;
+  margin: 16px 0 26px;
   font-size: 32px;
   line-height: 1.26;
   font-weight: 800;
@@ -34,7 +34,48 @@
   color: var(--text);
 }
 
-/* ── 오늘의 카드 — 파랑 히어로 카드. 색으로 확실히 강조한다 ── */
+/* ── 핵심 기능 4개 — 큰 아이콘 그리드. 홈에서 가장 먼저 보이는 것 ── */
+.jh-feature-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+.jh-feature {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+  background: var(--card);
+  border-radius: 24px;
+  padding: 22px 10px 18px;
+  box-shadow: var(--shadow-sm);
+}
+.jh-feature:active { transform: scale(0.97); }
+.jh-feature-ico {
+  width: 76px;
+  height: 76px;
+  margin-bottom: 4px;
+  border-radius: 22px;
+  background: var(--brand-tint);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.jh-feature-ico img { width: 56px; height: 56px; }
+.jh-feature-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text);
+}
+.jh-feature-sub {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--text-sub);
+  word-break: keep-all;
+}
+
+/* ── 로드맵 카드 — 보조 위치(스크롤해야 보임). 색은 있지만 화면의 주인공은 아니다 ── */
 .jh-hero {
   position: relative;
   display: block;
@@ -42,17 +83,18 @@
   text-align: left;
   background: var(--brand);
   border-radius: 28px;
-  padding: 26px 24px 22px;
+  padding: 24px 22px 20px;
+  margin-top: 28px;
   overflow: visible;
   box-shadow: 0 16px 32px -12px rgba(46, 139, 208, 0.45);
 }
 /* 아이콘이 카드 오른쪽 위 모서리를 넘어 떠 있는 배지 */
 .jh-hero-badge {
   position: absolute;
-  top: -22px;
+  top: -18px;
   right: 14px;
-  width: 104px;
-  height: 104px;
+  width: 88px;
+  height: 88px;
   filter: drop-shadow(0 10px 14px rgba(20, 30, 45, 0.22));
 }
 .jh-hero-row {

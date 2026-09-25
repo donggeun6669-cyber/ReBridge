@@ -6,16 +6,26 @@ import { getBookmarks } from '../lib/bookmarks.js';
 import { gradeRoadmap } from '../lib/roadmap.js';
 import imgRoadmap from '../assets/icons3d/roadmap.png';
 import imgAsk from '../assets/icons3d/ask.png';
+import imgDreamdrive from '../assets/icons3d/dreamdrim.png';
+import imgStudy from '../assets/icons3d/step-ged.png';
+import imgCommunity from '../assets/icons3d/community.png';
+import imgMypage from '../assets/icons3d/mypage.png';
 import '../styles.home.css';
 
-// 홈 탭 — 2026-09 전면 리디자인(레퍼런스 기반, 기존 hm-* 레이아웃 폐기).
-//   하단 탭(꿈드림센터·진학지원·커뮤니티·마이페이지)이 생기면서 홈은 그 탭들의
-//   입구를 다시 만들지 않는다 — '같은 기능은 한 화면에만' 원칙. 홈은:
-//     ① 오늘 상태 카드(로드맵) 하나 — 색이 있는 카드로 확실히 강조, 누르면 진학지원 탭으로
-//     ② 탭에 없는 잔가지 바로가기(담임에게 물어보기)만 아래에 목록으로
-//   색은 기존 토큰(--brand·--accent 등) 그대로 쓰되, 레이아웃·타이포·카드 구성은 새로 짬.
+// 홈 탭 — 2026-09 재구성 (동근님 지시: 핵심 기능을 큰 아이콘으로 먼저 보여주고,
+//   로드맵은 스크롤 내려야 나오는 보조 위치로).
+//   ① 핵심 기능 4개(나머지 탭과 동일) — 큰 아이콘 그리드, 화면 맨 위
+//   ② 지금 바로 — 탭에 없는 잔가지(담임에게 물어보기)
+//   ③ 로드맵 카드 — 맨 아래, 스크롤해야 보임
 
-// '관심 대학'은 마이페이지에 이미 입구가 있어 여기 또 만들지 않는다(같은 기능은 한 화면에만).
+const FEATURES = [
+  { screen: 'dreamdrive', img: imgDreamdrive, title: '꿈드림센터', sub: '가까운 센터·지원 혜택' },
+  { screen: 'roadmap',    img: imgStudy,      title: '진학지원',   sub: '검정고시·내 점수·대학 찾기' },
+  { screen: 'community',  img: imgCommunity,  title: '커뮤니티',   sub: '같은 길 가는 친구들' },
+  { screen: 'mypage',     img: imgMypage,      title: '마이페이지', sub: '내 정보·관심 대학' },
+];
+
+// '관심 대학'은 마이페이지 안에 이미 입구가 있어 여기 또 만들지 않는다(같은 기능은 한 화면에만).
 const SHORTCUTS = [
   { screen: 'help', img: imgAsk, title: '담임에게 물어보기', sub: '용어·자주 묻는 질문' },
 ];
@@ -26,6 +36,7 @@ export default function JourneyHome({ goTo = () => {} }) {
   const [rm] = useState(() => gradeRoadmap(profile, getBookmarks().length));
   const grade = gradeOption(profile?.grade);
   const region = getHomeRegion(profile);
+  const features = FEATURES.filter((f) => !isHiddenScreen(f.screen));
   const shortcuts = SHORTCUTS.filter((s) => !isHiddenScreen(s.screen));
   const currentIdx = rm.steps.findIndex((s) => s.status === 'current');
 
@@ -38,9 +49,36 @@ export default function JourneyHome({ goTo = () => {} }) {
         <h1 className="jh-title">우리, 대학<br />한번 가 볼까요?</h1>
       </header>
 
-      {/* 오늘의 카드 — 색이 있는 큰 카드 하나로 강조. 진학지원 탭으로 전환된다 */}
+      {/* 핵심 기능 — 큰 아이콘 4개, 나머지 탭과 같은 곳으로 간다 */}
+      <div className="jh-feature-grid">
+        {features.map((f) => (
+          <button key={f.screen} type="button" className="jh-feature" onClick={() => goTo(f.screen)}>
+            <span className="jh-feature-ico"><img src={f.img} alt="" width="56" height="56" /></span>
+            <span className="jh-feature-title">{f.title}</span>
+            <span className="jh-feature-sub">{f.sub}</span>
+          </button>
+        ))}
+      </div>
+
+      <p className="jh-sec-title">지금 바로</p>
+      <div className="jh-quick-list">
+        {shortcuts.map((s) => (
+          <button key={s.screen} type="button" className="jh-quick" onClick={() => goTo(s.screen)}>
+            <span className="jh-quick-ico">
+              {s.img ? <img src={s.img} alt="" width="34" height="34" /> : <s.Icon size={22} />}
+            </span>
+            <span className="jh-quick-text">
+              <span className="jh-quick-title">{s.title}</span>
+              <span className="jh-quick-sub">{s.sub}</span>
+            </span>
+            <ChevronRight size={20} className="jh-quick-arrow" />
+          </button>
+        ))}
+      </div>
+
+      {/* 로드맵 — 보조 위치. 스크롤을 내려야 보인다 */}
       <button type="button" className="jh-hero" onClick={() => goTo('roadmap')}>
-        <img className="jh-hero-badge" src={imgRoadmap} alt="" width="104" height="104" />
+        <img className="jh-hero-badge" src={imgRoadmap} alt="" width="88" height="88" />
 
         <span className="jh-hero-row">
           <span className="jh-hero-kicker">나의 대입 로드맵</span>
@@ -69,22 +107,6 @@ export default function JourneyHome({ goTo = () => {} }) {
 
         <span className="jh-hero-cta">내 로드맵 보기<ChevronRight size={18} /></span>
       </button>
-
-      <p className="jh-sec-title">지금 바로</p>
-      <div className="jh-quick-list">
-        {shortcuts.map((s) => (
-          <button key={s.screen} type="button" className="jh-quick" onClick={() => goTo(s.screen)}>
-            <span className="jh-quick-ico">
-              {s.img ? <img src={s.img} alt="" width="34" height="34" /> : <s.Icon size={22} />}
-            </span>
-            <span className="jh-quick-text">
-              <span className="jh-quick-title">{s.title}</span>
-              <span className="jh-quick-sub">{s.sub}</span>
-            </span>
-            <ChevronRight size={20} className="jh-quick-arrow" />
-          </button>
-        ))}
-      </div>
     </div>
   );
 }
