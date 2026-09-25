@@ -1,0 +1,62 @@
+/* =====================================================================
+   하단 탭바 — 2026-09 리디자인
+   5개 고정 탭, 탭마다 독립 스택(App.jsx). 아이콘은 3D(Fluent Emoji, MIT).
+   ===================================================================== */
+
+.tabbar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: stretch;
+  background: var(--card);
+  border-top: 1px solid var(--border);
+  padding: 6px 4px calc(6px + env(safe-area-inset-bottom, 0px));
+}
+
+.tabbar-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 6px 2px 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tabbar-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  transition: transform 0.15s ease;
+}
+
+.tabbar-icon {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  filter: grayscale(70%) opacity(0.55);
+  transition: filter 0.15s ease;
+}
+
+.tabbar-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: -0.1px;
+}
+
+.tabbar-btn.on .tabbar-icon-wrap {
+  transform: translateY(-1px) scale(1.12);
+}
+.tabbar-btn.on .tabbar-icon {
+  filter: none;
+}
+.tabbar-btn.on .tabbar-label {
+  color: var(--brand);
+  font-weight: 800;
+}
