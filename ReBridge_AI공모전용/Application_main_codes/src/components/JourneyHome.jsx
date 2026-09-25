@@ -15,8 +15,8 @@ import '../styles.home.css';
 //   ① 꿈드림센터 찾기 — 제일 중요한 기능이라 가로로 긴 배너 하나로 따로 뺌
 //   ② 진학지원·커뮤니티 — 그 아래 2열 아이콘 그리드(기존 크기 유지)
 //     마이페이지는 이미 탭에 있으니 홈에서 뺀다(같은 기능은 한 화면에만).
-//   ③ 지금 바로 — 탭에 없는 잔가지(담임에게 물어보기)
-//   ④ 로드맵 카드 — 맨 아래, 스크롤해야 보임
+//   ③ 로드맵 카드 — 스크롤해야 보이는 위치지만 '지금 바로'보다는 위
+//   ④ 지금 바로 — 탭에 없는 잔가지(담임에게 물어보기)
 
 const PRIMARY_FEATURE = { screen: 'dreamdrive', img: imgDreamdrive, title: '꿈드림센터', sub: '가까운 센터 찾기·지원 혜택' };
 const FEATURES = [
@@ -71,23 +71,7 @@ export default function JourneyHome({ goTo = () => {} }) {
         ))}
       </div>
 
-      <p className="jh-sec-title">지금 바로</p>
-      <div className="jh-quick-list">
-        {shortcuts.map((s) => (
-          <button key={s.screen} type="button" className="jh-quick" onClick={() => goTo(s.screen)}>
-            <span className="jh-quick-ico">
-              {s.img ? <img src={s.img} alt="" width="34" height="34" /> : <s.Icon size={22} />}
-            </span>
-            <span className="jh-quick-text">
-              <span className="jh-quick-title">{s.title}</span>
-              <span className="jh-quick-sub">{s.sub}</span>
-            </span>
-            <ChevronRight size={20} className="jh-quick-arrow" />
-          </button>
-        ))}
-      </div>
-
-      {/* 로드맵 — 보조 위치. 스크롤을 내려야 보인다 */}
+      {/* 로드맵 — 담임에게 물어보기보다 위로 */}
       <button type="button" className="jh-hero" onClick={() => goTo('roadmap')}>
         <img className="jh-hero-badge" src={imgRoadmap} alt="" width="88" height="88" />
 
@@ -118,6 +102,22 @@ export default function JourneyHome({ goTo = () => {} }) {
 
         <span className="jh-hero-cta">내 로드맵 보기<ChevronRight size={18} /></span>
       </button>
+
+      <p className="jh-sec-title">지금 바로</p>
+      <div className="jh-quick-list">
+        {shortcuts.map((s) => (
+          <button key={s.screen} type="button" className="jh-quick" onClick={() => goTo(s.screen)}>
+            <span className="jh-quick-ico">
+              {s.img ? <img src={s.img} alt="" width="34" height="34" /> : <s.Icon size={22} />}
+            </span>
+            <span className="jh-quick-text">
+              <span className="jh-quick-title">{s.title}</span>
+              <span className="jh-quick-sub">{s.sub}</span>
+            </span>
+            <ChevronRight size={20} className="jh-quick-arrow" />
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
