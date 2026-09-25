@@ -54,7 +54,7 @@ export default function JourneyHome({ goTo = () => {} }) {
       {/* 가장 중요한 기능 — 가로로 긴 배너 하나로 따로 강조 */}
       {showPrimary && (
         <button type="button" className="jh-feature-wide" onClick={() => goTo(PRIMARY_FEATURE.screen)}>
-          <span className="jh-feature-wide-ico"><img src={PRIMARY_FEATURE.img} alt="" width="64" height="64" /></span>
+          <span className="jh-feature-wide-ico"><img src={PRIMARY_FEATURE.img} alt="" width="52" height="52" /></span>
           <span className="jh-feature-wide-text">
             <span className="jh-feature-wide-title">{PRIMARY_FEATURE.title}</span>
             <span className="jh-feature-wide-sub">{PRIMARY_FEATURE.sub}</span>
@@ -66,7 +66,7 @@ export default function JourneyHome({ goTo = () => {} }) {
       <div className="jh-feature-grid">
         {features.map((f) => (
           <button key={f.screen} type="button" className="jh-feature" onClick={() => goTo(f.screen)}>
-            <span className="jh-feature-ico"><img src={f.img} alt="" width="56" height="56" /></span>
+            <span className="jh-feature-ico"><img src={f.img} alt="" width="46" height="46" /></span>
             <span className="jh-feature-title">{f.title}</span>
             <span className="jh-feature-sub">{f.sub}</span>
           </button>
@@ -75,7 +75,7 @@ export default function JourneyHome({ goTo = () => {} }) {
 
       {/* 로드맵 — 담임에게 물어보기보다 위로 */}
       <button type="button" className="jh-hero" onClick={() => goTo('roadmap')}>
-        <img className="jh-hero-badge" src={imgRoadmap} alt="" width="88" height="88" />
+        <img className="jh-hero-badge" src={imgRoadmap} alt="" width="72" height="72" />
 
         <span className="jh-hero-row">
           <span className="jh-hero-kicker">나의 대입 로드맵</span>
@@ -110,7 +110,7 @@ export default function JourneyHome({ goTo = () => {} }) {
         {shortcuts.map((s) => (
           <button key={s.screen} type="button" className="jh-quick" onClick={() => goTo(s.screen)}>
             <span className="jh-quick-ico">
-              {s.img ? <img src={s.img} alt="" width="34" height="34" /> : <s.Icon size={22} />}
+              {s.img ? <img src={s.img} alt="" width="28" height="28" /> : <s.Icon size={20} />}
             </span>
             <span className="jh-quick-text">
               <span className="jh-quick-title">{s.title}</span>
