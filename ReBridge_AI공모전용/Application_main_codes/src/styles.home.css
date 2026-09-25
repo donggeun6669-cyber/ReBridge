@@ -64,7 +64,12 @@
   align-items: center;
   justify-content: center;
 }
-.jh-feature-wide-ico img { width: 64px; height: 64px; filter: drop-shadow(0 4px 6px rgba(20, 30, 45, 0.18)); }
+.jh-feature-wide-ico img {
+  width: 64px;
+  height: 64px;
+  filter: drop-shadow(0 4px 6px rgba(20, 30, 45, 0.18));
+  animation: jh-float 3.2s ease-in-out infinite;
+}
 .jh-feature-wide-text { flex: 1; min-width: 0; }
 .jh-feature-wide-title {
   display: block;
@@ -96,7 +101,7 @@
   border: 1px solid var(--border);
   border-radius: 24px;
   padding: 22px 10px 18px;
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) inset, 0 2px 4px rgba(20, 30, 45, 0.05), 0 10px 20px -8px rgba(20, 30, 45, 0.16);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) inset, 0 2px 4px rgba(20, 30, 45, 0.05), 0 14px 26px -8px rgba(20, 30, 45, 0.18);
 }
 .jh-feature:active { transform: scale(0.97); }
 /* 아이콘 칸 — 그라디언트 + 안쪽 하이라이트로 살짝 도드라져 보이게 */
@@ -112,7 +117,14 @@
   align-items: center;
   justify-content: center;
 }
-.jh-feature-ico img { width: 56px; height: 56px; filter: drop-shadow(0 3px 5px rgba(20, 30, 45, 0.16)); }
+.jh-feature-ico img {
+  width: 56px;
+  height: 56px;
+  filter: drop-shadow(0 3px 5px rgba(20, 30, 45, 0.16));
+  animation: jh-float 3.2s ease-in-out infinite;
+}
+/* 그리드 두 번째 칸(커뮤니티)은 타이밍을 살짝 어긋나게 — 똑같이 움직이면 기계적으로 보임 */
+.jh-feature:nth-child(2) .jh-feature-ico img { animation-delay: 0.6s; }
 .jh-feature-title {
   font-size: 16px;
   font-weight: 800;
@@ -146,6 +158,8 @@
   width: 88px;
   height: 88px;
   filter: drop-shadow(0 10px 14px rgba(20, 30, 45, 0.22));
+  animation: jh-float 3.2s ease-in-out infinite;
+  animation-delay: 0.3s;
 }
 .jh-hero-row {
   display: flex;
@@ -265,7 +279,25 @@
   align-items: center;
   justify-content: center;
 }
-.jh-quick-ico img { filter: drop-shadow(0 3px 5px rgba(20, 30, 45, 0.14)); }
+.jh-quick-ico img {
+  filter: drop-shadow(0 3px 5px rgba(20, 30, 45, 0.14));
+  animation: jh-float 3.2s ease-in-out infinite;
+  animation-delay: 0.9s;
+}
+
+/* 아이콘이 위아래로 살짝 떠 있는 것처럼 — 카드마다 딜레이를 줘서 다 같이 움직이지 않게 */
+@keyframes jh-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .jh-feature-wide-ico img,
+  .jh-feature-ico img,
+  .jh-hero-badge,
+  .jh-quick-ico img {
+    animation: none;
+  }
+}
 .jh-quick-text { flex: 1; min-width: 0; }
 .jh-quick-title {
   display: block;
