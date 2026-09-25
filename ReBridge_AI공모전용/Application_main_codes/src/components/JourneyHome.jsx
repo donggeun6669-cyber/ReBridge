@@ -19,9 +19,11 @@ import '../styles.home.css';
 //   ④ 지금 바로 — 탭에 없는 잔가지(담임에게 물어보기)
 
 const PRIMARY_FEATURE = { screen: 'dreamdrive', img: imgDreamdrive, title: '꿈드림센터', sub: '가까운 센터 찾기·지원 혜택' };
+// '진학지원' 타일은 로드맵 전체가 아니라 '대학 찾기'만 바로 연다 — 로드맵 카드(검정고시·
+// 서류 등 전체 단계)와는 다른 목적지라 이름도 구분했다(동근님 2026-09).
 const FEATURES = [
-  { screen: 'roadmap',   img: imgStudy,     title: '진학지원', sub: '검정고시·내 점수·대학 찾기' },
-  { screen: 'community', img: imgCommunity, title: '커뮤니티', sub: '같은 길 가는 친구들' },
+  { screen: 'univ-explore', img: imgStudy,     title: '대학 찾기', sub: '내 점수로 갈 수 있는 대학' },
+  { screen: 'community',    img: imgCommunity, title: '커뮤니티',  sub: '같은 길 가는 친구들' },
 ];
 
 // '관심 대학'은 마이페이지 안에 이미 입구가 있어 여기 또 만들지 않는다(같은 기능은 한 화면에만).
