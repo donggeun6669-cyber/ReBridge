@@ -34,19 +34,22 @@
   color: var(--text);
 }
 
-/* ── 가장 중요한 기능(꿈드림센터) — 가로로 긴 배너, 화면 맨 위 ── */
+/* ── 가장 중요한 기능(꿈드림센터) — 가로로 긴 배너, 화면 맨 위 ──
+   입체감: 카드에 미세한 상하 그라디언트 + 2단 그림자(뜬 느낌),
+   아이콘 칸은 대각선 그라디언트 + 안쪽 하이라이트, 아이콘 자체엔 그림자를 줘서
+   칸 위에 살짝 떠 있는 것처럼 보이게 한다. */
 .jh-feature-wide {
   display: flex;
   align-items: center;
   gap: 18px;
   width: 100%;
   text-align: left;
-  background: var(--card);
+  background: linear-gradient(180deg, #ffffff 0%, #fbfcfe 100%);
   border: 1px solid var(--border);
   border-radius: 26px;
   padding: 24px 22px;
   margin-bottom: 14px;
-  box-shadow: 0 8px 20px rgba(20, 30, 45, 0.1);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) inset, 0 2px 4px rgba(20, 30, 45, 0.05), 0 14px 26px -8px rgba(20, 30, 45, 0.18);
 }
 .jh-feature-wide:active { transform: scale(0.98); }
 .jh-feature-wide-ico {
@@ -54,13 +57,14 @@
   width: 84px;
   height: 84px;
   border-radius: 22px;
-  background: var(--brand-tint);
-  border: 1px solid rgba(28, 111, 178, 0.14);
+  background: linear-gradient(145deg, #F5FAFF 0%, var(--brand-tint) 60%, #DCEBFA 100%);
+  border: 1px solid rgba(28, 111, 178, 0.16);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.9) inset, 0 4px 10px rgba(28, 111, 178, 0.14);
   display: flex;
   align-items: center;
   justify-content: center;
 }
-.jh-feature-wide-ico img { width: 64px; height: 64px; }
+.jh-feature-wide-ico img { width: 64px; height: 64px; filter: drop-shadow(0 4px 6px rgba(20, 30, 45, 0.18)); }
 .jh-feature-wide-text { flex: 1; min-width: 0; }
 .jh-feature-wide-title {
   display: block;
@@ -88,26 +92,27 @@
   align-items: center;
   gap: 6px;
   text-align: center;
-  background: var(--card);
+  background: linear-gradient(180deg, #ffffff 0%, #fbfcfe 100%);
   border: 1px solid var(--border);
   border-radius: 24px;
   padding: 22px 10px 18px;
-  box-shadow: 0 6px 16px rgba(20, 30, 45, 0.07);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) inset, 0 2px 4px rgba(20, 30, 45, 0.05), 0 10px 20px -8px rgba(20, 30, 45, 0.16);
 }
 .jh-feature:active { transform: scale(0.97); }
-/* 아이콘 칸에도 옅은 테두리를 줘서 카드 배경과 경계가 뚜렷하게 보이게 한다 */
+/* 아이콘 칸 — 그라디언트 + 안쪽 하이라이트로 살짝 도드라져 보이게 */
 .jh-feature-ico {
   width: 76px;
   height: 76px;
   margin-bottom: 4px;
   border-radius: 22px;
-  background: var(--brand-tint);
-  border: 1px solid rgba(28, 111, 178, 0.14);
+  background: linear-gradient(145deg, #F5FAFF 0%, var(--brand-tint) 60%, #DCEBFA 100%);
+  border: 1px solid rgba(28, 111, 178, 0.16);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.9) inset, 0 4px 10px rgba(28, 111, 178, 0.14);
   display: flex;
   align-items: center;
   justify-content: center;
 }
-.jh-feature-ico img { width: 56px; height: 56px; }
+.jh-feature-ico img { width: 56px; height: 56px; filter: drop-shadow(0 3px 5px rgba(20, 30, 45, 0.16)); }
 .jh-feature-title {
   font-size: 16px;
   font-weight: 800;
@@ -126,12 +131,12 @@
   display: block;
   width: 100%;
   text-align: left;
-  background: var(--brand);
+  background: linear-gradient(160deg, #3E9BDD 0%, var(--brand) 55%, var(--brand-deep) 100%);
   border-radius: 28px;
   padding: 24px 22px 20px;
   margin-top: 28px;
   overflow: visible;
-  box-shadow: 0 16px 32px -12px rgba(46, 139, 208, 0.45);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.25) inset, 0 4px 8px rgba(20, 30, 45, 0.12), 0 20px 36px -12px rgba(28, 111, 178, 0.55);
 }
 /* 아이콘이 카드 오른쪽 위 모서리를 넘어 떠 있는 배지 */
 .jh-hero-badge {
@@ -240,11 +245,11 @@
   gap: 14px;
   width: 100%;
   text-align: left;
-  background: var(--card);
+  background: linear-gradient(180deg, #ffffff 0%, #fbfcfe 100%);
   border: 1px solid var(--border);
   border-radius: 22px;
   padding: 16px 18px;
-  box-shadow: 0 6px 16px rgba(20, 30, 45, 0.07);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) inset, 0 2px 4px rgba(20, 30, 45, 0.05), 0 10px 20px -8px rgba(20, 30, 45, 0.16);
 }
 .jh-quick:active { transform: scale(0.98); }
 .jh-quick-ico {
@@ -252,13 +257,15 @@
   width: 52px;
   height: 52px;
   border-radius: 18px;
-  background: var(--accent-soft);
-  border: 1px solid rgba(122, 82, 0, 0.14);
+  background: linear-gradient(145deg, #FFFBF0 0%, var(--accent-soft) 60%, #FFE9B0 100%);
+  border: 1px solid rgba(122, 82, 0, 0.16);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.9) inset, 0 4px 10px rgba(122, 82, 0, 0.12);
   color: var(--accent-ink);
   display: flex;
   align-items: center;
   justify-content: center;
 }
+.jh-quick-ico img { filter: drop-shadow(0 3px 5px rgba(20, 30, 45, 0.14)); }
 .jh-quick-text { flex: 1; min-width: 0; }
 .jh-quick-title {
   display: block;
