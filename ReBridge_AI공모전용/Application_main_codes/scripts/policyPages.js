@@ -96,8 +96,8 @@ function page(doc, canonical) {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>${esc(data.title)} — 검고담임</title>
-<meta name="description" content="검고담임(검정고시생·학교 밖 청소년 입시·진로 안내)의 ${esc(data.title)}입니다.">
+<title>${esc(data.title)} — TalkDream</title>
+<meta name="description" content="TalkDream(학교 밖 청소년 꿈드림센터·진학 안내)의 ${esc(data.title)}입니다.">
 <link rel="canonical" href="${esc(canonical)}">
 <style>${CSS}</style>
 </head>
@@ -108,7 +108,7 @@ function page(doc, canonical) {
 ${body}
 ${renderContact()}
 <p class="effective">시행일: ${esc(POLICY_EFFECTIVE)}</p>
-<a class="backlink" href="/">검고담임으로 돌아가기</a>
+<a class="backlink" href="/">TalkDream으로 돌아가기</a>
 </main>
 </body>
 </html>`;
