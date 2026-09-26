@@ -83,6 +83,13 @@ export const HOME_REGIONS = [
 export function getHomeRegion(p = loadProfile()) {
   return p?.homeRegion || null;
 }
+// 홈에서 지역만 바로 고를 때(2026-09-26 PRD v2 시연판 — 시작 질문을 건너뛴 사람용)
+export function setHomeRegion(region) {
+  const prev = loadProfile() || {};
+  const next = { ...prev, homeRegion: region || undefined };
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(next)); } catch { /* 무시 */ }
+  return next;
+}
 
 // ── 나이 (2026-09 서연님 UI 개선안: 시작 화면에서 나이를 묻고 맞춤 안내) ─────────
 // 생년월일이 아니라 '나이대'만 받는다. 개인 식별이 안 되고, 이 기기(localStorage)에만 남는다.

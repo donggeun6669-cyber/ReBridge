@@ -20,7 +20,7 @@ import CommunityActionSheet from './CommunityActionSheet.jsx';
 import { useAuthUser, NicknameGate } from './AuthScreen.jsx';
 import '../styles.community.css';
 
-export default function CommunityScreen({ goTo = () => {}, goBack = () => {}, params = {} }) {
+export default function CommunityScreen({ goTo = () => {}, goBack = () => {}, params = {}, isRoot = false }) {
   const user = useAuthUser();
   const boards = boardsFor(user);
 
@@ -204,9 +204,9 @@ export default function CommunityScreen({ goTo = () => {}, goBack = () => {}, pa
   // ── 헤더(공통) ──
   const header = (
     <header className="topbar between">
-      {/* 하단 탭이 없어서(2026-09-17) 뒤로 버튼으로 나간다 */}
+      {/* 하단 탭의 첫 화면이면(2026-09-26) 뒤로 버튼이 필요 없다. 다른 화면에서 들어왔을 때만 보인다 */}
       <div className="cm-head-title">
-        <button className="icon-btn" aria-label="뒤로" onClick={goBack}><ArrowLeft size={22} /></button>
+        {!isRoot && <button className="icon-btn" aria-label="뒤로" onClick={goBack}><ArrowLeft size={22} /></button>}
         <span className="page-title">커뮤니티</span>
       </div>
       <div className="cm-head-actions">

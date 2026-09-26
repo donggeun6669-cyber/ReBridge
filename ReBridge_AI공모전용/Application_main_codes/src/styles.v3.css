@@ -1,0 +1,692 @@
+/* =====================================================================
+   v3 — PRD v2 시연판 (2026-09-26, 브랜치 prd2-center-demo)
+   ---------------------------------------------------------------------
+   방향: "AI가 만든 티"를 빼는 것.
+     · 그라디언트·큰 그림자·3D 아이콘·가운데 정렬 대제목을 쓰지 않는다.
+     · 종이색 바탕 + 흰 면 + 1px 선. 카드 격자보다 목록(행)으로 보여준다.
+     · 강조색은 초록 하나. 노랑은 형광펜처럼 글자 밑에만 조금.
+     · 글자 크기 차이로 위계를 만든다(색·아이콘으로 만들지 않는다).
+   참고: 당근 SEED Design의 담백한 목록형 구성, 토스의 문장형 제목.
+   기존 styles.css와 부딪히지 않게 전부 v3- 접두사를 쓴다.
+   ===================================================================== */
+
+:root {
+  --v3-bg: #F6F5F1;
+  --v3-surface: #FFFFFF;
+  --v3-ink: #191A1C;
+  --v3-ink-2: #55595F;
+  --v3-ink-3: #8C9096;
+  --v3-line: #E7E5DF;
+  --v3-line-2: #D9D6CE;
+  --v3-green: #16734F;
+  --v3-green-press: #115C3F;
+  --v3-green-soft: #E7F2EC;
+  --v3-mark: #FFE27A;
+  --v3-warn-soft: #FFF6DA;
+  --v3-warn-ink: #7A5A00;
+  --v3-radius: 14px;
+  --v3-tabbar-h: 60px;
+}
+
+/* ── 화면 틀 ─────────────────────────────────────────────────────────── */
+.v3-screen {
+  background: var(--v3-bg);
+  padding: 0 0 32px;
+  color: var(--v3-ink);
+  letter-spacing: -0.01em;
+}
+.v3-pad { padding-left: 20px; padding-right: 20px; }
+
+.v3-top {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 54px;
+  padding: 6px 12px 6px 8px;
+  background: var(--v3-bg);
+}
+.v3-top.root { padding-left: 20px; }
+.v3-top-title {
+  flex: 1;
+  font-size: 17px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v3-top.root .v3-top-title { font-size: 20px; }
+.v3-icon-btn {
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--v3-ink);
+  position: relative;
+}
+.v3-icon-btn:active { background: rgba(0, 0, 0, 0.05); }
+.v3-dot {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background: #E5484D;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+}
+
+/* ── 글자 ───────────────────────────────────────────────────────────── */
+.v3-eyebrow {
+  font-size: 13px;
+  color: var(--v3-ink-3);
+  margin: 6px 0 6px;
+}
+.v3-h1 {
+  font-size: 26px;
+  line-height: 1.32;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  margin: 0 0 8px;
+}
+.v3-mark {
+  background: linear-gradient(transparent 58%, var(--v3-mark) 58%, var(--v3-mark) 92%, transparent 92%);
+  padding: 0 1px;
+}
+.v3-lead {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--v3-ink-2);
+  margin: 0;
+}
+.v3-sec-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 17px;
+  font-weight: 700;
+  margin: 28px 20px 10px;
+}
+.v3-sec-title small {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--v3-ink-3);
+}
+.v3-sec-more {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--v3-ink-2);
+  background: none;
+  padding: 4px 0;
+}
+.v3-note {
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--v3-ink-3);
+  margin: 10px 20px 0;
+}
+
+/* ── 면 ─────────────────────────────────────────────────────────────── */
+.v3-card {
+  background: var(--v3-surface);
+  border: 1px solid var(--v3-line);
+  border-radius: var(--v3-radius);
+  margin: 0 16px;
+}
+.v3-card + .v3-card { margin-top: 10px; }
+.v3-card-body { padding: 18px 18px 16px; }
+
+/* 목록 묶음 — 흰 면 안에 선으로 나뉜 행들 */
+.v3-list {
+  background: var(--v3-surface);
+  border: 1px solid var(--v3-line);
+  border-radius: var(--v3-radius);
+  margin: 0 16px;
+  overflow: hidden;
+}
+.v3-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 15px 16px;
+  background: none;
+  text-align: left;
+  color: inherit;
+  border-top: 1px solid var(--v3-line);
+}
+.v3-list > .v3-row:first-child { border-top: none; }
+button.v3-row:active { background: #FAFAF8; }
+.v3-row-main { flex: 1; min-width: 0; }
+.v3-row-title {
+  display: block;
+  font-size: 15.5px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.v3-row-sub {
+  display: block;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--v3-ink-3);
+  margin-top: 2px;
+}
+.v3-row-sub.clamp {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v3-row-end {
+  flex-shrink: 0;
+  color: var(--v3-ink-3);
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.v3-row-ico {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--v3-bg);
+  color: var(--v3-ink-2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.v3-row-ico.green { background: var(--v3-green-soft); color: var(--v3-green); }
+
+/* ── 버튼 ───────────────────────────────────────────────────────────── */
+.v3-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 48px;
+  padding: 0 16px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  background: var(--v3-green);
+  color: #fff;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.v3-btn:active { background: var(--v3-green-press); }
+.v3-btn.ghost {
+  background: var(--v3-surface);
+  color: var(--v3-ink);
+  border: 1px solid var(--v3-line-2);
+}
+.v3-btn.ghost:active { background: #F2F1ED; }
+.v3-btn.soft { background: var(--v3-green-soft); color: var(--v3-green); }
+.v3-btn.block { width: 100%; }
+.v3-btn.sm { height: 38px; font-size: 14px; border-radius: 10px; padding: 0 12px; }
+.v3-btn[disabled] { opacity: 0.4; }
+.v3-btn-row {
+  display: flex;
+  gap: 8px;
+}
+.v3-btn-row > * { flex: 1; }
+
+/* ── 칩 ─────────────────────────────────────────────────────────────── */
+.v3-chips {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 0 16px 2px;
+  scrollbar-width: none;
+}
+.v3-chips::-webkit-scrollbar { display: none; }
+.v3-chip {
+  flex-shrink: 0;
+  height: 34px;
+  padding: 0 13px;
+  border-radius: 17px;
+  border: 1px solid var(--v3-line-2);
+  background: var(--v3-surface);
+  color: var(--v3-ink-2);
+  font-size: 13.5px;
+  font-weight: 600;
+}
+.v3-chip.on {
+  background: var(--v3-ink);
+  border-color: var(--v3-ink);
+  color: #fff;
+}
+.v3-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  height: 22px;
+  padding: 0 7px;
+  border-radius: 6px;
+  background: var(--v3-bg);
+  color: var(--v3-ink-2);
+  font-size: 12px;
+  font-weight: 600;
+  vertical-align: middle;
+}
+.v3-tag.green { background: var(--v3-green-soft); color: var(--v3-green); }
+.v3-tag.warn { background: var(--v3-warn-soft); color: var(--v3-warn-ink); }
+
+/* ── 안내 띠 ─────────────────────────────────────────────────────────── */
+.v3-banner {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin: 0 16px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--v3-warn-soft);
+  color: var(--v3-warn-ink);
+  font-size: 13px;
+  line-height: 1.55;
+}
+.v3-banner svg { flex-shrink: 0; margin-top: 2px; }
+.v3-banner.green { background: var(--v3-green-soft); color: var(--v3-green-press); }
+
+/* ── 검색 ───────────────────────────────────────────────────────────── */
+.v3-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 46px;
+  margin: 0 16px;
+  padding: 0 14px;
+  border-radius: 12px;
+  background: var(--v3-surface);
+  border: 1px solid var(--v3-line);
+  color: var(--v3-ink-3);
+}
+.v3-search input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: none;
+  font: inherit;
+  font-size: 15px;
+  color: var(--v3-ink);
+}
+
+/* ── 하단 탭 ────────────────────────────────────────────────────────── */
+.v3-tabbar {
+  flex-shrink: 0;
+  display: flex;
+  height: calc(var(--v3-tabbar-h) + env(safe-area-inset-bottom, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  background: var(--v3-surface);
+  border-top: 1px solid var(--v3-line);
+}
+.v3-tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  background: none;
+  color: var(--v3-ink-3);
+  font-size: 11px;
+  font-weight: 600;
+  position: relative;
+}
+.v3-tab.on { color: var(--v3-ink); }
+.v3-tab .v3-dot { top: 5px; right: calc(50% - 20px); }
+
+/* ── 홈: 가까운 센터 ─────────────────────────────────────────────────── */
+.v3-near-name {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.4;
+  margin: 4px 0 2px;
+}
+.v3-near-meta {
+  font-size: 13.5px;
+  color: var(--v3-ink-3);
+  margin-bottom: 14px;
+}
+.v3-near-actions { display: flex; gap: 8px; }
+.v3-near-actions .v3-btn { flex: 1; }
+
+/* 센터에서 하는 일 — 가로로 넘기는 작은 면 */
+.v3-hscroll {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 0 16px 4px;
+  scrollbar-width: none;
+}
+.v3-hscroll::-webkit-scrollbar { display: none; }
+.v3-help-item {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  width: 132px;
+  padding: 14px 14px 12px;
+  border-radius: var(--v3-radius);
+  background: var(--v3-surface);
+  border: 1px solid var(--v3-line);
+  text-align: left;
+  color: inherit;
+}
+.v3-help-item svg { color: var(--v3-green); }
+.v3-help-item b {
+  display: block;
+  font-size: 14.5px;
+  margin: 10px 0 3px;
+}
+.v3-help-item span {
+  display: block;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--v3-ink-3);
+}
+
+/* ── 센터 상세 ───────────────────────────────────────────────────────── */
+.v3-detail-head { padding: 4px 20px 18px; }
+.v3-detail-name {
+  font-size: 23px;
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: -0.03em;
+  margin: 6px 0 6px;
+}
+.v3-detail-meta {
+  font-size: 14px;
+  color: var(--v3-ink-2);
+  line-height: 1.55;
+}
+.v3-kv {
+  display: flex;
+  gap: 12px;
+  padding: 13px 16px;
+  border-top: 1px solid var(--v3-line);
+  font-size: 14.5px;
+  line-height: 1.5;
+}
+.v3-list > .v3-kv:first-child { border-top: none; }
+.v3-kv dt {
+  flex-shrink: 0;
+  width: 58px;
+  color: var(--v3-ink-3);
+}
+.v3-kv dd { margin: 0; flex: 1; word-break: keep-all; overflow-wrap: anywhere; }
+.v3-kv a { color: var(--v3-green); font-weight: 600; text-decoration: none; }
+.v3-steps {
+  list-style: none;
+  counter-reset: v3step;
+  margin: 0;
+  padding: 4px 18px 16px;
+}
+.v3-steps li {
+  counter-increment: v3step;
+  position: relative;
+  padding: 12px 0 0 34px;
+  font-size: 14.5px;
+  line-height: 1.55;
+}
+.v3-steps li::before {
+  content: counter(v3step);
+  position: absolute;
+  left: 0;
+  top: 12px;
+  width: 22px;
+  height: 22px;
+  border-radius: 11px;
+  background: var(--v3-ink);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+  line-height: 22px;
+}
+.v3-steps li span { display: block; font-size: 13px; color: var(--v3-ink-3); }
+.v3-sticky-cta {
+  position: sticky;
+  bottom: 0;
+  margin-top: auto;
+  padding: 12px 16px 14px;
+  background: linear-gradient(to top, var(--v3-bg) 75%, rgba(246, 245, 241, 0));
+  display: flex;
+  gap: 8px;
+}
+.v3-sticky-cta .v3-btn { flex: 1; }
+
+/* ── 쪽지 ───────────────────────────────────────────────────────────── */
+.v3-chat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 16px 16px;
+}
+.v3-chat-day {
+  align-self: center;
+  font-size: 12px;
+  color: var(--v3-ink-3);
+  margin: 8px 0;
+}
+.v3-bubble-wrap { display: flex; flex-direction: column; max-width: 82%; }
+.v3-bubble-wrap.me { align-self: flex-end; align-items: flex-end; }
+.v3-bubble-wrap.them { align-self: flex-start; align-items: flex-start; }
+.v3-bubble-who {
+  font-size: 12px;
+  color: var(--v3-ink-3);
+  margin: 6px 4px 3px;
+}
+.v3-bubble {
+  padding: 10px 13px;
+  border-radius: 16px;
+  font-size: 15px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+.v3-bubble-wrap.me .v3-bubble {
+  background: var(--v3-green);
+  color: #fff;
+  border-bottom-right-radius: 5px;
+}
+.v3-bubble-wrap.them .v3-bubble {
+  background: var(--v3-surface);
+  border: 1px solid var(--v3-line);
+  border-bottom-left-radius: 5px;
+}
+.v3-bubble-time {
+  font-size: 11px;
+  color: var(--v3-ink-3);
+  margin: 3px 4px 0;
+}
+.v3-starters {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 0 16px 10px;
+}
+.v3-starter {
+  text-align: left;
+  padding: 11px 14px;
+  border-radius: 12px;
+  background: var(--v3-surface);
+  border: 1px solid var(--v3-line);
+  font-size: 14.5px;
+  color: var(--v3-ink);
+}
+.v3-starter:active { background: #FAFAF8; }
+.v3-composer {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 10px 12px 12px;
+  background: var(--v3-bg);
+  border-top: 1px solid var(--v3-line);
+}
+.v3-composer textarea {
+  flex: 1;
+  min-height: 44px;
+  max-height: 120px;
+  resize: none;
+  border: 1px solid var(--v3-line-2);
+  border-radius: 12px;
+  padding: 11px 13px;
+  font: inherit;
+  font-size: 15px;
+  line-height: 1.45;
+  background: var(--v3-surface);
+  color: var(--v3-ink);
+  outline: none;
+}
+.v3-composer textarea:focus { border-color: var(--v3-green); }
+.v3-send {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--v3-green);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.v3-send[disabled] { background: var(--v3-line-2); }
+.v3-input {
+  width: 100%;
+  height: 46px;
+  border: 1px solid var(--v3-line-2);
+  border-radius: 12px;
+  padding: 0 13px;
+  font: inherit;
+  font-size: 15px;
+  background: var(--v3-surface);
+  outline: none;
+  box-sizing: border-box;
+}
+.v3-input:focus { border-color: var(--v3-green); }
+.v3-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--v3-ink-2);
+  margin: 0 0 6px;
+}
+
+/* 비었을 때 */
+.v3-empty {
+  text-align: left;
+  padding: 22px 18px;
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--v3-ink-2);
+}
+.v3-empty b { color: var(--v3-ink); display: block; font-size: 16px; margin-bottom: 4px; }
+
+/* 스위치(선생님 모드) */
+.v3-switch {
+  width: 46px;
+  height: 28px;
+  border-radius: 14px;
+  background: var(--v3-line-2);
+  position: relative;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+.v3-switch::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 22px;
+  height: 22px;
+  border-radius: 11px;
+  background: #fff;
+  transition: transform 0.15s;
+}
+.v3-switch.on { background: var(--v3-green); }
+.v3-switch.on::after { transform: translateX(18px); }
+
+/* 진학 탭 — 로드맵 한 줄 요약 */
+.v3-progress {
+  display: flex;
+  gap: 4px;
+  margin: 14px 0 8px;
+}
+.v3-progress span {
+  flex: 1;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--v3-line);
+}
+.v3-progress span.done { background: var(--v3-green); }
+.v3-progress span.now { background: var(--v3-mark); }
+.v3-progress-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--v3-ink-3);
+}
+
+/* ── 커뮤니티를 v3 톤으로 (2026-09-26) ────────────────────────────────
+   커뮤니티 화면 코드는 그대로 두고, 색·그림자 토큰만 이 범위 안에서 바꿔 끼운다.
+   (styles.community.css 는 main 과 공유하는 파일이라 직접 고치지 않는다) */
+.v3-app .cm-screen {
+  background: var(--v3-bg);
+  --bg: var(--v3-bg);
+  --card: #fff;
+  --border: var(--v3-line);
+  --text: var(--v3-ink);
+  --text-sub: var(--v3-ink-3);
+  --brand: var(--v3-green);
+  --brand-deep: var(--v3-ink);
+  --brand-tint: #F2F1ED;
+  --grad-brand: var(--v3-ink);
+  --on-brand: #fff;
+  --shadow-sm: none;
+  --shadow-brand: none;
+  --accent-text: var(--v3-green);
+}
+.v3-app .cm-card,
+.v3-app .cm-post,
+.v3-app .cm-comment,
+.v3-app .cm-notice { border: 1px solid var(--v3-line); box-shadow: none; }
+.v3-app .cm-notice { background: #fff; }
+.v3-app .cm-fab { background: var(--v3-green); color: #fff; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12); }
+.v3-app .cm-comment.cm-answer { background: var(--v3-green-soft); border-color: #CFE5D9; }
+.v3-app .cm-head-auth { background: #fff; border: 1px solid var(--v3-line-2); color: var(--v3-ink); }
+
+/* ── 기존 화면(진학 쪽 안내·점수·대학 찾기 등)도 같은 색으로 (2026-09-26) ──
+   화면 코드는 그대로 두고 styles.css 의 전역 토큰만 이 앱 틀 안에서 바꿔 끼운다.
+   노랑 버튼·파랑 글자 → 초록 하나로 모은다. main 에는 영향 없음(이 브랜치에만 있는 파일). */
+.v3-app {
+  --bg: var(--v3-bg);
+  --grad-brand: var(--v3-green);
+  --on-brand: #fff;
+  --brand: var(--v3-green);
+  --brand-deep: var(--v3-green-press);
+  --brand-tint: var(--v3-green-soft);
+  --accent: var(--v3-green-soft);
+  --accent-soft: #F2F1ED;
+  --accent-ink: var(--v3-green);
+  --accent-text: var(--v3-green-press);
+  --text: var(--v3-ink);
+  --border: var(--v3-line);
+  --shadow-brand: none;
+  --shadow-warm: none;
+}

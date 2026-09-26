@@ -258,7 +258,7 @@ export default function CommunityPostScreen({ goTo = () => {}, goBack = () => {}
             className="cm-input"
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder={replyTo ? `${replyTo.nickname}님에게 답글…` : '댓글 달기…'}
+            placeholder={replyTo ? `${replyTo.nickname}님에게 답글…` : user?.role === 'staff' ? '꿈드림 선생님으로 댓글 달기…' : '댓글 달기…'}
             maxLength={1000}
           />
           <button className="cm-send" disabled={busy || !text.trim()} aria-label={replyTo ? '답글 등록' : '댓글 등록'}>
