@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
   Search, X, Mail, Navigation, ChevronRight, ChevronDown, Phone,
+  HeartHandshake, GraduationCap, School, Compass, Users, Activity,
 } from 'lucide-react';
+import { DREAM_ABOUT, DREAM_SERVICES } from '../data/dreamServices.js';
 import {
-  REGIONS, REGION_COUNT, filterCenters, shortName, distLabel, locationAllowed, requestPosition,
+  REGIONS, REGION_COUNT, filterCenters, shortName, centerMark, distLabel, locationAllowed, requestPosition,
 } from '../lib/centers.js';
 import { getHomeRegion } from '../lib/persona.js';
 import { COMMON_SUPPORT } from '../data/commonSupport.js';
@@ -17,6 +19,7 @@ import '../styles.v3.css';
 //   위치는 처음부터 묻지 않는다(예전 화면은 들어오자마자 동의 창을 띄웠다). '내 주변' 칩을 누를 때만.
 
 const PAGE = 15;
+const SVC_ICONS = { HeartHandshake, GraduationCap, School, Compass, Users, Activity };
 
 export default function CentersScreen({ goTo = () => {}, params = {} }) {
   const [region, setRegion] = useState(() => {
@@ -58,7 +61,7 @@ export default function CentersScreen({ goTo = () => {}, params = {} }) {
     <div className="screen v3-screen">
       <header className="v3-top root">
         <span className="v3-top-title">꿈드림</span>
-        <button className="v3-icon-btn" aria-label="쪽지함" onClick={() => goTo('inbox')}>
+        <button className="v3-icon-btn" aria-label="꿈드림 쪽지함" onClick={() => goTo('inbox')}>
           <Mail size={22} />
           {unread > 0 && <span className="v3-dot">{unread}</span>}
         </button>
@@ -71,15 +74,43 @@ export default function CentersScreen({ goTo = () => {}, params = {} }) {
         </button>
       )}
 
-      <div className="v3-pad" style={{ paddingTop: staff ? 14 : 2 }}>
-        <p className="v3-eyebrow">학교 밖 청소년 지원센터</p>
-        <h1 className="v3-h1">공부·진로·상담까지<br /><span className="v3-mark">무료</span>로 도와주는 곳</h1>
-        <p className="v3-lead">만 9~24세 학교 밖 청소년이면 누구나 이용할 수 있어요. 전화가 부담되면 쪽지로 먼저 물어봐도 괜찮아요.</p>
+      {/* 꿈드림이 어떤 곳인지 먼저 (2026-09-26 2차 — 동근님: 꿈드림을 더 강조) */}
+      <section className="v3-dream-hero" style={{ marginTop: staff ? 12 : 2 }}>
+        <span className="v3-dream-logo" aria-hidden="true">꿈드림</span>
+        <h1 className="v3-dream-hero-title">공부·진로·상담까지<br />무료로 도와주는 곳</h1>
+        <p className="v3-dream-hero-sub">
+          학교를 그만뒀거나 다니지 않는 만 9~24세라면 누구나 쓸 수 있는 공공 지원센터예요.
+        </p>
+        <div className="v3-dream-facts">
+          <span><b>{Object.values(REGION_COUNT).reduce((a, b) => a + b, 0)}곳</b>전국 센터</span>
+          <span><b>{DREAM_ABOUT.age}</b>이용 나이</span>
+          <span><b>무료</b>이용 비용</span>
+        </div>
+        <button type="button" className="v3-btn block" onClick={() => goTo('about-dream')}>
+          꿈드림이 뭐 하는 곳인지 자세히 보기
+        </button>
+      </section>
+
+      <h2 className="v3-sec-title">
+        꿈드림에서 받을 수 있는 것
+        <small>센터마다 달라요</small>
+      </h2>
+      <div className="v3-svc-grid">
+        {DREAM_SERVICES.map((s) => {
+          const Icon = SVC_ICONS[s.icon];
+          return (
+            <button key={s.id} type="button" className="v3-svc" onClick={() => goTo('about-dream', { open: s.id })}>
+              {Icon && <Icon size={20} />}
+              <b>{s.title}</b>
+              <span>{s.short}</span>
+            </button>
+          );
+        })}
       </div>
 
       <h2 className="v3-sec-title">
-        센터 찾기
-        <small>전국 {Object.values(REGION_COUNT).reduce((a, b) => a + b, 0)}곳</small>
+        내 근처 꿈드림 찾기
+        <small>전화·쪽지로 바로 연결</small>
       </h2>
 
       <label className="v3-search">
@@ -128,6 +159,7 @@ export default function CentersScreen({ goTo = () => {}, params = {} }) {
         )}
         {list.slice(0, shown).map((c) => (
           <button key={c.id} type="button" className="v3-row" onClick={() => goTo('center', { centerId: c.id })}>
+            <span className="v3-cav" aria-hidden="true">{centerMark(c)}</span>
             <span className="v3-row-main">
               <span className="v3-row-title">{shortName(c)}</span>
               <span className="v3-row-sub clamp">{c.address}</span>

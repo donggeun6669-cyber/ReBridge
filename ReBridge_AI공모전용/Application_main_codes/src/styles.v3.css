@@ -690,3 +690,173 @@ button.v3-row:active { background: #FAFAF8; }
   --shadow-brand: none;
   --shadow-warm: none;
 }
+
+/* ── 꿈드림 강조 (2026-09-26 2차) ────────────────────────────────────────
+   동근님: "꿈드림이라는 단체를 UI가 더 강조해 줬으면". 꿈드림이 나오는 자리에는
+   초록 면(히어로)과 '꿈드림' 글자 표식을 같이 쓴다. 그라디언트·그림자는 여전히 쓰지 않는다. */
+.v3-dream-hero {
+  margin: 4px 16px 0;
+  padding: 22px 20px 18px;
+  border-radius: 18px;
+  background: var(--v3-green);
+  color: #fff;
+}
+.v3-dream-logo {
+  display: inline-flex;
+  align-items: center;
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 7px;
+  background: #fff;
+  color: var(--v3-green);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.v3-dream-hero-title {
+  font-size: 23px;
+  line-height: 1.35;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  margin: 12px 0 8px;
+}
+.v3-dream-hero-sub {
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.82);
+  margin: 0;
+}
+.v3-dream-facts {
+  display: flex;
+  margin-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.22);
+  padding-top: 14px;
+}
+.v3-dream-facts span {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.75);
+}
+.v3-dream-facts span + span { padding-left: 14px; border-left: 1px solid rgba(255, 255, 255, 0.22); }
+.v3-dream-facts b { font-size: 17px; color: #fff; font-weight: 700; }
+.v3-dream-hero .v3-btn {
+  background: #fff;
+  color: var(--v3-green);
+  margin-top: 16px;
+}
+.v3-dream-hero .v3-btn:active { background: #EEF5F1; }
+
+/* 꿈드림 서비스 타일 (꿈드림 탭) — 2열, 아이콘 + 제목 + 구체적인 예시 한 줄 */
+.v3-svc-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 0 16px;
+}
+.v3-svc {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 14px 14px 13px;
+  border-radius: var(--v3-radius);
+  background: var(--v3-surface);
+  border: 1px solid var(--v3-line);
+  text-align: left;
+  color: inherit;
+  min-height: 108px;
+}
+.v3-svc:active { background: #FAFAF8; }
+.v3-svc svg { color: var(--v3-green); margin-bottom: 8px; }
+.v3-svc b { font-size: 14.5px; line-height: 1.35; }
+.v3-svc span { font-size: 12.5px; line-height: 1.45; color: var(--v3-ink-3); }
+
+.v3-checks { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 9px; }
+.v3-checks li { display: flex; gap: 8px; font-size: 14.5px; line-height: 1.5; color: var(--v3-ink-2); }
+.v3-checks svg { flex-shrink: 0; color: var(--v3-green); margin-top: 3px; }
+
+/* 펼치는 목록 */
+.v3-acc + .v3-acc { border-top: 1px solid var(--v3-line); }
+.v3-acc .v3-row { border-top: none; }
+.v3-acc-body { padding: 0 16px 16px 64px; display: flex; flex-direction: column; gap: 12px; }
+.v3-acc-item b { display: block; font-size: 14.5px; margin-bottom: 2px; }
+.v3-acc-item span { display: block; font-size: 13.5px; line-height: 1.55; color: var(--v3-ink-2); }
+.v3-acc-note {
+  margin: 2px 0 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--v3-warn-soft);
+  color: var(--v3-warn-ink);
+  font-size: 12.5px;
+  line-height: 1.55;
+}
+
+/* 센터 표식 — 쪽지·쪽지함에서 '꿈드림과 이어져 있다'는 걸 보여주는 동그라미 */
+.v3-cav {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--v3-green);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+.v3-cav.lg { width: 48px; height: 48px; border-radius: 14px; font-size: 14px; }
+.v3-cav.student { background: var(--v3-bg); color: var(--v3-ink-2); border: 1px solid var(--v3-line); }
+
+/* 쪽지 화면 위 센터 카드 */
+.v3-thread-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 16px;
+  padding: 14px;
+  border-radius: var(--v3-radius);
+  background: var(--v3-surface);
+  border: 1px solid var(--v3-line);
+}
+.v3-thread-head-main { flex: 1; min-width: 0; }
+.v3-thread-head-name { display: block; font-size: 16px; font-weight: 700; }
+.v3-thread-head-sub { display: block; font-size: 12.5px; color: var(--v3-ink-3); margin-top: 2px; }
+.v3-thread-head-acts { display: flex; gap: 6px; }
+.v3-thread-head-acts .v3-icon-btn { border: 1px solid var(--v3-line-2); width: 38px; height: 38px; }
+
+/* 전달 상태: 보냄 → 선생님 확인 → 답장 */
+.v3-track {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 12px 4px 0;
+  font-size: 12px;
+  color: var(--v3-ink-3);
+}
+.v3-track i {
+  font-style: normal;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.v3-track i.on { color: var(--v3-green); font-weight: 700; }
+.v3-track .bar { flex: 1; height: 1px; background: var(--v3-line-2); }
+.v3-track .bar.on { background: var(--v3-green); }
+.v3-staff-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--v3-green);
+  background: var(--v3-green-soft);
+  border-radius: 6px;
+  padding: 2px 6px;
+  margin-left: 4px;
+}
+.v3-acc { scroll-margin-top: 64px; }

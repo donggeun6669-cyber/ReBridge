@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import {
-  Mail, Phone, ChevronRight, HeartHandshake, GraduationCap, Compass, Users, Activity, Wallet,
+  Mail, Phone, ChevronRight, HeartHandshake, GraduationCap, Compass, Users, Activity, School,
 } from 'lucide-react';
 import { loadProfile, gradeOption, getHomeRegion, setHomeRegion } from '../lib/persona.js';
-import { suggestedCenter, shortName, REGIONS } from '../lib/centers.js';
-import { BENEFIT_CATEGORIES } from '../data/benefitCategories.js';
+import { suggestedCenter, shortName, centerMark, getCenter, REGIONS } from '../lib/centers.js';
+import { DREAM_SERVICES } from '../data/dreamServices.js';
 import { gradeRoadmap } from '../lib/roadmap.js';
 import { getBookmarks } from '../lib/bookmarks.js';
 import { listThreads, subscribeMessages, unreadCount, timeLabel } from '../lib/messages.js';
@@ -15,7 +15,7 @@ import '../styles.v3.css';
 //   맨 위는 '내 가까운 꿈드림' 한 곳과 전화·쪽지. 진학·커뮤니티는 그 아래 한 줄씩(부가 기능).
 //   대학 이야기로 시작하지 않는다 — 학교 밖 청소년 전체(9~24세)가 대상이고, 대입은 그중 일부다.
 
-const ICONS = { HeartHandshake, GraduationCap, Compass, Users, Activity, Wallet };
+const ICONS = { HeartHandshake, GraduationCap, School, Compass, Users, Activity };
 
 export default function HomeV3Screen({ goTo = () => {} }) {
   const [profile, setProfile] = useState(() => loadProfile());
@@ -56,13 +56,16 @@ export default function HomeV3Screen({ goTo = () => {} }) {
         <div className="v3-card-body">
           {center ? (
             <>
-              <span className="v3-tag green">{region}에서 가까운 센터</span>
+              <span style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                <span className="v3-dream-logo" style={{ background: 'var(--v3-green)', color: '#fff', height: 22, fontSize: 12 }}>꿈드림</span>
+                <span className="v3-tag">{region}에서 가까운 센터</span>
+              </span>
               <p className="v3-near-name">{shortName(center)}</p>
               <p className="v3-near-meta">{center.address}</p>
               <div className="v3-near-actions">
                 <a className="v3-btn ghost" href={`tel:${center.phone}`}><Phone size={16} /> 전화</a>
                 <button type="button" className="v3-btn" onClick={() => goTo('thread', { centerId: center.id })}>
-                  <Mail size={16} /> 쪽지
+                  <Mail size={16} /> 선생님께 쪽지
                 </button>
               </div>
               <button type="button" className="v3-sec-more" style={{ marginTop: 12 }} onClick={() => goTo('center', { centerId: center.id })}>
@@ -86,11 +89,12 @@ export default function HomeV3Screen({ goTo = () => {} }) {
       {latest && (
         <>
           <h2 className="v3-sec-title">
-            최근 쪽지
+            꿈드림 쪽지
             <button type="button" className="v3-sec-more" onClick={() => goTo('inbox')}>쪽지함 ›</button>
           </h2>
           <div className="v3-list">
             <button type="button" className="v3-row" onClick={() => goTo('thread', { centerId: latest.centerId })}>
+              <span className="v3-cav" aria-hidden="true">{centerMark(getCenter(latest.centerId))}</span>
               <span className="v3-row-main">
                 <span className="v3-row-title">{latest.centerName}</span>
                 <span className="v3-row-sub clamp">
@@ -105,15 +109,18 @@ export default function HomeV3Screen({ goTo = () => {} }) {
         </>
       )}
 
-      <h2 className="v3-sec-title">꿈드림에선 이런 걸 해요</h2>
+      <h2 className="v3-sec-title">
+        꿈드림에선 이런 걸 해요
+        <button type="button" className="v3-sec-more" onClick={() => goTo('about-dream')}>꿈드림이 뭐예요? ›</button>
+      </h2>
       <div className="v3-hscroll">
-        {BENEFIT_CATEGORIES.map((b) => {
-          const Icon = ICONS[b.icon];
+        {DREAM_SERVICES.map((sv) => {
+          const Icon = ICONS[sv.icon];
           return (
-            <button key={b.id} type="button" className="v3-help-item" onClick={() => goTo('centers')}>
+            <button key={sv.id} type="button" className="v3-help-item" onClick={() => goTo('about-dream', { open: sv.id })}>
               {Icon && <Icon size={20} />}
-              <b>{b.label}</b>
-              <span>{b.desc.replace(/\s*\((전국 공통|센터별 상이)\)/, '').split('·').slice(0, 2).join('·')}</span>
+              <b>{sv.title}</b>
+              <span>{sv.short}</span>
             </button>
           );
         })}

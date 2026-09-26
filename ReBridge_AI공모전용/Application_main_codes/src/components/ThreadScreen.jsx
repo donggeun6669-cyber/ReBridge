@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { ArrowLeft, Send, Info } from 'lucide-react';
-import { getCenter, shortName } from '../lib/centers.js';
+import { ArrowLeft, Send, Info, Phone, MapPin, Check } from 'lucide-react';
+import { getCenter, shortName, centerMark } from '../lib/centers.js';
 import {
   getDemoRole, getThread, threadForCenter, sendFromStudent, replyFromStaff, markRead,
   subscribeMessages, STARTERS, timeLabel,
@@ -13,7 +13,7 @@ import '../styles.v3.css';
 //   선생님 모드: params.threadId 로 들어온다(쪽지함에서). 말풍선의 '나'가 선생님 쪽으로 바뀐다.
 //   ⚠️ 시연 모드 — 실제 센터로 보내지 않는다. 화면 맨 위에 늘 적어 둔다.
 
-export default function ThreadScreen({ goBack = () => {}, centerId, threadId }) {
+export default function ThreadScreen({ goTo = () => {}, goBack = () => {}, centerId, threadId }) {
   const role = getDemoRole();
   const staff = role === 'staff';
   const [thread, setThread] = useState(() => (threadId ? getThread(threadId) : threadForCenter(centerId)));
@@ -43,7 +43,7 @@ export default function ThreadScreen({ goBack = () => {}, centerId, threadId }) 
     if (next) { setThread({ ...next }); setText(''); }
   }
 
-  const title = staff ? `${thread?.nickname || '학생'} 학생` : shortName(center);
+  const title = staff ? '받은 쪽지' : '꿈드림 쪽지';
   const messages = thread?.messages || [];
   let lastDay = '';
 
@@ -54,18 +54,41 @@ export default function ThreadScreen({ goBack = () => {}, centerId, threadId }) 
         <span className="v3-top-title">{title}</span>
       </header>
 
-      <div className="v3-banner">
-        <Info size={15} />
-        <span>시연용 화면이에요. 쪽지는 이 기기에만 저장되고 <b>실제 센터로 보내지지 않아요.</b>
+      {/* 누구와 이야기하는지 늘 위에 (2026-09-26 2차 — '꿈드림과 이어진다'는 느낌) */}
+      {staff ? (
+        <div className="v3-thread-head">
+          <span className="v3-cav student" aria-hidden="true">{(thread?.nickname || '학').slice(0, 2)}</span>
+          <span className="v3-thread-head-main">
+            <span className="v3-thread-head-name">{thread?.nickname || '학생'} 학생</span>
+            <span className="v3-thread-head-sub">{shortName(center)}로 온 쪽지 · 이름·연락처는 받지 않아요</span>
+          </span>
+        </div>
+      ) : center && (
+        <div className="v3-thread-head">
+          <span className="v3-cav" aria-hidden="true">{centerMark(center)}</span>
+          <span className="v3-thread-head-main">
+            <span className="v3-thread-head-name">{shortName(center)}</span>
+            <span className="v3-thread-head-sub">꿈드림 선생님이 읽고 답해요</span>
+          </span>
+          <span className="v3-thread-head-acts">
+            <a className="v3-icon-btn" href={`tel:${center.phone}`} aria-label="센터에 전화"><Phone size={17} /></a>
+            <button type="button" className="v3-icon-btn" aria-label="센터 정보" onClick={() => goTo('center', { centerId: center.id })}><MapPin size={17} /></button>
+          </span>
+        </div>
+      )}
+
+      <p className="v3-note" style={{ display: 'flex', gap: 6, alignItems: 'flex-start', margin: '10px 20px 0' }}>
+        <Info size={13} style={{ flexShrink: 0, marginTop: 2 }} />
+        <span>시연 화면이라 쪽지는 이 기기에만 저장되고 실제 센터로 보내지지 않아요.
           {!staff && ' MY에서 선생님 모드를 켜면 답장을 써 볼 수 있어요.'}</span>
-      </div>
+      </p>
 
       <div className="v3-chat">
         {messages.length === 0 && !staff && (
           <div style={{ padding: '14px 4px 4px' }}>
-            <p style={{ fontSize: 17, fontWeight: 700, margin: '0 0 6px' }}>{shortName(center)} 선생님께</p>
+            <p style={{ fontSize: 17, fontWeight: 700, margin: '0 0 6px' }}>{shortName(center)} 선생님께 첫 쪽지</p>
             <p className="v3-lead" style={{ fontSize: 14.5 }}>
-              궁금한 걸 짧게 적어도 괜찮아요. 이름 대신 부를 이름만 알려 주면 돼요.
+              “가 봐도 돼요?” 한 줄이면 충분해요. 선생님이 읽고 이 쪽지함으로 답장해 줘요.
             </p>
             <label className="v3-label" htmlFor="nick" style={{ marginTop: 16 }}>불러 줄 이름 (선택)</label>
             <input
@@ -85,7 +108,9 @@ export default function ThreadScreen({ goBack = () => {}, centerId, threadId }) 
           const showDay = day !== lastDay;
           lastDay = day;
           const mine = staff ? m.from === 'staff' : m.from === 'student';
-          const who = m.from === 'staff' ? `${shortName(center)} 선생님` : (thread.nickname || '학생');
+          const who = m.from === 'staff'
+            ? <>{shortName(center)} 선생님<span className="v3-staff-chip">꿈드림 선생님</span></>
+            : `${thread.nickname || '학생'} 학생`;
           return (
             <div key={m.id} style={{ display: 'contents' }}>
               {showDay && <span className="v3-chat-day">{day}</span>}
@@ -98,11 +123,27 @@ export default function ThreadScreen({ goBack = () => {}, centerId, threadId }) 
           );
         })}
 
-        {messages.length > 0 && !staff && messages[messages.length - 1].from === 'student' && (
-          <p className="v3-note" style={{ margin: '10px 4px 0', textAlign: 'center' }}>
-            선생님이 확인하면 답장이 와요. 급한 일은 전화가 더 빨라요.
-          </p>
-        )}
+        {messages.length > 0 && !staff && (() => {
+          // 전달 상태: 보냄 → 선생님 확인 → 답장. 시연판이라 '확인'은 답장이 왔을 때만 켠다(읽음 표시를 지어내지 않는다).
+          const replied = messages.some((m) => m.from === 'staff');
+          const waiting = messages[messages.length - 1].from === 'student';
+          return (
+            <>
+              <div className="v3-track" aria-label="쪽지 전달 상태">
+                <i className="on"><Check size={12} /> {shortName(center)}로 보냄</i>
+                <span className={`bar${replied ? ' on' : ''}`} />
+                <i className={replied ? 'on' : ''}>선생님 확인</i>
+                <span className={`bar${replied ? ' on' : ''}`} />
+                <i className={replied ? 'on' : ''}>답장</i>
+              </div>
+              {waiting && (
+                <p className="v3-note" style={{ margin: '8px 4px 0', textAlign: 'center' }}>
+                  선생님이 확인하면 여기로 답장이 와요. 급한 일은 전화가 더 빨라요.
+                </p>
+              )}
+            </>
+          );
+        })()}
         <div ref={endRef} />
       </div>
 

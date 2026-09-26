@@ -36,6 +36,14 @@ export function shortName(c) {
   return `${head || c.district} 꿈드림`;
 }
 
+// 쪽지·쪽지함에서 센터를 알아보게 하는 짧은 표식 — '종로구' → '종로', '중구' → '중구', 시·도 센터 → '서울'
+export function centerMark(c) {
+  if (!c) return '꿈';
+  if (c.type === '시도') return c.region;
+  const d = String(c.district || '').split(' ').pop();
+  return d.length <= 2 ? d : d.replace(/[시군구]$/, '').slice(0, 2);
+}
+
 export function haversine(lat1, lng1, lat2, lng2) {
   const R = 6371;
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
