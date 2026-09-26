@@ -109,3 +109,14 @@ export const DREAM_SERVICES = [
 export function serviceById(id) {
   return DREAM_SERVICES.find((s) => s.id === id) || null;
 }
+
+// 센터 선생님께 물어보면 좋은 것 — 누르면 쪽지 입력칸에 문장이 채워진다 (2026-09-26).
+// 위 DREAM_SERVICES 에 있는 지원만 쓴다. 센터 상세(CenterDetailScreen)에 있다.
+export const DREAM_ASKS = [
+  { id: 'record', label: '청소년생활기록부', draft: '대학 수시에 낼 청소년생활기록부를 발급받고 싶어요. 어떻게 신청하면 되나요?' },
+  { id: 'ged', label: '검정고시 대비반·교재', draft: '검정고시 대비반이나 교재 지원을 받을 수 있을까요?' },
+  { id: 'college', label: '대학 진학 상담', draft: '대학 진학 상담을 받고 싶어요. 제 점수로 어디를 볼 수 있을지 같이 봐 주실 수 있나요?' },
+  { id: 'career', label: '진로·직업체험', draft: '요즘 하는 진로·직업체험 프로그램이 있을까요?' },
+  { id: 'health', label: '무료 건강검진', draft: '학교 밖 청소년 무료 건강검진을 받고 싶어요. 어떻게 신청하나요?' },
+  { id: 'visit', label: '처음 방문', draft: '센터에 한번 가 보고 싶은데, 언제 가면 되나요?' },
+];

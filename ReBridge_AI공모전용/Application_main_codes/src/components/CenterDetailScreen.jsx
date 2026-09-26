@@ -6,7 +6,7 @@ import {
 import { getCenter, shortName, centerMark, PROGRAMS_CHECKED } from '../lib/centers.js';
 import { threadForCenter } from '../lib/messages.js';
 import { getMyCenterId, setMyCenterId } from '../lib/persona.js';
-import { DREAM_SERVICES } from '../data/dreamServices.js';
+import { DREAM_SERVICES, DREAM_ASKS } from '../data/dreamServices.js';
 import '../styles.v3.css';
 
 // 센터 상세 (PRD v2 F2·F3·F5 — 2026-09-26 시연판)
@@ -88,6 +88,19 @@ export default function CenterDetailScreen({ goTo = () => {}, goBack = () => {},
         </div>
       </div>
 
+
+      {/* 센터에 물어보면 좋은 것 — 홈에서 여기로 옮김 (2026-09-26 동근님: 꿈드림 칸에서 보이게) */}
+      <h2 className="v3-sec-title">
+        선생님께 물어보면 좋은 것
+        <small>누르면 쪽지로 이어져요</small>
+      </h2>
+      <div className="v3-chips" style={{ flexWrap: 'wrap', rowGap: 8 }}>
+        {DREAM_ASKS.filter((a) => (mine ? a.id !== 'visit' : true)).map((a) => (
+          <button key={a.id} type="button" className="v3-chip" onClick={() => goTo('thread', { centerId: c.id, draft: a.draft })}>
+            {a.label}
+          </button>
+        ))}
+      </div>
 
       <h2 className="v3-sec-title">기본 정보</h2>
       <dl className="v3-list" style={{ margin: '0 16px' }}>

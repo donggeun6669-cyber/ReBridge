@@ -3,7 +3,7 @@
 //
 // 시드: 인증 플로우 데모용 테스트 인증코드(DREAM-TEST·TEACHER-DEMO·MENTOR-DEMO)와 시연용 예시 글을 미리 넣어둔다.
 
-const SEED_VERSION = 'v4'; // 버전 올리면 시드 재적용(사용자가 쓴 글·댓글은 남긴다)
+const SEED_VERSION = 'v5'; // 버전 올리면 시드 재적용(사용자가 쓴 글·댓글은 남긴다)
 
 const KEYS = {
   user: 'rb_comm_user',
@@ -155,6 +155,76 @@ const SEED_POSTS = [
     title: '진로 상담이 생각보다 깊었어요',
     body: '"무슨 직업 가져라"가 아니라 내가 뭘 좋아하는지부터 같이 찾아줬어요. 예약이 좀 밀리는 편이라 일찍 신청하는 걸 추천해요.',
     ...A('새벽달', 'youth', 'demo') },
+
+  // ── 2026-09-26 추가 (홈 게시판·HOT 목록이 에타처럼 차 보이도록) ──
+  // 사실 관계는 CLAUDE.md 「이미 확인된 사실」(과목·합격 기준·결시·과목합격제)과
+  // 여성가족부 「학교 밖 청소년 지원 안내서」(청소년생활기록부·원서 단체 접수·무상 급식)에 있는 것만 썼다.
+  { id: 'seed-f3', board: 'free', tag: null, demo: true, seed_likes: 9, created_at: NOW - H * 0.4,
+    title: '카페에서 공부하는 사람 있어요?',
+    body: '집에서는 집중이 안 돼서 요즘 동네 카페 가요. 다들 어디서 공부하는지 궁금해요.',
+    ...A('모래알') },
+  { id: 'seed-f4', board: 'free', tag: null, demo: true, seed_likes: 15, created_at: NOW - H * 4,
+    title: '꿈드림 점심 오늘 맛있었다',
+    body: '센터에서 밥 주는 거 처음 알았을 때 진짜 놀랐어요ㅋㅋ 오늘은 제육이었음',
+    ...A('초록별', 'youth', 'demo') },
+  { id: 'seed-f5', board: 'free', tag: null, demo: true, seed_likes: 6, created_at: NOW - H * 14,
+    title: '같이 아침 인증하실 분',
+    body: '매일 9시 전에 일어나서 책상 앞에 앉는 거 인증해요. 혼자 하니까 자꾸 무너져서요.',
+    ...A('해바라기') },
+  { id: 'seed-w3', board: 'worry', tag: null, demo: true, seed_likes: 11, created_at: NOW - H * 1.5,
+    title: '친구들이랑 연락이 점점 끊겨요',
+    body: '학교 그만두고 나서 친구들이랑 대화할 게 없어졌어요. 새로 친구 만들 수 있을까요?',
+    ...A('익명') },
+  { id: 'seed-w4', board: 'worry', tag: null, demo: true, seed_likes: 5, created_at: NOW - H * 22,
+    title: '검정고시 끝나고 뭘 해야 할지 모르겠어요',
+    body: '합격은 했는데 그다음이 막막해요. 대학을 가야 할지 일을 해야 할지.',
+    ...A('익명') },
+  { id: 'seed-q7', board: 'qna', tag: null, demo: true, seed_likes: 13, created_at: NOW - H * 2.5,
+    title: '고졸 검정고시 선택과목 뭐가 쉬워요?',
+    body: '선택과목을 하나 골라야 한다는데 뭐가 있는지부터 모르겠어요.',
+    ...A('파도') },
+  { id: 'seed-q8', board: 'qna', tag: null, demo: true, seed_likes: 8, created_at: NOW - H * 16,
+    title: '청소년생활기록부가 뭐예요?',
+    body: '꿈드림에서 떼 준다고 들었는데 대학 갈 때 쓰는 건가요?',
+    ...A('나무늘보') },
+  { id: 'seed-i3', board: 'info', tag: 'ged', demo: true, seed_likes: 19, created_at: NOW - H * 9,
+    title: '[주의] 접수한 과목 하나라도 안 보면 불합격이에요',
+    body: '결시는 0점 처리가 아니라 그 회차 불합격이에요. "한 과목 버리고 평균으로 넘기기"는 안 돼요. 접수한 과목은 꼭 다 보세요.',
+    ...MENTOR2 },
+  { id: 'seed-i4', board: 'info', tag: 'ged', demo: true, seed_likes: 10, created_at: NOW - H * 28,
+    title: '꿈드림에서 검정고시 원서 같이 접수해 줘요',
+    body: '센터를 통해서 원서를 단체로 접수할 수 있어요. 처음이라 헷갈리면 다니는 센터 선생님께 물어보세요.',
+    ...STAFF2 },
+  { id: 'seed-p3', board: 'pass', tag: null, demo: true, seed_likes: 22, created_at: NOW - H * 18,
+    title: '두 번째 도전에 붙었어요',
+    body: '처음엔 두 과목이 모자랐는데 60점 넘은 과목은 남아 있어서 나머지만 다시 봤어요. 포기하지 마세요!',
+    ...A('한걸음') },
+  { id: 'seed-p4', board: 'pass', tag: null, demo: true, seed_likes: 12, created_at: NOW - H * 50,
+    title: '전문대 합격 후기 (수시)',
+    body: '비교내신 기준을 대학마다 찾아보는 게 제일 힘들었어요. 입학처에 전화해서 물어보니까 친절하게 알려 주더라고요.',
+    ...A('새벽달', 'youth', 'demo') },
+  { id: 'seed-r3', board: 'review', tag: null, rating: 5, demo: true, seed_likes: 7, created_at: NOW - H * 7,
+    title: '△△시 꿈드림 멘토링 좋아요',
+    body: '대학생 멘토 선생님이랑 일주일에 한 번 수학 봐요. 모르는 거 편하게 물어볼 수 있어서 좋아요.',
+    ...A('구름') },
+  { id: 'seed-r4', board: 'review', tag: null, rating: 4, demo: true, seed_likes: 4, created_at: NOW - H * 45,
+    title: '처음 가기 전에 전화했더니 편했어요',
+    body: '갑자기 찾아가기 무서워서 먼저 전화했는데, 언제 오면 되는지 다 알려 주셨어요. 망설이는 분들 전화 먼저 해 보세요.',
+    ...A('봄비', 'youth', 'demo') },
+
+  // ── 우리 센터 (center) — 인증한 사람만 보인다. 시연 인증코드 DREAM-TEST 의 센터('demo')와 같은 글 ──
+  { id: 'seed-c1', board: 'center', tag: null, demo: true, seed_likes: 6, created_at: NOW - H * 3.5,
+    title: '청소년생활기록부 신청 받아요',
+    body: '올해 대학 수시를 준비하는 친구들은 선생님께 말해 주세요. 지원하는 대학 일정에 맞춰 같이 준비해요.',
+    ...A('해솔 선생님', 'staff', 'demo') },
+  { id: 'seed-c2', board: 'center', tag: null, demo: true, seed_likes: 3, created_at: NOW - H * 6,
+    title: '수요일 오후 수학 같이 할 사람',
+    body: '센터 학습실에서 기출 같이 풀어요. 저도 수학 약해요ㅎㅎ',
+    ...A('초록별', 'youth', 'demo') },
+  { id: 'seed-c3', board: 'center', tag: null, demo: true, seed_likes: 2, created_at: NOW - H * 30,
+    title: '센터 와이파이 비번 바뀌었어요?',
+    body: '어제부터 안 잡히는 것 같아서요.',
+    ...A('빛나', 'youth', 'demo') },
 ];
 
 const C = (id, post, hoursAgo, body, author, parent = null) => ({
@@ -188,6 +258,20 @@ const SEED_COMMENTS = [
   C('seed-c-w1b', 'seed-w1', 3, '불안이 오래 가면 혼자 참지 말고 꿈드림 상담도 이용해 보세요. 이야기만 나눠도 가벼워질 때가 있어요.', STAFF),
   C('seed-c-p1a', 'seed-p1', 5, '축하해요!!! 저도 다음 회차 목표예요.', A('한걸음')),
   C('seed-c-r1a', 'seed-r1', 10, '합격 축하드려요! 저도 용기가 생기네요.', A('준비생')),
+  C('seed-c-q7a', 'seed-q7', 2,
+    '고졸 선택과목은 도덕·기술가정·체육·음악·미술 중에 하나를 골라요. 어떤 게 쉬운지는 사람마다 달라서, 기출을 한 번씩 풀어 보고 고르는 걸 추천해요.',
+    MENTOR),
+  C('seed-c-q8a', 'seed-q8', 15,
+    '꿈드림센터에서 활동한 내용을 적은 공식 서류예요. 일부 대학 수시(학생부종합)에서 학교생활기록부 대신 낼 수 있어요. 지원할 수 있는 대학은 해마다 달라서, 그해 모집요강과 센터에 꼭 확인해요.',
+    STAFF),
+  C('seed-c-f4a', 'seed-f4', 3, '우리 센터는 도시락 나와요 부럽다', A('모래알')),
+  C('seed-c-f4b', 'seed-f4', 2, '센터마다 방식이 다르대요!', A('해바라기')),
+  C('seed-c-w3a', 'seed-w3', 1, '꿈드림 동아리 들어가 보세요. 저는 거기서 친구 생겼어요.', A('익명')),
+  C('seed-c-w3b', 'seed-w3', 1,
+    '센터에 또래랑 같이 하는 동아리·캠프 프로그램이 있어요. 편할 때 한번 놀러 와요.',
+    STAFF2),
+  C('seed-c-p3a', 'seed-p3', 17, '축하해요!! 저도 과목합격 남은 거 믿고 다시 해볼게요', A('파도')),
+  C('seed-c-c2a', 'seed-c2', 5, '저 갈래요!', A('빛나', 'youth', 'demo')),
 ];
 
 export const mockStore = {
