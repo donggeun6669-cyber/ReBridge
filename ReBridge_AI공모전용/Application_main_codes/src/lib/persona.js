@@ -43,12 +43,13 @@ export function getPersona(profile) {
   return { stage: p.stage, goal: p.goal || 'undecided' };
 }
 
-export function savePersona({ stage, goal, age, grade, homeRegion }) {
+export function savePersona({ stage, goal, age, grade, homeRegion, myCenterId }) {
   const prev = loadProfile() || {};
   const next = { ...prev, stage, goal };
   if (age !== undefined) next.age = age;
   if (grade !== undefined) next.grade = grade;
   if (homeRegion !== undefined) next.homeRegion = homeRegion;
+  if (myCenterId !== undefined) next.myCenterId = myCenterId || undefined;
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(next)); } catch { /* 무시 */ }
   return next;
 }
@@ -83,6 +84,19 @@ export const HOME_REGIONS = [
 export function getHomeRegion(p = loadProfile()) {
   return p?.homeRegion || null;
 }
+// ── 다니는 꿈드림센터 (2026-09-26 동근님: 이미 꿈드림을 다니는 아이를 위한 화면도 필요) ──
+// 값이 있으면 홈이 '우리 센터' 홈으로 바뀐다(HomeV3Screen). null = 아직 안 다님/모름.
+// 센터 id(kkumdrim.json의 id)만 기기에 저장한다. 서버로 보내지 않는다.
+export function getMyCenterId(p = loadProfile()) {
+  return p?.myCenterId || null;
+}
+export function setMyCenterId(id) {
+  const prev = loadProfile() || {};
+  const next = { ...prev, myCenterId: id || undefined };
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(next)); } catch { /* 무시 */ }
+  return next;
+}
+
 // 홈에서 지역만 바로 고를 때(2026-09-26 PRD v2 시연판 — 시작 질문을 건너뛴 사람용)
 export function setHomeRegion(region) {
   const prev = loadProfile() || {};

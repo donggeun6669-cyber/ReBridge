@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import {
   Mail, Phone, ChevronRight, HeartHandshake, GraduationCap, Compass, Users, Activity, School,
 } from 'lucide-react';
-import { loadProfile, gradeOption, getHomeRegion, setHomeRegion } from '../lib/persona.js';
+import { loadProfile, gradeOption, getHomeRegion, setHomeRegion, getMyCenterId } from '../lib/persona.js';
+import MyCenterHome from './MyCenterHome.jsx';
 import { suggestedCenter, shortName, centerMark, getCenter, REGIONS } from '../lib/centers.js';
 import { DREAM_SERVICES } from '../data/dreamServices.js';
 import { gradeRoadmap } from '../lib/roadmap.js';
@@ -17,7 +18,14 @@ import '../styles.v3.css';
 
 const ICONS = { HeartHandshake, GraduationCap, School, Compass, Users, Activity };
 
+// 다니는 센터가 있으면 '우리 센터' 홈, 없으면 '가까운 꿈드림 찾기' 홈 (2026-09-26)
 export default function HomeV3Screen({ goTo = () => {} }) {
+  const myCenterId = getMyCenterId();
+  if (myCenterId) return <MyCenterHome centerId={myCenterId} goTo={goTo} />;
+  return <FindCenterHome goTo={goTo} />;
+}
+
+function FindCenterHome({ goTo }) {
   const [profile, setProfile] = useState(() => loadProfile());
   const region = getHomeRegion(profile);
   const grade = gradeOption(profile?.grade);
@@ -68,9 +76,14 @@ export default function HomeV3Screen({ goTo = () => {} }) {
                   <Mail size={16} /> 선생님께 쪽지
                 </button>
               </div>
-              <button type="button" className="v3-sec-more" style={{ marginTop: 12 }} onClick={() => goTo('center', { centerId: center.id })}>
-                센터에서 뭘 하는지 보기 ›
-              </button>
+              <span style={{ display: 'flex', justifyContent: 'space-between', marginTop: 12 }}>
+                <button type="button" className="v3-sec-more" onClick={() => goTo('center', { centerId: center.id })}>
+                  센터에서 뭘 하는지 보기 ›
+                </button>
+                <button type="button" className="v3-sec-more" onClick={() => goTo('my-center')}>
+                  이미 다니고 있어요 ›
+                </button>
+              </span>
             </>
           ) : (
             <>

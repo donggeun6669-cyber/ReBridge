@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { getCenter, shortName, centerMark, PROGRAMS_CHECKED } from '../lib/centers.js';
 import { threadForCenter } from '../lib/messages.js';
+import { getMyCenterId, setMyCenterId } from '../lib/persona.js';
 import { DREAM_SERVICES } from '../data/dreamServices.js';
 import '../styles.v3.css';
 
@@ -20,6 +21,7 @@ export default function CenterDetailScreen({ goTo = () => {}, goBack = () => {},
   const [copied, setCopied] = useState(false);
   const [open, setOpen] = useState('study');
   const [moreLinks, setMoreLinks] = useState(false);
+  const [mine, setMine] = useState(() => getMyCenterId() === centerId);
 
   if (!c) {
     return (
@@ -58,6 +60,16 @@ export default function CenterDetailScreen({ goTo = () => {}, goBack = () => {},
           <h1 className="v3-detail-name" style={{ margin: '6px 0 2px' }}>{shortName(c)}</h1>
           <p className="v3-detail-meta">{c.name}</p>
         </span>
+      </div>
+      {/* 다니는 센터로 정하면 홈이 '우리 센터' 홈이 된다 (2026-09-26) */}
+      <div style={{ padding: '0 20px 14px' }}>
+        {mine ? (
+          <span className="v3-tag green" style={{ height: 30, padding: '0 10px', fontSize: 13 }}><Check size={14} /> 내가 다니는 센터예요</span>
+        ) : (
+          <button type="button" className="v3-btn ghost sm" onClick={() => { setMyCenterId(c.id); setMine(true); }}>
+            여기 다니고 있어요
+          </button>
+        )}
       </div>
 
       {/* 쪽지가 이 센터로 이어진다는 걸 먼저 보여준다 (2026-09-26 2차 — 동근님: 연계되는 느낌이 부족) */}

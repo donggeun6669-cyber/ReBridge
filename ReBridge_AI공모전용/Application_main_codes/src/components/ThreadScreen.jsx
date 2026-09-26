@@ -6,6 +6,7 @@ import {
   subscribeMessages, STARTERS, timeLabel,
 } from '../lib/messages.js';
 import { getCachedUser } from '../lib/auth.js';
+import { getMyCenterId } from '../lib/persona.js';
 import '../styles.v3.css';
 
 // 1:1 쪽지 대화 (PRD v2 F5 학생 · F7 실무자 — 2026-09-26 시연판)
@@ -13,14 +14,17 @@ import '../styles.v3.css';
 //   선생님 모드: params.threadId 로 들어온다(쪽지함에서). 말풍선의 '나'가 선생님 쪽으로 바뀐다.
 //   ⚠️ 시연 모드 — 실제 센터로 보내지 않는다. 화면 맨 위에 늘 적어 둔다.
 
-export default function ThreadScreen({ goTo = () => {}, goBack = () => {}, centerId, threadId }) {
+export default function ThreadScreen({ goTo = () => {}, goBack = () => {}, centerId, threadId, draft = '' }) {
   const role = getDemoRole();
   const staff = role === 'staff';
   const [thread, setThread] = useState(() => (threadId ? getThread(threadId) : threadForCenter(centerId)));
-  const [text, setText] = useState('');
+  // '센터에 물어보면 좋은 것'에서 들어오면 문장이 미리 채워져 있다(고쳐 쓸 수 있음)
+  const [text, setText] = useState(draft);
   const [nickname, setNickname] = useState(() => getCachedUser()?.nickname || '');
   const endRef = useRef(null);
   const center = getCenter(thread?.centerId || centerId);
+  // 내가 다니는 센터면 첫 방문 안내 대신 '다니는 중' 말투로 (2026-09-26)
+  const isMine = center && getMyCenterId() === center.id;
 
   useEffect(() => subscribeMessages(() => {
     setThread(threadId ? getThread(threadId) : threadForCenter(centerId));
@@ -88,7 +92,9 @@ export default function ThreadScreen({ goTo = () => {}, goBack = () => {}, cente
           <div style={{ padding: '14px 4px 4px' }}>
             <p style={{ fontSize: 17, fontWeight: 700, margin: '0 0 6px' }}>{shortName(center)} 선생님께 첫 쪽지</p>
             <p className="v3-lead" style={{ fontSize: 14.5 }}>
-              “가 봐도 돼요?” 한 줄이면 충분해요. 선생님이 읽고 이 쪽지함으로 답장해 줘요.
+              {isMine
+                ? '센터에서 못 물어본 것도 편하게 적어요. 선생님이 읽고 이 쪽지함으로 답장해 줘요.'
+                : '“가 봐도 돼요?” 한 줄이면 충분해요. 선생님이 읽고 이 쪽지함으로 답장해 줘요.'}
             </p>
             <label className="v3-label" htmlFor="nick" style={{ marginTop: 16 }}>불러 줄 이름 (선택)</label>
             <input
@@ -147,7 +153,8 @@ export default function ThreadScreen({ goTo = () => {}, goBack = () => {}, cente
         <div ref={endRef} />
       </div>
 
-      {messages.length === 0 && !staff && (
+      {/* 문장이 미리 채워져 들어왔으면(센터에 물어보면 좋은 것) 시작 문장은 감춘다 */}
+      {messages.length === 0 && !staff && !draft && (
         <div className="v3-starters">
           {STARTERS.map((s) => (
             <button key={s} type="button" className="v3-starter" onClick={() => setText(s)}>{s}</button>
@@ -157,7 +164,7 @@ export default function ThreadScreen({ goTo = () => {}, goBack = () => {}, cente
 
       <div className="v3-composer">
         <textarea
-          rows={1}
+          rows={text.length > 24 ? 3 : 1}
           placeholder={staff ? '답장 쓰기' : '쪽지 쓰기'}
           value={text}
           onChange={(e) => setText(e.target.value)}

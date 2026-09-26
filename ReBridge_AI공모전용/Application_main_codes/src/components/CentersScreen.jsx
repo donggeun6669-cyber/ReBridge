@@ -5,9 +5,9 @@ import {
 } from 'lucide-react';
 import { DREAM_ABOUT, DREAM_SERVICES } from '../data/dreamServices.js';
 import {
-  REGIONS, REGION_COUNT, filterCenters, shortName, centerMark, distLabel, locationAllowed, requestPosition,
+  REGIONS, REGION_COUNT, filterCenters, shortName, centerMark, getCenter, distLabel, locationAllowed, requestPosition,
 } from '../lib/centers.js';
-import { getHomeRegion } from '../lib/persona.js';
+import { getHomeRegion, getMyCenterId } from '../lib/persona.js';
 import { COMMON_SUPPORT } from '../data/commonSupport.js';
 import { subscribeMessages, unreadCount, getDemoRole } from '../lib/messages.js';
 import '../styles.v3.css';
@@ -107,6 +107,25 @@ export default function CentersScreen({ goTo = () => {}, params = {} }) {
           );
         })}
       </div>
+
+      {getMyCenterId() && getCenter(getMyCenterId()) && (() => {
+        const mc = getCenter(getMyCenterId());
+        return (
+          <>
+            <h2 className="v3-sec-title">내가 다니는 센터</h2>
+            <div className="v3-list">
+              <button type="button" className="v3-row" onClick={() => goTo('center', { centerId: mc.id })}>
+                <span className="v3-cav" aria-hidden="true">{centerMark(mc)}</span>
+                <span className="v3-row-main">
+                  <span className="v3-row-title">{shortName(mc)}</span>
+                  <span className="v3-row-sub">프로그램·소식 · 선생님께 쪽지</span>
+                </span>
+                <ChevronRight size={18} className="v3-row-end" />
+              </button>
+            </div>
+          </>
+        );
+      })()}
 
       <h2 className="v3-sec-title">
         내 근처 꿈드림 찾기

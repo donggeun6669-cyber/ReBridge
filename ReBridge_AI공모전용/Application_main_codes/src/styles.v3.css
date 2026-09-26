@@ -860,3 +860,33 @@ button.v3-row:active { background: #FAFAF8; }
   margin-left: 4px;
 }
 .v3-acc { scroll-margin-top: 64px; }
+
+/* ── '우리 센터' 홈 (2026-09-26 — 이미 꿈드림 다니는 아이용) ── */
+.v3-mycenter-msg {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+  padding: 12px 13px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  text-align: left;
+}
+.v3-mycenter-msg:active { background: rgba(255, 255, 255, 0.22); }
+.v3-mycenter-msg b { display: block; font-size: 14px; }
+.v3-mycenter-msg .clamp {
+  display: block;
+  font-size: 12.5px;
+  opacity: 0.85;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v3-btn.v3-btn-onhero {
+  background: transparent;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+.v3-btn.v3-btn-onhero:active { background: rgba(255, 255, 255, 0.12); }

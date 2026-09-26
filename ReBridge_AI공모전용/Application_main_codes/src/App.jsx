@@ -17,6 +17,7 @@ const InboxScreen = lazy(() => import('./components/InboxScreen.jsx'));
 const UnivHomeScreen = lazy(() => import('./components/UnivHomeScreen.jsx'));
 const MyV3Screen = lazy(() => import('./components/MyV3Screen.jsx'));
 const AboutDreamScreen = lazy(() => import('./components/AboutDreamScreen.jsx'));
+const MyCenterPickScreen = lazy(() => import('./components/CenterPicker.jsx'));
 const ExploreScreen = lazy(() => import('./components/ExploreScreen.jsx'));
 const ExploreHelpScreen = lazy(() => import('./components/ExploreHelpScreen.jsx'));
 const AdmissionMatrixScreen = lazy(() => import('./components/AdmissionMatrixScreen.jsx'));
@@ -77,7 +78,7 @@ const KNOWN_SCREENS = [
   'guide', 'glossary', 'results', 'detail', 'admission-matrix', 'documents', 'saved', 'map', 'help',
   'checklist', 'forms-guide', 'dreamdrive', 'ged-guide', 'univ-explore', 'explore-help', 'path',
   'onboarding', 'study-roadmap', 'study-planner', 'support', 'roadmap',
-  'center', 'thread', 'inbox', 'about-dream',
+  'center', 'thread', 'inbox', 'about-dream', 'my-center',
   'job-home', 'job-explore', 'job-roadmap', 'job-questions', 'job-detail', 'job-info', 'job-psych',
   'job-training', 'job-apply',
   'community', 'community-post', 'community-write', 'community-auth',
@@ -178,8 +179,9 @@ export default function App() {
         {/* 꿈드림 탭 — 예전 'dreamdrive'·'support'도 goTo에서 여기로 바뀐다 */}
         {!splash && screen === 'centers'     && <CentersScreen goTo={goTo} params={params} />}
         {!splash && screen === 'center'      && <CenterDetailScreen goTo={goTo} goBack={goBack} centerId={params.centerId} />}
-        {!splash && screen === 'thread'      && <ThreadScreen goTo={goTo} goBack={goBack} centerId={params.centerId} threadId={params.threadId} />}
+        {!splash && screen === 'thread'      && <ThreadScreen goTo={goTo} goBack={goBack} centerId={params.centerId} threadId={params.threadId} draft={params.draft} />}
         {!splash && screen === 'inbox'       && <InboxScreen goTo={goTo} goBack={goBack} />}
+        {!splash && screen === 'my-center'   && <MyCenterPickScreen goTo={goTo} goBack={goBack} />}
         {!splash && screen === 'about-dream' && <AboutDreamScreen goTo={goTo} goBack={goBack} open={params.open} />}
         {!splash && screen === 'univ-home'   && <UnivHomeScreen goTo={goTo} />}
         {/* 진로 허브 — v1에서 숨김. (숨기면 'explore'가 KNOWN_SCREENS에 없어

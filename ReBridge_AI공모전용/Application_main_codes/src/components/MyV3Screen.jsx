@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import {
   ChevronRight, Mail, UserRound, GraduationCap, Bookmark, ShieldCheck, ScrollText, RotateCcw,
-  MessagesSquare, Pencil,
+  MessagesSquare, Pencil, MapPin,
 } from 'lucide-react';
-import { loadProfile, gradeOption, getHomeRegion } from '../lib/persona.js';
+import { loadProfile, gradeOption, getHomeRegion, getMyCenterId } from '../lib/persona.js';
+import { getCenter, shortName } from '../lib/centers.js';
 import { getCachedUser, subscribe } from '../lib/auth.js';
 import { getBadge } from '../lib/youthVerify.js';
 import { unreadCount, subscribeMessages } from '../lib/messages.js';
@@ -82,6 +83,9 @@ export default function MyV3Screen({ goTo = () => {} }) {
 
       <h2 className="v3-sec-title">내 활동</h2>
       <div className="v3-list">
+        <Row Icon={MapPin} title="다니는 꿈드림센터"
+          sub={getMyCenterId() ? shortName(getCenter(getMyCenterId())) : '아직 안 골랐어요 — 고르면 홈이 우리 센터 화면으로 바뀌어요'}
+          onClick={() => goTo('my-center')} />
         <Row Icon={Mail} title={staff ? '받은 쪽지' : '쪽지함'} onClick={() => goTo('inbox')}
           end={unread > 0 ? <span className="v3-tag green">{unread}</span> : null} />
         <Row Icon={MessagesSquare} title="커뮤니티 닉네임·인증"
