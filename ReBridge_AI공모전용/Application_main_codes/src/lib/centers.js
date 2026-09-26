@@ -1,17 +1,24 @@
 // centers — 꿈드림센터 목록 한 곳 (PRD v2 F1~F3, 2026-09-26 시연판)
 //   · 기본 정보: data/kkumdrim.json (여성가족부 2025 주소록 기반, 222곳)
 //   · 홈페이지: data/kkumdrim_web.json — 한국청소년상담복지개발원 「전국 꿈드림 센터」(2025-09-03)
-//     CSV의 '홈페이지' 칸을 전화번호로 맞춰 붙였다(84곳). 빈 칸은 지어내지 않는다.
-//     [TODO: 확인 필요] 김요셉 님이 2026-07 학회 때 서울 센터 URL을 손으로 찾아 붙인 기록이 있다고 함 —
-//     받으면 이 파일에 source를 달아 더한다.
+//     CSV의 '홈페이지' 칸을 전화번호로 맞춰 붙였다(84곳). 2026-09-26 접속 확인에서 죽은 7곳(modoo 종료 포함)은 뺐고
+//     영등포는 누리집 첫 화면으로 바꿨다 → 77곳. 빈 칸은 지어내지 않는다.
+//     김요셉 님이 손으로 찾은 서울 센터 링크는 2026-09-26에 받았다 — 홈페이지가 아니라 프로그램·공지 게시판 링크라
+//     아래 kkumdrim_programs.json 에 따로 둔다.
 import centersRaw from '../data/kkumdrim.json';
 import webRaw from '../data/kkumdrim_web.json';
+// 센터 프로그램·공지 게시판 링크 — 김요셉 님 정리(서울 26곳, 2026-09-26 전달, PRD v2 F2·F8).
+//   links 가 비어 있으면 'none'에 이유가 있다(실제로 온라인 게시판이 없는 곳). 서울 밖은 아직 정리 전(null).
+import programsRaw from '../data/kkumdrim_programs.json';
+
+export const PROGRAMS_CHECKED = programsRaw._checked;
 import { getHomeRegion } from './persona.js';
 
 export const CENTERS = centersRaw.map((c) => ({
   ...c,
   homepage: webRaw[c.id]?.url || null,
   homepageSource: webRaw[c.id]?.source || null,
+  programs: programsRaw.centers[c.id] || null,
 }));
 
 export const REGIONS = [

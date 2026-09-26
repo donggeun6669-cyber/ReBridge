@@ -108,7 +108,7 @@ export default function MyV3Screen({ goTo = () => {} }) {
       <h2 className="v3-sec-title">개인정보</h2>
       <div className="v3-card">
         <div className="v3-card-body" style={{ fontSize: 14, lineHeight: 1.65, color: 'var(--v3-ink-2)' }}>
-          검고담임은 이름·전화번호·주민번호를 받지 않아요. 학년·지역·점수처럼 직접 고른 정보는 이 기기에만 저장돼요.
+          TalkDream은 이름·전화번호·주민번호를 받지 않아요. 학년·지역·점수처럼 직접 고른 정보는 이 기기에만 저장돼요.
           위치는 가까운 센터를 찾을 때만 쓰고 저장하지 않아요.
         </div>
       </div>

@@ -105,7 +105,7 @@ export default function OnboardingScreen({ goTo = () => {}, presetTrack = null }
         ) : (
           <span className="brand-lockup">
             <LogoMark size={22} />
-            <span className="wordmark">검고담임</span>
+            <span className="wordmark">TalkDream</span>
           </span>
         )}
       </header>
@@ -124,7 +124,7 @@ export default function OnboardingScreen({ goTo = () => {}, presetTrack = null }
           <span className="onb-hello-logo"><LogoMark size={64} /></span>
           <h1 className="onb-hello-title">
             어서 와요.<br />
-            <span className="accent">검고담임</span>이에요
+            <span className="accent">TalkDream</span>이에요
           </h1>
           <p className="onb-hello-sub">
             가까운 꿈드림센터부터 검정고시·진학까지,<br />

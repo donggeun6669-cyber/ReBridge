@@ -161,7 +161,10 @@ export default function CentersScreen({ goTo = () => {}, params = {} }) {
           <button key={c.id} type="button" className="v3-row" onClick={() => goTo('center', { centerId: c.id })}>
             <span className="v3-cav" aria-hidden="true">{centerMark(c)}</span>
             <span className="v3-row-main">
-              <span className="v3-row-title">{shortName(c)}</span>
+              <span className="v3-row-title">
+                {shortName(c)}
+                {c.programs?.links.length > 0 && <span className="v3-tag green" style={{ marginLeft: 6 }}>프로그램 소식</span>}
+              </span>
               <span className="v3-row-sub clamp">{c.address}</span>
             </span>
             <span className="v3-row-end">

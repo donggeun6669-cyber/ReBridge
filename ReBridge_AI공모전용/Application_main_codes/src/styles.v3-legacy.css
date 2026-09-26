@@ -1,0 +1,543 @@
+/* =====================================================================
+   v3-legacy — 진학 쪽 기존 화면을 v3(styles.v3.css) 톤으로 맞추는 덮어쓰기 (2026-09-26)
+   화면 코드(JSX)와 기존 CSS 파일은 main 과 공유하므로 되도록 여기서만 바꾼다.
+   전부 .v3-app 범위 안에서만 적용된다.
+
+   대상 화면: 검정고시 안내 · 내 정보 · 나와 맞는 대학 · 대학 탐색(+읽는 법) · 대학 정보 ·
+             전형별 지원 가능 여부 · 대입 로드맵(+서류 체크리스트) · 담임에게 물어보기 ·
+             관심 대학 · 제출서류 · 학생부 대체서식 · 자주 하는 질문 · 개인정보/약관
+   원칙(styles.v3.css 머리말과 같다):
+     · 그림자 없음 → 1px 선(--v3-line)으로 면을 나눈다.
+     · 그라디언트·노란 면·파랑·보라 없음. 강조색은 초록 하나.
+     · 알약 모양 배지 → 모서리 6px 작은 태그.
+     · 상단 바는 .v3-top 처럼 — 왼쪽 뒤로 버튼 + 17px 제목, 종이색 바탕에 붙어 있게.
+   ===================================================================== */
+
+/* ── 1. 토큰 — 기존 CSS가 쓰는 변수 값을 이 앱 틀 안에서만 바꿔 끼운다 ──────── */
+.v3-app {
+  --shadow-sm: none;
+  --shadow-md: none;
+  --grad-soft: var(--v3-surface);
+  --bg-soft: #F2F1ED;
+  --surface-2: #F2F1ED;
+  --card: var(--v3-surface);
+  --text-sub: var(--v3-ink-2);
+  --text-muted: #6E7278;
+  --chevron: #B9B6AE;
+  --line: var(--v3-line-2);
+  --caution: var(--v3-warn-ink);
+  --caution-soft: var(--v3-warn-soft);
+  --green: var(--v3-green);
+  --green-dark: var(--v3-green);
+  --green-soft: var(--v3-green-soft);
+  --coral: var(--v3-green);
+  --coral-deep: var(--v3-green);
+  --coral-tint: var(--v3-green-soft);
+  --gold: var(--v3-green);
+  --r-sm: 12px;
+  --r-md: var(--v3-radius);
+  --r-lg: var(--v3-radius);
+}
+/* 넓은 화면에서 앱 틀 바깥 — 파란 바탕 대신 종이색 계열 */
+body:has(.v3-app) { background: #E9E7E1; }
+
+/* ── 2. 상단 바 — .v3-top 과 같은 모양 (커뮤니티는 styles.v3.css 가 따로 맞춘다) ── */
+.v3-app .screen:not(.cm-screen) > .topbar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  justify-content: flex-start;
+  gap: 4px;
+  min-height: 54px;
+  margin: 0 -20px 4px;
+  padding: 6px 12px 6px 8px;
+  background: var(--v3-bg);
+}
+.v3-app .screen:not(.cm-screen) > .topbar .icon-btn {
+  position: static;
+  flex-shrink: 0;
+  border-radius: 10px;
+}
+.v3-app .screen:not(.cm-screen) > .topbar .icon-btn:hover { background: transparent; }
+.v3-app .screen:not(.cm-screen) > .topbar .icon-btn:active { background: rgba(0, 0, 0, 0.05); }
+.v3-app .screen:not(.cm-screen) > .topbar .icon-btn.topbar-right { margin-left: auto; }
+.v3-app .screen:not(.cm-screen) > .topbar .page-title {
+  flex: 1;
+  min-width: 0;
+  font-size: 17px;
+  font-weight: 700;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v3-app .screen:not(.cm-screen) > .topbar .topbar-left { flex: 1; min-width: 0; gap: 4px; }
+/* 뒤로 버튼 없이 제목만 있을 때(탭 첫 화면) — .v3-top.root 처럼 왼쪽 여백 */
+.v3-app .topbar-left > .page-title:first-child { padding-left: 12px; }
+
+/* 화면 바탕 — 주제별 색 물(자주 하는 질문)을 빼고 종이색 하나로 */
+.v3-app .screen:not(.cm-screen) { background: var(--v3-bg); }
+.v3-app .guide-screen {
+  --g: var(--v3-green);
+  --g-deep: var(--v3-green);
+  --g-tint: var(--v3-green-soft);
+  --g-soft: var(--v3-surface);
+  --g-grad: var(--v3-green);
+  --g-wash: var(--v3-bg);
+  --g-shadow: transparent;
+  background: var(--v3-bg);
+}
+
+/* ── 3. 면 — 그림자를 뺀 자리에 1px 선. 모서리는 14px 하나로 ─────────────────── */
+.v3-app .help-card,
+.v3-app .profile-card,
+.v3-app .menu-row,
+.v3-app .result-card,
+.v3-app .detail-row,
+.v3-app .guide-hero,
+.v3-app .explain-box,
+.v3-app .next-action,
+.v3-app .guide-card,
+.v3-app .help-feat-card,
+.v3-app .help-card-sm,
+.v3-app .adm-card,
+.v3-app .result-profile-bar,
+.v3-app .result-profile-row,
+.v3-app .result-card-wrap,
+.v3-app .filter-panel,
+.v3-app .gq-card,
+.v3-app .rj-card,
+.v3-app .rj-dates,
+.v3-app .rd-rows,
+.v3-app .ehelp-sec.ehelp-card,
+.v3-app .rm-next,
+.v3-app .result-summary,
+.v3-app .doc-card,
+.v3-app .pol-hero,
+.v3-app .uni-card,
+.v3-app .help-faq-card,
+.v3-app .gloss-item,
+.v3-app .adm-matrix-card,
+.v3-app .rm-targets,
+.v3-app .rm-mystatus,
+.v3-app .fg-row,
+.v3-app .essay-card,
+.v3-app .essay-filter-bar,
+.v3-app .gedh-timeline,
+.v3-app .gedh-mock,
+.v3-app .gedh-subj,
+.v3-app .gedh-link,
+.v3-app .gedh-partial,
+.v3-app .gedh-elig,
+.v3-app .rd-more,
+.v3-app .rd-tile,
+.v3-app .pol-table {
+  border: 1px solid var(--v3-line);
+  border-radius: var(--v3-radius);
+  box-shadow: none;
+}
+.v3-app .detail-row.muted { border-color: transparent; }
+.v3-app .gq-detail .gedh-timeline,
+.v3-app .gq-detail .gedh-mock { border: 0; }
+.v3-app .uni-card:hover,
+.v3-app .result-card:hover,
+.v3-app .essay-card:hover { box-shadow: none; }
+.v3-app .gloss-item.is-open,
+.v3-app .gloss-item.highlight { border-color: var(--v3-green); box-shadow: none; }
+.v3-app .rd-tile.active { border-color: var(--v3-ink); }
+
+/* 결과 카드 왼쪽 색 띠 → 없앤다(상태는 배지로 이미 보여준다) */
+.v3-app .result-card.verdict-ok,
+.v3-app .result-card.verdict-cond,
+.v3-app .result-card.verdict-hard { border-left: 1px solid var(--v3-line); }
+
+/* ── 4. 글자 — 왼쪽 정렬, 크기로 위계 ─────────────────────────────────────── */
+.v3-app .intro-line {
+  font-size: 24px;
+  line-height: 1.35;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--v3-ink);
+}
+.v3-app .intro-line { padding: 10px 0 4px; }
+.v3-app .intro-sub { color: var(--v3-ink-2); padding: 6px 0 0; }
+.v3-app .profile-card { text-align: left; align-items: flex-start; }
+.v3-app .home-section-label {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--v3-ink);
+  padding: 0;
+}
+.v3-app .home-section-label::before { display: none; }
+
+/* ── 5. 버튼 — 초록 48px / 흰 바탕 + 선 ──────────────────────────────────── */
+.v3-app .cta {
+  min-height: 48px;
+  padding: 13px 16px;
+  border-radius: 12px;
+  background: var(--v3-green);
+  color: #fff;
+  font-size: 15.5px;
+  box-shadow: none;
+}
+.v3-app .cta:active { background: var(--v3-green-press); }
+.v3-app .cta:disabled { background: var(--v3-line-2); color: #fff; }
+.v3-app .btn-outline {
+  border: 1px solid var(--v3-line-2);
+  border-radius: 12px;
+  background: var(--v3-surface);
+  color: var(--v3-ink);
+}
+.v3-app .btn-outline:hover { background: var(--v3-surface); }
+.v3-app .btn-outline:active { background: #F2F1ED; }
+.v3-app .detail-officelink,
+.v3-app .ged-raw-toggle,
+.v3-app .topbar-textbtn {
+  border: 1px solid var(--v3-line-2);
+  border-radius: 10px;
+  background: var(--v3-surface);
+  color: var(--v3-ink);
+}
+.v3-app .coach-panel-cta,
+.v3-app .mentor-cta {
+  border-radius: 10px;
+  background: var(--v3-green);
+  color: #fff;
+}
+.v3-app .page-btn {
+  border: 1px solid var(--v3-line);
+  border-radius: 10px;
+  box-shadow: none;
+}
+.v3-app .page-btn.active {
+  background: var(--v3-green);
+  border-color: var(--v3-green);
+  color: #fff;
+  box-shadow: none;
+}
+
+/* 선택 칩 — v3-chip 처럼 켜지면 검정 */
+.v3-app .mx-chip.on,
+.v3-app .sort-chip.on,
+.v3-app .fchip.active {
+  background: var(--v3-ink);
+  border-color: var(--v3-ink);
+  color: #fff;
+}
+.v3-app .fchip,
+.v3-app .rm-jump-chip,
+.v3-app .filter-toggle-btn {
+  border: 1px solid var(--v3-line-2);
+  box-shadow: none;
+}
+.v3-app .filter-toggle-btn.open,
+.v3-app .filter-toggle-btn.has-active {
+  background: var(--v3-green-soft);
+  border-color: var(--v3-green);
+  color: var(--v3-green);
+}
+.v3-app .rm-jump-chip:active { background: #F2F1ED; }
+.v3-app .opt { border: 1px solid var(--v3-line-2); }
+.v3-app .opt.sel { border-color: var(--v3-green); }
+
+/* 입력칸 */
+.v3-app .search-bar {
+  border: 1px solid var(--v3-line);
+  border-radius: 12px;
+  box-shadow: none;
+}
+.v3-app .search-bar:focus-within { border-color: var(--v3-green); box-shadow: none; }
+.v3-app .ged-input,
+.v3-app .profile-year-select { border: 1px solid var(--v3-line-2); }
+.v3-app .ged-input:focus,
+.v3-app .profile-year-select:focus { border-color: var(--v3-green); outline: none; }
+
+/* ── 6. 배지 — 알약 대신 모서리 6px 작은 태그(.v3-tag) ──────────────────────── */
+.v3-app .fit-tag,
+.v3-app .rj-badge,
+.v3-app .rj-dday,
+.v3-app .rm-badge-now,
+.v3-app .rm-badge-done,
+.v3-app .rm-badge-opt,
+.v3-app .rm-dday,
+.v3-app .count-pill,
+.v3-app .result-tab-count,
+.v3-app .mx-badge,
+.v3-app .mx-mini,
+.v3-app .mx-total,
+.v3-app .mx-tag,
+.v3-app .cl-badge,
+.v3-app .gloss-check-tag,
+.v3-app .fg-special-badge,
+.v3-app .avail-tag,
+.v3-app .year-tag,
+.v3-app .gq-chip,
+.v3-app .rd-label,
+.v3-app .rd-badge,
+.v3-app .doc-tag,
+.v3-app .dday-badge,
+.v3-app .result-row-type,
+.v3-app .result-tag,
+.v3-app .essay-cond-badge,
+.v3-app .result-profile-edit,
+.v3-app .ged-req-label,
+.v3-app .ged-req-page {
+  border-radius: 6px;
+}
+.v3-app .fit-tag { border-color: transparent; }
+.v3-app .fit-good { background: var(--v3-green-soft); color: var(--v3-green); }
+.v3-app .fit-ok,
+.v3-app .fit-unknown,
+.v3-app .result-tab-count.muted { background: #F2F1ED; color: var(--v3-ink-2); }
+.v3-app .fit-check { background: var(--v3-warn-soft); color: var(--v3-warn-ink); }
+.v3-app .gq-chip { background: #F2F1ED; color: var(--v3-ink); }
+.v3-app .gq-chip--more { color: var(--v3-ink-3); }
+
+/* ── 7. 아이콘 칸 — 색 칠한 네모 대신 종이색 칸 + 회색 아이콘(.v3-row-ico) ──────── */
+.v3-app .gq-ico,
+.v3-app .gq-ico.tone-yellow,
+.v3-app .gq-ico.tone-blue,
+.v3-app .guide-card-icon,
+.v3-app .guide-screen .ico-brand,
+.v3-app .guide-screen .ico-green,
+.v3-app .guide-screen .ico-gold,
+.v3-app .guide-screen .ico-red,
+.v3-app .guide-screen .ico-coral,
+.v3-app .pol-hero-ico,
+.v3-app .gedh-tl-ico,
+.v3-app .rd-tile-ico,
+.v3-app .rm-branch-ico {
+  background: var(--v3-bg);
+  color: var(--v3-ink-2);
+  border-radius: 10px;
+}
+.v3-app .guide-hero-icon {
+  background: var(--v3-surface);
+  border: 1px solid var(--v3-line);
+  border-radius: 12px;
+  box-shadow: none;
+  color: var(--v3-ink-2);
+}
+.v3-app .saved-empty-ico { background: var(--v3-surface); border: 1px solid var(--v3-line); color: var(--v3-ink-2); }
+/* 이모지 장식(💡📊 등)은 숨긴다 — 글만으로 충분히 읽힌다 */
+.v3-app .explore-help-emoji,
+.v3-app .ehelp-emoji { display: none; }
+
+/* ── 8. 노란·크림 면 → 종이색/흰 면 ─────────────────────────────────────── */
+/* 검정고시 안내 — 원서접수 띠 */
+.v3-app .gedh-applybanner {
+  background: var(--v3-surface);
+  border: 1px solid var(--v3-line);
+  box-shadow: none;
+}
+.v3-app .gedh-applybanner-ico { background: var(--v3-green-soft); color: var(--v3-green); }
+.v3-app .gedh-applybanner-title { color: var(--v3-ink); }
+.v3-app .gedh-applybanner-sub { color: var(--v3-ink-2); }
+.v3-app .gedh-tl-dday,
+.v3-app .gedh-mock-item.on { background: var(--v3-green-soft); color: var(--v3-green); }
+
+/* 이 목록 읽는 법 — 크림 설명 칸 */
+.v3-app .ehelp-callout {
+  background: var(--v3-bg);
+  border: none;
+  color: var(--v3-ink-2);
+}
+.v3-app .ehelp-callout b { color: var(--v3-ink); }
+.v3-app .explore-help-link {
+  background: var(--v3-surface);
+  border: 1px solid var(--v3-line);
+}
+
+/* 결과·상세의 크림 안내 칸 */
+.v3-app .result-note,
+.v3-app .detail-reason {
+  background: var(--v3-surface);
+  border: 1px solid var(--v3-line);
+  color: var(--v3-ink-2);
+}
+.v3-app .result-holistic-note { background: #F2F1ED; }
+
+/* 자주 하는 질문 — '핵심' 노란 상자 → 흰 면, 라벨은 초록 태그 */
+.v3-app .rd-key {
+  background: var(--v3-surface);
+  border: 1px solid var(--v3-line);
+  border-radius: var(--v3-radius);
+}
+.v3-app .rd-key .rd-label { background: var(--v3-green-soft); color: var(--v3-green); }
+.v3-app .rd-key p { color: var(--v3-ink); }
+.v3-app .rd-next {
+  background: var(--v3-green-soft);
+  border-radius: var(--v3-radius);
+}
+.v3-app .rd-next .rd-label { background: var(--v3-green); color: #fff; }
+.v3-app .rd-badge.check { background: var(--v3-warn-soft); color: var(--v3-warn-ink); }
+
+/* 로드맵 — '지금 여기' 노란 줄, 노란 D-day, 3D 그림 */
+.v3-app .rj-step-img { display: none; }
+.v3-app .rj-step { min-height: 64px; }
+.v3-app .rj-step.is-current { background: var(--v3-green-soft); }
+.v3-app .rj-step-no {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  background: var(--v3-line-2);
+  color: var(--v3-ink-2);
+  font-size: 11.5px;
+}
+.v3-app .rj-step.is-current .rj-step-no { background: var(--v3-ink); color: #fff; }
+.v3-app .rj-step.is-done .rj-step-no { background: var(--v3-green); color: #fff; }
+.v3-app .rj-badge.now { background: var(--v3-green); color: #fff; }
+.v3-app .rj-badge.done { background: var(--v3-surface); color: var(--v3-green); }
+.v3-app .rj-dday { background: var(--v3-green-soft); color: var(--v3-green); }
+.v3-app .rj-dday.approx { background: #F2F1ED; color: var(--v3-ink-3); }
+.v3-app .rm-stage-term { background: var(--v3-bg); }
+.v3-app .rm-chip-btn,
+.v3-app .rm-target-row,
+.v3-app .rm-deadline-row { background: var(--v3-bg); border-color: var(--v3-line); }
+.v3-app .rm-deadlines { border-color: var(--v3-line); }
+.v3-app .rm-branch { border-color: var(--v3-line-2); }
+.v3-app .rm-inverse-msg { background: var(--v3-bg); }
+
+/* 경고 칸 — 왼쪽 굵은 띠를 빼고 .v3-banner 처럼 */
+.v3-app .cl-alert.critical,
+.v3-app .round-warning.critical,
+.v3-app .round-warning.caution,
+.v3-app .fg-warn-card {
+  border-left: none;
+  border-radius: 12px;
+}
+.v3-app .cl-goto-profile {
+  background: var(--v3-surface);
+  border: 1px dashed var(--v3-line-2);
+  color: var(--v3-green);
+}
+.v3-app .restricted-banner { border: none; border-radius: 12px; }
+.v3-app .ged-quote,
+.v3-app .calc-basis-quote {
+  border-left: 3px solid var(--v3-line-2);
+  background: var(--v3-bg);
+  color: var(--v3-ink-2);
+}
+
+/* 논술 탭 — 노랑·연두 배지 */
+.v3-app .essay-cat-bar.essay-cat-gold,
+.v3-app .essay-cat-bar.essay-cat-green,
+.v3-app .essay-cat-bar.essay-cat-brand { background: #F2F1ED; }
+.v3-app .essay-csat-badge.ok { background: var(--v3-green-soft); color: var(--v3-green); }
+.v3-app .essay-cond-badge { background: var(--v3-warn-soft); color: var(--v3-warn-ink); }
+.v3-app .legend-gold { background: var(--v3-warn-soft); }
+
+/* 칸수 — 안정(진초록)과 적정(연초록)을 구분 */
+.v3-app .gauge-ok .gauge-bar.on { background: #5E9E80; }
+
+/* ── 9. 대학 정보 · 제출서류 머리 — 파란 그라디언트 상자 → 상자 없이 글자만 ─────── */
+.v3-app .detail-header {
+  background: transparent;
+  border-radius: 0;
+  margin-top: 0;
+  padding: 6px 0 14px;
+  box-shadow: none;
+}
+.v3-app .detail-univ-name {
+  font-size: 23px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+.v3-app .detail-meta { color: var(--v3-ink-2); }
+/* 담임 한마디 — 초록 안내 띠(.v3-banner.green) */
+.v3-app .coach-panel {
+  background: var(--v3-green-soft);
+  border: none;
+}
+.v3-app .coach-panel-ico { background: var(--v3-surface); color: var(--v3-green); }
+.v3-app .coach-panel-kicker,
+.v3-app .coach-panel-dday { color: var(--v3-green); }
+.v3-app .ged-freshmen {
+  background: var(--v3-surface);
+  border: 1px solid var(--v3-line);
+  border-radius: var(--v3-radius);
+}
+.v3-app .help-nudge { background: var(--v3-surface); }
+
+/* 제출서류 체크리스트 — 보라 → 초록 */
+.v3-app .doc-card {
+  --doc-brand: var(--v3-green);
+  --doc-brand-deep: var(--v3-green);
+  --doc-brand-tint: var(--v3-green-soft);
+  --doc-text: var(--v3-ink);
+  --doc-text-sub: var(--v3-ink-2);
+  --doc-green: var(--v3-green);
+}
+.v3-app .doc-head { color: var(--v3-ink); }
+.v3-app .doc-item { background: var(--v3-bg); border-width: 1px; }
+.v3-app .doc-check { color: var(--v3-line-2); }
+.v3-app .doc-tag-opt { background: #F2F1ED; }
+.v3-app .doc-note-warn svg { color: var(--v3-warn-ink); }
+.v3-app .doc-card * { text-decoration-color: rgba(22, 115, 79, 0.35); }
+
+/* ── 10. 카드 여러 장 → 흰 면 하나 안의 행 목록(.v3-list / .v3-row) ─────────────
+   담임에게 물어보기(질문·용어) · 대학 탐색/관심 대학 · 전형별 지원 가능 여부 */
+.v3-app .help-results,
+.v3-app .gloss-list,
+.v3-app .uni-list,
+.v3-app .mx-list {
+  gap: 0;
+  background: var(--v3-surface);
+  border: 1px solid var(--v3-line);
+  border-radius: var(--v3-radius);
+  overflow: hidden;
+}
+.v3-app .help-results > .help-faq-card,
+.v3-app .gloss-list > .gloss-item,
+.v3-app .uni-list > .uni-card,
+.v3-app .mx-list > .mx-row,
+.v3-app .mx-list > .mx-row.elig-ok,
+.v3-app .mx-list > .mx-row.elig-cond,
+.v3-app .mx-list > .mx-row.elig-no {
+  border: none;
+  border-top: 1px solid var(--v3-line);
+  border-radius: 0;
+  box-shadow: none;
+  animation: none;
+}
+.v3-app .help-results > .help-faq-card:first-child,
+.v3-app .gloss-list > .gloss-item:first-child,
+.v3-app .uni-list > .uni-card:first-child,
+.v3-app .mx-list > .mx-row:first-child { border-top: none; }
+.v3-app .help-faq-card:active,
+.v3-app .uni-card:active { background: #FAFAF8; }
+.v3-app .gloss-list > .gloss-item.is-open { background: #FAFAF8; border-color: var(--v3-line); }
+.v3-app .gloss-list > .gloss-item.highlight { background: var(--v3-green-soft); border-color: var(--v3-line); }
+.v3-app .help-faq-title { font-size: 15.5px; font-weight: 600; }
+.v3-app .help-faq-desc { color: var(--v3-ink-3); }
+
+/* 학생부 대체서식 — 화면 여백(20px) 안에서 또 20px 들여 쓰던 것을 없앤다 */
+.v3-app .fg-warn-card { margin: 14px 0 8px; }
+.v3-app .fg-info-card { margin: 10px 0; border-radius: 12px; }
+.v3-app .fg-section-label { padding: 22px 0 6px; }
+.v3-app .fg-note { padding: 0 0 8px; }
+.v3-app .fg-table-wrap { padding: 0; }
+.v3-app .fg-footer { padding: 16px 0 32px; }
+
+/* 섹션 제목 — .v3-sec-title 과 같은 17px/700 */
+.v3-app .help-sec-title {
+  font-size: 17px;
+  font-weight: 700;
+  margin: 26px 0 10px;
+}
+.v3-app .help-sec-title span { font-size: 13px; font-weight: 500; color: var(--v3-ink-3); }
+.v3-app .fg-section-label {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--v3-ink);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* 대학 정보 — 펼친 전형 안의 '검정고시 지원 가부' 왼쪽 초록 띠, '다음 할 일' 띠 */
+.v3-app .ged2027-block { border-left: 2px solid var(--v3-line-2); }
+.v3-app .next-action { border-left: 1px solid var(--v3-line); }

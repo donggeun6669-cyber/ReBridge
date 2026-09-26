@@ -1,7 +1,7 @@
 {
-  "name": "검고담임 - 검정고시 대학 입시 도우미",
-  "short_name": "검고담임",
-  "description": "학교 밖 청소년을 위한 검정고시 대학 입시 도우미. 합격선·지원자격을 원문 그대로.",
+  "name": "TalkDream - 가까운 꿈드림에 물어봐요",
+  "short_name": "TalkDream",
+  "description": "학교 밖 청소년이 가까운 꿈드림센터를 찾고, 선생님께 쪽지로 물어보고, 진학까지 준비하는 앱.",
   "lang": "ko",
   "dir": "ltr",
   "start_url": "/",

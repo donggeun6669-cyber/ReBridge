@@ -39,7 +39,7 @@ export default function HomeV3Screen({ goTo = () => {} }) {
   return (
     <div className="screen v3-screen">
       <header className="v3-top root">
-        <span className="v3-top-title" style={{ fontSize: 18, letterSpacing: '-0.03em' }}>검고담임</span>
+        <span className="v3-top-title" style={{ fontSize: 18, letterSpacing: '-0.03em' }}>TalkDream</span>
         <button className="v3-icon-btn" aria-label="쪽지함" onClick={() => goTo('inbox')}>
           <Mail size={22} />
           {unread > 0 && <span className="v3-dot">{unread}</span>}

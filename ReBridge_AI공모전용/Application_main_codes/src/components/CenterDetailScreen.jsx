@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import {
   ArrowLeft, Phone, Mail, Copy, Check, Globe, HeartHandshake, GraduationCap, Compass, Users,
-  Activity, School, ChevronRight, ChevronDown, Info,
+  Activity, School, ChevronRight, ChevronDown, Info, ExternalLink, Megaphone,
 } from 'lucide-react';
-import { getCenter, shortName, centerMark } from '../lib/centers.js';
+import { getCenter, shortName, centerMark, PROGRAMS_CHECKED } from '../lib/centers.js';
 import { threadForCenter } from '../lib/messages.js';
 import { DREAM_SERVICES } from '../data/dreamServices.js';
 import '../styles.v3.css';
@@ -19,6 +19,7 @@ export default function CenterDetailScreen({ goTo = () => {}, goBack = () => {},
   const c = getCenter(centerId);
   const [copied, setCopied] = useState(false);
   const [open, setOpen] = useState('study');
+  const [moreLinks, setMoreLinks] = useState(false);
 
   if (!c) {
     return (
@@ -105,6 +106,44 @@ export default function CenterDetailScreen({ goTo = () => {}, goBack = () => {},
           </dd>
         </div>
       </dl>
+
+      {/* 이 센터 프로그램·소식 (PRD v2 F2·F8) — 김요셉 님이 서울 26곳을 손으로 정리한 게시판 링크 */}
+      <h2 className="v3-sec-title">
+        이 센터 프로그램·소식
+        {c.programs && <small>링크 확인 {PROGRAMS_CHECKED}</small>}
+      </h2>
+      <div className="v3-list">
+        {!c.programs && (
+          <div className="v3-empty">
+            <b>아직 정리 전이에요</b>
+            지금은 서울 센터부터 모으고 있어요. 이 센터 프로그램은 쪽지나 전화로 물어봐 주세요.
+          </div>
+        )}
+        {c.programs && c.programs.links.length === 0 && (
+          <div className="v3-empty">
+            <b>{c.programs.none}</b>
+            어떤 프로그램이 있는지는 선생님께 쪽지로 물어보는 게 가장 빨라요.
+          </div>
+        )}
+        {c.programs && (moreLinks ? c.programs.links : c.programs.links.slice(0, 3)).map((l) => (
+          <a key={l.url} className="v3-row" href={l.url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+            <span className="v3-row-ico green"><Megaphone size={17} /></span>
+            <span className="v3-row-main">
+              <span className="v3-row-title">{l.label}</span>
+              <span className="v3-row-sub clamp">{l.url.replace(/^https?:\/\/(www\.)?/, '').split('/')[0]}</span>
+            </span>
+            <ExternalLink size={16} className="v3-row-end" />
+          </a>
+        ))}
+        {c.programs && c.programs.links.length > 3 && !moreLinks && (
+          <button type="button" className="v3-row" style={{ justifyContent: 'center', color: 'var(--v3-ink-2)', fontWeight: 600 }} onClick={() => setMoreLinks(true)}>
+            링크 {c.programs.links.length - 3}개 더 보기 <ChevronDown size={16} />
+          </button>
+        )}
+      </div>
+      {c.programs?.links.length > 0 && (
+        <p className="v3-note">센터 누리집으로 이동해요. 신청 마감·대상은 게시글에서 꼭 확인해 주세요.</p>
+      )}
 
       <h2 className="v3-sec-title">
         여기서 받을 수 있는 것
