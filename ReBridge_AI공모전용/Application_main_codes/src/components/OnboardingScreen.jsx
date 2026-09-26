@@ -50,13 +50,6 @@ const TRACK_OPTS = [
   },
 ];
 
-function hasScores() {
-  try {
-    const p = JSON.parse(localStorage.getItem('rebridge_profile'));
-    return !!(p && p.gedScores && Object.values(p.gedScores).some((v) => v !== '' && v != null));
-  } catch { return false; }
-}
-
 export default function OnboardingScreen({ goTo = () => {}, presetTrack = null }) {
   // 0 인사 → 1 나이 → 2 상황. 트랙이 안 정해졌으면 나이 다음에 트랙을 묻는다.
   const [step, setStep] = useState(0);
@@ -73,9 +66,9 @@ export default function OnboardingScreen({ goTo = () => {}, presetTrack = null }
 
   function finish(goal, stage) {
     savePersona({ goal, stage, grade, homeRegion });
-    if (goal === 'university' && stage === 'tested' && !hasScores()) {
-      goTo('profile'); // 점수 입력부터
-    } else if (goal === 'job') {
+    // 2026-09-26 PRD v2 시연판: 센터 중심이라 끝나면 홈(가까운 꿈드림)으로 간다.
+    // 점수 입력은 진학 탭에서 한다(예전엔 '이미 봤어요'면 바로 점수 입력으로 보냈다).
+    if (goal === 'job') {
       goTo('job-questions');
     } else {
       goTo(getNav({ goal, stage }).landing);
@@ -134,8 +127,8 @@ export default function OnboardingScreen({ goTo = () => {}, presetTrack = null }
             <span className="accent">검고담임</span>이에요
           </h1>
           <p className="onb-hello-sub">
-            검정고시로 대학 가는 길,<br />
-            처음부터 끝까지 같이 볼게요.
+            가까운 꿈드림센터부터 검정고시·진학까지,<br />
+            혼자 찾지 않게 같이 볼게요.
           </p>
 
           <div className="onb-privacy">
