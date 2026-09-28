@@ -17,7 +17,7 @@
   margin-top: 6px;
   font-size: 23px;
   line-height: 1.38;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: -0.03em;
   color: var(--text);
   word-break: keep-all;
@@ -29,7 +29,7 @@
   padding: 2px 8px;
   border-radius: 999px;
   font-size: 11.5px;
-  font-weight: 800;
+  font-weight: 700;
 }
 .rd-key {
   padding: 14px 16px;
@@ -130,14 +130,14 @@
   background: var(--brand-tint);
   color: var(--brand-deep);
 }
-.rd-tile-title { font-size: 15px; font-weight: 800; line-height: 1.35; color: var(--text); word-break: keep-all; }
+.rd-tile-title { font-size: 15px; font-weight: 700; line-height: 1.35; color: var(--text); word-break: keep-all; }
 .rd-tile-short { font-size: 12.5px; line-height: 1.4; color: var(--text-sub); word-break: keep-all; }
 .rd-badge {
   margin-top: auto;
   padding: 2px 8px;
   border-radius: 999px;
   font-size: 11px;
-  font-weight: 800;
+  font-weight: 700;
   background: var(--brand-tint);
   color: var(--brand-deep);
 }
@@ -188,7 +188,7 @@
   margin-top: 4px;
   font-size: 17px;
   line-height: 1.4;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--text);
   word-break: keep-all;
 }

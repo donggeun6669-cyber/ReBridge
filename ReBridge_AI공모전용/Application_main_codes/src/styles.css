@@ -83,10 +83,13 @@
 
   --app-max: 430px;
 
-  /* Wanted Sans — 본문·제목 공용. 번들에 들어 있다(src/index.jsx).
+  /* IBM Plex Sans KR — 본문·제목 공용. 번들에 들어 있다(src/index.jsx).
+     2026-09-28 서연님이 후보 6종 중에서 고름(Wanted Sans에서 교체).
      CDN으로 되돌리지 말 것 —
-     jsdelivr가 막힌 환경에서 폰트가 통째로 안 뜬 적이 있다. */
-  --font-body: 'Wanted Sans Variable', 'Wanted Sans', -apple-system,
+     jsdelivr가 막힌 환경에서 폰트가 통째로 안 뜬 적이 있다.
+     ⚠️ 이 서체는 700이 최대다. 800을 쓰면 브라우저가 가짜 굵기(faux bold)를
+        그려서 한글이 뭉개진다. 굵기는 400/500/600/700 네 단계만 쓴다. */
+  --font-body: 'IBM Plex Sans KR', -apple-system,
     BlinkMacSystemFont, system-ui, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
 
   font-family: var(--font-body);
@@ -206,7 +209,7 @@ button {
 }
 .wordmark {
   font-size: 20px;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: 0;
   /* 그라디언트 텍스트 제거 — 단색이 훨씬 또렷하고 덜 인위적이다 (2026-09 UI 개선). */
   color: var(--brand-deep);
@@ -414,7 +417,7 @@ button {
 }
 .map-card-name {
   font-size: 17px;
-  font-weight: 800;
+  font-weight: 700;
   padding-right: 28px;
 }
 .map-card-meta {
@@ -524,8 +527,8 @@ button {
   color: var(--brand-deep);
 }
 .help-nudge-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.help-nudge-kicker { font-size: 11.5px; font-weight: 800; color: var(--brand-deep); }
-.help-nudge-title { font-size: 15px; font-weight: 800; color: var(--text); }
+.help-nudge-kicker { font-size: 11.5px; font-weight: 700; color: var(--brand-deep); }
+.help-nudge-title { font-size: 15px; font-weight: 700; color: var(--text); }
 .help-nudge-todo { font-size: 12.5px; color: var(--text-sub); line-height: 1.45; }
 
 /* ① 검색 결과 FAQ */
@@ -568,7 +571,7 @@ button {
   color: var(--brand-deep);
 }
 .mentor-body { display: flex; flex-direction: column; min-width: 0; }
-.mentor-title { font-size: 15.5px; font-weight: 800; color: var(--text); }
+.mentor-title { font-size: 15.5px; font-weight: 700; color: var(--text); }
 .mentor-desc { margin: 5px 0 0; font-size: 13px; line-height: 1.55; color: var(--text); }
 .mentor-cta {
   align-self: flex-start;
@@ -601,7 +604,7 @@ button {
 .hero h1 {
   font-size: 30px;
   line-height: 1.32;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: 0;
   color: var(--text);
 }
@@ -909,7 +912,7 @@ button {
   place-items: center;
   background: var(--bg-soft);
   color: var(--brand-deep);
-  font-weight: 800;
+  font-weight: 700;
   font-size: 15px;
 }
 .uni-logo-ok   { background: var(--green-soft); color: var(--green-dark); }
@@ -988,7 +991,7 @@ button {
   color: var(--text-sub);
   font-weight: 500;
 }
-.explore-count b { color: var(--text); font-weight: 800; }
+.explore-count b { color: var(--text); font-weight: 700; }
 .explore-count-shown { color: var(--text-sub); font-weight: 500; }
 
 /* 추천순 상위권 제외 안내 */
@@ -1069,7 +1072,7 @@ button {
   line-height: 1.5;
   font-weight: 500;
 }
-.explore-banner-body b { font-weight: 800; }
+.explore-banner-body b { font-weight: 700; }
 .explore-banner svg { flex-shrink: 0; opacity: 0.9; }
 
 .badge {
@@ -1174,7 +1177,7 @@ button {
 .intro-line {
   padding: 14px 4px 4px;
   font-size: 22px;
-  font-weight: 800;
+  font-weight: 700;
   line-height: 1.4;
   letter-spacing: 0;
 }
@@ -1270,7 +1273,7 @@ button {
 }
 .mp-card-name {
   font-size: 16px;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--on-brand);
 }
 .mp-card-sub {
@@ -1323,7 +1326,7 @@ button {
 .mp-section-label {
   margin: 24px 2px 8px;
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--text-sub);
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -1626,7 +1629,7 @@ button {
   display: block;
   margin-bottom: 3px;
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--brand-deep);
 }
 
@@ -1641,7 +1644,7 @@ button {
 }
 .detail-univ-name {
   font-size: 22px;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: -0.02em;
   color: var(--text);
 }
@@ -1822,7 +1825,7 @@ button {
   margin-top: 16px;
   font-size: 27px;
   line-height: 1.28;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: 0;
   color: var(--text);
   white-space: pre-line;
@@ -1850,7 +1853,7 @@ button {
   margin-bottom: 9px;
   color: var(--g-deep, var(--brand-deep));
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 700;
 }
 .explain-box p,
 .next-action p {
@@ -1905,7 +1908,7 @@ button {
 .guide-card h2 {
   font-size: 15.5px;
   line-height: 1.35;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--text);
 }
 .guide-card p {
@@ -2432,7 +2435,7 @@ button {
   background: var(--brand-tint);
   color: var(--brand-deep);
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 700;
   margin-left: 6px;
 }
 
@@ -2455,7 +2458,7 @@ button {
   color: var(--brand);
 }
 .coach-panel-body { display: flex; flex-direction: column; gap: 3px; }
-.coach-panel-kicker { font-size: 11.5px; font-weight: 800; color: var(--brand-deep); }
+.coach-panel-kicker { font-size: 11.5px; font-weight: 700; color: var(--brand-deep); }
 .coach-panel-text { font-size: 14px; line-height: 1.55; color: var(--text); font-weight: 500; }
 .coach-panel-cta {
   align-self: flex-start;
@@ -2503,7 +2506,7 @@ button {
   padding: 1px 7px;
   border-radius: var(--r-pill);
   font-size: 10.5px;
-  font-weight: 800;
+  font-weight: 700;
 }
 .affinity-mini.good { background: var(--green-soft); color: var(--green-dark); }
 .affinity-mini.ok   { background: var(--brand-tint); color: var(--brand-deep); }
@@ -2537,7 +2540,7 @@ button {
   border-radius: 2px;
   background: var(--border);
 }
-.gauge-label { font-size: 12px; font-weight: 800; }
+.gauge-label { font-size: 12px; font-weight: 700; }
 .gauge-good .gauge-bar.on  { background: var(--green-dark); }
 .gauge-good .gauge-label   { color: var(--green-dark); }
 .gauge-ok   .gauge-bar.on  { background: var(--brand); }
@@ -2549,7 +2552,7 @@ button {
 /* 리스트 카드용 컴팩트 게이지 */
 .gauge-compact { gap: 6px; }
 .gauge-compact .gauge-bar { width: 5px; height: 12px; }
-.gauge-compact .gauge-label { font-size: 11.5px; font-weight: 800; }
+.gauge-compact .gauge-label { font-size: 11.5px; font-weight: 700; }
 
 /* 전형 상세(펼침) */
 .adm-detail {
@@ -2571,7 +2574,7 @@ button {
   color: var(--text-sub);
 }
 .adm-cut { font-size: 15px; color: var(--text); font-weight: 500; }
-.adm-cut b { font-size: 18px; color: var(--brand-deep); font-weight: 800; }
+.adm-cut b { font-size: 18px; color: var(--brand-deep); font-weight: 700; }
 .adm-cut-meta { font-size: 12.5px; color: var(--text-sub); }
 .adm-need {
   display: flex;
@@ -2587,7 +2590,7 @@ button {
   font-weight: 600;
 }
 .adm-need svg { flex: 0 0 auto; margin-top: 2px; }
-.adm-need b { font-weight: 800; }
+.adm-need b { font-weight: 700; }
 .adm-disclaimer { font-size: 11.5px; color: var(--text-sub); margin-top: 8px; }
 .adm-block-desc { font-size: 13px; line-height: 1.55; color: var(--text); font-weight: 500; }
 
@@ -2620,7 +2623,7 @@ button {
   padding: 2px 8px;
   border-radius: var(--r-pill);
   font-size: 10.5px;
-  font-weight: 800;
+  font-weight: 700;
 }
 .avail-tag.on  { background: var(--green-soft); color: var(--green-dark); }
 .avail-tag.off { background: var(--bg-soft, #F0EDF5); color: var(--text-sub); }
@@ -2755,7 +2758,7 @@ button {
   background: var(--brand);
   color: #fff;
   font-size: 10px;
-  font-weight: 800;
+  font-weight: 700;
 }
 /* 필터 초기화 버튼 */
 .filter-reset-btn {
@@ -2798,7 +2801,7 @@ button {
 .filter-group-label {
   flex: 0 0 32px;
   font-size: 11px;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--text-sub);
   letter-spacing: 0.02em;
   white-space: nowrap;
@@ -3046,7 +3049,7 @@ button {
    스플래시에서 '검고담임'이 안 보였다. 배경을 바꿀 땐 여기 글자색도 같이 본다. */
 .splash-wordmark {
   font-size: 32px;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--brand-deep);
   letter-spacing: -0.01em;
 }
@@ -3085,7 +3088,7 @@ button {
   border-radius: var(--r-pill);
   background: var(--brand-tint);
   font-size: 11.5px;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--brand-deep);
   letter-spacing: 0.03em;
   margin-bottom: 12px;
@@ -3093,7 +3096,7 @@ button {
 .home-title {
   font-size: 30px;
   line-height: 1.28;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--text);
   letter-spacing: -0.02em;
 }
@@ -3134,7 +3137,7 @@ button {
 .home-cta-card:active { transform: scale(0.98); filter: brightness(0.97); }
 .home-cta-inner { display: flex; flex-direction: column; gap: 7px; position: relative; z-index: 1; }
 .home-cta-label { font-size: 13px; font-weight: 600; opacity: 0.88; }
-.home-cta-title { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.25; }
+.home-cta-title { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.25; }
 .home-cta-arrow { position: relative; z-index: 1; flex-shrink: 0; }
 
 /* ── 섹션 공통 ── */
@@ -3144,7 +3147,7 @@ button {
   align-items: center;
   gap: 6px;
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--text);
   letter-spacing: 0;
   margin-bottom: 10px;
@@ -3381,7 +3384,7 @@ button {
 }
 .cl-section-label {
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--text-sub);
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -3499,7 +3502,7 @@ button {
   align-items: center;
   gap: 6px;
   font-size: 13.5px;
-  font-weight: 800;
+  font-weight: 700;
   color: #8B1A0A;
   margin-bottom: 8px;
 }
@@ -3537,7 +3540,7 @@ button {
 
 .fg-section-label {
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--text-sub);
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -3569,7 +3572,7 @@ button {
 }
 .fg-univ-name {
   font-size: 16px;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--text);
 }
 .fg-special-badge {
@@ -3796,7 +3799,7 @@ button {
 .essay-cat-bar.essay-cat-gold  { background: #fef9c3; }
 .essay-cat-label {
   font-size: 10px;
-  font-weight: 800;
+  font-weight: 700;
   text-align: center;
   line-height: 1.3;
   color: var(--text);
@@ -3819,7 +3822,7 @@ button {
 }
 .essay-card-name {
   font-size: 15px;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--text);
 }
 .essay-card-sub {
@@ -4079,7 +4082,7 @@ button {
 /* 공통 카드 요소 */
 .kdream-card-name {
   font-size: 14px;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--text);
   margin-bottom: 3px;
 }
@@ -4152,7 +4155,7 @@ button {
   align-items: center;
   gap: 5px;
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--text);
   margin-bottom: 8px;
 }
@@ -4515,9 +4518,9 @@ button {
   padding: 5px 11px; border-radius: var(--r-pill);
   /* 시안(2026-09-07)의 '함께 가요' 칩과 같은 노랑. 첫 화면과 홈이 따로 놀지 않게. */
   background: var(--accent); color: var(--accent-text);
-  font-size: 11.5px; font-weight: 800; letter-spacing: 0.03em;
+  font-size: 11.5px; font-weight: 700; letter-spacing: 0.03em;
 }
-.th2-title { font-size: 26px; font-weight: 800; color: var(--text); line-height: 1.35; margin-top: 10px; }
+.th2-title { font-size: 26px; font-weight: 700; color: var(--text); line-height: 1.35; margin-top: 10px; }
 .th2-accent {
   /* 파랑은 크림 위에서 튄다(서연님). 아이콘 칸과 같은 갈색으로 맞춘다. */
   color: var(--accent-ink);
@@ -4530,7 +4533,7 @@ button {
 }
 .th2-cta-left { display: flex; flex-direction: column; gap: 3px; text-align: left; }
 .th2-cta-sub { font-size: 10px; color: var(--accent-text); opacity: .8; }
-.th2-cta-main { font-size: 15px; font-weight: 800; color: var(--on-brand); }
+.th2-cta-main { font-size: 15px; font-weight: 700; color: var(--on-brand); }
 .th2-cta-arrow {
   width: 30px; height: 30px; background: rgba(107,74,0,.14);
   border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--on-brand); flex-shrink: 0;
@@ -4539,7 +4542,7 @@ button {
 .th2-white-block { padding: 16px 0; margin-bottom: 2px; }
 .th2-gray-block  { background: var(--bg-soft); border-radius: var(--r-lg); padding: 14px 16px; margin-bottom: 10px; }
 .th2-sec-title {
-  font-size: 13px; font-weight: 800; color: var(--text); margin-bottom: 12px;
+  font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 12px;
   padding-left: 9px; border-left: 3px solid var(--brand);
 }
 
@@ -4738,7 +4741,7 @@ button {
   color: var(--text-sub); cursor: pointer;
 }
 .kdream-page-num.active {
-  background: var(--brand); border-color: var(--brand); color: #fff; font-weight: 800;
+  background: var(--brand); border-color: var(--brand); color: #fff; font-weight: 700;
 }
 .kdream-page-ellipsis {
   color: var(--text-sub); font-size: 13px; padding: 0 2px; line-height: 34px;
@@ -4811,7 +4814,7 @@ button {
   color: #8a6d1f;
 }
 .year-warn svg { flex-shrink: 0; margin-top: 1px; }
-.year-warn b { display: block; font-size: 13px; font-weight: 800; }
+.year-warn b { display: block; font-size: 13px; font-weight: 700; }
 .year-warn p { margin-top: 3px; font-size: 12px; line-height: 1.55; }
 
 /* 원서 접수 마감 D-day */
@@ -4822,7 +4825,7 @@ button {
   padding: 2px 8px;
   border-radius: var(--r-pill);
   font-size: 10.5px;
-  font-weight: 800;
+  font-weight: 700;
   white-space: nowrap;
 }
 .dday-urgent { background: var(--danger-soft); color: #B03A22; }
@@ -4847,7 +4850,7 @@ button {
   background: var(--bg-soft);
   color: var(--text-sub);
   font-size: 10.5px;
-  font-weight: 800;
+  font-weight: 700;
   white-space: nowrap;
 }
 
@@ -4952,7 +4955,7 @@ button {
   line-height: 1.6;
   font-weight: 600;
 }
-.gcheck-warn b { font-weight: 800; }
+.gcheck-warn b { font-weight: 700; }
 
 /* ── 2028 5등급제 전환 블록 (FiveGradeBlock) ────────────────────────────
    경고가 아니라 '알아둬야 하는 사실'이라서 위험색(빨강)은 쓰지 않는다.
@@ -5038,7 +5041,7 @@ button {
   line-height: 1.6;
   font-weight: 600;
 }
-.adm-cut-caveat b { font-weight: 800; }
+.adm-cut-caveat b { font-weight: 700; }
 
 /* 자격 제한 전형밖에 없는 대학 — 목록을 보기 전에 먼저 알린다 */
 .restricted-banner {
@@ -5051,7 +5054,7 @@ button {
   border: 1px solid var(--caution);
   color: var(--caution);
 }
-.restricted-banner b { font-weight: 800; font-size: 14px; display: block; }
+.restricted-banner b { font-weight: 700; font-size: 14px; display: block; }
 .restricted-banner p { margin-top: 6px; font-size: 12.5px; line-height: 1.65; font-weight: 600; }
 
 /* ── 전형별 지원 가능 여부 ─────────────────────────────────────────────
@@ -5076,7 +5079,7 @@ button {
   align-items: center;
   gap: 7px;
   font-size: 14.5px;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--text);
 }
 .amc-arrow { margin-left: auto; color: var(--chevron); }
@@ -5087,7 +5090,7 @@ button {
   font-size: 12px;
   font-weight: 700;
 }
-.amc-n b { font-weight: 800; }
+.amc-n b { font-weight: 700; }
 .amc-n.ok   { background: var(--green-soft);  color: var(--green-dark); }
 .amc-n.cond { background: var(--caution-soft); color: var(--caution); }
 .amc-n.no   { background: var(--danger-soft);  color: var(--danger); }
@@ -5095,7 +5098,7 @@ button {
 
 /* ── 전용 화면 ── */
 .mx-head { padding: 6px 0 14px; }
-.mx-univ { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; color: var(--text); }
+.mx-univ { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; color: var(--text); }
 .mx-totals { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 12px; }
 .mx-total {
   padding: 6px 12px;
@@ -5103,7 +5106,7 @@ button {
   font-size: 12.5px;
   font-weight: 700;
 }
-.mx-total b { font-weight: 800; font-size: 14px; }
+.mx-total b { font-weight: 700; font-size: 14px; }
 .mx-total.ok   { background: var(--green-soft);  color: var(--green-dark); }
 .mx-total.cond { background: var(--caution-soft); color: var(--caution); }
 .mx-total.no   { background: var(--danger-soft);  color: var(--danger); }
@@ -5135,7 +5138,7 @@ button {
 
 .mx-group { margin-bottom: 26px; }
 .mx-group-head { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
-.mx-group-title { font-size: 16px; font-weight: 800; color: var(--text); }
+.mx-group-title { font-size: 16px; font-weight: 700; color: var(--text); }
 .mx-group-counts { margin-left: auto; display: flex; gap: 5px; }
 .mx-mini { padding: 3px 8px; border-radius: var(--r-pill); font-size: 11px; font-weight: 700; }
 .mx-mini.ok   { background: var(--green-soft);  color: var(--green-dark); }
@@ -5215,7 +5218,7 @@ button {
   align-items: center;
   gap: 6px;
   font-size: 13.5px;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--text);
   margin-bottom: 10px;
 }
@@ -5246,7 +5249,7 @@ button {
   align-items: center;
   gap: 6px;
   font-size: 11.5px;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--text-sub);
   margin-bottom: 6px;
 }
@@ -5267,7 +5270,7 @@ button {
   background: var(--brand-tint);
   color: var(--brand-deep);
   font-size: 10px;
-  font-weight: 800;
+  font-weight: 700;
 }
 .ged-req-part pre {
   margin: 0;
@@ -5291,7 +5294,7 @@ button {
   border: none;
   background: none;
   font-size: 15px;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--text);
   cursor: pointer;
 }
@@ -5341,7 +5344,7 @@ button {
   color: var(--text);
   font-weight: 500;
 }
-.rm-deadline-text b { font-weight: 800; }
+.rm-deadline-text b { font-weight: 700; }
 .rm-deadline-date {
   display: block;
   margin: 4px 0 0 12px;
@@ -5471,7 +5474,7 @@ button {
 
 
 /* =====================================================================
-   큰 제목 — 본문과 같은 Wanted Sans, 굵기로 위계를 만든다.
+   큰 제목 — 본문과 같은 IBM Plex Sans KR, 굵기로 위계를 만든다.
    (제목만 다른 둥근 폰트를 쓰는 안은 2026-09에 시도했다가 되돌렸다.
     한글 라운드 디스플레이 폰트는 대부분 굵기가 1종이라 너무 두껍다.)
    ===================================================================== */
@@ -5514,7 +5517,7 @@ button {
   border-radius: var(--r-pill);
   background: var(--accent);
   font-size: 11.5px;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--accent-text);
   letter-spacing: 0.03em;
 }
@@ -5522,7 +5525,7 @@ button {
   margin: 0;
   font-size: 30px;
   line-height: 1.28;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: -0.02em;
   color: var(--text);
 }
@@ -5645,7 +5648,7 @@ button {
   display: grid; place-items: center;
   font-size: 30px; line-height: 1;
 }
-.th3-icon-label { font-size: 14px; font-weight: 800; color: var(--text); text-align: center; }
+.th3-icon-label { font-size: 14px; font-weight: 700; color: var(--text); text-align: center; }
 .th3-icon-sub { font-size: 11px; font-weight: 600; color: var(--text-sub); text-align: center; margin-top: -4px; }
 
 /* 지금 바로 — 넓은 카드 두 줄 */
@@ -5670,7 +5673,7 @@ button {
   font-size: 26px; line-height: 1;
 }
 .th3-shortcut-text { flex: 1; display: flex; flex-direction: column; gap: 3px; }
-.th3-shortcut-title { font-size: 17px; font-weight: 800; color: var(--text); }
+.th3-shortcut-title { font-size: 17px; font-weight: 700; color: var(--text); }
 .th3-shortcut-sub { font-size: 12.5px; color: var(--text-sub); }
 .th3-chev { color: var(--chevron); flex-shrink: 0; }
 
@@ -5683,22 +5686,22 @@ button {
 }
 .rm-jump-chip:active { background: var(--accent-soft); }
 .rm-sec-title {
-  font-size: 18px; font-weight: 800; color: var(--text);
+  font-size: 18px; font-weight: 700; color: var(--text);
   margin: 8px 0 12px; scroll-margin-top: 12px;
 }
 .rm-docs { margin-top: 26px; padding-top: 22px; border-top: 1px solid var(--border); scroll-margin-top: 8px; }
-.cl-merged-title { font-size: 15px; font-weight: 800; color: var(--text); margin-bottom: 4px; }
+.cl-merged-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
 
 /* 담임에게 물어보기 (Q&A + 입시 용어 합본, 2026-09-17) */
 .help-sec-title {
-  font-size: 15px; font-weight: 800; color: var(--text);
+  font-size: 15px; font-weight: 700; color: var(--text);
   margin: 18px 0 10px;
 }
 .help-sec-title span { font-size: 12px; font-weight: 700; color: var(--text-sub); margin-left: 4px; }
 
 /* 꿈드림센터 · 지원 혜택 합본 (2026-09-17) */
 .kdream-sec-title {
-  font-size: 15px; font-weight: 800; color: var(--text);
+  font-size: 15px; font-weight: 700; color: var(--text);
   margin: 16px 0 8px;
 }
 /* 합본 화면 정렬 — 원래 kdream·spt 부품은 여백 없는 화면에 맞춰 좌우 16~20px를 스스로 줬다.
@@ -5733,7 +5736,7 @@ button {
   background: var(--card); box-shadow: var(--shadow-md);
 }
 .xf-group + .xf-group { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border); }
-.xf-title { font-size: 13px; font-weight: 800; color: var(--text); margin: 0 0 8px; }
+.xf-title { font-size: 13px; font-weight: 700; color: var(--text); margin: 0 0 8px; }
 .xf-options { display: flex; flex-wrap: wrap; gap: 6px; }
 .xf-opt {
   display: inline-flex; align-items: center; gap: 6px;
@@ -5758,12 +5761,12 @@ button {
 .xf-reset:disabled { opacity: .45; }
 .xf-done {
   flex: 1; padding: 10px 14px; border-radius: 10px; border: 0;
-  background: var(--brand); color: #fff; font-size: 14px; font-weight: 800;
+  background: var(--brand); color: #fff; font-size: 14px; font-weight: 700;
 }
 
 /* ── 5등급제 블록 v2 (2026-09-19) — 한 줄 요약 + 눌러서 펼침, 여백 넉넉히 ── */
 .five-grade.fg-v2 { gap: 0; padding: 18px 16px 14px; border-radius: 18px; }
-.fg-v2 .fg-title { font-size: 15px; font-weight: 800; gap: 6px; }
+.fg-v2 .fg-title { font-size: 15px; font-weight: 700; gap: 6px; }
 .fg-hint { margin: 4px 0 10px; font-size: 12px; color: var(--text-sub); }
 .fg-points { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
 .fg-point { background: var(--card); border-radius: 14px; }
@@ -5804,7 +5807,7 @@ button {
   color: var(--text-sub);
   word-break: keep-all;
 }
-.plan-sub-list li::before { content: '·'; position: absolute; left: 2px; font-weight: 800; }
+.plan-sub-list li::before { content: '·'; position: absolute; left: 2px; font-weight: 700; }
 .plan-sub-list b { color: var(--text); }
 
 /* ── 전형 카드 접는 안내 (2026-09-19) — 결과는 보이고, 설명·주의·출처는 '자세히'로 ── */

@@ -56,7 +56,7 @@
   margin: 14px 2px 20px;
   font-size: 27px;
   line-height: 1.32;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: -0.04em;
 }
 
@@ -101,7 +101,7 @@
   display: block;
   font-size: 20px;
   line-height: 1.38;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: -0.03em;
 }
 .hm-road-note {
@@ -160,7 +160,7 @@
   border-color: var(--hm-yellow);
   box-shadow: 0 0 0 5px var(--hm-yellow-soft);
 }
-.hm-step.is-current .hm-step-label { color: var(--hm-ink); font-weight: 800; }
+.hm-step.is-current .hm-step-label { color: var(--hm-ink); font-weight: 700; }
 
 .hm-cta {
   display: block;
@@ -249,7 +249,7 @@
   margin-top: 6px;
   font-size: 21px;
   line-height: 1.38;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: -0.03em;
   color: var(--text);
 }
@@ -344,7 +344,7 @@
   min-width: 52px;
   text-align: center;
   font-size: 12.5px;
-  font-weight: 800;
+  font-weight: 700;
   color: #4A3A06;
   background: #F7D55C;
   border-radius: 999px;

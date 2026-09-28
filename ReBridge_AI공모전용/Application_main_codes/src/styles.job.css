@@ -3,7 +3,7 @@
    ===================================================================== */
 .job-sec-label {
   font-size: 14px;
-  font-weight: 800;
+  font-weight: 700;
   color: var(--text);
   margin: 6px 2px 11px;
   display: flex;
@@ -32,7 +32,7 @@
 .job-cat-head { width: 100%; display: flex; align-items: center; gap: 13px; padding: 14px 15px; text-align: left; }
 .job-cat-ico { width: 42px; height: 42px; flex: 0 0 42px; display: grid; place-items: center; border-radius: 12px; }
 .job-cat-text { flex: 1; display: flex; flex-direction: column; }
-.job-cat-title { font-size: 15.5px; font-weight: 800; color: var(--text); }
+.job-cat-title { font-size: 15.5px; font-weight: 700; color: var(--text); }
 .job-cat-desc { font-size: 12.5px; color: var(--text-sub); margin-top: 2px; }
 .job-cat-chev { color: var(--text-sub); flex: 0 0 auto; transition: transform 0.2s; }
 .job-cat.open .job-cat-chev { transform: rotate(180deg); color: var(--brand); }
@@ -70,7 +70,7 @@
 }
 .job-tag.badge { color: #fff; background: var(--coral); }
 .job-prog-go { color: var(--text-sub); flex: 0 0 auto; }
-.job-prog-title { display: block; font-size: 15.5px; font-weight: 800; color: var(--text); }
+.job-prog-title { display: block; font-size: 15.5px; font-weight: 700; color: var(--text); }
 .job-prog-desc { display: block; font-size: 12.5px; color: var(--text-sub); line-height: 1.5; margin-top: 4px; }
 /* 쉬운 한 줄 풀이 — 전문용어 옆 평이한 설명 */
 .job-prog-plain {
@@ -109,13 +109,13 @@
   padding: 16px;
   margin-bottom: 16px;
 }
-.jd-title { font-size: 20px; font-weight: 800; color: var(--text); margin: 10px 0 8px; }
+.jd-title { font-size: 20px; font-weight: 700; color: var(--text); margin: 10px 0 8px; }
 .jd-summary { font-size: 13.5px; color: var(--text-sub); line-height: 1.6; }
 
 .jd-block { margin-bottom: 18px; }
 .jd-h {
   display: flex; align-items: center; gap: 6px;
-  font-size: 14px; font-weight: 800; color: var(--text);
+  font-size: 14px; font-weight: 700; color: var(--text);
   margin: 0 2px 9px;
 }
 .jd-h svg { color: var(--brand); flex: 0 0 auto; }
@@ -147,7 +147,7 @@
   flex: 0 0 22px; width: 22px; height: 22px;
   display: grid; place-items: center;
   background: var(--brand); color: #fff;
-  font-size: 12px; font-weight: 800; border-radius: 50%;
+  font-size: 12px; font-weight: 700; border-radius: 50%;
   margin-top: 1px;
 }
 
@@ -164,7 +164,7 @@
   width: 100%; padding: 15px;
   background: var(--grad-warm);
   box-shadow: var(--shadow-warm);
-  color: #fff; font-size: 15.5px; font-weight: 800;
+  color: #fff; font-size: 15.5px; font-weight: 700;
   border-radius: var(--r-md); text-decoration: none;
 }
 .jd-apply:active { filter: brightness(0.96); }
@@ -196,7 +196,7 @@
   font-size: 14px; color: var(--text); padding: 9px 0;
 }
 .ji-search-btn {
-  flex: 0 0 auto; font-size: 13px; font-weight: 800; color: #fff;
+  flex: 0 0 auto; font-size: 13px; font-weight: 700; color: #fff;
   background: var(--brand); border-radius: var(--r-sm); padding: 8px 14px;
 }
 .ji-search-clear {
@@ -229,7 +229,7 @@
   padding: 14px 15px; text-align: left;
 }
 .ji-item-text { flex: 1; display: flex; flex-direction: column; }
-.ji-item-name { font-size: 15px; font-weight: 800; color: var(--text); }
+.ji-item-name { font-size: 15px; font-weight: 700; color: var(--text); }
 .ji-meta { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
 .ji-meta-chip {
   font-size: 10.5px; font-weight: 700; color: var(--brand-deep);
@@ -242,7 +242,7 @@
 .ji-item-body { padding: 2px 15px 15px; }
 .ji-detail-row { margin-bottom: 11px; }
 .ji-detail-label {
-  display: inline-block; font-size: 11px; font-weight: 800; color: var(--brand-deep);
+  display: inline-block; font-size: 11px; font-weight: 700; color: var(--brand-deep);
   background: var(--brand-tint); padding: 2px 9px; border-radius: var(--r-pill); margin-bottom: 5px;
 }
 .ji-detail-text { font-size: 13px; color: var(--text); line-height: 1.55; margin: 0; }
@@ -262,7 +262,7 @@
 }
 .ji-connect:active { filter: brightness(0.97); }
 .ji-connect-text { flex: 1; display: flex; flex-direction: column; }
-.ji-connect-label { font-size: 13.5px; font-weight: 800; color: var(--brand-deep); }
+.ji-connect-label { font-size: 13.5px; font-weight: 700; color: var(--brand-deep); }
 .ji-connect-sub { font-size: 11.5px; color: var(--text-sub); margin-top: 2px; }
 .ji-connect svg { color: var(--brand); flex: 0 0 auto; }
 
@@ -279,7 +279,7 @@
 }
 .job-step-num {
   width: 28px; height: 28px; display: grid; place-items: center;
-  border-radius: 50%; font-size: 13px; font-weight: 800;
+  border-radius: 50%; font-size: 13px; font-weight: 700;
   background: var(--bg-soft); color: var(--text-sub);
   border: 1.5px solid var(--border);
 }
@@ -311,7 +311,7 @@
 .ji-detail-fail-text { font-size: 12.5px; color: var(--text-sub); line-height: 1.5; margin: 0 0 9px; }
 .ji-retry {
   display: inline-flex; align-items: center; gap: 6px;
-  font-size: 12.5px; font-weight: 800; color: var(--brand-deep);
+  font-size: 12.5px; font-weight: 700; color: var(--brand-deep);
   background: var(--brand-tint); border-radius: var(--r-pill); padding: 7px 13px;
 }
 .ji-retry:active { filter: brightness(0.96); }
@@ -322,7 +322,7 @@
   margin-top: 22px; padding-top: 18px;
   border-top: 1px solid var(--border);
 }
-.ji-test-head { font-size: 15.5px; font-weight: 800; color: var(--text); margin: 0 2px 4px; }
+.ji-test-head { font-size: 15.5px; font-weight: 700; color: var(--text); margin: 0 2px 4px; }
 .ji-test-sub { font-size: 12.5px; color: var(--text-sub); line-height: 1.5; margin: 0 2px 12px; }
 .ji-test-glabel {
   font-size: 11.5px; font-weight: 700; color: var(--text-sub);
@@ -337,7 +337,7 @@
 }
 .ji-test:active { background: var(--brand-tint); }
 .ji-test-text { flex: 1; display: flex; flex-direction: column; }
-.ji-test-name { font-size: 14px; font-weight: 800; color: var(--text); display: flex; align-items: center; }
+.ji-test-name { font-size: 14px; font-weight: 700; color: var(--text); display: flex; align-items: center; }
 .ji-test-min {
   font-size: 10.5px; font-weight: 700; color: var(--brand-deep);
   background: var(--brand-tint); padding: 2px 7px; border-radius: var(--r-pill); margin-left: 8px;
@@ -372,7 +372,7 @@
 .ji-savebar-count b { color: var(--brand-deep); }
 .ji-savebar-cta {
   display: inline-flex; align-items: center; gap: 6px; padding: 11px 18px;
-  background: var(--brand); color: #fff; font-size: 14px; font-weight: 800; border-radius: var(--r-pill);
+  background: var(--brand); color: #fff; font-size: 14px; font-weight: 700; border-radius: var(--r-pill);
 }
 .ji-toast {
   position: fixed; left: 50%; bottom: 92px; transform: translateX(-50%);
@@ -398,14 +398,14 @@
 .jt-step { display: flex; gap: 11px; align-items: flex-start; }
 .jt-step-num {
   flex: 0 0 auto; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center;
-  background: var(--brand); color: #fff; font-size: 12.5px; font-weight: 800; margin-top: 1px;
+  background: var(--brand); color: #fff; font-size: 12.5px; font-weight: 700; margin-top: 1px;
 }
 .jt-step-text { display: flex; flex-direction: column; gap: 3px; }
-.jt-step-title { font-size: 14px; font-weight: 800; color: var(--text); }
+.jt-step-title { font-size: 14px; font-weight: 700; color: var(--text); }
 .jt-step-detail { font-size: 12.5px; color: var(--text-sub); line-height: 1.5; }
 .jt-certs { display: flex; flex-direction: column; gap: 8px; }
 .jt-cert { padding: 11px 13px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--card); }
-.jt-cert-name { display: block; font-size: 13.5px; font-weight: 800; color: var(--text); }
+.jt-cert-name { display: block; font-size: 13.5px; font-weight: 700; color: var(--text); }
 .jt-cert-note { display: block; font-size: 12px; color: var(--text-sub); margin-top: 3px; line-height: 1.45; }
 .jt-tip {
   display: flex; gap: 9px; align-items: flex-start; padding: 12px 14px; border-radius: var(--r-md);
@@ -435,11 +435,11 @@
   background: var(--brand-tint); color: var(--brand-deep);
 }
 .ja-app-text { flex: 1; display: flex; flex-direction: column; min-width: 0; }
-.ja-app-name { font-size: 14.5px; font-weight: 800; color: var(--text); }
+.ja-app-name { font-size: 14.5px; font-weight: 700; color: var(--text); }
 .ja-app-sub { font-size: 11.5px; color: var(--text-sub); margin-top: 2px; }
 .ja-app-body { padding: 4px 14px 16px; }
 .ja-section {
-  display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 800;
+  display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700;
   color: var(--brand-deep); margin: 0 0 9px;
 }
 .ja-docs { display: flex; flex-direction: column; gap: 7px; }
@@ -454,7 +454,7 @@
 .ja-doc-note { font-size: 11.5px; color: var(--text-sub); line-height: 1.45; margin-top: 1px; }
 .ja-prompts { display: flex; flex-direction: column; gap: 14px; }
 .ja-prompt { display: flex; flex-direction: column; gap: 5px; }
-.ja-prompt-q { font-size: 13px; font-weight: 800; color: var(--text); }
+.ja-prompt-q { font-size: 13px; font-weight: 700; color: var(--text); }
 .ja-prompt-guide {
   display: flex; gap: 5px; align-items: flex-start; font-size: 11.5px; color: #8a5a00;
   background: #fff7e6; padding: 7px 9px; border-radius: 8px; line-height: 1.45;
