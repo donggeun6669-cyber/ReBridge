@@ -12,7 +12,7 @@ export default function LogoMark({ size = 24 }) {
         src="/GumgomentorLOGO.png"
         width={size}
         height={size}
-        alt="검고담임 로고"
+        alt="TalkDream 로고"
         className="logo-mark"
         style={{ objectFit: 'contain', display: 'block' }}
         onError={() => setImgFailed(true)}
@@ -28,7 +28,7 @@ export default function LogoMark({ size = 24 }) {
       fill="none"
       className="logo-mark"
       role="img"
-      aria-label="검고담임 로고"
+      aria-label="TalkDream 로고"
       xmlns="http://www.w3.org/2000/svg"
     >
       <defs>

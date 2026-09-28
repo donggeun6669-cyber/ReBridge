@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ChevronLeft } from 'lucide-react';
+import { CenterPicker } from './CenterPicker.jsx';
 import LogoMark from './LogoMark.jsx';
 import { savePersona, getNav, GRADE_OPTIONS, HOME_REGIONS, V1_UNIV_ONLY } from '../lib/persona.js';
 import '../styles.onboarding.css';
@@ -50,32 +51,28 @@ const TRACK_OPTS = [
   },
 ];
 
-function hasScores() {
-  try {
-    const p = JSON.parse(localStorage.getItem('rebridge_profile'));
-    return !!(p && p.gedScores && Object.values(p.gedScores).some((v) => v !== '' && v != null));
-  } catch { return false; }
-}
-
 export default function OnboardingScreen({ goTo = () => {}, presetTrack = null }) {
   // 0 인사 → 1 나이 → 2 상황. 트랙이 안 정해졌으면 나이 다음에 트랙을 묻는다.
   const [step, setStep] = useState(0);
   const [grade, setGrade] = useState(null);
   const [homeRegion, setHomeRegion] = useState(null);
+  // 다니는 꿈드림센터 (2026-09-26) — 고르면 홈이 '우리 센터' 홈이 된다
+  const [myCenterId, setMyCenter] = useState(null);
+  const [pickingCenter, setPickingCenter] = useState(false);
   const [track, setTrack] = useState(presetTrack || (V1_UNIV_ONLY ? 'university' : null));
 
   const needTrack = !presetTrack && !V1_UNIV_ONLY;
   // 화면 순서를 배열로 들고 다닌다 — 조건이 늘어도 인덱스 계산이 안 꼬이게.
   const FLOW = needTrack
-    ? ['hello', 'grade', 'region', 'track', 'stage']
-    : ['hello', 'grade', 'region', 'stage'];
+    ? ['hello', 'grade', 'region', 'dream', 'track', 'stage']
+    : ['hello', 'grade', 'region', 'dream', 'stage'];
   const cur = FLOW[step];
 
   function finish(goal, stage) {
-    savePersona({ goal, stage, grade, homeRegion });
-    if (goal === 'university' && stage === 'tested' && !hasScores()) {
-      goTo('profile'); // 점수 입력부터
-    } else if (goal === 'job') {
+    savePersona({ goal, stage, grade, homeRegion, myCenterId });
+    // 2026-09-26 PRD v2 시연판: 센터 중심이라 끝나면 홈(가까운 꿈드림)으로 간다.
+    // 점수 입력은 진학 탭에서 한다(예전엔 '이미 봤어요'면 바로 점수 입력으로 보냈다).
+    if (goal === 'job') {
       goTo('job-questions');
     } else {
       goTo(getNav({ goal, stage }).landing);
@@ -89,6 +86,12 @@ export default function OnboardingScreen({ goTo = () => {}, presetTrack = null }
 
   function pickRegion(r) {
     setHomeRegion(r);
+    setStep(step + 1);
+  }
+
+  function pickDream(centerId) {
+    setMyCenter(centerId);
+    setPickingCenter(false);
     setStep(step + 1);
   }
 
@@ -106,13 +109,13 @@ export default function OnboardingScreen({ goTo = () => {}, presetTrack = null }
     <div className="screen onb-screen">
       <header className="onb-top">
         {step > 0 ? (
-          <button className="icon-btn" aria-label="뒤로" onClick={() => setStep(step - 1)}>
+          <button className="icon-btn" aria-label="뒤로" onClick={() => (pickingCenter ? setPickingCenter(false) : setStep(step - 1))}>
             <ChevronLeft size={22} />
           </button>
         ) : (
           <span className="brand-lockup">
             <LogoMark size={22} />
-            <span className="wordmark">검고담임</span>
+            <span className="wordmark">TalkDream</span>
           </span>
         )}
       </header>
@@ -131,11 +134,11 @@ export default function OnboardingScreen({ goTo = () => {}, presetTrack = null }
           <span className="onb-hello-logo"><LogoMark size={64} /></span>
           <h1 className="onb-hello-title">
             어서 와요.<br />
-            <span className="accent">검고담임</span>이에요
+            <span className="accent">TalkDream</span>이에요
           </h1>
           <p className="onb-hello-sub">
-            검정고시로 대학 가는 길,<br />
-            처음부터 끝까지 같이 볼게요.
+            가까운 꿈드림센터부터 검정고시·진학까지,<br />
+            혼자 찾지 않게 같이 볼게요.
           </p>
 
           <div className="onb-privacy">
@@ -190,6 +193,40 @@ export default function OnboardingScreen({ goTo = () => {}, presetTrack = null }
           <button className="onb-skip" onClick={() => pickRegion(null)}>
             말하고 싶지 않아요
           </button>
+        </>
+      )}
+
+      {cur === 'dream' && !pickingCenter && (
+        <>
+          <h1 className="onb-q">꿈드림센터에<br /><span className="accent">다니고 있어요?</span></h1>
+          <p className="onb-sub">다니고 있다면 우리 센터 소식과 선생님 쪽지를 홈에 모아 드려요.</p>
+          <div className="onb-opts">
+            <button className="onb-card oc-green" onClick={() => setPickingCenter(true)}>
+              <span className="onb-card-body">
+                <span className="onb-card-title">네, 다니고 있어요</span>
+                <span className="onb-card-desc">어느 센터인지 골라 주세요</span>
+              </span>
+            </button>
+            <button className="onb-card oc-brand" onClick={() => pickDream(null)}>
+              <span className="onb-card-body">
+                <span className="onb-card-title">아직이요</span>
+                <span className="onb-card-desc">가까운 센터와 하는 일을 보여 드릴게요</span>
+              </span>
+            </button>
+          </div>
+          <button className="onb-skip" onClick={() => pickDream(null)}>
+            꿈드림이 뭔지 잘 몰라요
+          </button>
+        </>
+      )}
+
+      {cur === 'dream' && pickingCenter && (
+        <>
+          <h1 className="onb-q">어느 꿈드림에<br /><span className="accent">다니고 있어요?</span></h1>
+          <p className="onb-sub">이 기기에만 저장돼요. 나중에 MY에서 바꿀 수 있어요.</p>
+          <div style={{ margin: '0 -20px' }}>
+            <CenterPicker region={homeRegion} selectedId={myCenterId} onPick={(c) => pickDream(c.id)} />
+          </div>
         </>
       )}
 

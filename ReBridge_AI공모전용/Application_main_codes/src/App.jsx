@@ -2,15 +2,28 @@ import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import { ArrowLeft } from 'lucide-react';
 // 스플래시만 즉시 로드하고, 화면들은 lazy로 쪼개 첫 로딩 번들을 가볍게 한다.
 // (대형 JSON을 물고 있는 대입 관련 화면들이 초기 번들에서 빠지는 효과)
-import SplashScreen from './components/SplashScreen.jsx';
+import SySplash from './sy/SySplash.jsx';
+import SyTabBar from './sy/SyTabBar.jsx';
+import './styles.v3.css';
+import './styles.v3-legacy.css';
+import 'pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css';
+import './sy/sy.css';
 import { getPersona, loadProfile, V1_UNIV_ONLY, isHiddenScreen } from './lib/persona.js';
 
-const HomeScreen = lazy(() => import('./components/HomeScreen.jsx'));
+// PRD v2 시연판(2026-09-26): 홈·꿈드림·진학·MY 탭 첫 화면과 센터 상세·쪽지를 새로 만들었다.
+const HomeV3Screen = lazy(() => import('./components/HomeV3Screen.jsx'));
+const CentersScreen = lazy(() => import('./components/CentersScreen.jsx'));
+const CenterDetailScreen = lazy(() => import('./components/CenterDetailScreen.jsx'));
+const ThreadScreen = lazy(() => import('./components/ThreadScreen.jsx'));
+const InboxScreen = lazy(() => import('./components/InboxScreen.jsx'));
+const UnivHomeScreen = lazy(() => import('./components/UnivHomeScreen.jsx'));
+const MyV3Screen = lazy(() => import('./components/MyV3Screen.jsx'));
+const AboutDreamScreen = lazy(() => import('./components/AboutDreamScreen.jsx'));
+const MyCenterPickScreen = lazy(() => import('./components/CenterPicker.jsx'));
 const ExploreScreen = lazy(() => import('./components/ExploreScreen.jsx'));
 const ExploreHelpScreen = lazy(() => import('./components/ExploreHelpScreen.jsx'));
 const AdmissionMatrixScreen = lazy(() => import('./components/AdmissionMatrixScreen.jsx'));
 const ProfileScreen = lazy(() => import('./components/ProfileScreen.jsx'));
-const MyPageScreen = lazy(() => import('./components/MyPageScreen.jsx'));
 const GuideScreen = lazy(() => import('./components/GuideScreen.jsx'));
 const ResultsScreen = lazy(() => import('./components/ResultsScreen.jsx'));
 const DetailScreen = lazy(() => import('./components/DetailScreen.jsx'));
@@ -20,7 +33,6 @@ const SavedScreen = lazy(() => import('./components/SavedScreen.jsx'));
 const MapScreen = lazy(() => import('./components/MapScreen.jsx'));
 const HelpScreen = lazy(() => import('./components/HelpScreen.jsx'));
 const FormsGuideScreen = lazy(() => import('./components/FormsGuideScreen.jsx'));
-const DreamdriveScreen = lazy(() => import('./components/DreamdriveScreen.jsx'));
 const GedGuideScreen = lazy(() => import('./components/GedGuideScreen.jsx'));
 const StudyRoadmapScreen = /* #__PURE__ */ lazy(() => import('./components/StudyRoadmapScreen.jsx'));
 const StudyPlannerScreen = /* #__PURE__ */ lazy(() => import('./components/StudyPlannerScreen.jsx'));
@@ -41,16 +53,49 @@ const CommunityPostScreen = /* #__PURE__ */ lazy(() => import('./components/Comm
 const CommunityWriteScreen = /* #__PURE__ */ lazy(() => import('./components/CommunityWriteScreen.jsx'));
 const AuthScreen = /* #__PURE__ */ lazy(() => import('./components/AuthScreen.jsx'));
 const PolicyScreen = lazy(() => import('./components/PolicyScreen.jsx'));
+// ── 서연 UI (2026-09-28 Figma 시안 27장) ─────────────────────────────
+// 시안이 있는 화면은 아래 SY_SCREENS 가 그린다. 기능(데이터·저장·쪽지)은 prd2-center-demo 것을 그대로 쓴다.
+// 시안이 없는 화면(쪽지함·선생님 모드·센터 상세 등)은 예전 화면이 그대로 남아 있다.
+const SY_SCREENS = {
+  onboarding: lazy(() => import('./sy/SyOnboarding.jsx')),
+  home: lazy(() => import('./sy/SyHome.jsx')),
+  roadmap: lazy(() => import('./sy/SyRoadmap.jsx')),
+  checklist: lazy(() => import('./sy/SyRoadmap.jsx')),
+  centers: lazy(() => import('./sy/SyCenters.jsx')),
+  'location-consent': lazy(() => import('./sy/SyLocationConsent.jsx')),
+  'support-detail': lazy(() => import('./sy/SySupportDetail.jsx')),
+  thread: lazy(() => import('./sy/SyMessageWrite.jsx')),
+  'univ-home': lazy(() => import('./sy/SyUnivHome.jsx')),
+  score: lazy(() => import('./sy/SyScore.jsx')),
+  results: lazy(() => import('./sy/SyMatch.jsx')),
+  'univ-explore': lazy(() => import('./sy/SyExplore.jsx')),
+  detail: lazy(() => import('./sy/SyUnivDetail.jsx')),
+  'admission-matrix': lazy(() => import('./sy/SyAdmissionMatrix.jsx')),
+  documents: lazy(() => import('./sy/SyDocuments.jsx')),
+  'ged-guide': lazy(() => import('./sy/SyGedGuide.jsx')),
+  community: lazy(() => import('./sy/SyCommunity.jsx')),
+  'community-post': lazy(() => import('./sy/SyCommunityPost.jsx')),
+  'community-write': lazy(() => import('./sy/SyCommunityWrite.jsx')),
+  help: lazy(() => import('./sy/SyAskTeacher.jsx')),
+  glossary: lazy(() => import('./sy/SyAskTeacher.jsx')),
+  mypage: lazy(() => import('./sy/SyMyPage.jsx')),
+  'noti-scrap': lazy(() => import('./sy/SyNotiScrap.jsx')),
+  saved: lazy(() => import('./sy/SySaved.jsx')),
+};
+
 // 팀 내부용 데이터 원본 화면 — 서비스 동선에 링크가 없고 주소 뒤 #data 로만 열린다.
 const RawDataScreen = /* #__PURE__ */ lazy(() => import('./components/RawDataScreen.jsx'));
 
-// 하단 탭은 없앴다(2026-09-17 동근님). 홈이 유일한 뿌리이고, 나머지는 전부 홈에서 들어가서
-// 뒤로가기로 나온다. 그래서 홈으로 갈 때만 스택을 비운다.
-// (마이페이지는 홈 우측 상단 아이콘, 지원 혜택은 꿈드림센터 화면에 합쳤다)
-const ROOT_SCREEN = 'home';
+// 하단 탭 5개를 다시 살렸다(2026-09-26 동근님 — PRD v2, 2026-09-17에 없앴던 것을 되돌림).
+// 탭 첫 화면으로 갈 때는 스택을 비운다 = 탭을 누르면 그 탭의 처음으로 돌아간다.
+// 예전 이름 'dreamdrive'·'support'(꿈드림센터·지원 혜택)는 새 꿈드림 탭으로 보낸다.
+const TAB_ROOTS = ['home', 'centers', 'univ-home', 'community', 'mypage'];
+const SCREEN_ALIAS = { dreamdrive: 'centers', support: 'centers' };
+// 탭바를 감추는 화면 — 입력에 집중하는 전체 화면들
+const NO_TABBAR = ['onboarding', 'thread', 'location-consent', 'community-write', 'community-auth', 'profile', 'data-raw', 'privacy', 'terms'];
 const COMMUNITY_ON = !isHiddenScreen('community');
 // KNOWN_SCREENS 밖이지만 '준비 중'으로 떨어뜨리면 안 되는 화면들
-const MAIN_SCREENS = ['home', 'support', 'mypage', 'community', 'profile', 'onboarding'];
+const MAIN_SCREENS = ['home', 'centers', 'univ-home', 'mypage', 'community', 'profile', 'onboarding', ...Object.keys(SY_SCREENS)];
 
 // 주소 뒤 #data 로 들어오면 데이터 원본 화면부터 연다(스플래시도 건너뛴다).
 // UI를 고치는 사람이 실제 데이터를 보려고 쓰는 통로다. 일반 사용자 동선에는 링크가 없다.
@@ -65,6 +110,7 @@ const KNOWN_SCREENS = [
   'guide', 'glossary', 'results', 'detail', 'admission-matrix', 'documents', 'saved', 'map', 'help',
   'checklist', 'forms-guide', 'dreamdrive', 'ged-guide', 'univ-explore', 'explore-help', 'path',
   'onboarding', 'study-roadmap', 'study-planner', 'support', 'roadmap',
+  'center', 'thread', 'inbox', 'about-dream', 'my-center',
   'job-home', 'job-explore', 'job-roadmap', 'job-questions', 'job-detail', 'job-info', 'job-psych',
   'job-training', 'job-apply',
   'community', 'community-post', 'community-write', 'community-auth',
@@ -84,6 +130,15 @@ export default function App() {
   const [stack, setStack] = useState(
     isRawHash() ? [{ screen: 'data-raw', params: {} }] : [{ screen: 'home', params: {} }],
   );
+  // 개발 중 확인용 — 주소 뒤 #go=화면이름 으로 그 화면을 바로 연다 (dev 에서만)
+  useEffect(() => {
+    if (!import.meta.env.DEV) return;
+    const m = window.location.hash.match(/^#go=([\w-]+)(?:&(.*))?$/);
+    if (!m) return;
+    const params = Object.fromEntries(new URLSearchParams(m[2] || ''));
+    setSplash(false);
+    setStack([{ screen: m[1], params }]);
+  }, []);
 
   function handleSplashDone() {
     setSplash(false);
@@ -101,8 +156,8 @@ export default function App() {
       return;
     }
     setStack([
-      { screen: 'home',    params: {} },
-      { screen: 'results', params: {} },
+      { screen: 'univ-home', params: {} },
+      { screen: 'results',   params: {} },
     ]);
   }
 
@@ -110,9 +165,10 @@ export default function App() {
   const screen  = current.screen;
   const params  = current.params;
 
-  const goTo = useCallback((next, options = {}) => {
+  const goTo = useCallback((rawNext, options = {}) => {
+    const next = SCREEN_ALIAS[rawNext] || rawNext;
     setStack((s) => {
-      if (next === ROOT_SCREEN) return [{ screen: next, params: options }];
+      if (TAB_ROOTS.includes(next)) return [{ screen: next, params: options }];
       const top = s[s.length - 1];
       if (top.screen === next && JSON.stringify(top.params) === JSON.stringify(options)) return s;
       return [...s, { screen: next, params: options }];
@@ -148,50 +204,65 @@ export default function App() {
   }, []);
 
   const isMainScreen = MAIN_SCREENS.includes(screen);
+  const SyCurrent = SY_SCREENS[screen] || null;
   const persona = getPersona();
 
   return (
     <div className="app-shell">
-      <div className="app-frame">
-        {splash && <SplashScreen onDone={handleSplashDone} />}
+      <div className="app-frame v3-app sy-app">
+        {splash && <SySplash onDone={handleSplashDone} />}
 
-        <Suspense fallback={<div className="screen" aria-busy="true" />}>
-
-
-        {!splash && screen === 'onboarding'  && <OnboardingScreen goTo={goTo} presetTrack={params.presetTrack} />}
-
-        {!splash && screen === 'home'        && <HomeScreen goTo={goTo} goBack={goBack} />}
-        {/* 지원 혜택은 꿈드림센터 화면에 합쳤다 — 'support'로 와도 같은 화면 */}
-        {!splash && (screen === 'support' || screen === 'dreamdrive') && (
-          <DreamdriveScreen goTo={goTo} goBack={goBack} params={params} />
+        <Suspense fallback={<div className="sy-screen" aria-busy="true" />}>
+        {!splash && SyCurrent && (
+          <SyCurrent
+            goTo={goTo}
+            goBack={goBack}
+            params={params}
+            screen={screen}
+            canGoBack={stack.length > 1}
+            onProfileComplete={handleProfileComplete}
+          />
         )}
+
+
+        {!splash && !SyCurrent && screen === 'onboarding'  && <OnboardingScreen goTo={goTo} presetTrack={params.presetTrack} />}
+
+        {!splash && !SyCurrent && screen === 'home'        && <HomeV3Screen goTo={goTo} />}
+        {/* 꿈드림 탭 — 예전 'dreamdrive'·'support'도 goTo에서 여기로 바뀐다 */}
+        {!splash && !SyCurrent && screen === 'centers'     && <CentersScreen goTo={goTo} params={params} />}
+        {!splash && !SyCurrent && screen === 'center'      && <CenterDetailScreen goTo={goTo} goBack={goBack} centerId={params.centerId} />}
+        {!splash && !SyCurrent && screen === 'thread'      && <ThreadScreen goTo={goTo} goBack={goBack} centerId={params.centerId} threadId={params.threadId} draft={params.draft} />}
+        {!splash && !SyCurrent && screen === 'inbox'       && <InboxScreen goTo={goTo} goBack={goBack} />}
+        {!splash && !SyCurrent && screen === 'my-center'   && <MyCenterPickScreen goTo={goTo} goBack={goBack} />}
+        {!splash && !SyCurrent && screen === 'about-dream' && <AboutDreamScreen goTo={goTo} goBack={goBack} open={params.open} />}
+        {!splash && !SyCurrent && screen === 'univ-home'   && <UnivHomeScreen goTo={goTo} />}
         {/* 진로 허브 — v1에서 숨김. (숨기면 'explore'가 KNOWN_SCREENS에 없어
             CareerHub와 '준비 중'이 같이 그려지던 이중 렌더도 함께 사라진다) */}
-        {!splash && !V1_UNIV_ONLY && screen === 'explore'     && <CareerHubScreen goTo={goTo} persona={persona} />}
-        {!splash && screen === 'univ-explore' && <ExploreScreen goTo={goTo} goBack={goBack} canGoBack={stack.length > 1} />}
-        {!splash && screen === 'explore-help' && <ExploreHelpScreen goBack={goBack} />}
-        {!splash && screen === 'path'        && (
+        {!splash && !SyCurrent && !V1_UNIV_ONLY && screen === 'explore'     && <CareerHubScreen goTo={goTo} persona={persona} />}
+        {!splash && !SyCurrent && screen === 'univ-explore' && <ExploreScreen goTo={goTo} goBack={goBack} canGoBack={stack.length > 1} />}
+        {!splash && !SyCurrent && screen === 'explore-help' && <ExploreHelpScreen goBack={goBack} />}
+        {!splash && !SyCurrent && screen === 'path'        && (
           <PathGuideScreen pathKey={params.key} goBack={goBack} />
         )}
-        {!splash && screen === 'mypage'      && <MyPageScreen goTo={goTo} goBack={goBack} />}
+        {!splash && !SyCurrent && screen === 'mypage'      && <MyV3Screen goTo={goTo} />}
         {/* 내 로드맵 + 서류 체크리스트 = '지금 시기에 할 일' 한 화면 */}
-        {!splash && (screen === 'roadmap' || screen === 'checklist') && (
+        {!splash && !SyCurrent && (screen === 'roadmap' || screen === 'checklist') && (
           <RoadmapScreen goTo={goTo} goBack={goBack} focus={screen === 'checklist' ? 'docs' : null} />
         )}
-        {!splash && screen === 'profile'     && (
+        {!splash && !SyCurrent && screen === 'profile'     && (
           <ProfileScreen goTo={goTo} goBack={goBack} onComplete={handleProfileComplete} />
         )}
-        {!splash && screen === 'guide'       && (
+        {!splash && !SyCurrent && screen === 'guide'       && (
           <GuideScreen topic={params.topic} goTo={goTo} goBack={goBack} />
         )}
-        {!splash && screen === 'results'     && <ResultsScreen goTo={goTo} goBack={goBack} />}
-        {!splash && screen === 'detail'      && (
+        {!splash && !SyCurrent && screen === 'results'     && <ResultsScreen goTo={goTo} goBack={goBack} />}
+        {!splash && !SyCurrent && screen === 'detail'      && (
           <DetailScreen goTo={goTo} goBack={goBack} univId={params.univId} univName={params.univ} />
         )}
-        {!splash && screen === 'admission-matrix' && (
+        {!splash && !SyCurrent && screen === 'admission-matrix' && (
           <AdmissionMatrixScreen goBack={goBack} univId={params.univId} univName={params.univ} />
         )}
-        {!splash && screen === 'documents'   && (
+        {!splash && !SyCurrent && screen === 'documents'   && (
           <DocumentsScreen
             goTo={goTo}
             goBack={goBack}
@@ -200,39 +271,39 @@ export default function App() {
             admissionName={params.admissionName}
           />
         )}
-        {!splash && screen === 'saved'       && <SavedScreen goTo={goTo} goBack={goBack} />}
-        {!splash && screen === 'map'         && <MapScreen goTo={goTo} goBack={goBack} />}
+        {!splash && !SyCurrent && screen === 'saved'       && <SavedScreen goTo={goTo} goBack={goBack} />}
+        {!splash && !SyCurrent && screen === 'map'         && <MapScreen goTo={goTo} goBack={goBack} />}
         {/* 담임에게 물어보기 = 자주 묻는 질문 + 입시 용어. 'glossary'로 와도 같은 화면 */}
-        {!splash && (screen === 'help' || screen === 'glossary') && (
+        {!splash && !SyCurrent && (screen === 'help' || screen === 'glossary') && (
           <HelpScreen goTo={goTo} goBack={goBack} termId={params.termId} />
         )}
-        {!splash && screen === 'forms-guide' && <FormsGuideScreen goTo={goTo} goBack={goBack} />}
-        {!splash && screen === 'ged-guide'   && <GedGuideScreen goTo={goTo} goBack={goBack} />}
+        {!splash && !SyCurrent && screen === 'forms-guide' && <FormsGuideScreen goTo={goTo} goBack={goBack} />}
+        {!splash && !SyCurrent && screen === 'ged-guide'   && <GedGuideScreen goTo={goTo} goBack={goBack} />}
         {/* ▼ v1(V1_UNIV_ONLY)에서 숨기는 화면들 — 학습·직업 트랙.
             남은 링크로 들어와도 KNOWN_SCREENS에서 빠져 '준비 중'으로 떨어진다. */}
-        {!splash && !V1_UNIV_ONLY && screen === 'study-roadmap' && <StudyRoadmapScreen goTo={goTo} />}
-        {!splash && !V1_UNIV_ONLY && screen === 'study-planner' && <StudyPlannerScreen goTo={goTo} />}
-        {!splash && !V1_UNIV_ONLY && screen === 'job-home'      && <JobHomeScreen goTo={goTo} />}
-        {!splash && !V1_UNIV_ONLY && screen === 'job-explore'   && <JobExploreScreen goTo={goTo} />}
-        {!splash && !V1_UNIV_ONLY && screen === 'job-roadmap'   && <JobRoadmapScreen goTo={goTo} />}
-        {!splash && !V1_UNIV_ONLY && screen === 'job-questions' && <JobQuestionsScreen goTo={goTo} goBack={goBack} canGoBack={stack.length > 1} />}
-        {!splash && !V1_UNIV_ONLY && screen === 'job-detail'    && <JobDetailScreen id={params.id} goBack={goBack} />}
-        {!splash && !V1_UNIV_ONLY && screen === 'job-info'      && <JobInfoScreen goBack={goBack} goTo={goTo} initialQuery={params.q} />}
-        {!splash && !V1_UNIV_ONLY && screen === 'job-psych'     && <JobPsychScreen goBack={goBack} />}
-        {!splash && !V1_UNIV_ONLY && screen === 'job-training'  && <JobTrainingScreen goBack={goBack} goTo={goTo} />}
-        {!splash && !V1_UNIV_ONLY && screen === 'job-apply'     && <JobApplyScreen goBack={goBack} goTo={goTo} />}
+        {!splash && !SyCurrent && !V1_UNIV_ONLY && screen === 'study-roadmap' && <StudyRoadmapScreen goTo={goTo} />}
+        {!splash && !SyCurrent && !V1_UNIV_ONLY && screen === 'study-planner' && <StudyPlannerScreen goTo={goTo} />}
+        {!splash && !SyCurrent && !V1_UNIV_ONLY && screen === 'job-home'      && <JobHomeScreen goTo={goTo} />}
+        {!splash && !SyCurrent && !V1_UNIV_ONLY && screen === 'job-explore'   && <JobExploreScreen goTo={goTo} />}
+        {!splash && !SyCurrent && !V1_UNIV_ONLY && screen === 'job-roadmap'   && <JobRoadmapScreen goTo={goTo} />}
+        {!splash && !SyCurrent && !V1_UNIV_ONLY && screen === 'job-questions' && <JobQuestionsScreen goTo={goTo} goBack={goBack} canGoBack={stack.length > 1} />}
+        {!splash && !SyCurrent && !V1_UNIV_ONLY && screen === 'job-detail'    && <JobDetailScreen id={params.id} goBack={goBack} />}
+        {!splash && !SyCurrent && !V1_UNIV_ONLY && screen === 'job-info'      && <JobInfoScreen goBack={goBack} goTo={goTo} initialQuery={params.q} />}
+        {!splash && !SyCurrent && !V1_UNIV_ONLY && screen === 'job-psych'     && <JobPsychScreen goBack={goBack} />}
+        {!splash && !SyCurrent && !V1_UNIV_ONLY && screen === 'job-training'  && <JobTrainingScreen goBack={goBack} goTo={goTo} />}
+        {!splash && !SyCurrent && !V1_UNIV_ONLY && screen === 'job-apply'     && <JobApplyScreen goBack={goBack} goTo={goTo} />}
         {/* 커뮤니티 — 2026-09-18 v1에 넣었다(COMMUNITY_IN_V1). 출시 때 뺄지는 다시 정한다. */}
-        {!splash && COMMUNITY_ON && screen === 'community'       && <CommunityScreen goTo={goTo} goBack={goBack} params={params} />}
-        {!splash && COMMUNITY_ON && screen === 'community-post'  && <CommunityPostScreen goTo={goTo} goBack={goBack} id={params.id} />}
-        {!splash && COMMUNITY_ON && screen === 'community-write' && <CommunityWriteScreen goTo={goTo} goBack={goBack} board={params.board} tag={params.tag} initialTitle={params.initialTitle || ''} />}
-        {!splash && COMMUNITY_ON && screen === 'community-auth'  && <AuthScreen goTo={goTo} goBack={goBack} />}
+        {!splash && !SyCurrent && COMMUNITY_ON && screen === 'community'       && <CommunityScreen goTo={goTo} goBack={goBack} params={params} isRoot={stack.length === 1} />}
+        {!splash && !SyCurrent && COMMUNITY_ON && screen === 'community-post'  && <CommunityPostScreen goTo={goTo} goBack={goBack} id={params.id} />}
+        {!splash && !SyCurrent && COMMUNITY_ON && screen === 'community-write' && <CommunityWriteScreen goTo={goTo} goBack={goBack} board={params.board} tag={params.tag} initialTitle={params.initialTitle || ''} />}
+        {!splash && !SyCurrent && COMMUNITY_ON && screen === 'community-auth'  && <AuthScreen goTo={goTo} goBack={goBack} />}
 
         {/* 법적 고지 — 청소년 대상 서비스 필수 + 스토어 심사 요건 */}
-        {!splash && screen === 'privacy'         && <PolicyScreen doc="privacy" goBack={goBack} />}
-        {!splash && screen === 'terms'           && <PolicyScreen doc="terms"   goBack={goBack} />}
+        {!splash && !SyCurrent && screen === 'privacy'         && <PolicyScreen doc="privacy" goBack={goBack} />}
+        {!splash && !SyCurrent && screen === 'terms'           && <PolicyScreen doc="terms"   goBack={goBack} />}
 
         {/* 데이터 원본 — 팀 내부용. 주소 뒤 #data 로만 들어온다. */}
-        {!splash && screen === 'data-raw'        && <RawDataScreen goBack={leaveRawData} />}
+        {!splash && !SyCurrent && screen === 'data-raw'        && <RawDataScreen goBack={leaveRawData} />}
 
         {/* 미구현 화면 fallback */}
         {!splash && !isMainScreen && !KNOWN_SCREENS.includes(screen) && (
@@ -254,6 +325,9 @@ export default function App() {
           </div>
         )}
         </Suspense>
+        {!splash && !NO_TABBAR.includes(screen) && (
+          <SyTabBar active={TAB_ROOTS.includes(stack[0].screen) ? stack[0].screen : 'home'} onSelect={goTo} />
+        )}
       </div>
     </div>
   );

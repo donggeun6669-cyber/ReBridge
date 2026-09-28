@@ -1,0 +1,393 @@
+/* =====================================================================
+   묶음 E — 커뮤니티(목록 · 글 상세 · 글쓰기) 전용 스타일.
+   클래스는 전부 sy-e- 접두사. 공통 토큰은 src/sy/sy.css 의 --sy-* 를 쓴다.
+   ===================================================================== */
+
+.sy-e-badge-bg { background: #FFF4DD; } /* 참고용 — 아래에서 직접 씀 */
+
+/* 공통 화면 뒤로가기 화살표 — 시안은 초록(--sy-green)인데 공용 SyTop 은
+   ink 색이라(sy.css, 수정 금지) 이 묶음 화면 안에서만 덮어써 시안과 맞춘다. */
+.sy-e-post .sy-top-back,
+.sy-e-write .sy-top-back {
+  color: var(--sy-green);
+}
+
+/* ── 목록 화면 ───────────────────────────────────────────────────────── */
+.sy-e-boards {
+  display: flex; flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+.sy-e-board-chip {
+  height: 34px; padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid var(--sy-line);
+  background: var(--sy-surface);
+  color: var(--sy-ink);
+  font-size: 14px; font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.sy-e-board-chip.sel {
+  background: var(--sy-green);
+  border-color: var(--sy-green);
+  color: #fff;
+}
+
+.sy-e-sort {
+  display: flex; align-items: center;
+  gap: 14px;
+  margin: 16px 0 12px;
+}
+.sy-e-sort-btn {
+  background: none; border: 0; padding: 0;
+  font-size: 14px; font-weight: 700;
+  color: var(--sy-ink-3);
+  cursor: pointer;
+}
+.sy-e-sort-btn.sel { color: var(--sy-green); }
+.sy-e-sort-dash {
+  width: 22px; height: 4px; border-radius: 2px;
+  background: var(--sy-green);
+  margin-left: 2px;
+}
+
+.sy-e-tags {
+  display: flex; flex-wrap: wrap;
+  gap: 8px;
+  margin: -2px 0 14px;
+}
+.sy-e-tag-chip {
+  height: 28px; padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid var(--sy-line);
+  background: var(--sy-surface);
+  color: var(--sy-ink-2);
+  font-size: 12px; font-weight: 700;
+  cursor: pointer;
+}
+.sy-e-tag-chip.sel {
+  background: var(--sy-green-soft);
+  border-color: var(--sy-green-soft);
+  color: var(--sy-green);
+}
+
+.sy-e-list { display: flex; flex-direction: column; gap: 12px; padding-bottom: 12px; }
+
+.sy-e-card {
+  background: var(--sy-surface);
+  border: 1px solid var(--sy-line);
+  border-radius: var(--sy-radius);
+  padding: 16px;
+  cursor: pointer;
+}
+.sy-e-card-top {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.sy-e-pill {
+  display: inline-flex; align-items: center;
+  height: 26px; padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid var(--sy-line);
+  background: var(--sy-surface);
+  color: var(--sy-ink);
+  font-size: 12px; font-weight: 700;
+  white-space: nowrap;
+}
+.sy-e-pill-answer {
+  display: inline-flex; align-items: center; gap: 4px;
+  height: 26px; padding: 0 10px;
+  border-radius: 999px;
+  background: var(--sy-peach);
+  color: #fff;
+  font-size: 12px; font-weight: 700;
+  white-space: nowrap;
+}
+.sy-e-card-title {
+  margin: 0 0 6px;
+  font-size: 16px; font-weight: 700;
+  color: var(--sy-ink);
+  line-height: 1.35;
+}
+.sy-e-card-body {
+  margin: 0 0 12px;
+  font-size: 13px;
+  color: var(--sy-ink-2);
+  line-height: 1.5;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.sy-e-card-foot {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 8px;
+}
+.sy-e-author {
+  display: inline-flex; align-items: center; gap: 6px;
+  min-width: 0;
+}
+.sy-e-author-name {
+  font-size: 13px; font-weight: 600;
+  color: var(--sy-ink-2);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.sy-e-badge {
+  display: inline-flex; align-items: center; gap: 3px;
+  height: 22px; padding: 0 8px;
+  border-radius: 999px;
+  background: #FFF4DD;
+  color: var(--sy-green);
+  font-size: 11px; font-weight: 700;
+  white-space: nowrap;
+}
+.sy-e-stats {
+  display: flex; align-items: center; gap: 12px;
+  flex-shrink: 0;
+  font-size: 13px; font-weight: 600;
+  color: var(--sy-ink-3);
+}
+.sy-e-stat-like {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: none; border: 0; padding: 0;
+  color: var(--sy-ink-3);
+  cursor: pointer;
+}
+.sy-e-stat-like.liked { color: #E0654A; }
+
+.sy-e-empty {
+  padding: 40px 4px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--sy-ink-3);
+}
+.sy-e-locked {
+  padding: 40px 4px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--sy-ink-2);
+}
+
+.sy-e-toast {
+  position: fixed;
+  left: 50%; bottom: 96px;
+  transform: translateX(-50%);
+  background: var(--sy-ink);
+  color: #fff;
+  font-size: 13px; font-weight: 600;
+  padding: 10px 16px;
+  border-radius: 999px;
+  z-index: 40;
+  white-space: nowrap;
+}
+
+/* ── 글 상세 화면 ─────────────────────────────────────────────────────── */
+.sy-e-post-answer {
+  margin-top: 6px;
+}
+.sy-e-post-title {
+  margin: 14px 0 10px;
+  font-size: 20px; font-weight: 800;
+  color: var(--sy-ink);
+  line-height: 1.35;
+}
+.sy-e-post-author {
+  display: flex; align-items: baseline; gap: 8px;
+  margin-bottom: 14px;
+}
+.sy-e-post-author-name {
+  font-size: 13px; font-weight: 700;
+  color: var(--sy-ink);
+}
+.sy-e-post-author-when {
+  font-size: 13px; font-weight: 500;
+  color: var(--sy-ink-3);
+}
+.sy-e-post-body {
+  margin: 0 0 18px;
+  font-size: 15px; line-height: 1.6;
+  color: var(--sy-ink);
+  white-space: pre-wrap;
+}
+.sy-e-post-actions {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 18px;
+}
+.sy-e-action-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 36px; padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid var(--sy-line);
+  background: var(--sy-surface);
+  color: var(--sy-ink);
+  font-size: 13px; font-weight: 700;
+  cursor: pointer;
+}
+.sy-e-action-btn.like {
+  background: var(--sy-green);
+  border-color: var(--sy-green);
+  color: #fff;
+}
+.sy-e-action-btn.on { border-color: var(--sy-green); color: var(--sy-green); }
+
+.sy-e-divider {
+  height: 1px; background: var(--sy-line);
+  margin: 4px 0 18px;
+}
+
+.sy-e-comments-title {
+  margin: 0 0 14px;
+  font-size: 15px; font-weight: 800;
+  color: var(--sy-ink);
+}
+.sy-e-comment-group { margin-bottom: 16px; }
+.sy-e-comment-group.reply { margin-left: 30px; margin-top: 10px; margin-bottom: 0; }
+.sy-e-comment-head {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 6px;
+}
+.sy-e-avatar {
+  width: 26px; height: 26px; flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--sy-green-tint);
+  color: var(--sy-ink);
+  display: grid; place-items: center;
+  font-size: 12px; font-weight: 700;
+}
+.sy-e-comment-name { font-size: 13px; font-weight: 700; color: var(--sy-ink); }
+.sy-e-comment-when { font-size: 12px; color: var(--sy-ink-3); }
+.sy-e-comment-more {
+  margin-left: auto;
+  background: none; border: 0; padding: 4px;
+  color: var(--sy-ink-3);
+  cursor: pointer;
+}
+.sy-e-comment-body {
+  margin: 0 0 6px 34px;
+  font-size: 14px; line-height: 1.55;
+  color: var(--sy-ink);
+}
+.sy-e-comment-acts {
+  display: flex; align-items: center; gap: 12px;
+  margin-left: 34px;
+}
+.sy-e-comment-act {
+  background: none; border: 0; padding: 0;
+  font-size: 13px; color: var(--sy-ink-3);
+  cursor: pointer;
+}
+.sy-e-comment-act.liked { color: #E0654A; font-weight: 700; }
+
+.sy-e-reply-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin-bottom: 8px;
+}
+.sy-e-reply-chip button {
+  background: none; border: 0; padding: 0 0 0 2px;
+  color: var(--sy-green);
+  font-size: 15px; line-height: 1; cursor: pointer;
+}
+
+.sy-e-comment-bar {
+  position: sticky; bottom: 0;
+  margin: 18px -20px 0;
+  padding: 10px 20px calc(10px + env(safe-area-inset-bottom, 0px));
+  background: var(--sy-bg);
+}
+.sy-e-comment-bar-row {
+  display: flex; align-items: center; gap: 10px;
+  height: 48px; padding: 0 8px 0 16px;
+  border-radius: 999px;
+  background: var(--sy-surface);
+  border: 1px solid var(--sy-line);
+}
+.sy-e-comment-input {
+  flex: 1; border: 0; background: none;
+  font-size: 14px; color: var(--sy-ink);
+  font-family: var(--sy-font);
+}
+.sy-e-comment-input::placeholder { color: var(--sy-ink-3); }
+.sy-e-comment-send {
+  width: 34px; height: 34px; flex-shrink: 0;
+  display: grid; place-items: center;
+  border: 0; border-radius: 50%;
+  background: var(--sy-green); color: #fff;
+  cursor: pointer;
+}
+.sy-e-comment-send:disabled { opacity: .5; }
+
+/* ── 글쓰기 화면 ─────────────────────────────────────────────────────── */
+.sy-e-field { margin: 18px 0 0; }
+.sy-e-label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px; font-weight: 700;
+  color: var(--sy-ink);
+}
+.sy-e-select-wrap { position: relative; }
+.sy-e-select {
+  width: 100%; height: 54px;
+  padding: 0 40px 0 16px;
+  border-radius: 14px;
+  border: 1px solid var(--sy-line);
+  background: var(--sy-surface);
+  color: var(--sy-ink);
+  font-family: var(--sy-font);
+  font-size: 15px; font-weight: 600;
+  appearance: none; -webkit-appearance: none;
+}
+.sy-e-select-arrow {
+  position: absolute; right: 14px; top: 50%;
+  transform: translateY(-50%);
+  color: var(--sy-ink-3);
+  pointer-events: none;
+}
+.sy-e-input {
+  width: 100%; height: 54px;
+  padding: 0 16px;
+  border-radius: 14px;
+  border: 1px solid var(--sy-line);
+  background: var(--sy-surface);
+  color: var(--sy-ink);
+  font-family: var(--sy-font);
+  font-size: 15px;
+}
+.sy-e-input::placeholder { color: var(--sy-ink-3); }
+.sy-e-textarea {
+  width: 100%; min-height: 168px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid var(--sy-line);
+  background: var(--sy-surface);
+  color: var(--sy-ink);
+  font-family: var(--sy-font);
+  font-size: 15px; line-height: 1.6;
+  resize: vertical;
+}
+.sy-e-textarea::placeholder { color: var(--sy-ink-3); }
+.sy-e-notice {
+  display: flex; align-items: center; gap: 10px;
+  margin-top: 16px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: #EAF1EC;
+  color: var(--sy-ink-2);
+  font-size: 13px; font-weight: 600;
+  line-height: 1.4;
+}
+.sy-e-notice svg { flex-shrink: 0; color: var(--sy-green); }
+.sy-e-write-err {
+  margin: 10px 2px 0;
+  font-size: 13px; font-weight: 600;
+  color: #D0453A;
+}
+.sy-e-submit {
+  margin-top: 24px;
+}
+.sy-e-write .sy-top-action:disabled,
+.sy-e-write .sy-btn:disabled {
+  opacity: .45;
+  cursor: default;
+}

@@ -1,7 +1,7 @@
 {
-  "name": "검고담임 - 검정고시 대학 입시 도우미",
+  "name": "검고담임 - 대학까지, 혼자여도 차근차근",
   "short_name": "검고담임",
-  "description": "학교 밖 청소년을 위한 검정고시 대학 입시 도우미. 합격선·지원자격을 원문 그대로.",
+  "description": "학교 밖 청소년이 가까운 꿈드림센터를 찾고, 선생님께 쪽지로 물어보고, 진학까지 준비하는 앱.",
   "lang": "ko",
   "dir": "ltr",
   "start_url": "/",
@@ -9,7 +9,7 @@
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#F1F5F9",
-  "theme_color": "#2E8BD0",
+  "theme_color": "#F8F7F3",
   "categories": ["education"],
   "icons": [
     { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },

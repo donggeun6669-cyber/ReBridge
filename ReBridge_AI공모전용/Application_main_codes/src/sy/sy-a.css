@@ -1,0 +1,352 @@
+/* =====================================================================
+   묶음 A — 온보딩 · 홈 · 나의 대입 로드맵 (서연 UI 시안 2026-09-28)
+   시안 PNG(390×844)를 PIL 로 재서 맞춘 값. 맨 위 상태바(약 44px)는 구현하지 않아 그만큼 올라가 있다.
+   ===================================================================== */
+
+/* ── 공통 조각 ───────────────────────────────────────────────────────── */
+.sy-a-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  height: 24px; padding: 0 10px;
+  border-radius: 999px;
+  font-size: 12px; font-weight: 700; letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+.sy-a-pill.green { background: #E8F0EE; color: var(--sy-green); }
+.sy-a-pill.green.soft { background: #E7F0EB; }
+.sy-a-pill.neutral { background: var(--sy-neutral); color: #7A746B; height: 25px; }
+.sy-a-pill.dark { background: var(--sy-green); color: #fff; }
+
+.sy-a-sec {
+  margin: 0;
+  font-size: 18px; font-weight: 800; color: var(--sy-ink); letter-spacing: -0.03em;
+}
+
+.sy-a-badge {
+  flex-shrink: 0;
+  display: inline-flex; align-items: center;
+  height: 25px; padding: 0 10px;
+  border-radius: 999px;
+  font-size: 12px; font-weight: 700;
+}
+.sy-a-badge.green { background: #E7F0EB; color: var(--sy-green); }
+.sy-a-badge.peach { background: #FDDED0; color: var(--sy-green); }
+.sy-a-badge.neutral { background: #F2F0EB; color: var(--sy-ink-2); }
+
+/* ── 온보딩 첫 화면 ──────────────────────────────────────────────────── */
+.sy-a-onb {
+  display: flex; flex-direction: column;
+  min-height: 100%;
+  padding: 0 24px 30px;
+}
+.sy-a-onb-card {
+  position: relative;
+  flex-shrink: 0;
+  width: 210px; height: 255px;
+  margin: 90px auto 0;
+  background: var(--sy-surface);
+  border: 1px solid #E5E1D8;
+  border-radius: 22px;
+}
+.sy-a-onb-chip {
+  position: absolute; left: 19px; top: 21px;
+  display: inline-flex; align-items: center;
+  height: 22px; padding: 0 9px;
+  border-radius: 999px;
+  background: #E8F0ED; color: var(--sy-green);
+  font-size: 11.5px; font-weight: 700;
+}
+/* 큰 원 — 바깥 옅은 고리(96) + 안쪽 원(54) = 로고 자리 */
+.sy-a-onb-ring {
+  position: absolute; left: 93px; top: 19px;
+  width: 96px; height: 96px;
+  border-radius: 50%;
+  border: 13px solid #E8EEEB;
+  display: grid; place-items: center;
+  box-sizing: border-box;
+}
+.sy-a-onb-logo {
+  width: 54px; height: 54px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--sy-green);
+  display: block;
+}
+.sy-a-onb-list {
+  position: absolute; left: 19px; top: 133px;
+  margin: 0; padding: 0; list-style: none;
+  display: flex; flex-direction: column; gap: 18px;
+}
+.sy-a-onb-list li {
+  display: flex; align-items: center; gap: 10px;
+  height: 22px;
+  font-size: 13px; font-weight: 700; color: var(--sy-ink);
+}
+.sy-a-onb-list i {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: #D8E2DD; flex-shrink: 0;
+}
+.sy-a-onb-list i.on { background: var(--sy-green); }
+.sy-a-onb-title {
+  margin: 176px 0 0;
+  font-size: 24px; font-weight: 800; line-height: 30px; letter-spacing: -0.03em;
+  color: var(--sy-ink);
+}
+.sy-a-onb-sub {
+  margin: 10px 0 0;
+  font-size: 14px; color: var(--sy-ink-2);
+}
+.sy-a-onb-foot { margin-top: auto; padding-top: 24px; }
+.sy-a-onb-btn { height: 54px; border-radius: 16px; font-size: 15px; }
+
+/* ── 온보딩 질문(시안 없음 — 공통 모양) ─────────────────────────────── */
+.sy-a-q-dots { display: flex; gap: 6px; margin: 4px 0 22px; }
+.sy-a-q-dots span { flex: 1; height: 4px; border-radius: 2px; background: var(--sy-line); }
+.sy-a-q-dots span.on { background: var(--sy-green); }
+.sy-a-q-title { margin: 0; font-size: 24px; font-weight: 800; line-height: 32px; letter-spacing: -0.03em; }
+.sy-a-q-sub { margin: 10px 0 22px; font-size: 14px; line-height: 1.5; color: var(--sy-ink-2); }
+.sy-a-q-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.sy-a-q-grid.three { grid-template-columns: repeat(3, 1fr); }
+.sy-a-q-opt {
+  height: 50px;
+  border: 1px solid var(--sy-line); border-radius: 14px;
+  background: var(--sy-surface); color: var(--sy-ink);
+  font-size: 15px; font-weight: 700; cursor: pointer;
+}
+.sy-a-q-opt.on { background: var(--sy-green); border-color: var(--sy-green); color: #fff; }
+.sy-a-q-cards { display: flex; flex-direction: column; gap: 10px; }
+.sy-a-q-card {
+  display: flex; flex-direction: column; gap: 4px; align-items: flex-start;
+  padding: 18px;
+  border: 1px solid var(--sy-line); border-radius: var(--sy-radius);
+  background: var(--sy-surface); text-align: left; cursor: pointer;
+}
+.sy-a-q-card b { font-size: 16px; color: var(--sy-ink); }
+.sy-a-q-card span { font-size: 13px; color: var(--sy-ink-2); }
+.sy-a-q-skip {
+  display: block; margin: 18px auto 0;
+  background: none; border: 0; padding: 8px;
+  font-size: 13px; color: var(--sy-ink-2); text-decoration: underline; cursor: pointer;
+}
+
+/* ── 홈 ──────────────────────────────────────────────────────────────── */
+.sy-a-home { padding-bottom: 24px; }
+.sy-a-home-top {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  padding-top: 12px;
+  min-height: 52px;
+}
+.sy-a-home-title {
+  margin: 0; padding-top: 5px;
+  font-size: 22px; font-weight: 800; letter-spacing: -0.04em; color: var(--sy-ink);
+  line-height: 30px;
+}
+.sy-a-home-place { margin: 0; font-size: 12px; font-weight: 700; color: var(--sy-ink); line-height: 14px; }
+.sy-a-home-top:has(.sy-a-home-place) .sy-a-home-title { padding-top: 0; line-height: 28px; }
+.sy-a-bell {
+  width: 40px; height: 40px;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  border: 1px solid var(--sy-line);
+  background: var(--sy-surface); color: var(--sy-ink);
+  cursor: pointer;
+}
+
+.sy-a-quick {
+  display: flex; justify-content: space-between;
+  margin: 16px 0 13px;
+}
+.sy-a-quick.tight { margin-top: 14px; }
+.sy-a-quick-item {
+  width: 72px;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  background: none; border: 0; padding: 0; cursor: pointer;
+}
+.sy-a-quick-box {
+  width: 52px; height: 52px;
+  display: grid; place-items: center;
+  border-radius: 16px;
+}
+.sy-a-quick-box.green { background: #E8F2F0; color: var(--sy-green); }
+.sy-a-quick-box.blue { background: #EEF0F8; color: #3D5A8A; }
+.sy-a-quick-box.purple { background: #F3EEF8; color: #7C6098; }
+.sy-a-quick-box.peach { background: #FDF0E8; color: #8A5C30; }
+.sy-a-quick-label { font-size: 12px; font-weight: 700; color: var(--sy-ink); white-space: nowrap; }
+
+/* 로드맵 카드 */
+.sy-a-rcard {
+  padding: 18px 17px 17px;
+  background: var(--sy-surface);
+  border: 1px solid var(--sy-line);
+  border-radius: 20px;
+}
+.sy-a-rcard-head { display: flex; justify-content: space-between; align-items: center; min-height: 25px; }
+.sy-a-rcard-set {
+  width: 28px; height: 25px; margin-right: -4px;
+  display: grid; place-items: center;
+  background: none; border: 0; padding: 0; color: var(--sy-green); cursor: pointer;
+}
+.sy-a-rcard-title {
+  margin: 10px 0 0;
+  font-size: 22px; font-weight: 800; letter-spacing: -0.04em; color: var(--sy-ink); line-height: 30px;
+}
+.sy-a-rcard-sub { margin: 12px 0 0; font-size: 13px; color: var(--sy-ink-2); line-height: 18px; }
+.sy-a-bar {
+  display: flex; gap: 6px;
+  margin: 9px 0 0; padding: 0; list-style: none;
+}
+.sy-a-bar li { flex: 1; min-width: 0; }
+.sy-a-bar i { display: block; height: 6px; border-radius: 3px; background: var(--sy-line); }
+.sy-a-bar li.on i { background: #F8BCA2; }
+.sy-a-bar span {
+  display: block; margin-top: 6px;
+  font-size: 11px; font-weight: 500; color: var(--sy-ink-2); white-space: nowrap;
+}
+.sy-a-bar li.cur span { font-weight: 700; color: var(--sy-ink); }
+.sy-a-rcard-btn { margin-top: 11px; height: 54px; border-radius: 14px; font-size: 15px; }
+
+/* 처음 상태 — 초록 배너 + 담임에게 물어보기 */
+.sy-a-banner {
+  width: 100%;
+  display: flex; align-items: center; gap: 14px;
+  margin-top: 16px;
+  height: 84px; padding: 0 20px 0 18px;
+  border: 0; border-radius: 18px;
+  background: var(--sy-green); color: #fff;
+  text-align: left; cursor: pointer;
+}
+.sy-a-banner-ico {
+  width: 48px; height: 48px; flex-shrink: 0;
+  display: grid; place-items: center;
+  border-radius: 12px; background: #fff; color: var(--sy-green);
+}
+.sy-a-banner-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.sy-a-banner-text b { font-size: 16px; font-weight: 800; letter-spacing: -0.03em; }
+.sy-a-banner-text span { font-size: 12px; color: rgba(255, 255, 255, 0.85); }
+
+.sy-a-ask {
+  width: 100%;
+  display: flex; align-items: center; gap: 12px;
+  margin-top: 22px; padding: 0;
+  background: none; border: 0; text-align: left; cursor: pointer;
+  color: var(--sy-ink-2);
+}
+.sy-a-ask-ico {
+  width: 38px; height: 38px; flex-shrink: 0;
+  display: grid; place-items: center;
+  border-radius: 12px; background: #E8F2F0; color: var(--sy-green);
+}
+.sy-a-ask-text { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.sy-a-ask-text b { font-size: 14px; font-weight: 800; color: var(--sy-ink); }
+.sy-a-ask-text span { font-size: 12px; color: var(--sy-ink-2); }
+
+/* 정보 입력 후 — 지금 챙기면 좋아요 */
+.sy-a-home .sy-a-sec { margin: 18px 0 11px; }
+.sy-a-list { overflow: hidden; border-radius: 18px; }
+.sy-a-list + .sy-a-list { margin-top: 16px; }
+.sy-a-row {
+  width: 100%;
+  display: flex; align-items: center; gap: 12px;
+  height: 81px; padding: 0 18px;
+  background: none; border: 0; text-align: left; cursor: pointer;
+  color: var(--sy-ink-2);
+  position: relative;
+}
+.sy-a-row.tall { height: 87px; }
+.sy-a-row + .sy-a-row::before {
+  content: ''; position: absolute; left: 18px; right: 18px; top: 0;
+  height: 1px; background: var(--sy-line);
+}
+.sy-a-row-ico {
+  width: 38px; height: 38px; flex-shrink: 0;
+  display: grid; place-items: center;
+  border-radius: 10px; background: var(--sy-neutral); color: var(--sy-green);
+}
+.sy-a-row-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.sy-a-row-text b { font-size: 14px; font-weight: 800; color: var(--sy-ink); }
+.sy-a-row-text span { font-size: 12px; color: var(--sy-ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ── 나의 대입 로드맵 ─────────────────────────────────────────────────── */
+.sy-a-rm-hero {
+  margin-top: 4px;
+  padding: 18px 17px 15px;
+  background: var(--sy-green-tint);
+  border: 1px solid #DCE5E1;
+  border-radius: 20px;
+}
+.sy-a-rm-hero.on { background: #EAF4F2; border-color: #D8E1DD; padding-bottom: 14px; }
+.sy-a-rm-hero-head { display: flex; justify-content: space-between; align-items: center; }
+.sy-a-rm-place { font-size: 12px; font-weight: 800; color: var(--sy-ink); }
+.sy-a-rm-hero-title {
+  margin: 13px 0 0;
+  font-size: 22px; font-weight: 800; letter-spacing: -0.04em; line-height: 30px; color: var(--sy-ink);
+}
+.sy-a-rm-hero-sub { margin: 8px 0 0; font-size: 13px; color: var(--sy-ink-2); line-height: 18px; }
+.sy-a-rm-hero-btn { margin-top: 13px; height: 54px; border-radius: 14px; font-size: 15px; }
+
+.sy-a-rm > .sy-a-sec { margin: 22px 0 16px; }
+
+.sy-a-tl {
+  margin: 0; padding: 18px 18px 14px; list-style: none;
+  border-radius: 18px;
+}
+.sy-a-tl.gap { margin-top: 16px; padding-top: 15px; padding-bottom: 12px; }
+.sy-a-tl-step { position: relative; }
+.sy-a-tl-step:not(.last)::after {
+  content: ''; position: absolute; left: 12px; top: 26px;
+  width: 2px; height: 54px; background: #D8D2CB;
+}
+.sy-a-tl.gap .sy-a-tl-step:not(.last)::after { background: #D8E1DD; }
+.sy-a-tl-btn {
+  width: 100%;
+  display: flex; align-items: flex-start; gap: 15px;
+  min-height: 92px; padding: 0;
+  background: none; border: 0; text-align: left; cursor: pointer;
+  color: inherit;
+}
+.sy-a-tl-step.last .sy-a-tl-btn { min-height: 44px; }
+.sy-a-tl-btn:disabled { cursor: default; }
+.sy-a-tl-dot {
+  width: 26px; height: 26px; flex-shrink: 0;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  box-sizing: border-box;
+}
+.is-done .sy-a-tl-dot { background: var(--sy-green); color: #fff; }
+.is-current .sy-a-tl-dot { background: var(--sy-peach); color: #fff; }
+.is-next .sy-a-tl-dot { background: #fff; border: 1px solid #D8D2CB; }
+.sy-a-tl.gap .is-next .sy-a-tl-dot { border-color: #D8E1DD; }
+.is-next .sy-a-tl-dot i {
+  width: 14px; height: 14px; border-radius: 50%;
+  border: 2.5px solid var(--sy-green); box-sizing: border-box;
+}
+.sy-a-tl-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 9px; padding-top: 3px; }
+.sy-a-tl-text b { font-size: 15px; font-weight: 800; color: var(--sy-ink); line-height: 20px; }
+.sy-a-tl-text span { font-size: 12px; color: var(--sy-ink-2); line-height: 16px; }
+
+.sy-a-docs { margin-top: 13px; scroll-margin-top: 64px; }
+.sy-a-docs-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.sy-a-more {
+  background: none; border: 0; padding: 4px 0;
+  font-size: 14px; font-weight: 700; color: #C26B38; cursor: pointer;
+}
+.sy-a-docs-card { padding: 2px 16px 8px; border-radius: 18px; }
+.sy-a-docs-hr { border: 0; height: 1px; background: var(--sy-line); margin: 0 0 7px; }
+.sy-a-doc {
+  width: 100%;
+  display: flex; align-items: center; gap: 12px;
+  min-height: 36px; padding: 0;
+  background: none; border: 0; text-align: left; cursor: pointer;
+}
+.sy-a-doc.on { min-height: 50px; }
+.sy-a-doc-box {
+  width: 24px; height: 24px; flex-shrink: 0;
+  display: grid; place-items: center;
+  border-radius: 6px;
+  border: 1px solid #D8E1DD; background: #fff; color: #6F756D;
+  box-sizing: border-box;
+}
+.sy-a-doc.on .sy-a-doc-box { background: var(--sy-peach); border-color: var(--sy-peach); color: #fff; }
+.sy-a-doc-title { flex: 1; min-width: 0; font-size: 14px; font-weight: 700; color: var(--sy-ink); }
+.sy-a-doc.on .sy-a-doc-title { color: #6F756D; }
+.sy-a-doc-state { font-size: 12px; color: #6F756D; flex-shrink: 0; }
+.sy-a-doc.on .sy-a-doc-state { font-weight: 800; color: var(--sy-ink); }
