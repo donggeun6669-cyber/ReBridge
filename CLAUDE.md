@@ -70,7 +70,15 @@ npm run verify         # 배포 캐시 우회 검증 (node verify-deploy.mjs)
 - 배지 3종: 🎖️ 학교밖 인증 · 🧑‍🏫 꿈드림 선생님 · 🎓 합격 멘토 (`youthVerify.js`의 `BADGES`, 코드에 role). 시연 코드 DREAM-TEST · TEACHER-DEMO · MENTOR-DEMO.
 - 시연용 예시 글(`communityStore.js`, `demo: true`)은 가상 닉네임·가상 센터(○○구)다. **실존 센터 이름으로 후기를 지어내지 말 것.** 답변 내용은 `data/gedGuide.js`·`glossary.js`에 있는 사실만 쓴다.
 
-## ⚠️ 홈 · 로드맵 · 입구 한 곳 원칙 (2026-09-18 동근님)
+## ⚠️ 화면 = 서연 UI 시안 (2026-09-28 동근님)
+
+- 화면 모양의 기준은 `ReBridge_AI공모전용/Planning/서연_UI시안_2026-09-28/`의 Figma 시안 PNG 27장(390×844)이다. **시안을 바꾸지 않는다.** 기능과 시안이 부딪히면 시안이 우선, 기능은 있는데 들어갈 자리가 없으면 보류하고 동근님께 보고.
+- 코드: `src/sy/` (공통 `sy.css`·`SyTop`·`SyTabBar`·`SySplash`, 화면 `Sy*.jsx`, 묶음별 `sy-a~f.css`). `App.jsx`의 `SY_SCREENS`가 화면 id를 `Sy*.jsx`로 연결한다. 시안이 없는 화면(쪽지함·센터 상세·프로필 수정·약관·커뮤니티 로그인 등)은 예전 `src/components/` 화면이 그대로 뜬다.
+- **하단 탭 5개가 있다**: 홈 · 꿈드림 · 진학지원 · 커뮤니티 · 마이 (`TAB_ROOTS`). 탭 첫 화면으로 goTo 하면 스택이 비워진다. 아래 '입구 한 곳'·'하단 탭 없음' 규칙은 이 시안으로 대체됐다.
+- 앱 이름은 **검고담임**. 온보딩 카드의 원 안 캐릭터는 `public/sy-logo.png`.
+- 개발 모드에서 주소 뒤 `#go=화면id&키=값`으로 화면을 바로 연다.
+
+## (지난 규칙) 홈 · 로드맵 · 입구 한 곳 원칙 (2026-09-18 동근님) — 2026-09-28 서연 UI로 대체
 
 - 홈(`JourneyHome.jsx`) = 로드맵 카드 1개 + 큰 3D 아이콘 3개(커뮤니티 · 담임에게 물어보기 · 꿈드림센터) + 우측 상단 MY. 바탕 회백색 `#F7F8FA`, 포인트 노랑(지금 단계·D-day)·파랑(버튼·완료).
 - 로드맵(`RoadmapScreen.jsx`, `lib/roadmap.js`의 `gradeRoadmap`)은 **학년별**. 4단계 검정고시(`ged-guide`) · 내 점수(`results`) · 대학 찾기(`univ-explore`) · 원서·서류(화면 안)의 **입구는 로드맵 한 곳**. 관심 대학(`saved`)은 MY.
@@ -113,13 +121,13 @@ npm run verify         # 배포 캐시 우회 검증 (node verify-deploy.mjs)
 ## 아키텍처
 
 - **React 18 + Vite 6**, JS/JSX (TypeScript 아님, `"type":"module"`).
-- **커스텀 라우터** — react-router 아님. `src/App.jsx`가 `{screen, params}` 스택을 들고 `goTo()`/`goBack()`을 모든 화면에 prop으로 넘긴다. 새 화면은 `KNOWN_SCREENS`에 등록해야 함. `goTo('home')`만 스택을 비운다(하단 탭이 없어서 나머지는 전부 뒤로가기로 나온다 — 새 화면엔 뒤로 버튼 필수). 안 하면 "준비 중" placeholder.
+- **커스텀 라우터** — react-router 아님. `src/App.jsx`가 `{screen, params}` 스택을 들고 `goTo()`/`goBack()`을 모든 화면에 prop으로 넘긴다. 새 화면은 `KNOWN_SCREENS`에 등록해야 함. 탭 첫 화면(`home` `centers` `univ-home` `community` `mypage`)으로 goTo 하면 스택을 비운다. 나머지 화면엔 뒤로 버튼 필수. 안 하면 "준비 중" placeholder.
 - **페르소나 기반 UI** (`src/lib/persona.js`) — `{stage, goal}`에 따라 노출 기능이 달라짐. 상태는 localStorage `rebridge_profile`. 모든 사용자에게 모든 기능을 한꺼번에 보여주지 않는 게 원칙.
 - **트랙 3개** (v1에서는 `univ` 하나만 노출 — 위 절 참고) — 홈에서 고른 길(`activeTrack`)에 따라 `TrackHome`이 다른 대시보드를 그린다.
   `study`(검정고시) · `univ`(대입) · `job`(일·진로). 카드·문구·바로가기는 전부
   `src/components/TrackHome.jsx` 위쪽 `TRACK_DATA` 한 곳에 있다.
-  **하단 탭은 없다** (2026-09-17 동근님). 마이페이지는 홈 우측 상단 아이콘.
-- **같은 기능은 한 화면에만** (2026-09-17 동근님). 합친 화면과, 예전 이름으로 와도 열리게 남긴 별칭:
+  하단 탭 5개가 있다(2026-09-26 되살림, 2026-09-28 서연 UI). 마이페이지는 '마이' 탭.
+- **같은 기능은 한 화면에만** (2026-09-17 동근님. 화면 구성은 2026-09-28부터 서연 UI 시안이 우선). 합친 화면과, 예전 이름으로 와도 열리게 남긴 별칭:
   | 화면 | 합친 것 | 별칭(screen 이름) |
   |---|---|---|
   | `RoadmapScreen` "지금 시기에 할 일" | 내 로드맵 + 서류 체크리스트(`ChecklistSection`) | `checklist` → 서류 구역으로 스크롤 |

@@ -29,7 +29,7 @@ export default function SySaved({ goTo = () => {}, goBack = () => {} }) {
 
       {items.length === 0 ? (
         <div className="sy-f-sv-empty">
-          <span className="sy-f-sv-empty-ico"><Heart size={34} /></span>
+          <span className="sy-f-sv-empty-ico"><Heart size={30} strokeWidth={2} /></span>
           <h2 className="sy-f-sv-empty-title">아직 담은 대학이 없어요</h2>
           <p className="sy-f-sv-empty-sub">비교하고 싶은 대학을 관심 목록에 담아봐요.</p>
           <button type="button" className="sy-btn sy-f-sv-empty-btn" onClick={() => goTo('univ-explore')}>
