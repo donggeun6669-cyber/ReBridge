@@ -73,7 +73,7 @@
   // ── 미리 불러오기: 글꼴·이미지를 다 받은 뒤에 시작해 타이밍이 밀리지 않게 ──
   async function preload(urls) {
     const fontLoads = [400, 500, 600, 700, 800, 900].map((w) =>
-      document.fonts.load(`${w} 40px "Wanted Sans Variable"`, '검고담임 대학 0123'));
+      document.fonts.load(`${w} 40px "Pretendard Variable"`, '검고담임 대학 0123'));
     const imgLoads = urls.map((u) => new Promise((res) => {
       const im = new Image();
       im.onload = () => (im.decode ? im.decode().catch(() => {}) : Promise.resolve()).then(() => res({ u, ok: true }));
@@ -85,7 +85,7 @@
     await document.fonts.ready;
     const imgs = await Promise.all(imgLoads);
     const failed = imgs.filter((r) => !r.ok).map((r) => r.u);
-    const fontOk = document.fonts.check('800 40px "Wanted Sans Variable"', '검고담임');
+    const fontOk = document.fonts.check('800 40px "Pretendard Variable"', '검고담임');
     return { failed, fontOk, images: imgs.length };
   }
 
@@ -111,7 +111,7 @@
 
     const status = await preload(assets);
     if (status.failed.length) console.error('[광고] 이미지를 못 불러옴:', status.failed);
-    if (!status.fontOk) console.error('[광고] 글꼴(Wanted Sans)을 못 불러옴');
+    if (!status.fontOk) console.error('[광고] 글꼴(Pretendard)을 못 불러옴');
     build(stage);
 
     let t = startT, playing = false, loop = true, last = 0, raf = 0;

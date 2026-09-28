@@ -1,0 +1,7 @@
+Pretendard Variable
+Copyright (c) 2021, Kil Hyung-jin (https://github.com/orioncactus/pretendard),
+with Reserved Font Name Pretendard.
+
+This Font Software is licensed under the SIL Open Font License, Version 1.1.
+http://scripts.sil.org/OFL
+(앱이 쓰는 npm 패키지 pretendard 1.3.9 의 PretendardVariable.woff2 를 그대로 담음)

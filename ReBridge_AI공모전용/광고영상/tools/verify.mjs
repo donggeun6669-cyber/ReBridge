@@ -46,7 +46,7 @@ const frames = (page, n = 2) => page.evaluate((n) => new Promise((r) => { let i 
   const st = await page.evaluate(() => window.AD.status);
   ok('글꼴·이미지 불러오기', st.fontOk && st.failed.length === 0, `이미지 ${st.images}개, 실패 ${st.failed.length}개, 글꼴 ${st.fontOk ? '정상' : '실패'}`);
   const fontName = await page.evaluate(() => getComputedStyle(document.querySelector('.cl-line')).fontFamily);
-  ok('광고 글꼴이 Wanted Sans', /Wanted Sans/.test(fontName), fontName.split(',')[0]);
+  ok('광고 글꼴이 Pretendard', /Pretendard/.test(fontName), fontName.split(',')[0]);
 
   await page.waitForTimeout(1500);
   const t1 = await page.evaluate(() => window.AD.time);
