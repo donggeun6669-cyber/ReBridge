@@ -1,0 +1,364 @@
+/* =====================================================================
+   서연 UI 묶음 C — 진학지원 (허브 · 내 점수 · 나와 맞는 대학 · 대학 찾기)
+   2026-09-28 시안(390×844)을 PIL 로 재서 맞춘 값. 모든 클래스는 sy-c- 접두사.
+   ===================================================================== */
+
+/* ── 공통 제목 ───────────────────────────────────────────────────────── */
+.sy-c-hero {
+  margin: 3px 0 0;
+  font-size: 24px; line-height: 32px; font-weight: 800;
+  color: var(--sy-ink);
+  letter-spacing: -0.03em;
+}
+.sy-c-lead {
+  margin: 8px 0 0;
+  font-size: 15px; line-height: 22px; font-weight: 500;
+  color: var(--sy-ink-2);
+}
+
+/* ── 허브: 네 칸 ─────────────────────────────────────────────────────── */
+.sy-c-tiles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 15px;
+  margin-top: 16px;
+}
+.sy-c-tile {
+  display: flex; flex-direction: column; align-items: flex-start;
+  height: 112px;
+  padding: 14px 14px 0;
+  background: var(--sy-surface);
+  border: 1px solid var(--sy-line);
+  border-radius: 16px;
+  text-align: left;
+  font-family: inherit;
+  color: var(--sy-ink);
+  cursor: pointer;
+}
+.sy-c-tile.main { background: var(--sy-green); border-color: var(--sy-green); color: #fff; }
+.sy-c-tile-ico {
+  width: 36px; height: 36px;
+  display: grid; place-items: center;
+  border-radius: 10px;
+  background: #F1F3F0; color: var(--sy-green);
+}
+.sy-c-tile.main .sy-c-tile-ico { background: rgba(255, 255, 255, 0.84); }
+.sy-c-tile-title { margin-top: 9px; font-size: 16px; line-height: 22px; font-weight: 800; letter-spacing: -0.03em; }
+.sy-c-tile-sub { margin-top: 4px; font-size: 11.5px; line-height: 16px; font-weight: 500; color: #95929D; }
+.sy-c-tile.main .sy-c-tile-sub { color: rgba(255, 255, 255, 0.82); }
+
+/* ── 허브: 아래 목록 카드 ───────────────────────────────────────────── */
+.sy-c-links {
+  margin-top: 17px;
+  padding: 4px 17px;
+  background: var(--sy-surface);
+  border: 1px solid var(--sy-line);
+  border-radius: 18px;
+  box-shadow: 0 10px 22px rgba(60, 50, 30, 0.05);
+}
+.sy-c-link {
+  display: flex; align-items: center; gap: 13px;
+  width: 100%; min-height: 78px;
+  padding: 0;
+  background: none; border: 0;
+  font-family: inherit; text-align: left;
+  cursor: pointer;
+}
+.sy-c-link + .sy-c-link { border-top: 1px solid var(--sy-line); }
+.sy-c-link-ico {
+  flex-shrink: 0;
+  width: 38px; height: 38px;
+  display: grid; place-items: center;
+  border-radius: 11px;
+  background: #F1F3F0; color: var(--sy-green);
+}
+.sy-c-link-main { flex: 1; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.sy-c-link-title { font-size: 15px; line-height: 21px; font-weight: 800; color: var(--sy-ink); }
+.sy-c-link-sub { font-size: 12px; line-height: 17px; font-weight: 500; color: #95929D; }
+.sy-c-link-end { flex-shrink: 0; color: var(--sy-ink-2); }
+
+/* ── 내 점수: 입력 칸 ────────────────────────────────────────────────── */
+.sy-c-label {
+  display: block;
+  margin-top: 16px;
+  font-size: 13px; line-height: 18px; font-weight: 800;
+  color: var(--sy-ink);
+}
+.sy-c-lead + .sy-c-label { margin-top: 16px; }
+.sy-c-field {
+  position: relative;
+  display: flex; align-items: center;
+  height: 50px;
+  margin-top: 6px;
+  padding: 0 14px;
+  background: var(--sy-surface);
+  border: 1px solid #E7E2D8;
+  border-radius: 14px;
+}
+.sy-c-input {
+  flex: 1; min-width: 0;
+  height: 100%;
+  border: 0; outline: 0; padding: 0;
+  background: none;
+  font-family: inherit; font-size: 15px; font-weight: 500;
+  color: var(--sy-ink);
+}
+.sy-c-unit { font-size: 14px; font-weight: 600; color: var(--sy-ink-2); }
+.sy-c-select-text { flex: 1; font-size: 15px; font-weight: 500; color: var(--sy-ink); }
+.sy-c-select-text.empty { color: #A7A49F; }
+.sy-c-select-caret { color: var(--sy-ink-2); }
+/* 네이티브 select 를 투명하게 덮어 모양은 시안, 동작은 기기 선택창 */
+.sy-c-select-native {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  opacity: 0;
+  border: 0;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+/* 섹션 제목 + 오른쪽 글자 버튼 */
+.sy-c-sec {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 15px;
+}
+.sy-c-sec-title { margin: 0; font-size: 20px; line-height: 28px; font-weight: 800; color: var(--sy-ink); letter-spacing: -0.03em; }
+.sy-c-sec-link {
+  background: none; border: 0; padding: 4px 0;
+  font-family: inherit; font-size: 13px; font-weight: 800;
+  color: var(--sy-orange);
+  cursor: pointer;
+}
+.sy-c-sec-link.green { color: var(--sy-green); }
+
+/* 수능 모의 등급 세 칸 */
+.sy-c-grades {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px;
+  margin-top: 14px;
+}
+.sy-c-grade {
+  position: relative;
+  display: grid; place-items: center;
+  height: 48px;
+  background: var(--sy-surface);
+  border: 1px solid #E7E2D8;
+  border-radius: 12px;
+  font-size: 14px; font-weight: 800;
+  color: var(--sy-ink);
+  cursor: pointer;
+}
+.sy-c-grade.off { opacity: 0.45; }
+
+/* 수능 볼 예정 아니에요 */
+.sy-c-check {
+  display: flex; align-items: center; gap: 12px;
+  width: 100%; height: 52px;
+  margin-top: 18px;
+  padding: 0 13px;
+  background: transparent;
+  border: 1px solid #D8E1DE;
+  border-radius: 14px;
+  font-family: inherit; font-size: 14px; font-weight: 800;
+  color: var(--sy-ink);
+  text-align: left;
+  cursor: pointer;
+}
+.sy-c-check-box {
+  width: 24px; height: 24px;
+  display: grid; place-items: center;
+  border: 2px solid var(--sy-green);
+  border-radius: 6px;
+  color: #fff;
+}
+.sy-c-check.on .sy-c-check-box { background: var(--sy-green); }
+.sy-c-foot {
+  margin: 18px 0 0;
+  font-size: 12px; line-height: 18px; font-weight: 500;
+  color: #95929D;
+}
+
+/* ── 나와 맞는 대학: 칩 ──────────────────────────────────────────────── */
+.sy-c-chips { display: flex; gap: 6px; margin-top: 2px; overflow-x: auto; scrollbar-width: none; }
+.sy-c-chips::-webkit-scrollbar { display: none; }
+.sy-c-chip {
+  flex-shrink: 0;
+  height: 30px; padding: 0 12px;
+  background: var(--sy-surface);
+  border: 1px solid #E5E1DA;
+  border-radius: 999px;
+  font-family: inherit; font-size: 13px; font-weight: 800;
+  color: var(--sy-ink);
+  cursor: pointer;
+}
+.sy-c-chip.on { background: var(--sy-peach); border-color: var(--sy-peach); color: #fff; }
+.sy-c-note {
+  margin: 12px 0 0;
+  font-size: 11.5px; line-height: 18px; font-weight: 500;
+  color: #95929D;
+}
+
+/* 결과 카드 */
+.sy-c-list {
+  margin-top: 10px;
+  padding: 0 14px;
+  background: var(--sy-surface);
+  border: 1px solid #E5E1DA;
+  border-radius: 18px;
+  box-shadow: 0 10px 22px rgba(60, 50, 30, 0.05);
+}
+.sy-c-row {
+  display: flex; flex-direction: column; gap: 5px;
+  width: 100%;
+  padding: 14px 0 13px;
+  background: none; border: 0;
+  font-family: inherit; text-align: left;
+  cursor: pointer;
+}
+.sy-c-row + .sy-c-row { border-top: 1px solid #E5E1DA; }
+.sy-c-row-line { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 22px; }
+.sy-c-row-name { font-size: 16px; line-height: 22px; font-weight: 800; color: var(--sy-ink); letter-spacing: -0.03em; }
+.sy-c-row-sub {
+  min-width: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-size: 12.5px; line-height: 18px; font-weight: 500;
+  color: var(--sy-ink-2);
+}
+
+/* 배지 */
+.sy-c-pill {
+  flex-shrink: 0;
+  display: inline-flex; align-items: center; gap: 4px;
+  height: 22px; padding: 0 9px 0 8px;
+  border-radius: 999px;
+  background: #FFF4E8;
+  font-size: 11.5px; font-weight: 800;
+  color: var(--sy-green);
+  white-space: nowrap;
+}
+.sy-c-pill.lv5 svg { color: #21835A; }
+.sy-c-pill.lv4 svg { color: var(--sy-green); }
+.sy-c-pill.lv3 svg { color: #A96713; }
+.sy-c-pill.lv2 svg { color: #C64B5C; }
+.sy-c-pill.lv1 svg { color: #687187; }
+.sy-c-pill.gray { background: #F3F1EC; color: #687187; }
+.sy-c-csat-ok {
+  flex-shrink: 0;
+  display: inline-flex; align-items: center; gap: 3px;
+  font-size: 11.5px; font-weight: 800;
+  color: #21835A;
+  white-space: nowrap;
+}
+
+/* 아래 '어려움' + 기준 안내 */
+.sy-c-legend { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 15px; }
+.sy-c-hard {
+  flex-shrink: 0;
+  display: inline-flex; align-items: center; gap: 5px;
+  height: 24px; padding: 0 9px 0 8px;
+  background: #F3F1EC;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-family: inherit; font-size: 11.5px; font-weight: 800;
+  color: #687187;
+  cursor: pointer;
+}
+.sy-c-hard.on { border-color: #687187; }
+.sy-c-legend-text { font-size: 11px; line-height: 16px; font-weight: 500; color: #95929D; text-align: right; }
+
+/* ── 나와 맞는 대학: 불러오는 중 · 빈 화면 ─────────────────────────── */
+.sy-c-center { display: flex; flex-direction: column; align-items: center; text-align: center; padding-top: 203px; }
+.sy-c-center.loading { padding-top: 207px; }
+.sy-c-center-title { margin: 17px 0 0; font-size: 22px; line-height: 30px; font-weight: 800; color: var(--sy-ink); letter-spacing: -0.03em; }
+.sy-c-center-sub { margin: 7px 0 0; font-size: 13.5px; line-height: 18px; font-weight: 500; color: #6B6B6B; }
+.sy-c-center.loading .sy-c-center-title { margin-top: 25px; }
+.sy-c-center.loading .sy-c-center-sub { margin-top: 5px; font-size: 14px; line-height: 20px; color: #918D87; }
+
+.sy-c-spinner { position: relative; width: 134px; height: 136px; }
+.sy-c-spinner-ring {
+  position: absolute; left: 0; top: 0;
+  width: 134px; height: 134px;
+  border-radius: 50%;
+  background: conic-gradient(var(--sy-peach) 0 38%, #D8D4CC 38% 100%);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 16px), #000 calc(100% - 15.5px));
+          mask: radial-gradient(farthest-side, transparent calc(100% - 16px), #000 calc(100% - 15.5px));
+  animation: sy-c-spin 1.4s linear infinite;
+}
+.sy-c-spinner-badge {
+  position: absolute; left: 3px; top: 5px;
+  width: 60px; height: 60px;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  background: #fff;
+  border: 1px solid #EAE6DC;
+  color: var(--sy-green);
+}
+@keyframes sy-c-spin { to { transform: rotate(360deg); } }
+.sy-c-progress {
+  width: 220px; height: 7px;
+  margin-top: 20px;
+  border-radius: 999px;
+  background: #E8E3DA;
+  overflow: hidden;
+}
+.sy-c-progress span {
+  display: block; height: 100%; width: 60%;
+  border-radius: 999px;
+  background: var(--sy-peach);
+  animation: sy-c-fill 1.2s ease-out both;
+}
+@keyframes sy-c-fill { from { width: 15%; } to { width: 60%; } }
+
+.sy-c-empty-ico {
+  width: 104px; height: 104px;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  background: #E7EFEA;
+}
+.sy-c-empty-ico span {
+  width: 76px; height: 76px;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  border: 2px solid var(--sy-green);
+  color: var(--sy-green);
+}
+.sy-c-empty-btn { width: 240px; margin-top: 19px; font-size: 15px; font-weight: 800; }
+
+/* ── 대학 찾기 ───────────────────────────────────────────────────────── */
+.sy-c-search {
+  display: flex; align-items: center; gap: 10px;
+  height: 48px;
+  margin-top: 3px;
+  padding: 0 15px;
+  background: var(--sy-surface);
+  border: 1px solid #DBD7D0;
+  border-radius: 14px;
+}
+.sy-c-search-ico { flex-shrink: 0; color: var(--sy-green); }
+.sy-c-search input {
+  flex: 1; min-width: 0; height: 100%;
+  border: 0; outline: 0; padding: 0; background: none;
+  font-family: inherit; font-size: 15px; font-weight: 500;
+  color: var(--sy-ink);
+}
+.sy-c-search input::placeholder { color: #A7A49F; }
+.sy-c-search + .sy-c-sec { margin-top: 13px; }
+.sy-c-filters {
+  margin-top: 12px;
+  padding: 6px 14px;
+  background: var(--sy-surface);
+  border: 1px solid #E6E2DA;
+  border-radius: 18px;
+  box-shadow: 0 10px 22px rgba(60, 50, 30, 0.04);
+}
+.sy-c-filter {
+  position: relative;
+  display: flex; align-items: center; gap: 6px;
+  height: 54px;
+  cursor: pointer;
+}
+.sy-c-filter-name { flex: 1; font-size: 13.5px; font-weight: 800; color: var(--sy-ink); }
+.sy-c-filter-val { font-size: 13px; font-weight: 700; color: #8A867F; }
+.sy-c-filter-val.on { color: var(--sy-ink); font-weight: 800; }
+.sy-c-filter-caret { color: #8A867F; }
+.sy-c-cta { margin-top: 16px; height: 52px; font-size: 15px; font-weight: 800; }
+.sy-c-cta:disabled { opacity: 0.5; cursor: default; }
