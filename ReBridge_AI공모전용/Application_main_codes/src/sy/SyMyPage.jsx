@@ -1,12 +1,28 @@
 // 마이페이지 — 시안: 마이페이지.png
 // 기능은 기존 lib/persona.js·lib/auth.js·lib/bookmarks.js 를 그대로 쓴다.
 import { useMemo } from 'react';
-import { Pencil, Heart, Bell, BookA, MapPin, ChevronRight, CheckCircle2, Navigation } from 'lucide-react';
+import { Pencil, Heart, Bell, BookA, MapPin, ChevronRight, CheckCircle2, Navigation, RotateCcw } from 'lucide-react';
 import { loadProfile, getPersona, gradeOption, getHomeRegion } from '../lib/persona.js';
 import { getCachedUser } from '../lib/auth.js';
 import { getBookmarks } from '../lib/bookmarks.js';
 import SyTop from './SyTop.jsx';
 import './sy-f.css';
+
+// 처음부터 다시 하기 — 이 기기에 저장된 앱 기록(rebridge_·rb_ 로 시작하는 값)을 지우고 새로 연다.
+// 처음 들어온 것처럼 스플래시 → 시작 질문부터 다시 뜬다. EXPO 시연에서 다음 사람에게 넘길 때 쓴다(2026-09-28 동근님).
+// 예전 MyV3Screen 의 '처음부터 다시 하기'와 같은 동작이다.
+function resetEverything() {
+  try {
+    const keys = [];
+    for (let i = 0; i < localStorage.length; i += 1) {
+      const k = localStorage.key(i);
+      if (k && (k.startsWith('rebridge_') || k.startsWith('rb_'))) keys.push(k);
+    }
+    keys.forEach((k) => localStorage.removeItem(k));
+    sessionStorage.removeItem('rb_track_picked');
+  } catch { /* 시크릿 창 등 — 무시하고 새로 연다 */ }
+  window.location.replace(window.location.pathname);
+}
 
 function Row({ Icon, title, sub, onClick }) {
   return (
@@ -82,6 +98,11 @@ export default function SyMyPage({ goTo = () => {} }) {
         </button>
         <button type="button" className="sy-f-mp-plain-row" onClick={() => goTo('terms')}>
           이용약관 <ChevronRight size={16} />
+        </button>
+        <button type="button" className="sy-f-mp-plain-row reset" onClick={() => {
+          if (window.confirm('이 기기에 저장된 정보(내 정보·쪽지·관심 대학·커뮤니티 글)를 모두 지우고 처음 화면부터 다시 시작할까요?')) resetEverything();
+        }}>
+          <span className="sy-f-mp-reset-label"><RotateCcw size={15} /> 처음부터 다시 하기</span>
         </button>
       </div>
     </div>

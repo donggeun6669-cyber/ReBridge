@@ -193,6 +193,10 @@
 }
 .sy-f-mp-plain-row svg { color: var(--sy-ink-3); }
 .sy-f-mp-plain-row:last-child { border-bottom: 0; }
+/* 처음부터 다시 하기 — 시안에 없는 줄(2026-09-28 동근님 요청). 목록 모양은 같게, 글자만 주황(위험 동작) */
+.sy-f-mp-plain-row.reset { color: var(--sy-orange); }
+.sy-f-mp-reset-label { display: inline-flex; align-items: center; gap: 6px; }
+.sy-f-mp-plain-row.reset svg { color: var(--sy-orange); }
 
 /* ── 알림 · 내 스크랩 ───────────────────────────────────────────────── */
 .sy-f-ns-tabs { display: flex; gap: 8px; margin: 6px 0 18px; }
