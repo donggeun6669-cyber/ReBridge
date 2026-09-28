@@ -8,7 +8,7 @@ import './sy-a.css';
 
 // 온보딩 — 서연 UI 시안 「온보딩」(2026-09-28)
 //   첫 화면(시안 그대로): 나의 로드맵 카드 + '대학까지 가는 길, 담임처럼 함께할게요' + 시작할게요
-//   카드 오른쪽 큰 원 안쪽 = 로고 자리 → /sy-logo.png 를 원형으로 잘라 넣었다(동근님 지시).
+//   카드 오른쪽 큰 원은 시안 그대로(진초록 원). 로고는 스플래시에만 넣는다(2026-09-28 동근님).
 //   '시작할게요' 다음은 기존 온보딩(OnboardingScreen)과 같은 질문: 학년 → 사는 지역 → 꿈드림 → 상황.
 //   (질문 화면은 시안이 없어 서연 UI 공통 모양으로만 그렸다.)
 //   끝나면 기존 온보딩과 같이 savePersona 후 getNav().landing(= 홈)으로 간다.
@@ -50,7 +50,7 @@ export default function SyOnboarding({ goTo = () => {}, goBack = () => {}, param
         <div className="sy-a-onb-card" aria-hidden="true">
           <span className="sy-a-onb-chip">나의 로드맵</span>
           <span className="sy-a-onb-ring">
-            <img className="sy-a-onb-logo" src="/sy-logo.png" alt="" />
+            <span className="sy-a-onb-logo" />
           </span>
           <ul className="sy-a-onb-list">
             <li><i className="on" />내 정보 준비</li>

@@ -55,7 +55,7 @@
   background: #E8F0ED; color: var(--sy-green);
   font-size: 11.5px; font-weight: 700;
 }
-/* 큰 원 — 바깥 옅은 고리(96) + 안쪽 원(54) = 로고 자리 */
+/* 큰 원 — 바깥 옅은 고리(96) + 안쪽 진초록 원(54), 시안 그대로 */
 .sy-a-onb-ring {
   position: absolute; left: 93px; top: 19px;
   width: 96px; height: 96px;
@@ -67,7 +67,6 @@
 .sy-a-onb-logo {
   width: 54px; height: 54px;
   border-radius: 50%;
-  object-fit: cover;
   background: var(--sy-green);
   display: block;
 }

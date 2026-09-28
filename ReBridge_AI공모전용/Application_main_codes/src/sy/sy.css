@@ -141,5 +141,7 @@
   background: var(--sy-bg);
   padding-top: 18px;
 }
+/* 로고 그림의 흰 바탕을 배경색에 녹이고(multiply), 글자 위치는 시안 그대로 두도록 높이만큼 위로 뺀다 */
+.sy-splash-logo { width: 132px; height: 132px; display: block; margin-top: -150px; mix-blend-mode: multiply; }
 .sy-splash-title { font-size: 30px; font-weight: 800; color: var(--sy-green); letter-spacing: -0.03em; }
 .sy-splash-sub { font-size: 13px; font-weight: 600; color: #6F6D78; letter-spacing: -0.02em; }
