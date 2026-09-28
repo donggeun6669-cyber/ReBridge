@@ -92,7 +92,7 @@ const RawDataScreen = /* #__PURE__ */ lazy(() => import('./components/RawDataScr
 const TAB_ROOTS = ['home', 'centers', 'univ-home', 'community', 'mypage'];
 const SCREEN_ALIAS = { dreamdrive: 'centers', support: 'centers' };
 // 탭바를 감추는 화면 — 입력에 집중하는 전체 화면들
-const NO_TABBAR = ['onboarding', 'thread', 'location-consent', 'community-write', 'community-post', 'community-auth', 'profile', 'data-raw', 'privacy', 'terms'];
+const NO_TABBAR = ['onboarding', 'thread', 'location-consent', 'community-write', 'community-auth', 'profile', 'data-raw', 'privacy', 'terms'];
 const COMMUNITY_ON = !isHiddenScreen('community');
 // KNOWN_SCREENS 밖이지만 '준비 중'으로 떨어뜨리면 안 되는 화면들
 const MAIN_SCREENS = ['home', 'centers', 'univ-home', 'mypage', 'community', 'profile', 'onboarding', ...Object.keys(SY_SCREENS)];
