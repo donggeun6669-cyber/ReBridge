@@ -29,7 +29,7 @@
 .onb-hello-logo { margin-bottom: var(--gap-lg); }
 .onb-hello-title {
   font-size: 34px;
-  font-weight: 700;
+  font-weight: 800;
   line-height: 1.3;
   letter-spacing: -0.8px;
   color: var(--text);
@@ -79,7 +79,7 @@
 /* ── 질문 공통 ── */
 .onb-q {
   font-size: 30px;
-  font-weight: 700;
+  font-weight: 800;
   line-height: 1.3;
   letter-spacing: -0.7px;
   color: var(--text);

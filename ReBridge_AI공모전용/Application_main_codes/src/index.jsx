@@ -4,12 +4,7 @@ import App from './App.jsx';
 // 폰트는 CDN이 아니라 번들에 넣는다 (2026-09).
 // jsdelivr가 막히거나 느린 환경에서 폰트가 통째로 안 뜨는 사고를 막으려는 것.
 // unicode-range로 쪼개져 있어 브라우저가 실제 쓰는 글자 조각만 받는다.
-// 2026-09-28 서연님 선택으로 Wanted Sans → IBM Plex Sans KR.
-// 이 서체는 700이 최대라 800을 쓰면 브라우저가 가짜 굵기를 그린다 — CSS에 800을 두지 말 것.
-import '@fontsource/ibm-plex-sans-kr/400.css';
-import '@fontsource/ibm-plex-sans-kr/500.css';
-import '@fontsource/ibm-plex-sans-kr/600.css';
-import '@fontsource/ibm-plex-sans-kr/700.css';
+import 'wanted-sans/fonts/webfonts/variable/split/WantedSansVariable.css';
 import './styles.css';
 
 createRoot(document.getElementById('root')).render(
