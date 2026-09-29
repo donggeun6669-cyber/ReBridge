@@ -164,7 +164,7 @@ function footer(s, n) {
 
   askBox(s, 5.0, [
     '이 자료는 답을 정해 두고 확인받는 자료가 아닙니다. 기능을 덜어내야 한다는 말씀도 그대로 반영하겠습니다.',
-    '실무자 선생님 의견과, 가능하다면 센터의 청소년이 직접 느낀 점을 함께 듣고 싶습니다.',
+    '현장에서 아이들을 만나 오신 선생님의 눈으로만 봐 주시면 됩니다. 아이들에게 따로 물어보실 필요는 없습니다.',
   ], 1.45);
   footer(s, 2);
 }
@@ -589,20 +589,20 @@ function footer(s, n) {
   pageTitle(s, '정리하면', '이것들을 여쭙고 싶습니다');
 
   const hw = (CW - 0.4) / 2;
+
   s.addShape(pres.ShapeType.roundRect, {
     x: M, y: 1.95, w: hw, h: 3.9, rectRadius: 0.1,
     fill: { color: WHITE }, line: { color: NAVY, width: 1.5 },
   });
-  s.addText('실무자 선생님께', {
+  s.addText('기능이 쓸모가 있는지', {
     x: M + 0.3, y: 2.15, w: hw - 0.6, h: 0.36, isTextBox: true, margin: 0,
     fontFace: F, fontSize: 16, bold: true, color: NAVY,
   });
   s.addText([
-    { text: '센터에서 아이들이 가장 자주 묻는 입시 질문은 무엇인가요?', options: { bullet: true, breakLine: true, paraSpaceAfter: 8 } },
-    { text: '이 앱을 센터에서 쓰신다면 어떤 방식일까요? 아이 혼자 보게 할지, 상담하며 같이 볼지.', options: { bullet: true, breakLine: true, paraSpaceAfter: 8 } },
-    { text: '쪽지 기능은 도움이 될까요, 부담이 될까요?', options: { bullet: true, breakLine: true, paraSpaceAfter: 8 } },
-    { text: '"확인 필요"가 많은 것이 신뢰를 얻을까요, 잃을까요?', options: { bullet: true, breakLine: true, paraSpaceAfter: 8 } },
-    { text: '센터 정보 222곳 중 틀린 곳이 있을까요?', options: { bullet: true } },
+    { text: '넣어 둔 기능 중 현장에서 실제로 쓰일 것 같은 것은 무엇인가요?', options: { bullet: true, breakLine: true, paraSpaceAfter: 8 } },
+    { text: '반대로 "이건 없어도 되겠다" 싶은 기능이 있나요?', options: { bullet: true, breakLine: true, paraSpaceAfter: 8 } },
+    { text: '아이들이 앱을 계속 쓰게 하려면 무엇이 더 있어야 할까요?', options: { bullet: true, breakLine: true, paraSpaceAfter: 8 } },
+    { text: '센터에서 아이들이 가장 자주 묻는 입시 질문은 무엇인가요?', options: { bullet: true } },
   ], {
     x: M + 0.3, y: 2.62, w: hw - 0.6, h: 3.0, isTextBox: true, margin: 0,
     fontFace: F, fontSize: 12.5, color: INK, lineSpacing: 19,
@@ -612,16 +612,15 @@ function footer(s, n) {
     x: M + hw + 0.4, y: 1.95, w: hw, h: 3.9, rectRadius: 0.1,
     fill: { color: WHITE }, line: { color: YELLOW, width: 1.5 },
   });
-  s.addText('청소년 친구들께', {
+  s.addText('현장에서 쓰인다면', {
     x: M + hw + 0.7, y: 2.15, w: hw - 0.6, h: 0.36, isTextBox: true, margin: 0,
     fontFace: F, fontSize: 16, bold: true, color: AMBER,
   });
   s.addText([
-    { text: '처음 켰을 때 뭘 해야 할지 알겠나요?', options: { bullet: true, breakLine: true, paraSpaceAfter: 8 } },
-    { text: '어떤 기능을 제일 먼저 눌러 보고 싶나요?', options: { bullet: true, breakLine: true, paraSpaceAfter: 8 } },
-    { text: '없어도 될 것 같은 기능이 있나요?', options: { bullet: true, breakLine: true, paraSpaceAfter: 8 } },
-    { text: '"이런 게 있으면 쓸 것 같다" 하는 게 있나요?', options: { bullet: true, breakLine: true, paraSpaceAfter: 8 } },
-    { text: '읽다가 무슨 말인지 모르겠던 단어가 있었나요?', options: { bullet: true } },
+    { text: '센터에서 쓰신다면 어떤 방식일까요? 아이 혼자 보게 할지, 상담하며 같이 볼지.', options: { bullet: true, breakLine: true, paraSpaceAfter: 8 } },
+    { text: '쪽지 기능은 도움이 될까요, 처리할 일만 늘어날까요?', options: { bullet: true, breakLine: true, paraSpaceAfter: 8 } },
+    { text: '"확인 필요"가 자주 뜨는 것이 신뢰를 얻을까요, 잃을까요?', options: { bullet: true, breakLine: true, paraSpaceAfter: 8 } },
+    { text: '센터 정보 222곳 중 틀리거나 빠진 곳이 있을까요?', options: { bullet: true } },
   ], {
     x: M + hw + 0.7, y: 2.62, w: hw - 0.6, h: 3.0, isTextBox: true, margin: 0,
     fontFace: F, fontSize: 12.5, color: INK, lineSpacing: 19,
